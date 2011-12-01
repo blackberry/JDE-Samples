@@ -52,14 +52,13 @@ public class TransitionScreen extends MainScreen {
      * @see Screen#invokeAction(int)
      */
     protected boolean invokeAction(final int action) {
-        switch (action) {
-        case ACTION_INVOKE: {
+        if (action == ACTION_INVOKE) {
             final ScreenTransitionsDemo app =
                     (ScreenTransitionsDemo) UiApplication.getUiApplication();
             app.startOrStopThread();
             return true;
         }
-        }
+
         return super.invokeAction(action);
     }
 
@@ -71,6 +70,7 @@ public class TransitionScreen extends MainScreen {
             invokeAction(ACTION_INVOKE);
             return true;
         }
+
         return super.touchEvent(event);
     }
 }

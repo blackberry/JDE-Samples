@@ -73,9 +73,13 @@ public class FileUploadDialog extends PopupScreen implements
         _emailEdit = new BasicEditField("Recipient Email: ", "");
         add(_emailEdit);
 
-        _okButton = new ButtonField("OK", Field.FIELD_HCENTER);
+        _okButton =
+                new ButtonField("OK", Field.FIELD_HCENTER
+                        | ButtonField.CONSUME_CLICK);
         _okButton.setChangeListener(this);
-        _cancelButton = new ButtonField("Cancel", Field.FIELD_HCENTER);
+        _cancelButton =
+                new ButtonField("Cancel", Field.FIELD_HCENTER
+                        | ButtonField.CONSUME_CLICK);
         _cancelButton.setChangeListener(this);
 
         final HorizontalFieldManager hfm =

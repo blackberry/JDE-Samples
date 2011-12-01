@@ -1,0 +1,19 @@
+5810, 5810, 3.6, 2002, keyboard
+6210, 6210, 3.6, 2002, keyboard
+6220, 6220, 3.6, 2002, keyboard
+6710, 6710, 3.6, 2002, keyboard
+7100g, 7100g, 4.0, 2004, keyboard
+7100i, 7100i, 4.1, 2005, keyboard
+7130e, 7130e, 4.1, 2005, keyboard
+7130i, 7130i, 4.1, 2005, keyboard
+7210, 7210, 3.7, 2003, keyboard
+7510, 7510, 4.0, 2004, keyboard
+7730, 7730, 4.0, 2004, keyboard
+8100, Pearl, 4.3, 2006, keyboard/trackball
+8220, Pearl Flip, 4.6, 2008, keyboard/trackball
+8300, Curve, 4.5, 2008, keyboard/trackball
+8330, Curve, 4.6, 2008, keyboard/trackball
+8700g, 8700g, 4.1, 2005, keyboard
+8800, 8800, 4.2.1, 2007, keyboard/trackball
+9000, Bold, 4.6, 2008, keyboard/trackball
+9500, Storm, 4.7, 2008, keyboard/trackball/touch

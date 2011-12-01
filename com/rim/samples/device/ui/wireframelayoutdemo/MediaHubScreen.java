@@ -43,7 +43,7 @@ import net.rim.device.api.ui.extension.component.PictureScrollField;
  * corresponding image to be displayed in the BitmapField.
  */
 public class MediaHubScreen extends MainScreen implements FieldChangeListener {
-    private static String CALL_OUT_TEXT = "Call-out ";
+    private static final String CALL_OUT_TEXT = "Call-out ";
 
     private final Bitmap[] _bitmapArray = new Bitmap[4];
     private final BitmapField _bitmapField;

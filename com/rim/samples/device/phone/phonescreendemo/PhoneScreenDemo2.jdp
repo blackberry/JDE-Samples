@@ -23,7 +23,7 @@ ExcludeFromBuildAll=0
 Exported=0
 [Files
 img\logo_2.jpg
-PhoneScreenAction2.java
+PhoneScreenDataSender2.java
 PhoneScreenDemo2.java
 ]
 HaveAlxImports=0
@@ -44,6 +44,7 @@ RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=1
+SkipCompile=0
 StartupTier=7
 SystemModule=1
 Title=Phone Screen Demo 2

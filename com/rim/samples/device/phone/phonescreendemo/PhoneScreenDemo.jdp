@@ -23,7 +23,7 @@ ExcludeFromBuildAll=0
 Exported=0
 [Files
 img\logo.jpg
-PhoneScreenAction.java
+PhoneScreenDataSender.java
 PhoneScreenDemo.java
 ]
 HaveAlxImports=0
@@ -37,7 +37,7 @@ HaveImports=0
 ]
 Listing=0
 Options=-quiet 
-OutputFileName=phonescreendemo
+OutputFileName=PhoneScreenDemo
 [PackageProtection
 ]
 Platform=0
@@ -45,6 +45,7 @@ RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=1
+SkipCompile=0
 StartupTier=7
 SystemModule=1
 Title=Phone Screen Demo

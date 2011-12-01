@@ -26,6 +26,9 @@
 
 package com.rim.samples.device.mediakeysdemo.mediaplayerdemo.mediaplayerlib;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.media.MediaActionHandler;
 import net.rim.device.api.system.Bitmap;
 import net.rim.device.api.system.Display;
@@ -48,6 +51,7 @@ import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
 import net.rim.device.api.ui.decor.Border;
 import net.rim.device.api.ui.decor.BorderFactory;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * This class handles the user interface for the MediaPlayerDemo
@@ -431,15 +435,19 @@ public class MediaPlayerDemoScreen extends MainScreen {
          * Creates a new instance of HelpMenuItem
          */
         public HelpMenuItem() {
-            super("Help", 0, 0);
-        }
-
-        /**
-         * Displays the help screen to the user
-         */
-        public void run() {
-            final HelpScreen screen = new HelpScreen("Help", INSTRUCTION_TEXT);
-            UiApplication.getUiApplication().pushScreen(screen);
+            super(new StringProvider("Help"), 0x230010, 0);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final HelpScreen screen =
+                            new HelpScreen("Help", INSTRUCTION_TEXT);
+                    UiApplication.getUiApplication().pushScreen(screen);
+                }
+            }));
         }
     }
 
@@ -761,10 +769,8 @@ public class MediaPlayerDemoScreen extends MainScreen {
             case TouchEvent.UNCLICK:
                 // Prevents the "reduced" menu from opening
                 return true;
-            default:
-                return super.touchEvent(message);
             }
-
+            return super.touchEvent(message);
         }
     }
 
@@ -905,9 +911,8 @@ public class MediaPlayerDemoScreen extends MainScreen {
             case TouchEvent.UNCLICK:
                 // Prevents the "reduced" menu from opening
                 return true;
-            default:
-                return super.touchEvent(message);
             }
+            return super.touchEvent(message);
         }
     }
 }

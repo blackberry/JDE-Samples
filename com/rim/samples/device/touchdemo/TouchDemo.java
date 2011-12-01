@@ -51,7 +51,7 @@ public final class TouchDemo extends UiApplication {
     }
 
     /**
-     * Constructor
+     * Creates a new TouchDemo object
      */
     public TouchDemo() {
         if (Touchscreen.isSupported()) {

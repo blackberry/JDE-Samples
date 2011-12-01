@@ -11,7 +11,7 @@
 
 #define STRICT
 #ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0400
+#define _WIN32_WINNT 0x0501 
 #endif
 #define _ATL_APARTMENT_THREADED
 
@@ -25,8 +25,8 @@
 extern CComModule _Module;
 #include <atlcom.h>
 
-
-#import "desktopapi.tlb" no_namespace named_guids
+//Ensure that this path is correct for your installation
+#import "C:\Program Files\Research In Motion\BlackBerry\desktopapi.tlb" no_namespace named_guids
 #import <msxml3.dll> named_guids
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

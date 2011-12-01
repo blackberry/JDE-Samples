@@ -32,7 +32,9 @@ import net.rim.device.api.ui.UiApplication;
  * SVG UI sample application.
  */
 public final class SVGForms extends UiApplication {
-    // Constructor
+    /**
+     * Creates a new SVGForms object
+     */
     public SVGForms() {
         final SVGFormsScreen _formsScreen = new SVGFormsScreen();
         this.pushScreen(_formsScreen);

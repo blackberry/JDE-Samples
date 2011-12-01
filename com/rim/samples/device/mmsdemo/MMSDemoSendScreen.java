@@ -28,30 +28,41 @@ package com.rim.samples.device.mmsdemo;
 
 import javax.wireless.messaging.MessagePart;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Display;
-import net.rim.device.api.ui.Graphics;
+import net.rim.device.api.ui.Color;
+import net.rim.device.api.ui.DrawStyle;
+import net.rim.device.api.ui.Field;
+import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.Screen;
+import net.rim.device.api.ui.XYRect;
 import net.rim.device.api.ui.component.BasicEditField;
 import net.rim.device.api.ui.component.EditField;
 import net.rim.device.api.ui.component.LabelField;
-import net.rim.device.api.ui.component.ListField;
-import net.rim.device.api.ui.component.ListFieldCallback;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.SeparatorField;
+import net.rim.device.api.ui.component.table.DataTemplate;
+import net.rim.device.api.ui.component.table.TableController;
+import net.rim.device.api.ui.component.table.TableView;
+import net.rim.device.api.ui.component.table.TemplateColumnProperties;
+import net.rim.device.api.ui.component.table.TemplateRowProperties;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.decor.BackgroundFactory;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * The client screen for the MMS Demo
  */
-public final class MMSDemoSendScreen extends MainScreen implements
-        ListFieldCallback {
-    private final EditField _subjectField;
-    private final EditField _messageField;
-    private final EditField _addressField;
-    private final EditField _status;
-    private final MMSDemo _app;
-    private final ListField _attachmentList;
+public final class MMSDemoSendScreen extends MainScreen {
+    private EditField _subjectField;
+    private EditField _messageField;
+    private EditField _addressField;
+    private EditField _status;
+    private MMSDemo _app;
+    private TableView _view;
 
     private static final int MAX_PHONE_NUMBER_LENGTH = 30;
 
@@ -62,6 +73,8 @@ public final class MMSDemoSendScreen extends MainScreen implements
      *            The MMSDemo application instance
      */
     public MMSDemoSendScreen(final MMSDemo app) {
+        super(Manager.NO_VERTICAL_SCROLL);
+
         _app = app;
 
         // Initialize UI components
@@ -78,57 +91,124 @@ public final class MMSDemoSendScreen extends MainScreen implements
         add(new SeparatorField());
         final LabelField attachmentText = new LabelField("Attachments");
         add(attachmentText);
-        _attachmentList = new ListField();
-        _attachmentList.setCallback(this);
-        add(_attachmentList);
-        add(new SeparatorField());
+
+        // Create table components
+        _view = new TableView(_app.getMessageParts());
+        final TableController controller =
+                new TableController(_app.getMessageParts(), _view);
+        controller.setFocusPolicy(TableController.ROW_FOCUS);
+        _view.setController(controller);
+
+        // Set the highlight style for the view
+        _view.setDataTemplateFocus(BackgroundFactory
+                .createLinearGradientBackground(Color.LIGHTBLUE,
+                        Color.LIGHTBLUE, Color.BLUE, Color.BLUE));
+
+        // Create a data template that will format the model data as an array of
+        // LabelFields
+        final DataTemplate dataTemplate = new DataTemplate(_view, 1, 1) {
+            public Field[] getDataFields(final int modelRowIndex) {
+                final MessagePart message =
+                        (MessagePart) _app.getMessageParts().getRow(
+                                modelRowIndex);
+                final Field[] fields =
+                        { new LabelField(message.getContentLocation(),
+                                Field.NON_FOCUSABLE | DrawStyle.ELLIPSIS) };
+                return fields;
+            }
+        };
+
+        // Define the regions of the data template and column/row size
+        dataTemplate.createRegion(new XYRect(0, 0, 1, 1));
+        dataTemplate.setColumnProperties(0, new TemplateColumnProperties(
+                Display.getWidth()));
+        dataTemplate.setRowProperties(0, new TemplateRowProperties(24));
+
+        _view.setDataTemplate(dataTemplate);
+        dataTemplate.useFixedHeight(true);
+
+        // Add the file to the screen
+        add(_view);
+
         _status = new EditField();
         add(_status);
 
+        // Menu item to attach a picture to the MMS
+        final MenuItem attachPicture =
+                new MenuItem(new StringProvider("Attach Picture"), 0x230010, 0);
+        attachPicture.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                _app.attach(MMSDemo.PICTURE);
+            }
+        }));
+
+        // Menu item to attach an audio file to the MMS
+        final MenuItem attachAudio =
+                new MenuItem(new StringProvider("Attach Audio"), 0x230020, 1);
+        attachAudio.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                _app.attach(MMSDemo.AUDIO);
+            }
+        }));
+
+        // Menu item to send the MMS
+        final MenuItem sendMenuItem =
+                new MenuItem(new StringProvider("Send"), 0x230030, 3);
+        sendMenuItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                // Send MMS on non-event thread
+                final Thread t = new Thread() {
+                    public void run() {
+                        _app.sendMMS(_addressField, _subjectField,
+                                _messageField);
+                    }
+                };
+                t.start();
+            }
+        }));
+
+        _removeAttachment =
+                new MenuItem(new StringProvider("Remove Attachment"), 0x230040,
+                        4);
+        _removeAttachment.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                _app.getMessageParts().removeRowAt(
+                        _view.getRowNumberWithFocus());
+            }
+        }));
+
         // Add menu items to this screen
-        addMenuItem(_sendMenuItem);
-        addMenuItem(_attachPicture);
-        addMenuItem(_attachAudio);
+        addMenuItem(sendMenuItem);
+        addMenuItem(attachPicture);
+        addMenuItem(attachAudio);
     }
 
     // Menu items --------------------------------------------------------------
-    private final MenuItem _attachPicture = new MenuItem("Attach Picture",
-            65536, 0) {
-        public void run() {
-            _app.attach(MMSDemo.PICTURE);
-        }
-    };
-
-    private final MenuItem _attachAudio =
-            new MenuItem("Attach Audio", 65536, 0) {
-                public void run() {
-                    _app.attach(MMSDemo.AUDIO);
-                }
-            };
-
-    private final MenuItem _sendMenuItem = new MenuItem("Send", 0, 0) {
-        public void run() {
-            // Send MMS on non-event thread
-            final Thread t = new Thread() {
-                public void run() {
-                    _app.sendMMS(_addressField, _subjectField, _messageField);
-                }
-            };
-            t.start();
-        }
-    };
 
     /**
-     * Removes an attachment from the attachment list
+     * Menu item to remove an attachment from the attachment list
      */
-    private final MenuItem _removeAttachment = new MenuItem(
-            "Remove Attachment", 65536, 0) {
-        public void run() {
-            _app.getMessageParts().removeElementAt(
-                    _attachmentList.getSelectedIndex());
-            updateScreen();
-        }
-    };
+    private MenuItem _removeAttachment;
 
     /**
      * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
@@ -150,64 +230,9 @@ public final class MMSDemoSendScreen extends MainScreen implements
      * @see MainScreen#makeMenu(Menu, int)
      */
     protected void makeMenu(final Menu menu, final int context) {
-        if (_attachmentList.getSize() > 0) {
+        if (_app.getMessageParts().getNumberOfRows() > 0) {
             menu.add(_removeAttachment);
         }
         super.makeMenu(menu, context);
-    }
-
-    /**
-     * Updates the screen with the new list of attachments
-     */
-    public void updateScreen() {
-        _attachmentList.setSize(_app.getMessageParts().size());
-        this.invalidate();
-    }
-
-    // ListFieldCallback methods
-    // ------------------------------------------------
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#drawListRow(ListField,Graphics,int,int,int)
-     */
-    public void drawListRow(final ListField listField, final Graphics graphics,
-            final int index, final int y, final int width) {
-        if (listField == _attachmentList
-                && index < _app.getMessageParts().size()) {
-            final MessagePart m =
-                    (MessagePart) _app.getMessageParts().elementAt(index);
-            final String name = m.getContentLocation();
-            graphics.drawText(name, 0, y, 0, width);
-        }
-    }
-
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#get(ListField ,
-     *      int)
-     */
-    public Object get(final ListField listField, final int index) {
-        if (listField == _attachmentList) {
-            // If index is out of bounds an exception will be thrown, but
-            // that's the behaviour we want in that case.
-            return _app.getMessageParts().elementAt(index);
-        }
-
-        return null;
-    }
-
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#getPreferredWidth(ListField)
-     */
-    public int getPreferredWidth(final ListField listField) {
-        // Use entire screen width
-        return Display.getWidth();
-    }
-
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#indexOfList(ListField
-     *      , String , int)
-     */
-    public int indexOfList(final ListField listField, final String prefix,
-            final int start) {
-        return -1; // Not implemented
     }
 }

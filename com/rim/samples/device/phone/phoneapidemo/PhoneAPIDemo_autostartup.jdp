@@ -1,5 +1,9 @@
 ## RIM Java Development Environment
 # RIM Project file
+#
+# This file is generated and managed by BlackBerry developer tools.
+# It SHOULD NOT BE modified manually.
+#
 AddOn=0
 AlwaysBuild=0
 [AlxImports
@@ -21,6 +25,7 @@ AutoRestart=0
 ]
 EntryFor=PhoneAPIDemo
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 ]
 HaveAlxImports=0
@@ -35,12 +40,15 @@ HaveImports=0
 Listing=0
 MidletClass=autostartup
 NoImport=0
-Options=-quiet
-OutputFileName=com_rim_phoneapidemo_autostartup
+Options=-quiet 
+OutputFileName=PhoneAPIDemo_autostartup
 [PackageProtection
 ]
 RibbonPosition=0
+[RolloverIcons
+]
 RunOnStartup=1
+SkipCompile=0
 StartupTier=7
 SystemModule=1
 Type=3

@@ -24,7 +24,7 @@
  * Environment Development Guide associated with this release.
  */
 
-package com.rim.samples.device.phonemultilinedemo;
+package com.rim.samples.device.phone.phonemultilinedemo;
 
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
@@ -43,7 +43,9 @@ import net.rim.device.api.ui.component.Dialog;
  * Step 4: Repeat step 2 and 3. 
  */
 public final class PhoneMultiLineDemo extends UiApplication {
-    // Constructor
+    /**
+     * Creates a new PhoneMultiLineDemo object
+     */
     public PhoneMultiLineDemo() {
         pushScreen(new PhoneMultiLineScreen(this));
     }

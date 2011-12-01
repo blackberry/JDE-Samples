@@ -24,7 +24,7 @@
  * Environment Development Guide associated with this release.
  */
 
-package com.rim.samples.device.blackberry.browser;
+package com.rim.samples.device.browser.browserplugin;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,7 +50,7 @@ import net.rim.device.api.ui.container.VerticalFieldManager;
 public final class BrowserPlugin extends BrowserContentProvider implements
         BrowserPageContext {
 
-    private static String[] ACCEPT = { "application/x-vnd.rim.xxxtest" };
+    private static final String[] ACCEPT = { "application/x-vnd.rim.xxxtest" };
 
     /**
      * @see net.rim.device.api.browser.plugin.BrowserContentProvider#getAccept(net.rim.device.api.browser.field.RenderingOptions)

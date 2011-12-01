@@ -37,8 +37,8 @@ import net.rim.device.api.system.RuntimeStore;
 /**
  * This class is used to facilitate the storage of messages. For the sake of
  * simplicitly, we are saving messages in the device runtime store. In a real
- * world situation, messages would be saved in device persistent store and/or a
- * mail server.
+ * world situation, messages would be saved in device persistent store and/or on
+ * a mail server.
  */
 public final class MessageListDemoStore {
     // com.rim.samples.device.messagelistdemo.MessageListDemoStore
@@ -52,7 +52,9 @@ public final class MessageListDemoStore {
     private ApplicationMessageFolder _deletedFolder;
     private final ApplicationIndicator _indicator;
 
-    // Constructor
+    /**
+     * Creates a new MessageListDemoStore object
+     */
     private MessageListDemoStore() {
         _inboxMessages = new ReadableListImpl();
         _deletedMessages = new ReadableListImpl();
@@ -62,12 +64,12 @@ public final class MessageListDemoStore {
     }
 
     /**
-     * Gets the singleton instance of the MessageListDemoStore.
+     * Gets the singleton instance of the MessageListDemoStore
      * 
      * @return The singleton instance of the MessagelistDemoStore
      */
     public static synchronized MessageListDemoStore getInstance() {
-        // Keep messages as singleton in the RuntimeStore.
+        // Keep messages as singleton in the RuntimeStore
         if (_instance == null) {
             final RuntimeStore rs = RuntimeStore.getRuntimeStore();
 
@@ -80,11 +82,12 @@ public final class MessageListDemoStore {
                 }
             }
         }
+
         return _instance;
     }
 
     /**
-     * Sets the main and deleted folders.
+     * Sets the main and deleted folders
      * 
      * @param mainFolder
      *            The main folder to use
@@ -98,7 +101,7 @@ public final class MessageListDemoStore {
     }
 
     /**
-     * Gets the inbox folder.
+     * Retrieves the inbox folder
      * 
      * @return The inbox folder
      */
@@ -107,7 +110,7 @@ public final class MessageListDemoStore {
     }
 
     /**
-     * Gets the deleted folder.
+     * Retrieves the deleted folder
      * 
      * @return The deleted folder
      */
@@ -116,27 +119,27 @@ public final class MessageListDemoStore {
     }
 
     /**
-     * User deleted message, move it into deleted folder.
+     * Moves a message into the deleted folder
      * 
      * @param message
      *            The message to move to the deleted folder
      */
     void deleteInboxMessage(final DemoMessage message) {
         if (message.isNew()) {
-            // Update indicator.
+            // Update indicator
             _indicator.setValue(_indicator.getValue() - 1);
             if (_indicator.getValue() <= 0) {
                 _indicator.setVisible(false);
             }
         }
+
         message.messageDeleted();
         _inboxMessages.removeMessage(message);
         _deletedMessages.addMessage(message);
-
     }
 
     /**
-     * Commits the message to a persistant store.
+     * Commits a message to the persistent store
      * 
      * @param message
      *            The message to commit
@@ -148,7 +151,7 @@ public final class MessageListDemoStore {
     }
 
     /**
-     * Adds a message to the inbox.
+     * Adds a message to the inbox
      * 
      * @param message
      *            The message to add to the inbox
@@ -157,8 +160,9 @@ public final class MessageListDemoStore {
         _inboxMessages.addMessage(message);
 
         if (message.isNew()) {
-            // Update indicator.
+            // Update indicator
             _indicator.setValue(_indicator.getValue() + 1);
+            _indicator.setNotificationState(true);
             if (!_indicator.isVisible()) {
                 _indicator.setVisible(true);
             }
@@ -166,7 +170,7 @@ public final class MessageListDemoStore {
     }
 
     /**
-     * Completely deletes the message from the message store.
+     * Completely deletes the message from the message store
      * 
      * @param message
      *            The message to delete from the message store
@@ -176,7 +180,7 @@ public final class MessageListDemoStore {
     }
 
     /**
-     * Gets the inbox messages as a readable list.
+     * Retrieves the inbox messages as a readable list
      * 
      * @return The readable list of all the inbox messages
      */
@@ -185,7 +189,7 @@ public final class MessageListDemoStore {
     }
 
     /**
-     * Gets the deleted messages as a readable list.
+     * Gets the deleted messages as a readable list
      * 
      * @return The readable list of all the deleted messages
      */
@@ -201,7 +205,7 @@ public final class MessageListDemoStore {
         private final Vector messages;
 
         /**
-         * Creates a empty instance of ReadableListImpl.
+         * Creates a empty instance of ReadableListImpl
          */
         ReadableListImpl() {
             messages = new Vector();
@@ -238,7 +242,7 @@ public final class MessageListDemoStore {
         }
 
         /**
-         * Add a message to this list.
+         * Add a message to this list
          * 
          * @param message
          *            The message to add to this list
@@ -248,7 +252,7 @@ public final class MessageListDemoStore {
         }
 
         /**
-         * Removes a message from this list.
+         * Removes a message from this list
          * 
          * @param message
          *            The message to remove from this list

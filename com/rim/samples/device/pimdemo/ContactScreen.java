@@ -33,6 +33,9 @@ import javax.microedition.pim.PIMException;
 import javax.microedition.pim.PIMItem;
 
 import net.rim.blackberry.api.pdap.BlackBerryContact;
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BasicEditField;
@@ -40,30 +43,32 @@ import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.EditField;
 import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 public final class ContactScreen extends MainScreen {
     private final EditField _first, _last, _email, _home, _home2;
-    private final SaveMenuItem _saveMenuItem;
-
-    private class SaveMenuItem extends MenuItem {
-        private SaveMenuItem() {
-            super("Save Contact", 100000, 5);
-        }
-
-        public void run() {
-            // If successful, return to contact list.
-            if (onSave()) {
-                final UiApplication uiapp = UiApplication.getUiApplication();
-                uiapp.popScreen(uiapp.getActiveScreen());
-            }
-        }
-    }
 
     /**
      * Creates a new ContactScreen object
      */
     public ContactScreen() {
-        _saveMenuItem = new SaveMenuItem();
+        final MenuItem saveMenuItem =
+                new MenuItem(new StringProvider("Save Contact"), 0x230010, 5);
+        saveMenuItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                // If successful, return to contact list.
+                if (onSave()) {
+                    final UiApplication uiapp =
+                            UiApplication.getUiApplication();
+                    uiapp.popScreen(uiapp.getActiveScreen());
+                }
+            }
+        }));
 
         setTitle("Create Contact");
 
@@ -88,7 +93,7 @@ public final class ContactScreen extends MainScreen {
                         BasicEditField.FILTER_PHONE);
         add(_home2);
 
-        addMenuItem(_saveMenuItem);
+        addMenuItem(saveMenuItem);
     }
 
     /**

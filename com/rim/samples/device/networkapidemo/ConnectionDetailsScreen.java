@@ -40,22 +40,20 @@ import net.rim.device.api.io.transport.ConnectionDescriptor;
 import net.rim.device.api.io.transport.TransportInfo;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
-import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.ButtonField;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.component.SeparatorField;
-import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 
 /**
  * A screen showing connection details: transport, URL and results of a
- * connection request. Clicking "Render HTML" button shows the content of an
- * HTML response in a BrowserField. Clicking "Render RAW" button shows the
+ * connection request. Clicking the "Render HTML" button shows the content of an
+ * HTML response in a BrowserField. Clicking the "Render RAW" button shows the
  * content of a response as text.
  */
-public class ConnectionDetailsScreen extends MainScreen {
+public final class ConnectionDetailsScreen extends MainScreen {
     // Displays text results from the server
     private final RichTextField _contentsField;
 
@@ -66,9 +64,11 @@ public class ConnectionDetailsScreen extends MainScreen {
     private final ButtonField _renderBtn;
 
     // Parses HTML results from the server and displays them like a browser
-    private final BrowserField _bf2;
+    private final BrowserField _browserField;
 
     private boolean _renderRaw;
+
+    private final UiApplication _uiApp;
 
     /**
      * Creates a new ConnectionDetailsScreen object
@@ -83,21 +83,19 @@ public class ConnectionDetailsScreen extends MainScreen {
             final String originalUrl) {
         _originalUrl = originalUrl;
 
-        // Set up BrowserField
+        setTitle("Connection Details");
+
         final BrowserFieldConfig browserFieldConfig = new BrowserFieldConfig();
 
         // Enable caret navigation mode
         browserFieldConfig.setProperty(BrowserFieldConfig.NAVIGATION_MODE,
-                BrowserFieldConfig.NAVIGATION_MODE_CARET);
+                BrowserFieldConfig.NAVIGATION_MODE_NODE);
 
         // Disable JavaScript
         browserFieldConfig.setProperty(BrowserFieldConfig.JAVASCRIPT_ENABLED,
                 Boolean.FALSE);
 
-        _bf2 = new BrowserField(browserFieldConfig);
-
-        // Set the screen's title
-        setTitle("Connection Details");
+        _browserField = new BrowserField(browserFieldConfig);
 
         add(new SeparatorField());
 
@@ -112,43 +110,25 @@ public class ConnectionDetailsScreen extends MainScreen {
 
         add(new SeparatorField());
 
-        // Display a "Back" button that closes this screen when clicked
-        final ButtonField okBtn =
-                new ButtonField("Back", ButtonField.CONSUME_CLICK
-                        | Field.FIELD_HCENTER);
-        okBtn.setChangeListener(new FieldChangeListener() {
-            public void fieldChanged(final Field field, final int context) {
-                UiApplication.getUiApplication().getActiveScreen().close();
-            }
-        });
-
-        // Set up a region that holds "Back" and "Render HTML" buttons and lays
-        // them out side by side on the same line.
-        final HorizontalFieldManager hfm =
-                new HorizontalFieldManager(Manager.NO_HORIZONTAL_SCROLL
-                        | Field.FIELD_HCENTER);
-        hfm.add(okBtn);
-
-        // Display "Render HTML" button that parses HTML results and displays
-        // them like a browser.
+        // Initialize button for displaying results in a browser field
+        // or as raw HTML.
         _renderBtn =
-                new ButtonField("Render HTML", ButtonField.CONSUME_CLICK
-                        | Field.FIELD_HCENTER);
-        _renderBtn.setVisualState(Field.VISUAL_STATE_DISABLED);
+                new ButtonField("Render HTML", ButtonField.NEVER_DIRTY
+                        | Field.FIELD_HCENTER | ButtonField.CONSUME_CLICK);
+        _renderBtn.setEnabled(false);
         _renderBtn.setChangeListener(new FieldChangeListener() {
+            /**
+             * @see FieldChangeListener#fieldChanged(Field, int)
+             */
             public void fieldChanged(final Field field, final int context) {
                 if (_renderRaw) {
-
                     renderRawContents();
                 } else {
                     renderHtmlContents();
                 }
             }
         });
-        hfm.add(_renderBtn);
-
-        // Add the "buttons region" to the screen
-        add(hfm);
+        add(_renderBtn);
 
         add(new SeparatorField());
 
@@ -163,24 +143,21 @@ public class ConnectionDetailsScreen extends MainScreen {
         final ContentReaderThread contentReader =
                 new ContentReaderThread(url, connectionDescriptor);
         contentReader.start();
+
+        _uiApp = UiApplication.getUiApplication();
     }
 
     /**
-     * @see MainScreen#onSavePrompt()
-     */
-    public boolean onSavePrompt() {
-        // Prevent the save dialog from being displayed
-        return true;
-    }
-
-    /**
-     * Shows a response received from a connection
+     * Displays a response received from a connection
      * 
      * @param content
      *            The String response of a connection
      */
     public void showContents(final String content) {
-        UiApplication.getUiApplication().invokeLater(new Runnable() {
+        _uiApp.invokeLater(new Runnable() {
+            /**
+             * @see Runnable#run()
+             */
             public void run() {
                 _contentsField.setText(content);
             }
@@ -188,10 +165,10 @@ public class ConnectionDetailsScreen extends MainScreen {
     }
 
     /**
-     * Renders a response in a BrowserField
+     * Renders a response in a <code>BrowserField</code>
      */
     public void renderHtmlContents() {
-        UiApplication.getUiApplication().invokeAndWait(new Runnable() {
+        _uiApp.invokeLater(new Runnable() {
             /**
              * @see Runnable#run()
              */
@@ -200,8 +177,9 @@ public class ConnectionDetailsScreen extends MainScreen {
                 delete(_contentsField);
 
                 // Render HTML results
-                _bf2.displayContent(_contentsField.getText(), _originalUrl);
-                add(_bf2);
+                _browserField.displayContent(_contentsField.getText(),
+                        _originalUrl);
+                add(_browserField);
 
                 // Update button label from "Render HTML" to "Render RAW"
                 _renderBtn.setLabel("Render RAW");
@@ -214,10 +192,13 @@ public class ConnectionDetailsScreen extends MainScreen {
      * Renders a response in a RichTextField
      */
     public void renderRawContents() {
-        UiApplication.getUiApplication().invokeAndWait(new Runnable() {
+        _uiApp.invokeLater(new Runnable() {
+            /**
+             * @see Runnable#run()
+             */
             public void run() {
                 // Remove HTML results from the screen
-                delete(_bf2);
+                delete(_browserField);
 
                 // Displays text results
                 add(_contentsField);
@@ -241,6 +222,7 @@ public class ConnectionDetailsScreen extends MainScreen {
         if (connectionDescriptor == null) {
             return null;
         }
+
         return connectionDescriptor.getUrl().toLowerCase();
     }
 
@@ -248,10 +230,18 @@ public class ConnectionDetailsScreen extends MainScreen {
      * A Thread class which opens a connection to a given URL and reads the
      * server's results
      */
-    private class ContentReaderThread extends Thread {
+    private final class ContentReaderThread extends Thread {
         private final String _url;
         private final ConnectionDescriptor _connectionDescriptor;
 
+        /**
+         * Creates a new ContentReaderThread object
+         * 
+         * @param url
+         *            The URL to connect to
+         * @param connectionDescriptor
+         *            Stores information about a <code>Connection</code>
+         */
         ContentReaderThread(final String url,
                 final ConnectionDescriptor connectionDescriptor) {
             _url = url;
@@ -290,8 +280,11 @@ public class ConnectionDetailsScreen extends MainScreen {
                         net.rim.device.api.io.IOUtilities.streamToBytes(is);
                 result = new String(data);
                 is.close();
-            } catch (final Throwable e) {
+
+                _renderBtn.setEnabled(true);
+            } catch (final Exception e) {
                 result = "ERROR fetching content: " + e.toString();
+                _renderBtn.setEnabled(false);
             } finally {
                 // Close OutputStream
                 if (os != null) {

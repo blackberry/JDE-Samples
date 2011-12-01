@@ -28,6 +28,9 @@ package com.rim.samples.device.sqlitedemo;
 
 import java.util.Vector;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
@@ -43,6 +46,7 @@ import net.rim.device.api.ui.component.TreeFieldCallback;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.util.IntEnumeration;
 import net.rim.device.api.util.IntHashtable;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * The main screen for the SQLiteDemo sample application
@@ -184,15 +188,15 @@ public final class SQLiteDemoScreen extends MainScreen implements
      * @see net.rim.device.api.ui.Screen#invokeAction(int)
      */
     protected boolean invokeAction(final int action) {
-        if (action == ACTION_INVOKE) // Trackball click
-        {
+        if (action == ACTION_INVOKE) {
             final int currentNode = _treeField.getCurrentNode();
 
             if (_treeField.getCookie(currentNode) instanceof String) {
                 displayItem(currentNode);
             }
-            return true; // We've consumed the event
+            return true;
         }
+
         return super.invokeAction(action);
     }
 
@@ -301,30 +305,33 @@ public final class SQLiteDemoScreen extends MainScreen implements
          */
         private AddItem(final int categoryId, final String categoryName,
                 final int categoryNode) {
-            super("", 0, 0);
+            super(new StringProvider(""), 0, 0);
             _categoryId = categoryId;
             _categoryName = categoryName;
             _categoryNode = categoryNode;
-        }
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final SQLiteDemo app =
+                            (SQLiteDemo) UiApplication.getUiApplication();
+                    final DirectoryItem item = new DirectoryItem(_categoryId);
+                    final DirectoryItem itemCopy = new DirectoryItem(item);
+                    app.pushModalScreen(new ItemScreen(item, _sqlManager, true));
 
-        /**
-         * Runs when the menu item is invoked by an end user. Pushes a modal
-         * screen which displays a new, blank directory item.
-         */
-        public void run() {
-            final SQLiteDemo app =
-                    (SQLiteDemo) UiApplication.getUiApplication();
-            final DirectoryItem item = new DirectoryItem(_categoryId);
-            final DirectoryItem itemCopy = new DirectoryItem(item);
-            app.pushModalScreen(new ItemScreen(item, _sqlManager, true));
-
-            if (!itemCopy.equals(item)) {
-                // Item was saved
-                final int itemNode =
-                        _treeField.addChildNode(_categoryNode, item.getName());
-                item.setNode(itemNode);
-                _directoryItems.addElement(item);
-            }
+                    if (!itemCopy.equals(item)) {
+                        // Item was saved
+                        final int itemNode =
+                                _treeField.addChildNode(_categoryNode, item
+                                        .getName());
+                        item.setNode(itemNode);
+                        _directoryItems.addElement(item);
+                    }
+                }
+            }));
         }
 
         /**
@@ -340,15 +347,21 @@ public final class SQLiteDemoScreen extends MainScreen implements
      */
     private final class OpenItem extends MenuItem {
         private OpenItem() {
-            super("Open Item", 0, 0);
-        }
+            super(new StringProvider("Open Item"), 0x230010, 0);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final int currentNode = _treeField.getCurrentNode();
 
-        public void run() {
-            final int currentNode = _treeField.getCurrentNode();
-
-            if (_treeField.getCookie(currentNode) instanceof String) {
-                displayItem(currentNode);
-            }
+                    if (_treeField.getCookie(currentNode) instanceof String) {
+                        displayItem(currentNode);
+                    }
+                }
+            }));
         }
     }
 
@@ -366,32 +379,38 @@ public final class SQLiteDemoScreen extends MainScreen implements
          *            which should be deleted
          */
         private DeleteItem(final int currentNode) {
-            super("", 0, 0);
+            super(new StringProvider(""), 0x230020, 0);
             _currentNode = currentNode;
-        }
+            this.setCommand(new Command(new CommandHandler() {
 
-        /**
-         * Runs when the menu item is invoked by an end user.
-         */
-        public void run() {
-            DirectoryItem item;
+                /**
+                 * Runs when the menu item is invoked by an end user.
+                 * 
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    DirectoryItem item;
 
-            // Loop through the DirectoryItems vector until the object is found
-            // which
-            // corresponds to the currently highlighted node.
-            for (int i = _directoryItems.size() - 1; i >= 0; --i) {
-                item = (DirectoryItem) _directoryItems.elementAt(i);
+                    // Loop through the DirectoryItems vector until the object
+                    // is found which
+                    // corresponds to the currently highlighted node.
+                    for (int i = _directoryItems.size() - 1; i >= 0; --i) {
+                        item = (DirectoryItem) _directoryItems.elementAt(i);
 
-                if (item.getNode() == _currentNode) {
-                    // Delete the item from the DirectoryItems vector and the
-                    // tree field
-                    _directoryItems.removeElementAt(i);
-                    _treeField.deleteSubtree(_currentNode);
+                        if (item.getNode() == _currentNode) {
+                            // Delete the item from the DirectoryItems vector
+                            // and the tree field
+                            _directoryItems.removeElementAt(i);
+                            _treeField.deleteSubtree(_currentNode);
 
-                    // Delete the item from the database
-                    _sqlManager.deleteItem(item.getId());
+                            // Delete the item from the database
+                            _sqlManager.deleteItem(item.getId());
+                        }
+                    }
                 }
-            }
+            }));
         }
 
         /**
@@ -438,30 +457,35 @@ public final class SQLiteDemoScreen extends MainScreen implements
          * Default constructor
          */
         private AddCategory() {
-            super("Add Category", 0, 0);
-        }
+            super(new StringProvider("Add Category"), 0x230030, 0);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * Runs when the menu item is invoked by the end user. Inserts a
+                 * new entry into the Category database table and adds a new
+                 * Category object to the respective vector.
+                 * 
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final AddCategoryDialog dialog = new AddCategoryDialog();
 
-        /**
-         * Runs when the menu item is invoked by the end user. Inserts a new
-         * entry into the Category database table and adds a new Category object
-         * to the respective vector.
-         */
-        public void run() {
-            final AddCategoryDialog dialog = new AddCategoryDialog();
+                    if (dialog.doModal() == Dialog.OK) {
+                        final String name = dialog.getText();
 
-            if (dialog.doModal() == Dialog.OK) {
-                final String name = dialog.getText();
+                        // Add a new category to the database
+                        final Category category = _sqlManager.addCategory(name);
 
-                // Add a new category to the database
-                final Category category = _sqlManager.addCategory(name);
-
-                if (category != null) {
-                    final int categoryNode =
-                            _treeField.addChildNode(0, category);
-                    _treeField.setCurrentNode(categoryNode);
-                    category.setNode(categoryNode);
+                        if (category != null) {
+                            final int categoryNode =
+                                    _treeField.addChildNode(0, category);
+                            _treeField.setCurrentNode(categoryNode);
+                            category.setNode(categoryNode);
+                        }
+                    }
                 }
-            }
+            }));
         }
     }
 
@@ -480,33 +504,36 @@ public final class SQLiteDemoScreen extends MainScreen implements
          *            The Category object to be deleted
          */
         private DeleteCategory(final Category category) {
-            super("Delete Category", 0, 0);
+            super(new StringProvider("Delete Category"), 0x230040, 0);
             _category = category;
-        }
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    // Remove category from the tree field
+                    _treeField.deleteSubtree(_category.getNode());
 
-        /**
-         * Runs when this menu item is invoked by an end user.
-         */
-        public void run() {
-            // Remove category from the tree field
-            _treeField.deleteSubtree(_category.getNode());
+                    final int id = _category.getId();
 
-            final int id = _category.getId();
+                    // Delete the category from the database
+                    _sqlManager.deleteCategory(id);
 
-            // Delete the category from the database
-            _sqlManager.deleteCategory(id);
+                    DirectoryItem item;
 
-            DirectoryItem item;
-
-            // Loop through the DirectoryItems vector and delete all
-            // objects having a category ID corresponding to the
-            // highlighted category.
-            for (int j = _directoryItems.size() - 1; j >= 0; --j) {
-                item = (DirectoryItem) _directoryItems.elementAt(j);
-                if (item.getCategoryId() == id) {
-                    _directoryItems.removeElementAt(j);
+                    // Loop through the DirectoryItems vector and delete all
+                    // objects having a category ID corresponding to the
+                    // highlighted category.
+                    for (int j = _directoryItems.size() - 1; j >= 0; --j) {
+                        item = (DirectoryItem) _directoryItems.elementAt(j);
+                        if (item.getCategoryId() == id) {
+                            _directoryItems.removeElementAt(j);
+                        }
+                    }
                 }
-            }
+            }));
         }
 
         /**

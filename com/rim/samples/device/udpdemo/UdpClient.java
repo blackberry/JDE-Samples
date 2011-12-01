@@ -1,5 +1,5 @@
 /*
- * UdpClient.java
+ * UDPClient.java
  *
  * Copyright © 1998-2011 Research In Motion Limited
  * 
@@ -35,39 +35,37 @@ import javax.microedition.io.UDPDatagramConnection;
 import net.rim.device.api.ui.UiApplication;
 
 /**
- * This class represents the client in our client/server configuration.
+ * This class represents the client in a client/server configuration
  */
-public final class UdpClient extends Thread {
+public final class UDPClient extends Thread {
     private final String _msg;
     private final UdpDemoScreen _screen;
-    private final UdpDemo _app;
+    private final UDPDemo _app;
     private UDPDatagramConnection _conn;
 
-    // Constructor
     /**
-     * Creates a new UdpClient.
+     * Creates a new UDPClient object
      * 
      * @param msg
-     *            The message sent to the server.
+     *            The message sent to the server
      */
-    public UdpClient(final String msg) {
+    public UDPClient(final String msg) {
         _msg = msg;
-        _app = (UdpDemo) UiApplication.getUiApplication();
+        _app = (UDPDemo) UiApplication.getUiApplication();
         _screen = _app.getScreen();
     }
 
     /**
-     * Implementation of Thread
+     * @see Thread#run()
      */
     public void run() {
         try {
-            // Make a UDP(datagram) connection to the local loopback address
-            // on our machine. We specify 2000 (the port our server listens on)
-            // as the destination port and specify 3000 as the
-            // source port.
+            // Make a UDP(datagram) connection to the local loopback address.
+            // Specify 2010 (the port the server listens on) as the destination
+            // port and specify 3000 as the source port.
             _conn =
                     (UDPDatagramConnection) Connector
-                            .open("datagram://127.0.0.1:2000;3000");
+                            .open("datagram://127.0.0.1:2010;3000");
 
             // Convert the message to a byte array for sending.
             final byte[] bufOut = _msg.getBytes();
@@ -83,7 +81,7 @@ public final class UdpClient extends Thread {
             _conn.receive(inDatagram);
             final String response = new String(inDatagram.getData());
 
-            if (response.equals("RECEIVED")) {
+            if (response.startsWith("RECEIVED")) {
                 // Display the status message on the event thread.
                 _app.invokeLater(new Runnable() {
                     public void run() {
@@ -102,8 +100,10 @@ public final class UdpClient extends Thread {
             });
         } finally {
             try {
-                // Close the connection
-                _conn.close();
+                if (_conn != null) {
+                    // Close the connection
+                    _conn.close();
+                }
             } catch (final IOException ioe) {
             }
         }

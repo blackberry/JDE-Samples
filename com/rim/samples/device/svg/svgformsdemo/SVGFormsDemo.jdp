@@ -20,6 +20,7 @@ AutoRestart=0
 [DependsOn
 ]
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 ButtonPanel.java
 img\SVGformsdemo_jde.png
@@ -30,7 +31,7 @@ svgforms.svg
 SVGFormsScreen.java
 SVGPanel.java
 SVGTextField.java
-SvgTextFieldHelper.java
+SVGTextFieldHelper.java
 TabEventHandler.java
 TextBoxManager.java
 TextPanel.java
@@ -42,21 +43,19 @@ HaveImports=0
 img\SVGformsdemo_jde.png
 ]
 [ImplicitRules
-svg
-svg
-echo nothing
 ]
 [Imports
 ]
 Listing=0
 Options=-quiet 
-OutputFileName=svgformsdemo
+OutputFileName=SVGFormsDemo
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=SVG Forms Demo

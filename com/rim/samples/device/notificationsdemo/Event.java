@@ -39,7 +39,9 @@ public final class Event {
     private final int _triggerIndex;
     private final long _timeout;
 
-    // Constructor
+    /**
+     * Creates a new Event object
+     */
     public Event(final long sourceid, final long eventid, final int priority,
             final long timeout, final int triggerIndex) {
         _sourceId = sourceid;

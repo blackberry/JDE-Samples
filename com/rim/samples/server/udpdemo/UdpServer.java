@@ -1,6 +1,6 @@
 /*
-* UdpServer.java
-*
+ * UdpServer.java
+ *
  * Copyright © 1998-2011 Research In Motion Limited
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,68 +22,72 @@
  * experience across a variety of languages and geographies.  For more information
  * on localizing your application, please refer to the BlackBerry Java Development
  * Environment Development Guide associated with this release.
-*/
+ */
 
 package com.rim.samples.server.udpdemo;
 
 import java.io.*;
 import java.net.*;
+import java.util.Date;
 
 /**
- * This class represents the server in our client/server configuration.
+ * This class represents the server in a client/server configuration
  */
-class UdpServer implements Runnable
-{    
-   /**
-    * Entry point for application.
-    */
-    public static void main (String args[])
+public class UdpServer implements Runnable
+{
+    final static int BROADCAST_PORT = 2010;
+
+    /**
+     * Entry point for application.
+     */
+    public static void main(String args[])
     {
         new UdpServer().run();
     }
-           
+
+
     public void run()
     {
 
-	System.out.println("               -----------------UDP Demo Server-----------------" + "\n\n");
+        System.out.println("               -----------------UDP Demo Server-----------------" + "\n\n");
 
-        for(;;)
+        while(true)
         {
             try
             {
-                // Create a new socket connection bound to port 2000.
-                DatagramSocket sock = new DatagramSocket(2000);
+                // Create a new socket connection bound to the defined port
+                DatagramSocket sock = new DatagramSocket(BROADCAST_PORT);
 
                 System.out.println("Waiting for data on local port: " + sock.getLocalPort());
 
-                // Create a packet to contain incoming data.
+                // Create a packet to contain incoming data
                 byte[] buf = new byte[256];
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
 
-                // Wait for incoming data (receive() is a blocking method).	
+                // Wait for incoming data (receive() is a blocking method)     
                 sock.receive(packet);
-                
-                // Retrieve data from packet and display.
+
+                // Retrieve data from packet and display
                 String data = new String(packet.getData());
                 int endIndex = data.indexOf(0);
-                data = data.substring(0,endIndex);			
-                System.out.println("Received data from remote port " + packet.getPort() + ":\n" + data);
+                data = data.substring(0, endIndex);
+                int remotePort = packet.getPort();
+                System.out.println("Received data from remote port " + remotePort + ":\n" + data);
 
-                // Determine origin of packet and display information.
+                // Determine origin of packet and display information
                 InetAddress remoteAddress = packet.getAddress();
-                System.out.println ("Sent from address: " + remoteAddress.getHostAddress());
+                System.out.println("Sent from address: " + remoteAddress.getHostAddress());
 
-                
                 // Send back an acknowledgment
-		String ack = "RECEIVED";
-		sock.send(new DatagramPacket(ack.getBytes(), ack.length(), remoteAddress, 3000));
-		
+                String ack = "RECEIVED " + new Date().toString();
+                sock.send(new DatagramPacket(ack.getBytes(), ack.length(), remoteAddress, remotePort));
+
                 sock.close();
             }
             catch(IOException ioe)
             {
                 System.out.println("Error: IOException - " + ioe.toString());
-            }    
-        }    
-    }       
+            }
+        }
+    }
 }

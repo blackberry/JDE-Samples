@@ -46,13 +46,14 @@ img\accessibilitydemo_jde.png
 ]
 Listing=0
 Options=-quiet 
-OutputFileName=accessibilitydemo
+OutputFileName=CustomComponentsDemo
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=Accessibility Demo

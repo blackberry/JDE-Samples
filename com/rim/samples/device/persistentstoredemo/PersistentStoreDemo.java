@@ -31,14 +31,10 @@ import java.util.Vector;
 import net.rim.device.api.system.CodeModuleManager;
 import net.rim.device.api.system.CodeSigningKey;
 import net.rim.device.api.system.ControlledAccess;
-import net.rim.device.api.system.Display;
 import net.rim.device.api.system.PersistentContent;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
-import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.UiApplication;
-import net.rim.device.api.ui.component.ListField;
-import net.rim.device.api.ui.component.ListFieldCallback;
 
 /**
  * A sample application to demonstrate persistence and content encryption. The
@@ -50,22 +46,22 @@ import net.rim.device.api.ui.component.ListFieldCallback;
  * The constructor for this class contains code to demonstrate the concept of
  * protecting an object stored in the persistent store with a code signing key.
  * To fully demonstrate this feature, the application will need to be run on a
- * secure BlackBerry device or simulator. Because this application leverages
- * controlled API's, it will need to be signed with the appropriate keys. See
- * the Blackberry Signature Tool Development Guide for more information on this
- * subject. You will also need to use the BlackBerry Signing Authority Admin
- * Tool to create a public/private key pair with the name "ACME". See the
- * BlackBerry Signing Authority Tool Administrator Guide for more information.
- * Replace the ACME public key contained in this project with the ACME public
- * key created with the BlackBerry Signing Authority Admin Tool. Build the
- * project and then use the BlackBerry Signing Authority Tool to sign the
- * resulting cod file with the ACME private key. When the
- * "Access controlled object" menu item code in the PersistentStoreDemoScreen
- * class is run, the module will be granted access to the controlled object by
- * virtue of the fact that it is signed with the ACME key.
+ * physical BlackBerry device or a BlackBerry simulator running in secure mode.
+ * Because this application leverages controlled API's, it will need to be
+ * signed with the appropriate keys. See the Blackberry Signature Tool
+ * Development Guide for more information on this subject. You will also need to
+ * use the BlackBerry Signing Authority Admin Tool to create a public/private
+ * key pair with the name "ACME". See the BlackBerry Signing Authority Tool
+ * Administrator Guide for more information. Replace the ACME public key
+ * contained in this project with the ACME public key created with the
+ * BlackBerry Signing Authority Admin Tool. Build the project and then use the
+ * BlackBerry Signing Authority Tool to sign the resulting cod file with the
+ * ACME private key. When the "Access controlled object" menu item code in the
+ * PersistentStoreDemoScreen class is run, the module will be granted access to
+ * the controlled object by virtue of the fact that it is signed with the ACME
+ * key.
  */
-public final class PersistentStoreDemo extends UiApplication implements
-        ListFieldCallback {
+public final class PersistentStoreDemo extends UiApplication {
     private final Vector _meetings;
     private final PersistentObject _store;
     private final PersistentStoreDemoScreen _screen;
@@ -105,7 +101,7 @@ public final class PersistentStoreDemo extends UiApplication implements
             // content state changes.
             PersistentContent.addListener(new PersistentStoreListener());
         } else {
-            // Launch GUI version of the application.
+            // Launch GUI version of the application
             final PersistentStoreDemo theApp = new PersistentStoreDemo();
 
             // Make the currently running thread the application's event
@@ -154,13 +150,13 @@ public final class PersistentStoreDemo extends UiApplication implements
      *            The meeting's position in the _meetings Vector. A value of -1
      *            represents a new meeting.
      */
-    void saveMeeting(final Meeting meeting, final int index) {
+    public void saveMeeting(final Meeting meeting, final int index) {
         if (index >= 0) {
-            _meetings.setElementAt(meeting, index);
+            _screen.getModel().removeRowAt(index);
+            _screen.getModel().insertRowAt(index, meeting);
         } else {
-            _meetings.addElement(meeting);
+            _screen.getModel().addRow(meeting);
         }
-        _screen.updateList();
     }
 
     /**
@@ -168,55 +164,19 @@ public final class PersistentStoreDemo extends UiApplication implements
      * 
      * @return A vector of Meeting objects
      */
-    Vector getMeetings() {
+    public Vector getMeetings() {
         return _meetings;
     }
 
     /**
      * Commits the updated vector of Meeting objects to the persistent store.
      */
-    void persist() {
+    public void persist() {
         // Synchronize on the PersistentObject so that no other object can
         // acquire the lock before we finish the commit operation.
         synchronized (_store) {
             _store.setContents(_meetings);
             PersistentObject.commit(_store);
         }
-    }
-
-    // ListFieldCallback methods
-    // ----------------------------------------------------------------------
-
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#drawListRow(ListField,Graphics,int,int,int)
-     */
-    public void drawListRow(final ListField list, final Graphics graphics,
-            final int index, final int y, final int w) {
-        final Meeting meeting = (Meeting) _meetings.elementAt(index);
-        final String text = meeting.getField(Meeting.MEETING_NAME);
-        graphics.drawText(text, 0, y, 0, w);
-    }
-
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#get(ListField ,
-     *      int)
-     */
-    public Object get(final ListField list, final int index) {
-        return null; // Not implemented
-    }
-
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#indexOfList(ListField
-     *      , String , int)
-     */
-    public int indexOfList(final ListField list, final String p, final int s) {
-        return 0; // Not implemented
-    }
-
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#getPreferredWidth(ListField)
-     */
-    public int getPreferredWidth(final ListField list) {
-        return Display.getWidth();
     }
 }

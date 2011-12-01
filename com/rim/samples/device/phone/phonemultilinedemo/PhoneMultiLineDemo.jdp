@@ -39,13 +39,14 @@ img\phonemultilinedemo_jde.png
 ]
 Listing=0
 Options=-quiet 
-OutputFileName=phonemultilinedemo
+OutputFileName=PhoneMultiLineDemo
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=Phone Multi Line Demo

@@ -30,6 +30,9 @@ import net.rim.blackberry.api.mail.Message;
 import net.rim.blackberry.api.mail.ServiceConfiguration;
 import net.rim.blackberry.api.mail.Session;
 import net.rim.blackberry.api.mail.Store;
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.servicebook.ServiceBook;
 import net.rim.device.api.servicebook.ServiceRecord;
 import net.rim.device.api.system.Application;
@@ -40,6 +43,7 @@ import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.ListField;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * The parent class for MessagesListScreen and FoldersViewScreen. This class
@@ -73,6 +77,57 @@ public class BlackBerryMailDemoScreen extends MainScreen {
      * Default Constructor for subclasses
      */
     protected BlackBerryMailDemoScreen() {
+        initializeMenuItems();
+    }
+
+    /**
+     * Initialize menu item objects
+     */
+    private void initializeMenuItems() {
+        _composeMenuItem =
+                new MenuItem(new StringProvider("Compose Email"), 0x230030, 2);
+        _composeMenuItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                final ComposeScreen composeScreen =
+                        new ComposeScreen(null, _store);
+                UiApplication.getUiApplication().pushScreen(composeScreen);
+                updateScreen();
+            }
+        }));
+
+        _openMenuItem =
+                new MenuItem(new StringProvider("Open Item"), 0x230010, 0);
+        _openMenuItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                openAction();
+            }
+        }));
+
+        _editMenuItem = new MenuItem(new StringProvider("Edit"), 0x230020, 1);
+        _editMenuItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                final Message msg = (Message) getSelectedItem();
+                final MessageScreen messageScreen =
+                        new MessageScreen(msg, true);
+                UiApplication.getUiApplication().pushScreen(messageScreen);
+                updateScreen();
+            }
+        }));
     }
 
     /**
@@ -82,6 +137,27 @@ public class BlackBerryMailDemoScreen extends MainScreen {
      *            Screen title
      */
     public BlackBerryMailDemoScreen(final String title) {
+        initializeMenuItems();
+
+        _selectServiceMenuItem =
+                new MenuItem(new StringProvider("Choose Message Service"),
+                        0x230040, 3);
+        _selectServiceMenuItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                if (_currentDisplayMode == MESSAGES_VIEW_MODE) {
+                    _store.removeFolderListener(_messagesViewScreen);
+                }
+
+                selectServiceDialog();
+                messageServiceChanged();
+            }
+        }));
+
         setTitle(title);
         _currentDisplayMode = MESSAGES_VIEW_MODE;
 
@@ -201,58 +277,28 @@ public class BlackBerryMailDemoScreen extends MainScreen {
     /**
      * Menu item to push a ComposeScreen
      */
-    private final MenuItem _composeMenuItem = new MenuItem("Compose Email",
-            110, 11) {
-        public void run() {
-            final ComposeScreen composeScreen = new ComposeScreen(null, _store);
-            UiApplication.getUiApplication().pushScreen(composeScreen);
-            updateScreen();
-        }
-    };
+    private MenuItem _composeMenuItem;
 
     /**
      * Menu item to open folder
      */
-    private final MenuItem _openMenuItem = new MenuItem("Open Item", 110, 10) {
-        public void run() {
-            openAction();
-        }
-    };
+    private MenuItem _openMenuItem;
 
     /**
      * Menu item to open a message for editing
      */
-    private final MenuItem _editMenuItem = new MenuItem("Edit", 110, 12) {
-        public void run() {
-            final Message msg = (Message) getSelectedItem();
-            final MessageScreen messageScreen = new MessageScreen(msg, true);
-            UiApplication.getUiApplication().pushScreen(messageScreen);
-            updateScreen();
-        }
-    };
+    private MenuItem _editMenuItem;
 
     /**
      * Menu item allows user to choose message service
      */
-    private final MenuItem _selectServiceMenuItem = new MenuItem(
-            "Choose Message Service", 110, 10) {
-        public void run() {
-            if (_currentDisplayMode == MESSAGES_VIEW_MODE) {
-                _store.removeFolderListener(_messagesViewScreen);
-            }
-
-            selectServiceDialog();
-            messageServiceChanged();
-        }
-    };
+    private MenuItem _selectServiceMenuItem;
 
     /**
      * @see net.rim.device.api.ui.Screen#makeMenu(Menu, int)
      */
     protected void makeMenu(final Menu menu, final int instance) {
-        // Have the compose menu item on top
         menu.add(_composeMenuItem);
-        menu.addSeparator();
 
         // If there are messages in the list, add the menu item for viewing
         // different messages.
@@ -293,31 +339,24 @@ public class BlackBerryMailDemoScreen extends MainScreen {
      * @see net.rim.device.api.ui.Screen#invokeAction(int)
      */
     protected boolean invokeAction(final int action) {
-        switch (action) {
-        case ACTION_INVOKE: // Trackball click
-        {
+        if (action == ACTION_INVOKE) {
             openAction();
             return true;
-        }
         }
 
         return super.invokeAction(action);
     }
 
     /**
-     * Overrides default. Enter key will display the message.
-     * 
-     * @see net.rim.device.api.ui.Screen#keyChar(char,int,int)
+     * @see net.rim.device.api.ui.Screen#keyChar(char, int, int)
      */
     public boolean keyChar(final char c, final int status, final int time) {
-        switch (c) {
-        case Characters.ENTER:
+        if (c == Characters.ENTER) {
             openAction();
             return true;
-
-        default:
-            return super.keyChar(c, status, time);
         }
+
+        return super.keyChar(c, status, time);
     }
 
     /**

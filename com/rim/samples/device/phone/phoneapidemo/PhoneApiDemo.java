@@ -36,25 +36,37 @@ import java.util.Vector;
 import net.rim.blackberry.api.phone.AbstractPhoneListener;
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.blackberry.api.phone.PhoneCall;
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.ControlledAccessException;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.system.KeyListener;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
+import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.Field;
-import net.rim.device.api.ui.Graphics;
+import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.Screen;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.XYRect;
 import net.rim.device.api.ui.component.BasicEditField;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
-import net.rim.device.api.ui.component.ListField;
-import net.rim.device.api.ui.component.ListFieldCallback;
 import net.rim.device.api.ui.component.Menu;
+import net.rim.device.api.ui.component.table.DataTemplate;
+import net.rim.device.api.ui.component.table.TableController;
+import net.rim.device.api.ui.component.table.TableModelAdapter;
+import net.rim.device.api.ui.component.table.TableModelChangeEvent;
+import net.rim.device.api.ui.component.table.TableView;
+import net.rim.device.api.ui.component.table.TemplateColumnProperties;
+import net.rim.device.api.ui.component.table.TemplateRowProperties;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.decor.BackgroundFactory;
 import net.rim.device.api.util.Persistable;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * The main class for the Phone API demo app.
@@ -68,13 +80,16 @@ public final class PhoneApiDemo extends UiApplication {
     // -------------------------------------------------------------------------------------
     private static PersistentObject _persist;
     private static Vector _phoneNumberList;
+    private static PhoneNumberTableModelAdapter _model;
 
-    // Make sure a database exists for this application.
+    // Make sure a database exists for this application
     static {
         _persist = PersistentStore.getPersistentObject(0x15835f89fc421f8cL); // com.rim.samples.device.phone.phoneapidemo
 
         synchronized (_persist) {
             _phoneNumberList = (Vector) _persist.getContents();
+
+            _model = new PhoneNumberTableModelAdapter();
 
             if (_phoneNumberList == null) {
                 _phoneNumberList = new Vector();
@@ -94,23 +109,11 @@ public final class PhoneApiDemo extends UiApplication {
     }
 
     /**
-     * Commits the phone number records to the persistent store.
+     * Commits the phone number records to the persistent store
      */
     private static void savePhoneNumberRecords() {
         synchronized (_persist) {
             _persist.commit();
-        }
-    }
-
-    /**
-     * Sets the size of the list field in the main screen. This can only be done
-     * when this app is in the foreground because it can cause a repaint.
-     */
-    public void activate() {
-        super.activate();
-
-        if (_mainScreen != null) {
-            _mainScreen.setPhoneNumberListFieldSize();
         }
     }
 
@@ -153,56 +156,142 @@ public final class PhoneApiDemo extends UiApplication {
     // -----------------------------------------------------------------------
 
     /**
+     * Adapter class for displaying phone number information in table format
+     */
+    private static class PhoneNumberTableModelAdapter extends TableModelAdapter {
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfRows()
+         */
+        public int getNumberOfRows() {
+            return _phoneNumberList.size();
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfColumns()
+         */
+        public int getNumberOfColumns() {
+            return 1;
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doGetRow(int
+         *      )
+         */
+        protected Object doGetRow(final int index) {
+            return _phoneNumberList.elementAt(index);
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doRemoveRowAt(int
+         *      )
+         */
+        protected boolean doRemoveRowAt(final int index) {
+            return _phoneNumberList.removeElement(doGetRow(index));
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doAddRow(Object
+         *      )
+         */
+        protected boolean doAddRow(final Object object) {
+            _phoneNumberList.addElement(object);
+            return true;
+        }
+
+        /**
+         * Force the table to refresh the listed elements
+         */
+        public void refresh() {
+            notifyListeners(new TableModelChangeEvent(
+                    TableModelChangeEvent.COLUMN_UPDATED, this, -1, 0));
+        }
+    };
+
+    /**
      * The main screen for the Phone API application. It displays a list of
      * phone numbers that have been contacted, and allows the user to view the
      * record for each one.
      */
-    private final class PhoneApiDemoMainScreen extends MainScreen implements
-            ListFieldCallback {
+    private final class PhoneApiDemoMainScreen extends MainScreen {
         // Members --------------------------------------------------
-        private final ListField _phoneNumberListField;
-        private final MenuItem _deleteAllItem;
+        private MenuItem _deleteAllItem;
+        private TableView _view;
 
         /**
          * PhoneApiDemoMainScreen constructor. Creates the fields and menu items
          * used on this screen.
          */
         private PhoneApiDemoMainScreen() {
-            super();
+            super(Manager.NO_VERTICAL_SCROLL);
 
-            /* parent. */setTitle("Phone API Demo");
+            setTitle("Phone API Demo");
 
-            _phoneNumberListField = new ListField(_phoneNumberList.size());
-            _phoneNumberListField.setCallback(this);
-            /* parent. */add(_phoneNumberListField);
+            _view = new TableView(_model);
 
-            // Menu item that deletes all the phone number records.
-            _deleteAllItem = new MenuItem("Delete All", 300000, 120) {
-                public void run() {
-                    if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
-                        _phoneNumberList.removeAllElements();
-                        PhoneApiDemo.savePhoneNumberRecords();
-                        setPhoneNumberListFieldSize();
-                    }
+            final TableController controller =
+                    new TableController(_model, _view);
+            _view.setController(controller);
+
+            _view.setDataTemplateFocus(BackgroundFactory
+                    .createLinearGradientBackground(Color.LIGHTBLUE,
+                            Color.LIGHTBLUE, Color.BLUE, Color.BLUE));
+            final DataTemplate dataTemplate = new DataTemplate(_view, 1, 1) {
+                public Field[] getDataFields(final int modelRowIndex) {
+                    final PhoneNumberRecord record =
+                            (PhoneNumberRecord) _model.getRow(modelRowIndex);
+                    final String text =
+                            (String) record
+                                    .getField(PhoneNumberRecord.PHONE_NUMBER);
+
+                    final Field[] fields =
+                            { new LabelField(text, Field.NON_FOCUSABLE) };
+
+                    return fields;
                 }
             };
+            dataTemplate.createRegion(new XYRect(0, 0, 1, 1));
+            dataTemplate.setColumnProperties(0, new TemplateColumnProperties(
+                    Display.getWidth()));
+            dataTemplate.setRowProperties(0, new TemplateRowProperties(32));
+            _view.setDataTemplate(dataTemplate);
+            dataTemplate.useFixedHeight(true);
 
-            /* parent. */addKeyListener(new PhoneApiDemoKeyListener(this));
+            add(_view);
+
+            // Menu item that deletes all the phone number records.
+            _deleteAllItem =
+                    new MenuItem(new StringProvider("Delete All"), 0x230010, 0);
+            _deleteAllItem.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
+                        while (_model.getNumberOfRows() > 1) {
+                            _model.removeRowAt(0, false);
+                        }
+                        if (_model.getNumberOfRows() == 1) {
+                            _model.removeRowAt(0);
+                        }
+                        PhoneApiDemo.savePhoneNumberRecords();
+                    }
+                }
+            }));
+
+            addKeyListener(new PhoneApiDemoKeyListener(this));
         }
 
         /**
-         * Sets the size of the list field that displays the phone number
-         * records, which may cause a repaint. Since this app competes with the
-         * BlackBerry Phone app for access to the UI, this method can only be
-         * called at certain times, such as when validate() is called in the
-         * PhoneApiDemo class.
+         * @see net.rim.device.api.ui.container.MainScreen#onExposed()
          */
-        void setPhoneNumberListFieldSize() {
-            _phoneNumberListField.setSize(_phoneNumberList.size());
+        protected void onExposed() {
+            _model.refresh();
         }
 
         /**
-         * Creates the menu for this screen.
+         * Creates the menu for this screen
          * 
          * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
          */
@@ -211,54 +300,16 @@ public final class PhoneApiDemo extends UiApplication {
 
             // If there are any items in the list, add menu items to view and
             // delete them.
-            if (_phoneNumberListField.getSize() > 0) {
-                final int index = _phoneNumberListField.getSelectedIndex();
+            if (_model.getNumberOfRows() > 0) {
+                final int index = _view.getRowNumberWithFocus();
                 final PhoneNumberRecord record =
-                        (PhoneNumberRecord) get(_phoneNumberListField, index);
+                        (PhoneNumberRecord) _model.getRow(index);
                 menu.add(new View(record));
                 menu.addSeparator();
                 menu.add(new Delete(record));
                 menu.add(_deleteAllItem);
                 menu.addSeparator();
             }
-        }
-
-        // ListFieldCallback methods
-        // ---------------------------------------------------------------
-        /**
-         * @see net.rim.device.api.ui.component.ListFieldCallback#drawListRow(ListField,Graphics,int,int,int)
-         */
-        public void drawListRow(final ListField listField,
-                final Graphics graphics, final int index, final int y,
-                final int width) {
-            final PhoneNumberRecord record =
-                    (PhoneNumberRecord) _phoneNumberList.elementAt(index);
-            graphics.drawText((String) record
-                    .getField(PhoneNumberRecord.PHONE_NUMBER), 0, y, 0, width);
-        }
-
-        /**
-         * @see net.rim.device.api.ui.component.ListFieldCallback#getPreferredWidth(ListField)
-         */
-        public int getPreferredWidth(final ListField listField) {
-            return Display.getWidth();
-        }
-
-        /**
-         * @see net.rim.device.api.ui.component.ListFieldCallback#get(ListField
-         *      , int)
-         */
-        public Object get(final ListField listField, final int index) {
-            return _phoneNumberList.elementAt(index);
-        }
-
-        /**
-         * @see net.rim.device.api.ui.component.ListFieldCallback#indexOfList(ListField
-         *      , String , int)
-         */
-        public int indexOfList(final ListField listField, final String prefix,
-                final int start) {
-            return -1; // Not implemented.
         }
 
         // Private inner classes representing menu items and listeners used by
@@ -273,77 +324,78 @@ public final class PhoneApiDemo extends UiApplication {
             private final PhoneNumberRecord _record;
 
             /**
-             * Constructs a menu item to view a record when invoked.
+             * Constructs a menu item to view a record when invoked
              * 
              * @param record
              *            The record to view
              */
             private View(final PhoneNumberRecord record) {
-                super("View", 200000, 100);
+                super(new StringProvider("View"), 0x230020, 100);
                 _record = record;
-            }
+                this.setCommand(new Command(new CommandHandler() {
+                    /**
+                     * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                     *      Object)
+                     */
+                    public void execute(final ReadOnlyCommandMetadata metadata,
+                            final Object context) {
+                        final MainScreen screen = new MainScreen();
 
-            /**
-             * Shows the phone number record.
-             * 
-             * @see java.lang.Runnable#run()
-             */
-            public void run() {
-                final MainScreen screen = new MainScreen();
+                        screen.setTitle(new LabelField("View Phone Record"));
 
-                screen.setTitle(new LabelField("View Phone Record"));
+                        final PhoneNumberRecordDisplayer displayer =
+                                new PhoneNumberRecordDisplayer(_record);
+                        final Vector fields = displayer.getFields();
+                        final int numFields = fields.size();
 
-                final PhoneNumberRecordDisplayer displayer =
-                        new PhoneNumberRecordDisplayer(_record);
-                final Vector fields = displayer.getFields();
-                final int numFields = fields.size();
+                        for (int i = 0; i < numFields; ++i) {
+                            screen.add((Field) fields.elementAt(i));
+                        }
 
-                for (int i = 0; i < numFields; ++i) {
-                    screen.add((Field) fields.elementAt(i));
-                }
+                        screen.addKeyListener(new PhoneApiDemoKeyListener(
+                                screen));
 
-                screen.addKeyListener(new PhoneApiDemoKeyListener(screen));
-
-                PhoneApiDemo.this.pushScreen(screen);
+                        PhoneApiDemo.this.pushScreen(screen);
+                    }
+                }));
             }
         }
 
         /**
          * This class is a menu item allowing a user to delete a phone number
-         * record.
+         * record
          */
         private final class Delete extends MenuItem {
-            // Members ----------------------------------------------
-            private final PhoneNumberRecord _record;
 
             /**
-             * Constructs a menu item to delete a phone record when invoked.
+             * Constructs a menu item to delete a phone record when invoked
              * 
              * @param record
              *            The phone record to delete
              */
             private Delete(final PhoneNumberRecord record) {
-                super("Delete", 300000, 110);
-                _record = record;
-            }
-
-            /**
-             * Deletes the phone record.
-             * 
-             * @see java.lang.Runnable#run()
-             */
-            public void run() {
-                if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
-                    _phoneNumberList.removeElement(_record);
-                    PhoneApiDemo.savePhoneNumberRecords();
-                    PhoneApiDemoMainScreen.this.setPhoneNumberListFieldSize();
-                }
+                super(new StringProvider("Delete"), 0x230030, 110);
+                this.setCommand(new Command(new CommandHandler() {
+                    /**
+                     * Deletes the phone record
+                     * 
+                     * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                     *      Object)
+                     */
+                    public void execute(final ReadOnlyCommandMetadata metadata,
+                            final Object context) {
+                        if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
+                            _model.removeRowAt(_view.getRowNumberWithFocus());
+                            PhoneApiDemo.savePhoneNumberRecords();
+                        }
+                    }
+                }));
             }
         }
     }
 
     /**
-     * Persistable phone number record.
+     * Persistable phone number record
      */
     private static final class PhoneNumberRecord implements Persistable {
         // Members
@@ -357,7 +409,7 @@ public final class PhoneApiDemo extends UiApplication {
         private static final int TALK_TIME = 1;
 
         /**
-         * Constructs a PhoneNumberRecord from a phone number.
+         * Constructs a PhoneNumberRecord from a phone number
          * 
          * @param phoneNumber
          *            The phone number of the record to be created
@@ -370,23 +422,23 @@ public final class PhoneApiDemo extends UiApplication {
         }
 
         /**
-         * Retrieves one of this record's fields.
+         * Retrieves one of this record's fields
          * 
          * @param index
-         *            The index of the field to retrieve.
-         * @return The field.
+         *            The index of the field to retrieve
+         * @return The field
          */
         private Object getField(final int index) {
             return _fields.elementAt(index);
         }
 
         /**
-         * Sets one of this record's fields.
+         * Sets one of this record's fields
          * 
          * @param index
-         *            The index of the field to set.
+         *            The index of the field to set
          * @param o
-         *            The object that the field is set to.
+         *            The object that the field is set to
          */
         private void setField(final int index, final Object o) {
             _fields.setElementAt(o, index);
@@ -397,9 +449,9 @@ public final class PhoneApiDemo extends UiApplication {
          * number record.
          * 
          * @param o
-         *            The object to check for equality.
+         *            The object to check for equality
          * @return True if this record and o refer to the same phone number
-         *         record; false otherwise.
+         *         record; false otherwise
          */
         public boolean equals(final Object o) {
             if (o instanceof PhoneNumberRecord) {
@@ -416,24 +468,24 @@ public final class PhoneApiDemo extends UiApplication {
         }
 
         /**
-         * Determines whether this record is currently recording "talk time".
+         * Determines whether this record is currently recording "talk time"
          * 
          * @return True if this record is currently recording "talk time"; false
-         *         otherwise.
+         *         otherwise
          */
         private boolean isActive() {
             return _startTime != 0;
         }
 
         /**
-         * Causes this record to start recording "talk time".
+         * Causes this record to start recording "talk time"
          */
         public void start() {
             _startTime = new Date().getTime();
         }
 
         /**
-         * Causes this record to temporarily stop recording "talk time".
+         * Causes this record to temporarily stop recording "talk time"
          */
         private void putOnHold() {
             long talkTime = ((Long) _fields.elementAt(TALK_TIME)).longValue();
@@ -443,14 +495,14 @@ public final class PhoneApiDemo extends UiApplication {
         }
 
         /**
-         * Causes this record to resume recording "talk time".
+         * Causes this record to resume recording "talk time"
          */
         private void resume() {
             start();
         }
 
         /**
-         * Causes this record to stop recording "talk time".
+         * Causes this record to stop recording "talk time"
          */
         private void end() {
             putOnHold();
@@ -540,11 +592,11 @@ public final class PhoneApiDemo extends UiApplication {
             AbstractPhoneListener {
         // Members ----------------------------------------------
 
-        // Helper object for searching the list of records.
+        // Helper object for searching the list of records
         private final PhoneNumberRecord _searchRecord = new PhoneNumberRecord(
                 "");
 
-        // Maps call IDs to their phone numbers.
+        // Maps call IDs to their phone numbers
         private final Hashtable _phoneNumberTable = new Hashtable();
 
         /**
@@ -560,7 +612,7 @@ public final class PhoneApiDemo extends UiApplication {
          * starts the "talk time" timer, and saves the record list.
          * 
          * @param callId
-         *            The ID of the call that connected.
+         *            The ID of the call that connected
          */
         public void callConnected(final int callId) {
             final PhoneCall phoneCall = Phone.getCall(callId);
@@ -573,7 +625,7 @@ public final class PhoneApiDemo extends UiApplication {
                 // No record exists yet with this phone number, so create one
                 // and put it in the list.
                 record = new PhoneNumberRecord(phoneNumber);
-                _phoneNumberList.addElement(record);
+                _model.addRow(record);
             }
 
             if (!record.isActive()) {
@@ -588,7 +640,7 @@ public final class PhoneApiDemo extends UiApplication {
          * phoneNumberRecord list.
          * 
          * @param callId
-         *            The ID of the call that disconnected.
+         *            The ID of the call that disconnected
          */
         public void callDisconnected(final int callId) {
             final PhoneNumberRecord record = getPhoneNumberRecord(callId);
@@ -633,7 +685,7 @@ public final class PhoneApiDemo extends UiApplication {
          * and saves the record list.
          * 
          * @param callId
-         *            The ID of the call that was resumed.
+         *            The ID of the call that was resumed
          */
         public void callResumed(final int callId) {
             final PhoneNumberRecord record = getPhoneNumberRecord(callId);
@@ -646,11 +698,11 @@ public final class PhoneApiDemo extends UiApplication {
 
         /**
          * Retrieves a phone number record by call ID. Returns null if no such
-         * record exists.
+         * record exists
          * 
          * @param callId
-         *            The ID of the phone number record to retrieve.
-         * @return The phone number record, or null if no record matches callId.
+         *            The ID of the phone number record to retrieve
+         * @return The phone number record, or null if no record matches callId
          */
         private PhoneNumberRecord getPhoneNumberRecord(final int callId) {
             final String phoneNumber =
@@ -663,9 +715,9 @@ public final class PhoneApiDemo extends UiApplication {
          * such record exists.
          * 
          * @param phoneNumber
-         *            The phone number of the phone number record to retrieve.
+         *            The phone number of the phone number record to retrieve
          * @return The phone number record, or null if no record matches
-         *         phoneNumber.
+         *         phoneNumber
          */
         private PhoneNumberRecord getPhoneNumberRecordByPhoneNumber(
                 final String phoneNumber) {
@@ -673,7 +725,7 @@ public final class PhoneApiDemo extends UiApplication {
             final int index = _phoneNumberList.indexOf(_searchRecord);
 
             if (index != -1) {
-                return (PhoneNumberRecord) _phoneNumberList.elementAt(index);
+                return (PhoneNumberRecord) _model.getRow(index);
             }
 
             return null;
@@ -688,7 +740,7 @@ public final class PhoneApiDemo extends UiApplication {
         private final Screen _screen;
 
         /**
-         * Constructor
+         * Creates a new PhoneApiDemoKeyListener object
          * 
          * @param screen
          *            The screen with to display the menu on

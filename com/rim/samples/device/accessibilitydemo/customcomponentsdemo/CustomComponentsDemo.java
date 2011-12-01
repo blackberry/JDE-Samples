@@ -59,7 +59,9 @@ public final class CustomComponentsDemo extends UiApplication {
         new CustomComponentsDemo().enterEventDispatcher();
     }
 
-    // Constructor
+    /**
+     * Creates a new CustomComponentsDemo object
+     */
     public CustomComponentsDemo() {
         try {
             // Only one listener can be registered
@@ -91,7 +93,9 @@ public final class CustomComponentsDemo extends UiApplication {
         private final TextComponent _textComponent;
         private final ValueComponent _valueComponent;
 
-        // Constructor
+        /**
+         * Creates a new CustomComponentsDemoScreen object
+         */
         private CustomComponentsDemoScreen() {
             setTitle("Accessibility Demo");
 

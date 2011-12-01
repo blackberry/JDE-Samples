@@ -38,13 +38,14 @@ img\spinnerdemo_jde.png
 ]
 Listing=0
 Options=-quiet 
-OutputFileName=DateTimePickerSpinnerDemo
+OutputFileName=SpinnerDemo
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=Spinner Demo

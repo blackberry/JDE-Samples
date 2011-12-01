@@ -83,7 +83,7 @@ public final class Protocol implements FilterBaseInterface, HttpConnection {
                 "text/html");
 
         // Attempt to parse for the file name
-        final int slashIndex = name.indexOf('/', 2);
+        final int slashIndex = name.lastIndexOf('/');
         if (slashIndex != -1) {
 
             // There is a slash - now get the path and file name and match

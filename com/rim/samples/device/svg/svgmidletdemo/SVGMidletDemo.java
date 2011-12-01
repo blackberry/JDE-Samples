@@ -53,7 +53,7 @@ import javax.microedition.midlet.MIDlet;
  */
 public final class SVGMidletDemo extends MIDlet implements CommandListener {
     // The svg file
-    private static String SVG_URL = "/sample.svg";
+    private static final String SVG_URL = "/sample.svg";
 
     private Command _mainExit;
 

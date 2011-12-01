@@ -222,6 +222,30 @@ public class OTABackupRestoreContactCollection implements SyncConverter,
     }
 
     /**
+     * Insert an element at the specified index
+     * 
+     * @param index
+     *            The index at which to insert
+     * @param object
+     *            The SyncObject to insert
+     */
+    public boolean insertSyncObjectAt(final int index, final SyncObject object) {
+        // Add a contact to the persistent store
+        _contacts.insertElementAt(object, index);
+        PersistentObject.commit(_contacts);
+
+        // Use the CollectionListeners to let the server know the add was
+        // successful
+        for (int i = 0; i < _listeners.size(); i++) {
+            final CollectionListener cl =
+                    (CollectionListener) _listeners.elementAt(i);
+            cl.elementAdded(this, object);
+        }
+
+        return true;
+    }
+
+    /**
      * @see net.rim.device.api.synchronization.SyncCollection#updateSyncObject(SyncObject,
      *      SyncObject)
      */
@@ -248,8 +272,19 @@ public class OTABackupRestoreContactCollection implements SyncConverter,
      * @see net.rim.device.api.synchronization.SyncCollection#removeSyncObject(SyncObject)
      */
     public boolean removeSyncObject(final SyncObject object) {
-        return false; // NA - This method would look much the same as
-                      // addSyncObject
+        // Remove a contact from the persistent store
+        _contacts.removeElement(object);
+        PersistentObject.commit(_contacts);
+
+        // Use the CollectionListeners to let the server know the remove was
+        // successful
+        for (int i = 0; i < _listeners.size(); i++) {
+            final CollectionListener cl =
+                    (CollectionListener) _listeners.elementAt(i);
+            cl.elementAdded(this, object);
+        }
+
+        return true;
     }
 
     public boolean removeAllSyncObjects() {
@@ -282,6 +317,17 @@ public class OTABackupRestoreContactCollection implements SyncConverter,
         }
 
         return null;
+    }
+
+    /**
+     * Return the SyncObject at the specified index
+     * 
+     * @param index
+     *            The index of the SyncObject to retrieve
+     * @return The requested SyncObject
+     */
+    public SyncObject getSyncObjectAt(final int index) {
+        return (SyncObject) _contacts.elementAt(index);
     }
 
     /**
@@ -394,14 +440,4 @@ public class OTABackupRestoreContactCollection implements SyncConverter,
         return _contacts.size();
     }
 
-    /**
-     * Retrieves a contact from the list.
-     * 
-     * @param index
-     *            The index of the contact to retrieve
-     * @return The contact at the specified index
-     */
-    OTAContactData contactAt(final int index) {
-        return (OTAContactData) _contacts.elementAt(index);
-    }
 }

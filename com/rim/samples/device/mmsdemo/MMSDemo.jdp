@@ -22,7 +22,7 @@ AutoRestart=0
 ExcludeFromBuildAll=0
 Exported=0
 [Files
-img\icon_jde.png
+img\mmsdemo_jde.png
 media\audio\audio0.mp3
 media\picture\picture0.png
 MMSDemo.java
@@ -33,7 +33,7 @@ HaveAlxImports=0
 HaveDefs=0
 HaveImports=0
 [Icons
-img\icon_jde.png
+img\mmsdemo_jde.png
 ]
 [ImplicitRules
 ]
@@ -48,6 +48,7 @@ RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=MMS Demo

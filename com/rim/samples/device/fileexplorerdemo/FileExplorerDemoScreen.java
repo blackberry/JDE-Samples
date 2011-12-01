@@ -34,32 +34,112 @@ import javax.microedition.io.file.FileSystemRegistry;
 
 import net.rim.blackberry.api.invoke.CameraArguments;
 import net.rim.blackberry.api.invoke.Invoke;
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.DeviceInfo;
+import net.rim.device.api.system.Display;
 import net.rim.device.api.system.KeypadListener;
+import net.rim.device.api.ui.Color;
+import net.rim.device.api.ui.DrawStyle;
+import net.rim.device.api.ui.Field;
+import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.XYRect;
 import net.rim.device.api.ui.component.Dialog;
+import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
+import net.rim.device.api.ui.component.table.AbstractTableModel;
+import net.rim.device.api.ui.component.table.DataTemplate;
+import net.rim.device.api.ui.component.table.TableController;
+import net.rim.device.api.ui.component.table.TableModel;
+import net.rim.device.api.ui.component.table.TableView;
+import net.rim.device.api.ui.component.table.TemplateColumnProperties;
+import net.rim.device.api.ui.component.table.TemplateRowProperties;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.decor.BackgroundFactory;
+import net.rim.device.api.util.StringProvider;
 
 /**
- * Main screen to show the listing of all directories/files
+ * Main screen displays list of all directories/files
  */
 public final class FileExplorerDemoScreen extends MainScreen {
-    private final FileExplorerDemo _uiApp;
-    private final FileExplorerDemoListFieldImpl _list;
-    private final FileExplorerDemoJournalListener _fileListener;
+    private FileExplorerDemo _uiApp;
+    private FileExplorerDemoJournalListener _fileListener;
     private String _parentRoot;
+
+    private AbstractTableModel _model;
+    private TableView _view;
 
     /**
      * Creates a new FileExplorerDemoScreen object
      */
     FileExplorerDemoScreen() {
+        super(Manager.NO_VERTICAL_SCROLL);
+
         setTitle("File Explorer Demo");
 
-        _list = new FileExplorerDemoListFieldImpl();
-        add(_list);
+        _model = new TableModel();
+
+        _view = new TableView(_model);
+        final TableController controller = new TableController(_model, _view);
+        controller.setFocusPolicy(TableController.ROW_FOCUS);
+        controller.setCommand(new CommandHandler() {
+            /**
+             * @see CommandHandler#execute(ReadOnlyCommandMetadata, Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                selectAction();
+            }
+
+        }, null, null);
+        _view.setController(controller);
+
+        // Set the highlight style for the view
+        _view.setDataTemplateFocus(BackgroundFactory
+                .createLinearGradientBackground(Color.LIGHTBLUE,
+                        Color.LIGHTBLUE, Color.BLUE, Color.BLUE));
+
+        // Create a data template that will format the model data as an array of
+        // LabelFields
+        final DataTemplate dataTemplate = new DataTemplate(_view, 1, 1) {
+            public Field[] getDataFields(final int modelRowIndex) {
+                final FileExplorerDemoFileHolder fileholder =
+                        (FileExplorerDemoFileHolder) _model
+                                .getRow(modelRowIndex);
+
+                String text;
+
+                if (fileholder.isDirectory()) {
+                    text = fileholder.getPath();
+                } else {
+                    text = fileholder.getFileName();
+                }
+
+                final Field[] fields =
+                        { new LabelField(text, DrawStyle.ELLIPSIS
+                                | Field.NON_FOCUSABLE) };
+
+                return fields;
+            }
+        };
+
+        // Define the regions of the data template and column/row size
+        dataTemplate.createRegion(new XYRect(0, 0, 1, 1));
+        dataTemplate.setColumnProperties(0, new TemplateColumnProperties(
+                Display.getWidth()));
+        dataTemplate.setRowProperties(0, new TemplateRowProperties(24));
+
+        _view.setDataTemplate(dataTemplate);
+        dataTemplate.useFixedHeight(true);
+
+        // Add the contact list to the screen
+        add(_view);
+
+        // Populate the table
         readRoots(null);
 
         _uiApp = (FileExplorerDemo) UiApplication.getUiApplication();
@@ -81,9 +161,9 @@ public final class FileExplorerDemoScreen extends MainScreen {
      * Deletes the selected file or directory
      */
     private void deleteAction() {
-        final int index = _list.getSelectedIndex();
+        final int index = _view.getRowNumberWithFocus();
         final FileExplorerDemoFileHolder fileholder =
-                (FileExplorerDemoFileHolder) _list.get(_list, index);
+                (FileExplorerDemoFileHolder) _model.getRow(index);
 
         if (fileholder != null) {
             final String filename =
@@ -95,7 +175,7 @@ public final class FileExplorerDemoScreen extends MainScreen {
                 try {
                     fc = (FileConnection) Connector.open("file:///" + filename);
                     fc.delete();
-                    _list.remove(index);
+                    _model.removeRowAt(index);
                 } catch (final Exception ex) {
                     FileExplorerDemo
                             .errorDialog("Unable to delete file or directory: "
@@ -107,6 +187,8 @@ public final class FileExplorerDemoScreen extends MainScreen {
                             fc = null;
                         }
                     } catch (final Exception ioex) {
+                        FileExplorerDemo.errorDialog("deleteAction() threw "
+                                + ioex.toString());
                     }
                 }
             }
@@ -122,15 +204,6 @@ public final class FileExplorerDemoScreen extends MainScreen {
      */
     public boolean keyChar(final char c, final int status, final int time) {
         switch (c) {
-        case Characters.ENTER:
-            return selectAction();
-
-        case Characters.DELETE:
-
-        case Characters.BACKSPACE:
-            deleteAction();
-            return true;
-
         case Characters.ESCAPE:
             if (goBack()) {
                 return true;
@@ -147,26 +220,88 @@ public final class FileExplorerDemoScreen extends MainScreen {
      * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
      */
     public void makeMenu(final Menu menu, final int instance) {
-        // Only display the menu if no actions are performed
-        if (instance == Menu.INSTANCE_DEFAULT) {
-            menu.add(_selectItem);
+        /*
+         * Menu item for invoking the camera application. This provides a
+         * convenient method of adding a file to the device file system in order
+         * to demonstrate the FileSystemJournalListener.
+         */
+        final MenuItem cameraItem =
+                new MenuItem(new StringProvider("Camera"), 0x230010, 0);
+        cameraItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                Invoke.invokeApplication(Invoke.APP_TYPE_CAMERA,
+                        new CameraArguments());
+            }
+        }));
 
+        // Menu item for deleting the selected file
+        final MenuItem deleteItem =
+                new MenuItem(new StringProvider("Delete"), 0x230020, 1);
+        deleteItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                deleteAction();
+            }
+        }));
+
+        // Menu item for displaying information on the selected file
+        final MenuItem selectItem =
+                new MenuItem(new StringProvider("Select"), 0x230030, 2);
+        selectItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                selectAction();
+            }
+        }));
+
+        // Menu item for going back one directory in the directory hierarchy
+        final MenuItem backItem =
+                new MenuItem(new StringProvider("Go Back"), 0x230040, 3);
+        backItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                goBack();
+            }
+        }));
+
+        // Only display the menu if no actions are performed
+        if (instance == Menu.INSTANCE_DEFAULT && _model.getNumberOfRows() > 0) {
             if (DeviceInfo.hasCamera()) {
-                menu.add(_cameraItem);
+                menu.add(cameraItem);
             }
 
             // Add delete item if selected item is not a directory and is not a
             // file in read only system partition.
-            final FileExplorerDemoFileHolder fileholder =
-                    (FileExplorerDemoFileHolder) _list.get(_list, _list
-                            .getSelectedIndex());
-            if (!fileholder.isDirectory()
-                    && !fileholder.getPath().startsWith("system/")) {
-                menu.add(_deleteItem);
-            }
+            if (_view.getRowNumberWithFocus() < _model.getNumberOfRows()) {
+                final FileExplorerDemoFileHolder fileholder =
+                        (FileExplorerDemoFileHolder) _model.getRow(_view
+                                .getRowNumberWithFocus());
+                if (!fileholder.isDirectory()
+                        && !fileholder.getPath().startsWith("system/")) {
+                    menu.add(deleteItem);
+                    menu.add(selectItem);
+                }
 
-            if (_parentRoot != null) {
-                menu.add(_backItem);
+                if (_parentRoot != null) {
+                    menu.add(backItem);
+                }
             }
         }
 
@@ -196,8 +331,10 @@ public final class FileExplorerDemoScreen extends MainScreen {
     private void readRoots(final String root) {
         _parentRoot = root;
 
-        // Clear whats in the list.
-        _list.removeAll();
+        // Clear list contents
+        while (_model.getNumberOfRows() > 0) {
+            _model.removeRowAt(0);
+        }
 
         FileConnection fc = null;
         Enumeration rootEnum = null;
@@ -219,6 +356,8 @@ public final class FileExplorerDemoScreen extends MainScreen {
                         fc.close();
                         fc = null;
                     } catch (final Exception ioex) {
+                        FileExplorerDemo.errorDialog("readRoots() threw "
+                                + ioex.toString());
                     }
                 }
             }
@@ -260,7 +399,7 @@ public final class FileExplorerDemoScreen extends MainScreen {
             final FileExplorerDemoFileHolder fileholder =
                     new FileExplorerDemoFileHolder(file);
             fileholder.setDirectory(fc.isDirectory());
-            _list.add(fileholder);
+            _model.addRow(fileholder);
         } catch (final Exception ioex) {
             FileExplorerDemo.errorDialog("Connector.open() threw "
                     + ioex.toString());
@@ -271,6 +410,8 @@ public final class FileExplorerDemoScreen extends MainScreen {
                     fc.close();
                     fc = null;
                 } catch (final Exception ioex) {
+                    FileExplorerDemo.errorDialog("readSubRoots() threw "
+                            + ioex.toString());
                 }
             }
         }
@@ -282,9 +423,13 @@ public final class FileExplorerDemoScreen extends MainScreen {
      * @return True.
      */
     private boolean selectAction() {
+        if (_model.getNumberOfRows() <= 0) {
+            return false;
+        }
+
         final FileExplorerDemoFileHolder fileholder =
-                (FileExplorerDemoFileHolder) _list.get(_list, _list
-                        .getSelectedIndex());
+                (FileExplorerDemoFileHolder) _model.getRow(_view
+                        .getRowNumberWithFocus());
 
         if (fileholder != null) {
             // If it's a directory then show what's in the directory
@@ -303,7 +448,7 @@ public final class FileExplorerDemoScreen extends MainScreen {
     /**
      * Updates the list of files
      */
-    /* package */void updateList() {
+    public void updateList() {
         synchronized (_uiApp.getAppEventLock()) {
             readRoots(_parentRoot);
         }
@@ -334,48 +479,4 @@ public final class FileExplorerDemoScreen extends MainScreen {
 
         return false;
     }
-
-    // ///////////////////////////////////////////////////////////
-    // Menu Items //
-    // ///////////////////////////////////////////////////////////
-
-    /**
-     * Menu item for invoking the camera application. This provides a convenient
-     * method of adding a file to the device file system in order to demonstrate
-     * the FileSystemJournalListener.
-     */
-    private final MenuItem _cameraItem = new MenuItem("Camera", 500, 500) {
-        public void run() {
-            Invoke.invokeApplication(Invoke.APP_TYPE_CAMERA,
-                    new CameraArguments());
-        }
-    };
-
-    /**
-     * Menu item for deleting the selected file
-     */
-    private final MenuItem _deleteItem = new MenuItem("Delete", 500, 500) {
-        public void run() {
-
-            deleteAction();
-        }
-    };
-
-    /**
-     * Menu item for displaying information on the selected file
-     */
-    private final MenuItem _selectItem = new MenuItem("Select", 500, 500) {
-        public void run() {
-            selectAction();
-        }
-    };
-
-    /**
-     * Menu item for going back one directory in the directory hierarchy
-     */
-    private final MenuItem _backItem = new MenuItem("Go Back", 500, 500) {
-        public void run() {
-            goBack();
-        }
-    };
 }

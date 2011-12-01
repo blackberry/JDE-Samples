@@ -26,7 +26,8 @@ library DESKTOPLib
 {
 	importlib("stdole32.tlb");
 	importlib("stdole2.tlb");
-	importlib("..\..\..\BlackBerry\desktopapi.tlb");
+	//Ensure this path is correct for your installation
+	importlib("C:\Program Files\Research In Motion\BlackBerry\desktopapi.tlb");
 
 	[
 		uuid(7C23B673-FB1D-45D8-83BE-390398BA9876),

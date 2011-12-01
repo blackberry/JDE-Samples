@@ -27,6 +27,7 @@
 package com.rim.samples.device.tiltdemo;
 
 import net.rim.device.api.system.Display;
+import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
 
@@ -45,40 +46,38 @@ public final class CustomSpanField extends Field {
      * @see net.rim.device.api.ui.Field#paint(Graphics)
      */
     protected void paint(final Graphics graphics) {
-        // Each rectangle will take the entire height of the field, and
+        // Each rectangle will take the entire height of the field and
         // one quarter of the width.
         final int rectHeight = getPreferredHeight();
         final int rectWidth = getPreferredWidth() / 4;
 
-        // Paint each of the four rectangles.
+        // Paint each of the four rectangles
         graphics.drawRect(0, 0, rectWidth, rectHeight);
-        graphics.setColor(0xCC0000);
+        graphics.setColor(Color.RED);
         graphics.fillRect(0, 0, rectWidth, rectHeight);
 
         graphics.drawRect(rectWidth, 0, rectWidth, rectHeight);
-        graphics.setColor(0x00FF00);
+        graphics.setColor(Color.LIME);
         graphics.fillRect(rectWidth, 0, rectWidth, rectHeight);
 
         graphics.drawRect(rectWidth * 2, 0, rectWidth, rectHeight);
-        graphics.setColor(0x0000FF);
+        graphics.setColor(Color.BLUE);
         graphics.fillRect(rectWidth * 2, 0, rectWidth, rectHeight);
 
         graphics.drawRect(rectWidth * 3, 0, rectWidth, rectHeight);
-        graphics.setColor(0x000000);
+        graphics.setColor(Color.BLACK);
         graphics.fillRect(rectWidth * 3, 0, rectWidth, rectHeight);
 
     }
 
     /**
-     * Field implementation.
-     * 
      * @see net.rim.device.api.ui.Field#layout(int, int)
      */
-    protected void layout(int height, int width) {
-        // Calculate width.
+    protected void layout(int width, int height) {
+        // Calculate width
         width = Math.min(width, getPreferredWidth());
 
-        // Calculate height.
+        // Calculate height
         height = Math.min(height, getPreferredHeight());
 
         setExtent(width, height);

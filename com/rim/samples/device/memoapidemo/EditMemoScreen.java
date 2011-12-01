@@ -29,19 +29,22 @@ package com.rim.samples.device.memoapidemo;
 import java.io.IOException;
 
 import net.rim.blackberry.api.pdap.BlackBerryMemo;
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * Screen that allows a memo to be edited. Used for both new and existing memos.
  */
 public final class EditMemoScreen extends MainScreen {
     private final MemoController _controller;
-    private final SaveItem _saveMenuItem = new SaveItem();
 
     /**
      * Constructor. Adds an appropriate title, depending on whether we're
@@ -77,8 +80,29 @@ public final class EditMemoScreen extends MainScreen {
             add(fields[i]);
         }
 
+        // Represents a menu item for saving the screen's memo.
+        final MenuItem saveMenuItem =
+                new MenuItem(new StringProvider("Save Memo"), 0x230010, 100);
+        saveMenuItem.setCommand(new Command(new CommandHandler() {
+
+            /**
+             * Attempts to save the screen's data to its associated memo. If
+             * successful, the edit screen is popped from the display stack.
+             * 
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                if (EditMemoScreen.this.onSave()) {
+                    UiApplication.getUiApplication().popScreen(
+                            EditMemoScreen.this);
+                }
+            }
+        }));
+
         // Add the menu item.
-        addMenuItem(_saveMenuItem);
+        addMenuItem(saveMenuItem);
     }
 
     /**
@@ -115,30 +139,6 @@ public final class EditMemoScreen extends MainScreen {
 
         if (!_controller.commitMemo()) {
             throw new IOException();
-        }
-    }
-
-    // ///////////////// INNER CLASSES /////////////////////////////
-
-    /**
-     * Represents a menu item for saving the screen's memo.
-     */
-    private final class SaveItem extends MenuItem {
-        /**
-         * Constructor.
-         */
-        private SaveItem() {
-            super("Save Memo", 100, 100);
-        }
-
-        /**
-         * Attempts to save the screen's data to its associated memo. If
-         * successful, the edit screen is popped from the display stack.
-         */
-        public void run() {
-            if (EditMemoScreen.this.onSave()) {
-                UiApplication.getUiApplication().popScreen(EditMemoScreen.this);
-            }
         }
     }
 }

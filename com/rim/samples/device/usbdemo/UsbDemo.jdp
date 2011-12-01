@@ -1,5 +1,9 @@
 ## RIM Java Development Environment
 # RIM Project file
+#
+# This file is generated and managed by BlackBerry developer tools.
+# It SHOULD NOT BE modified manually.
+#
 AddOn=0
 AlwaysBuild=0
 [AlxImports
@@ -20,9 +24,10 @@ AutoRestart=0
 [DependsOn
 ]
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 img\usbdemo_jde.png
-UsbDemo.java
+USBDemo.java
 ]
 HaveAlxImports=0
 HaveDefs=0
@@ -41,7 +46,10 @@ OutputFileName=UsbDemo
 [PackageProtection
 ]
 RibbonPosition=0
+[RolloverIcons
+]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=Usb Demo

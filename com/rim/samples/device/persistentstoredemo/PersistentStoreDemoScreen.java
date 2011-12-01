@@ -28,25 +28,42 @@ package com.rim.samples.device.persistentstoredemo;
 
 import java.util.Vector;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Characters;
+import net.rim.device.api.system.Display;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
+import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
+import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.XYRect;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
-import net.rim.device.api.ui.component.ListField;
 import net.rim.device.api.ui.component.Menu;
+import net.rim.device.api.ui.component.table.AbstractTableModel;
+import net.rim.device.api.ui.component.table.DataTemplate;
+import net.rim.device.api.ui.component.table.TableController;
+import net.rim.device.api.ui.component.table.TableModelAdapter;
+import net.rim.device.api.ui.component.table.TableView;
+import net.rim.device.api.ui.component.table.TemplateColumnProperties;
+import net.rim.device.api.ui.component.table.TemplateRowProperties;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.decor.BackgroundFactory;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * This screen displays a list of Meetings
  */
 public final class PersistentStoreDemoScreen extends MainScreen {
-    private final ListField _meetingList;
-    private final PersistentStoreDemo _uiApp;
+    private PersistentStoreDemo _uiApp;
+    private Vector _meetings;
+    private AbstractTableModel _model;
+    private TableView _view;
 
     /**
      * Creates a new PersistentStoreDemoScreen object
@@ -55,26 +72,156 @@ public final class PersistentStoreDemoScreen extends MainScreen {
      *            A vector of persistable Meeting objects
      */
     public PersistentStoreDemoScreen(final Vector meetings) {
+        super(Manager.NO_VERTICAL_SCROLL);
+
         _uiApp = (PersistentStoreDemo) UiApplication.getUiApplication();
+        _meetings = meetings;
 
         // Initialize UI components
         setTitle(new LabelField("Persistent Store Demo", DrawStyle.ELLIPSIS
                 | Field.USE_ALL_WIDTH));
-        _meetingList = new ListField();
-        add(_meetingList);
 
-        // Set list field callback and update meeting list
-        _meetingList.setCallback(_uiApp);
-        updateList();
+        // Create an adapter to display meetings list in a table
+        _model = new MeetingTableModelAdapter();
+
+        // Create the view and controller
+        _view = new TableView(_model);
+        final TableController controller = new TableController(_model, _view);
+        controller.setFocusPolicy(TableController.ROW_FOCUS);
+        _view.setController(controller);
+
+        _view.setDataTemplateFocus(BackgroundFactory
+                .createLinearGradientBackground(Color.LIGHTBLUE,
+                        Color.LIGHTBLUE, Color.BLUE, Color.BLUE));
+        final DataTemplate dataTemplate = new DataTemplate(_view, 1, 1) {
+            public Field[] getDataFields(final int modelRowIndex) {
+                final String text =
+                        ((Meeting) _model.getRow(modelRowIndex)).getField(0);
+                final Field[] fields =
+                        { new LabelField(text, Field.NON_FOCUSABLE) };
+
+                return fields;
+            }
+        };
+        dataTemplate.createRegion(new XYRect(0, 0, 1, 1));
+        dataTemplate.setColumnProperties(0, new TemplateColumnProperties(
+                Display.getWidth()));
+        dataTemplate.setRowProperties(0, new TemplateRowProperties(32));
+        _view.setDataTemplate(dataTemplate);
+        dataTemplate.useFixedHeight(true);
+
+        add(_view);
+
+        // Menu item to create a new meeting
+        final MenuItem newMeetingItem =
+                new MenuItem(new StringProvider("New Meeting"), 0x230010, 0);
+        newMeetingItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                final Meeting meeting = new Meeting();
+                _uiApp.pushScreen(new MeetingScreen(meeting, -1, true));
+            }
+        }));
+
+        viewItem = new MenuItem(new StringProvider("View"), 0x230020, 1);
+        viewItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                displayMeeting(false);
+            }
+        }));
+
+        editItem = new MenuItem(new StringProvider("Edit"), 0x230030, 2);
+        editItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                displayMeeting(true);
+            }
+        }));
+
+        deleteItem = new MenuItem(new StringProvider("Delete"), 0x230040, 3);
+        deleteItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                // Retrieve the highlighted Meeting object and remove it from
+                // the
+                // vector, then update the list field to reflect the change.
+                final int i = _view.getRowNumberWithFocus();
+                final String meetingName =
+                        ((Meeting) _uiApp.getMeetings().elementAt(i))
+                                .getField(Meeting.MEETING_NAME);
+                final int result =
+                        Dialog.ask(Dialog.DELETE, "Delete " + meetingName + "?");
+                if (result == Dialog.YES) {
+                    _model.removeRowAt(i);
+                }
+            }
+        }));
+
+        // Menu item to gain access to the controlled object
+        final MenuItem retrieveItem =
+                new MenuItem(new StringProvider("Access controlled object"),
+                        0x230050, 0);
+        retrieveItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                // Attempt to gain access to the controlled object. If
+                // the module has been signed with the ACME private key,
+                // the attempt will succeed.
+                final PersistentObject controlledStore =
+                        PersistentStore
+                                .getPersistentObject(PersistentStoreDemo.PERSISTENT_STORE_DEMO_CONTROLLED_ID);
+                if (controlledStore != null) {
+                    try {
+                        final Vector vector =
+                                (Vector) controlledStore.getContents();
+                        if (vector != null) {
+                            Dialog.alert("Successfully accessed controlled object");
+                        }
+                    } catch (final SecurityException se) {
+                        UiApplication.getUiApplication().invokeLater(
+                                new Runnable() {
+                                    public void run() {
+                                        Dialog.alert("PersistentObject#getContents() threw "
+                                                + se.toString());
+                                    }
+                                });
+                    }
+                }
+            }
+        }));
+
         addMenuItem(newMeetingItem);
         addMenuItem(retrieveItem);
     }
 
     /**
-     * Method to refresh our meetings list field
+     * Returns a reference to the table model
+     * 
+     * @return The table model
      */
-    void updateList() {
-        _meetingList.setSize(_uiApp.getMeetings().size());
+    public AbstractTableModel getModel() {
+        return _model;
     }
 
     /**
@@ -85,11 +232,10 @@ public final class PersistentStoreDemoScreen extends MainScreen {
      *            meeting should be read only
      */
     void displayMeeting(final boolean editable) {
-        if (!_meetingList.isEmpty()) {
-            final int index = _meetingList.getSelectedIndex();
-            final Vector meetings = _uiApp.getMeetings();
-            _uiApp.pushScreen(new MeetingScreen((Meeting) meetings
-                    .elementAt(index), index, editable));
+        if (_model.getNumberOfRows() != 0) {
+            final int index = _view.getRowNumberWithFocus();
+            _uiApp.pushScreen(new MeetingScreen((Meeting) _model.getRow(index),
+                    index, editable));
         }
     }
 
@@ -97,7 +243,7 @@ public final class PersistentStoreDemoScreen extends MainScreen {
      * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
      */
     protected void makeMenu(final Menu menu, final int instance) {
-        if (_meetingList.getSize() > 0) {
+        if (_model.getNumberOfRows() > 0) {
             menu.add(viewItem);
             menu.add(editItem);
             menu.add(deleteItem);
@@ -116,7 +262,7 @@ public final class PersistentStoreDemoScreen extends MainScreen {
             return true;
         }
 
-        // Intercept the ESC key - exit the app on its receipt.
+        // Intercept the ESC key - exit the app on its receipt
         if (key == Characters.ESCAPE) {
             _uiApp.persist();
             close();
@@ -132,89 +278,80 @@ public final class PersistentStoreDemoScreen extends MainScreen {
         switch (action) {
         case ACTION_INVOKE: // Trackball click
             displayMeeting(false);
-            return true; // We've consumed the event
+            return true;
         }
         return super.invokeAction(action);
     }
 
     // Inner classes------------------------------------------------------------
 
-    private final MenuItem newMeetingItem =
-            new MenuItem("New Meeting", 100, 1) {
-                /**
-                 * Creates a new Meeting object and passes it to a new instance
-                 * of a MeetingScreen.
-                 */
-                public void run() {
-                    final Meeting meeting = new Meeting();
-                    _uiApp.pushScreen(new MeetingScreen(meeting, -1, true));
-                }
-            };
-
-    private final MenuItem viewItem = new MenuItem("View", 65636, 1) {
+    /**
+     * Adapter to display meeting data in table format
+     */
+    private class MeetingTableModelAdapter extends TableModelAdapter {
         /**
-         * Displays the selected meeting for viewing
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfRows()
          */
-        public void run() {
-            displayMeeting(false);
+        public int getNumberOfRows() {
+            return _meetings.size();
         }
-    };
 
-    private final MenuItem editItem = new MenuItem("Edit", 65636, 2) {
         /**
-         * Displays the selected meeting for editing
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfColumns()
          */
-        public void run() {
-            displayMeeting(true);
+        public int getNumberOfColumns() {
+            return 1;
         }
-    };
 
-    private final MenuItem deleteItem = new MenuItem("Delete", 65636, 3) {
         /**
-         * Retrieves the highlighted Meeting object and removes it from the
-         * vector, then updates the list field to reflect the change.
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doGetRow(int)
          */
-        public void run() {
-            final int i = _meetingList.getSelectedIndex();
-            final String meetingName =
-                    ((Meeting) _uiApp.getMeetings().elementAt(i))
-                            .getField(Meeting.MEETING_NAME);
-            final int result =
-                    Dialog.ask(Dialog.DELETE, "Delete " + meetingName + "?");
-            if (result == Dialog.YES) {
-                _uiApp.getMeetings().removeElementAt(i);
-                updateList();
+        protected Object doGetRow(final int index) {
+            return _meetings.elementAt(index);
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doInsertRowAt(int,
+         *      Object)
+         */
+        protected boolean doInsertRowAt(final int index, final Object object) {
+            if (_meetings.size() == 0) {
+                _meetings.addElement(object);
+            } else {
+                _meetings.setElementAt(object, index);
             }
+            return true;
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doAddRow(Object)
+         */
+        protected boolean doAddRow(final Object object) {
+            _meetings.addElement(object);
+            return true;
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doRemoveRowAt(int)
+         */
+        protected boolean doRemoveRowAt(final int index) {
+            _meetings.removeElementAt(index);
+            return true;
         }
     };
 
-    private final MenuItem retrieveItem = new MenuItem(
-            "Access controlled object", 131172, 1) {
-        /**
-         * Attempt to gain access to the controlled object. If the module has
-         * been signed with the ACME private key, the attempt will succeed.
-         */
-        public void run() {
-            final PersistentObject controlledStore =
-                    PersistentStore
-                            .getPersistentObject(PersistentStoreDemo.PERSISTENT_STORE_DEMO_CONTROLLED_ID);
-            if (controlledStore != null) {
-                try {
-                    final Vector vector =
-                            (Vector) controlledStore.getContents();
-                    if (vector != null) {
-                        Dialog.alert("Successfully accessed controlled object");
-                    }
-                } catch (final SecurityException se) {
-                    UiApplication.getUiApplication().invokeLater(
-                            new Runnable() {
-                                public void run() {
-                                    Dialog.alert("PersistentObject#getContents() threw "
-                                            + se.toString());
-                                }
-                            });
-                }
-            }
-        }
-    };
+    /**
+     * Menu item to view selected meeting
+     */
+    private MenuItem viewItem;
+
+    /**
+     * Menu item to edit selected meeting
+     */
+    private MenuItem editItem;
+
+    /**
+     * Menu item to delete selected meeting
+     */
+    private MenuItem deleteItem;
 }

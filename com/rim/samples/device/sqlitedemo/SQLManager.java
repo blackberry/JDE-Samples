@@ -46,7 +46,7 @@ public class SQLManager {
      * Constructs a new SQLManager object
      * 
      * @param db
-     *            <description>
+     *            Database to manage
      */
     public SQLManager(final Database db) {
         _db = db;

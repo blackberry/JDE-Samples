@@ -27,18 +27,20 @@
 package com.rim.samples.device.memoapidemo;
 
 import net.rim.blackberry.api.pdap.BlackBerryMemo;
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * Screen for viewing a memo.
  */
 public final class ViewMemoScreen extends MainScreen {
     private final MemoController _controller;
-
-    private final MenuItem _editItem = new EditItem();
 
     /**
      * Constructor. Displays the provided memo's information on the screen.
@@ -64,44 +66,30 @@ public final class ViewMemoScreen extends MainScreen {
             add(fields[i]);
         }
 
+        // Menu item to edit this screen's memo.
+        final MenuItem editItem =
+                new MenuItem(new StringProvider("Edit Memo"), 100, 100);
+        editItem.setCommand(new Command(new CommandHandler() {
+
+            /**
+             * Pushes an edit screen to the display stack, passing it the memo
+             * to edit. Upon returning from the edit screen, the view screen is
+             * popped as well. The user is returned to the main screen.
+             * 
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                final UiApplication app = UiApplication.getUiApplication();
+                app.pushModalScreen(new EditMemoScreen(_controller.getMemo(),
+                        false)); // Blocks until edit screen is popped.
+                app.popScreen(ViewMemoScreen.this); // Now that edit screen is
+                                                    // popped, pop this view
+                                                    // screen as well.
+            }
+        }));
         // Add the menu item to the screen.
-        addMenuItem(_editItem);
-    }
-
-    // /////////////////////////////////////
-    // INNER CLASSES
-    // /////////////////////////////////////
-
-    /**
-     * Menu item to edit this screen's memo.
-     */
-    private final class EditItem extends MenuItem {
-        /**
-         * Constructor.
-         * 
-         * @param memo
-         *            The memo to edit.
-         */
-        private EditItem() {
-            super("Edit Memo", 100, 100);
-        }
-
-        /**
-         * Pushes an edit screen to the display stack, passing it the memo to
-         * edit. Upon returning from the edit screen, the view screen is popped
-         * as well. The user is returned to the main screen.
-         */
-        public void run() {
-            final UiApplication app = UiApplication.getUiApplication();
-            app.pushModalScreen(new EditMemoScreen(_controller.getMemo(), false)); // Blocks
-                                                                                   // until
-                                                                                   // edit
-                                                                                   // screen
-                                                                                   // is
-                                                                                   // popped.
-            app.popScreen(ViewMemoScreen.this); // Now that edit screen is
-                                                // popped, pop this view screen
-                                                // as well.
-        }
+        addMenuItem(editItem);
     }
 }

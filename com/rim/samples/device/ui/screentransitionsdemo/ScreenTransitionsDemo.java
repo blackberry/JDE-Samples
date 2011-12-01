@@ -97,7 +97,7 @@ public final class ScreenTransitionsDemo extends UiApplication {
             setTitle("Screen Transitions Demo");
 
             add(new LabelField(
-                    "Click trackball or screen to start and stop animation",
+                    "Click trackpad or screen to start and stop animation",
                     Field.NON_FOCUSABLE));
         }
 
@@ -105,12 +105,11 @@ public final class ScreenTransitionsDemo extends UiApplication {
          * @see Screen#invokeAction(int)
          */
         protected boolean invokeAction(final int action) {
-            switch (action) {
-            case ACTION_INVOKE: {
+            if (action == ACTION_INVOKE) {
                 startOrStopThread();
                 return true;
             }
-            }
+
             return super.invokeAction(action);
         }
 
@@ -122,6 +121,7 @@ public final class ScreenTransitionsDemo extends UiApplication {
                 invokeAction(ACTION_INVOKE);
                 return true;
             }
+
             return super.touchEvent(event);
         }
     }

@@ -33,11 +33,11 @@ import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.container.MainScreen;
 
 /**
- * This class displays DemoMessages.
+ * A MainScreen subclass for displaying messages
  */
 public final class DemoMessageScreen extends MainScreen {
     /**
-     * Constucts a screen to view DemoMessages.
+     * Constructs a screen to view a message
      * 
      * @param demoMessage
      *            The message to display

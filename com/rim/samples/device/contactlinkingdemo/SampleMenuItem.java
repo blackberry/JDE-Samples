@@ -29,6 +29,7 @@ package com.rim.samples.device.contactlinkingdemo;
 import net.rim.blackberry.api.menuitem.ApplicationMenuItem;
 import net.rim.blackberry.api.pdap.BlackBerryContact;
 import net.rim.blackberry.api.pdap.contactlinking.LinkedContactUtilities;
+import net.rim.device.api.ui.image.Image;
 
 /**
  * An ApplicationMenuItem that will be displayed in the Address Book application
@@ -41,9 +42,11 @@ public class SampleMenuItem extends ApplicationMenuItem {
      * 
      * @param applicationID
      *            The id of the application this ApplicationMenuItem is for
+     * @param icon
+     *            Icon for the menu item
      */
-    public SampleMenuItem(final long applicationID) {
-        super(0);
+    public SampleMenuItem(final long applicationID, final Image icon) {
+        super(0x230010, icon);
         _applicationID = applicationID;
     }
 

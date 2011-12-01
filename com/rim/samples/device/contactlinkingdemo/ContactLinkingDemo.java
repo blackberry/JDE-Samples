@@ -27,13 +27,15 @@
 package com.rim.samples.device.contactlinkingdemo;
 
 import net.rim.blackberry.api.menuitem.ApplicationMenuItem;
-import net.rim.blackberry.api.pdap.contactlinking.AddressBookFieldFactory;
 import net.rim.blackberry.api.pdap.contactlinking.LinkedContactConstants;
 import net.rim.blackberry.api.pdap.contactlinking.LinkedContactUtilities;
 import net.rim.device.api.system.Application;
 import net.rim.device.api.system.ApplicationDescriptor;
+import net.rim.device.api.system.EncodedImage;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
+import net.rim.device.api.ui.image.Image;
+import net.rim.device.api.ui.image.ImageFactory;
 
 /**
  * A sample application demonstrating the ability to link application specific
@@ -60,6 +62,18 @@ public final class ContactLinkingDemo extends UiApplication {
     public static void main(final String[] args) {
         if (args != null && args.length > 0) {
             if (args[0].equals("autostartup")) {
+                // Create images
+                final EncodedImage encodedImageBlue =
+                        EncodedImage
+                                .getEncodedImageResource("img/logo_blue.jpg");
+                final EncodedImage encodedImageBlack =
+                        EncodedImage
+                                .getEncodedImageResource("img/logo_black.jpg");
+                final Image imageBlue =
+                        ImageFactory.createImage(encodedImageBlue);
+                final Image imageBlack =
+                        ImageFactory.createImage(encodedImageBlack);
+
                 // Create an application descriptor for this application
                 final ApplicationDescriptor applicationDescriptor =
                         new ApplicationDescriptor(ApplicationDescriptor
@@ -67,8 +81,8 @@ public final class ContactLinkingDemo extends UiApplication {
                                 "Contact Linking Demo 1",
                                 new String[] { "menu-invoked" });
                 final ApplicationMenuItem[] items1 = new ApplicationMenuItem[2];
-                items1[0] = new SampleMenuItem(APPLICATION_ID);
-                items1[1] = new SampleMenuItem(APPLICATION_ID) {
+                items1[0] = new SampleMenuItem(APPLICATION_ID, imageBlue);
+                items1[1] = new SampleMenuItem(APPLICATION_ID, imageBlue) {
                     public String toString() {
                         return "Test item 2";
                     }
@@ -86,26 +100,26 @@ public final class ContactLinkingDemo extends UiApplication {
                                 new String[] { "menu-invoked" });
 
                 final ApplicationMenuItem[] items2 = new ApplicationMenuItem[1];
-                items2[0] = new SampleMenuItem(SECONDARY_APPLICATION_ID) {
-                    public String toString() {
-                        return "App 2 item";
-                    }
-                };
+                items2[0] =
+                        new SampleMenuItem(SECONDARY_APPLICATION_ID, imageBlack) {
+                            public String toString() {
+                                return "App 2 item";
+                            }
+                        };
 
                 LinkedContactUtilities.registerMenuItems(items2,
                         SECONDARY_APPLICATION_ID,
                         LinkedContactConstants.COMPOSE_SN_MENU_GROUP, appDesc2);
 
-                final AddressBookFieldFactory factory1 =
-                        new SampleAddressBookFieldFactory("Demo App 1");
-                final AddressBookFieldFactory factory2 =
-                        new SampleAddressBookFieldFactory("Demo App 2");
-
-                LinkedContactUtilities.registerAddressBookFieldFactory(
-                        factory1, APPLICATION_ID);
-                LinkedContactUtilities.registerAddressBookFieldFactory(
-                        factory2, SECONDARY_APPLICATION_ID);
-
+                // Register info providers
+                LinkedContactUtilities.registerLinkedContactInfoProvider(
+                        new SampleLinkedContactInfoProvider(imageBlue,
+                                "Demo App 1"), APPLICATION_ID,
+                        LinkedContactConstants.COMPOSE_SN_MENU_GROUP);
+                LinkedContactUtilities.registerLinkedContactInfoProvider(
+                        new SampleLinkedContactInfoProvider(imageBlack,
+                                "Demo App 2"), SECONDARY_APPLICATION_ID,
+                        LinkedContactConstants.COMPOSE_SN_MENU_GROUP);
             } else if (args[0].equals("menu-invoked")) {
                 // Create a new instance of the application and make the
                 // currently

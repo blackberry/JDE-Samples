@@ -29,19 +29,21 @@ package com.rim.samples.device.blackberrymaildemo;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
 
-/*
- * This sample demonstrates how to access email on a BlackBerry.  It shows the following:
+/**
+ * This sample demonstrates how to access email on a BlackBerry. It shows the
+ * following:
  * 
- * - Accessing all email service records (email accounts) available on a BlackBerry.
- * - Accessing all email folders and messages for an email account.
- * - Displaying the content of an email message.  Both plain text and HTML content 
- *   is displayed (if available within the message).
- * - Saving and sending email messages.
- *     
- * The sample can be tested using the BlackBerry email server simulator or 
- * synching the BlackBerry Desktop Manager to the BlackBerry Smartphone simulator
- * device. See the "BlackBerry Java Development Environment Development Guide"
- * for more information on the BlackBerry email server simulator.
+ * - Accessing all email service records (email accounts) available on a
+ * BlackBerry. - Accessing all email folders and messages for an email account.
+ * - Displaying the content of an email message. Both plain text and HTML
+ * content is displayed (if available within the message). - Saving and sending
+ * email messages.
+ * 
+ * The sample can be tested using the BlackBerry email server simulator or
+ * synching the BlackBerry Desktop Manager to the BlackBerry Smartphone
+ * simulator device. See the
+ * "BlackBerry Java Development Environment Development Guide" for more
+ * information on the BlackBerry email server simulator.
  */
 public final class BlackBerryMailDemo extends UiApplication {
     /**

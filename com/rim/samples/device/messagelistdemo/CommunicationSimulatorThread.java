@@ -34,20 +34,21 @@ import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
 
 /**
- * This class simulates communication with a server and generates message
- * actions. It can create new messages or update and delete existing ones.
+ * This Thread subclass simulates communication with a server and generates
+ * message actions. It can create new messages or update and delete existing
+ * ones.
  */
 public final class CommunicationSimulatorThread extends Thread {
 
     private boolean _keepRunning;
     private static Random _random = new Random();
 
-    private static String[] NAMES =
+    private static final String[] NAMES =
             { "Scott Wyatt", "Tanya Wahl", "Kate Strike", "Mark McMullen",
                     "Beth Horton", "John Graham", "Ho Sung Chan",
                     "Long Feng Wu", "Kevil Wilhelm", "Trevor Van Daele" };
 
-    private static String[] PICTURES = { "BlueDress.png", "BlueSuit.png",
+    private static final String[] PICTURES = { "BlueDress.png", "BlueSuit.png",
             "BlueSweatshirt.png", "BrownShirt.png", "Construction.png",
             "DarkJacket.png", "DarkSuit.png", "FemaleDoctor.png",
             "GreenJacket.png", "GreenShirt.png", "GreenTop.png",
@@ -55,17 +56,18 @@ public final class CommunicationSimulatorThread extends Thread {
             "OrangeShirt.png", "PatternShirt.png", "PurpleTop.png",
             "RedCap.png", "RedJacket.png", "RedShirt.png" };
 
-    // Constructor
+    /**
+     * Creates a new CommunicationSimulatorThread object
+     */
     public CommunicationSimulatorThread() {
         _keepRunning = true;
     }
 
     /**
-     * Performs random actions to the message store every three seconds.
-     * 
      * @see java.lang.Runnable#run()
      */
     public void run() {
+        // Perform random actions to the message store every three seconds
         final MessageListDemoStore messageStore =
                 MessageListDemoStore.getInstance();
         while (_keepRunning) {
@@ -101,7 +103,8 @@ public final class CommunicationSimulatorThread extends Thread {
 
         switch (_random.nextInt(3)) {
         case 0:
-            // Update an existing message.
+
+            // Update an existing message
             if (inboxMessages.size() > 0) {
                 final DemoMessage msg =
                         (DemoMessage) inboxMessages.getAt(_random
@@ -120,7 +123,8 @@ public final class CommunicationSimulatorThread extends Thread {
             break;
 
         case 1:
-            // Delete an inbox message.
+
+            // Delete an inbox message
             if (inboxMessages.size() > 0) {
                 final DemoMessage msg =
                         (DemoMessage) inboxMessages.getAt(_random
@@ -134,7 +138,8 @@ public final class CommunicationSimulatorThread extends Thread {
             break;
 
         default:
-            // Delete message completely.
+
+            // Delete message completely
             if (deletedMessages.size() > 0) {
                 final DemoMessage msg =
                         (DemoMessage) deletedMessages.getAt(_random
@@ -149,7 +154,7 @@ public final class CommunicationSimulatorThread extends Thread {
     }
 
     /**
-     * Adds a pre-defined message to the specified message store.
+     * Adds a predefined message to the specified message store
      * 
      * @param messageStore
      *            The message store to add the message to
@@ -164,10 +169,10 @@ public final class CommunicationSimulatorThread extends Thread {
         message.setReceivedTime(System.currentTimeMillis() - 1000 * 60
                 * _random.nextInt(60 * 24));
 
-        // assign random preview picture
+        // Assign random preview picture
         message.setPreviewPicture(getRandomPhotoImage());
 
-        // Store message.
+        // Store message
         messageStore.addInboxMessage(message);
 
         // Notify folder
@@ -175,7 +180,7 @@ public final class CommunicationSimulatorThread extends Thread {
     }
 
     /**
-     * Gets a random pre-defined image.
+     * Retrieves a random predefined image
      * 
      * @return The hard coded photo image
      */
@@ -186,7 +191,7 @@ public final class CommunicationSimulatorThread extends Thread {
     }
 
     /**
-     * Stops the thread from continuing its processing.
+     * Stops the thread from continuing its processing
      */
     void stopRunning() {
         synchronized (this) {

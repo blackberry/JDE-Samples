@@ -26,7 +26,6 @@
 
 package com.rim.samples.device.videorecordingdemo;
 
-import net.rim.device.api.system.Application;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.Touchscreen;
 import net.rim.device.api.ui.Ui;
@@ -64,14 +63,14 @@ public class VideoRecordingDemo extends UiApplication {
             } else {
                 UiApplication.getUiApplication().invokeLater(new Runnable() {
                     public void run() {
-                        Dialog.alert("No file systems large enough detected!\n\nWithout a large enough file system this demo cannot record video to a file.");
+                        Dialog.alert("No sufficiently large file systems detected!\n\nWithout an appropriate file system this demo cannot record video to a file.");
                         pushScreen(new VideoRecordingScreen(
                                 encodings[ANY_ENCODING], null));
                     }
                 });
             }
         } else {
-            Application.getApplication().invokeLater(new Runnable() {
+            UiApplication.getUiApplication().invokeLater(new Runnable() {
                 public void run() {
                     Dialog.alert("This device is not capable of recording video");
                     System.exit(0);

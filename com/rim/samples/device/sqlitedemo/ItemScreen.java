@@ -26,12 +26,16 @@
 
 package com.rim.samples.device.sqlitedemo;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.component.BasicEditField;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.EditField;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * A MainScreen class used to display and edit directory item details
@@ -77,12 +81,20 @@ public final class ItemScreen extends MainScreen {
      * @see MainScreen#makeMenu(Menu, int)
      */
     protected void makeMenu(final Menu menu, final int instance) {
-        menu.add(new MenuItem("Save", 0x00010000, 0) {
-            public void run() {
+        final MenuItem save =
+                new MenuItem(new StringProvider("Save"), 0x230010, 0);
+        save.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
                 onSave();
                 close();
             }
-        });
+        }));
+        menu.add(save);
     }
 
     /**

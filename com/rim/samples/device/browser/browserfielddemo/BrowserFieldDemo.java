@@ -24,7 +24,7 @@
  * Environment Development Guide associated with this release.
  */
 
-package com.rim.samples.device.blackberry.browser;
+package com.rim.samples.device.browser;
 
 import java.io.IOException;
 
@@ -43,6 +43,7 @@ import net.rim.device.api.io.http.HttpHeaders;
 import net.rim.device.api.system.Application;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.Field;
+import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Status;
 import net.rim.device.api.ui.container.MainScreen;
@@ -54,7 +55,7 @@ import net.rim.device.api.ui.container.MainScreen;
 public final class BrowserFieldDemo extends UiApplication implements
         RenderingApplication {
 
-    private static String REFERER = "referer";
+    private static final String REFERER = "referer";
 
     private final RenderingSession _renderingSession;
     private HttpConnection _currentConnection;
@@ -74,9 +75,11 @@ public final class BrowserFieldDemo extends UiApplication implements
         app.enterEventDispatcher();
     }
 
-    // Constructor
+    /**
+     * Creates a new BrowserFieldDemo object
+     */
     public BrowserFieldDemo() {
-        _mainScreen = new MainScreen();
+        _mainScreen = new MainScreen(Manager.HORIZONTAL_SCROLL);
         pushScreen(_mainScreen);
         _renderingSession = RenderingSession.getNewInstance();
 

@@ -176,7 +176,14 @@ public final class TableComponent extends HorizontalFieldManager implements
         private final boolean _selected; // True if the label is selected -
                                          // applicable for table cells only
 
-        // Constructor
+        /**
+         * Creates a new AccessibleLabel object
+         * 
+         * @param label
+         *            Text to display on the label
+         * @param selected
+         *            True if the label is selected, otherwise false
+         */
         private AccessibleLabel(final String label, final boolean selected) {
             _label = label;
             _selected = selected;

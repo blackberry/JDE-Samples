@@ -136,7 +136,9 @@ public final class BufferedPlayback extends UiApplication {
         /** A thread which creates and starts the Player */
         private PlayerThread _playerThread;
 
-        // Constructor
+        /**
+         * Creates a new BufferedPlaybackScreen object
+         */
         private BufferedPlaybackScreen() {
             // Set the title of the window
             setTitle("Buffered Playback Demo");

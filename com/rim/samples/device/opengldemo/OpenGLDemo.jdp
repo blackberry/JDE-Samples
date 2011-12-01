@@ -25,7 +25,7 @@ Exported=0
 Cube.java
 CubeRenderer.java
 img\BlackBerry.png
-img\icon_jde.png
+img\opengldemo_jde.png
 OpenGLDemo.java
 OpenGLScreen.java
 Renderer.java
@@ -34,7 +34,7 @@ HaveAlxImports=0
 HaveDefs=0
 HaveImports=0
 [Icons
-img\icon_jde.png
+img\opengldemo_jde.png
 ]
 [ImplicitRules
 ]
@@ -49,6 +49,7 @@ RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=OpenGL Demo

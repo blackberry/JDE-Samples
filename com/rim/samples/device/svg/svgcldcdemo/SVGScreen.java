@@ -51,9 +51,11 @@ import org.w3c.dom.svg.SVGSVGElement;
  */
 
 public final class SVGScreen extends MainScreen {
-    private static String SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg";
-    private static String XLINK_NAMESPACE_URI = "http://www.w3.org/1999/xlink";
-    private static String IMAGE_URL = "img/blackberry.png";
+    private static final String SVG_NAMESPACE_URI =
+            "http://www.w3.org/2000/svg";
+    private static final String XLINK_NAMESPACE_URI =
+            "http://www.w3.org/1999/xlink";
+    private static final String IMAGE_URL = "img/blackberry.png";
 
     protected SVGImage _image; // This is our SVGImage which will be built up
     protected ScalableGraphics _scalablegraphics; // This is our scalable
@@ -68,7 +70,9 @@ public final class SVGScreen extends MainScreen {
     private SVGElement _textElement;
     private SVGElement _imageElement;
 
-    // Constructor
+    /**
+     * Creates a new SVGScreen object
+     */
     public SVGScreen() {
         setTitle("SVG CLDC Demo");
 

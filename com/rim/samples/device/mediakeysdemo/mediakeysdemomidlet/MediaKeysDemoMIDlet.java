@@ -176,7 +176,7 @@ public final class MediaKeysDemoMIDlet extends MIDlet implements
             }
 
             // Allows user to toggle the 'media player mode' by clicking the
-            // trackball.
+            // trackball/trackpad.
             if (keyCode == MediaKeysMIDletConstants.TRACKBALL
                     && _mediaBehaviourControl != null) {
                 final boolean enabled =
@@ -284,7 +284,7 @@ public final class MediaKeysDemoMIDlet extends MIDlet implements
             // The instruction text
             final String instructionsTest =
                     "Try pressing a media key such as the mute key or the volume key. You can toggle the media player"
-                            + " mode by clicking the screen or the trackball. If media player mode is enabled, try pressing the media keys while the"
+                            + " mode by clicking the screen or the trackball/trackpad. If media player mode is enabled, try pressing the media keys while the"
                             + " application is in the background (Menu > Switch Application) and checking standard output with the debugger attached.";
             final char[] instructionsChars = instructionsTest.toCharArray();
 

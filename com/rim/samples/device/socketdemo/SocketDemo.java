@@ -51,7 +51,9 @@ public class SocketDemo extends UiApplication {
         app.enterEventDispatcher();
     }
 
-    // Constructor
+    /**
+     * Creates a new SocketDemo object
+     */
     public SocketDemo() {
         // Create a new screen for the application.
         _screen = new SocketDemoScreen();

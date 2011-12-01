@@ -91,7 +91,7 @@ public final class Util {
      * 
      * @param stateSet
      *            Flag containing bits representing supported orientation(s)
-     * @return <description>
+     * @return String to indicate supported orientation
      */
     public static String getOrientation(final int stateSet) {
         final boolean horizontal = (stateSet & AccessibleState.HORIZONTAL) != 0;

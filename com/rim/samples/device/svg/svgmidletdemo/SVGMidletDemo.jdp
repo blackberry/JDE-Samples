@@ -20,6 +20,7 @@ AutoRestart=0
 [DependsOn
 ]
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 img\svgmidletdemo_jde.png
 sample.svg
@@ -32,22 +33,20 @@ HaveImports=0
 img\svgmidletdemo_jde.png
 ]
 [ImplicitRules
-svg
-svg
-echo nothing
 ]
 [Imports
 ]
 Listing=0
 MidletClass=com.rim.samples.device.svg.svgmidletdemo.SVGMidletDemo
 Options=-quiet 
-OutputFileName=svgmidletdemo
+OutputFileName=SVGMidletDemo
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=SVG Midlet Demo

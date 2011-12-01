@@ -27,7 +27,7 @@
 package com.rim.samples.device.socketdemo;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 
 import javax.microedition.io.Connector;
@@ -39,11 +39,13 @@ import net.rim.device.api.ui.UiApplication;
  * A thread class to handle communication with the server component.
  */
 public class ConnectThread extends Thread {
-    private InputStreamReader _in;
+    private InputStream _in;
     private OutputStreamWriter _out;
     private final SocketDemoScreen _screen;
 
-    // Constructor
+    /**
+     * Creates a new ConnectThread object
+     */
     public ConnectThread() {
         _screen = ((SocketDemo) UiApplication.getUiApplication()).getScreen();
     }
@@ -90,7 +92,8 @@ public class ConnectThread extends Thread {
             connection = (StreamConnection) Connector.open(url);
             _screen.updateDisplay("Connection open");
 
-            _in = new InputStreamReader(connection.openInputStream());
+            _in = connection.openInputStream();
+
             _out = new OutputStreamWriter(connection.openOutputStream());
 
             // Send the HELLO string.

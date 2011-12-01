@@ -34,7 +34,9 @@ import net.rim.device.api.ui.UiApplication;
  * screen.
  */
 public final class SVGAnimatorDemo extends UiApplication {
-    // Constructor
+    /**
+     * Creates a new SVGAnimatorDemo object
+     */
     public SVGAnimatorDemo() {
         final SVGScreen screen = new SVGScreen();
         pushScreen(screen);

@@ -34,6 +34,7 @@ HaveAlxImports=0
 HaveDefs=0
 HaveImports=1
 [Icons
+img\browserfielddemo_jde.png
 ]
 [ImplicitRules
 ]
@@ -49,6 +50,7 @@ RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=Browser Field Demo

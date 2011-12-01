@@ -20,6 +20,7 @@ AutoRestart=0
 [DependsOn
 ]
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 img\svganimatordemo_jde.png
 sample.svg
@@ -33,21 +34,19 @@ HaveImports=0
 img\svganimatordemo_jde.png
 ]
 [ImplicitRules
-svg
-svg
-echo nothing
 ]
 [Imports
 ]
 Listing=0
 Options=-quiet 
-OutputFileName=svganimatordemo
+OutputFileName=SVGAnimatorDemo
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=SVG Animator Demo

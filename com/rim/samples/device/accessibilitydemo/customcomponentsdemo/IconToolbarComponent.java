@@ -53,7 +53,9 @@ public final class IconToolbarComponent extends Field implements
     private int _iconHeight;
     private int _state;
 
-    // Constructor
+    /**
+     * Creates a new IconToolbarComponent object
+     */
     public IconToolbarComponent() {
         super(Field.FOCUSABLE);
 
@@ -337,7 +339,14 @@ public final class IconToolbarComponent extends Field implements
         private final Bitmap _image;
         private int _state;
 
-        // Constructor
+        /**
+         * Creates a new Icon object
+         * 
+         * @param label
+         *            Label for the icon
+         * @param image
+         *            Bitmap image for the icon
+         */
         public Icon(final String label, final Bitmap image) {
             _label = label;
             _image = image;

@@ -29,12 +29,19 @@ package com.rim.samples.device.videorecordingdemo;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+import javax.microedition.amms.control.camera.FlashControl;
+import javax.microedition.amms.control.camera.ZoomControl;
+import javax.microedition.amms.control.imageeffect.ImageEffectControl;
 import javax.microedition.media.MediaException;
 import javax.microedition.media.Player;
 import javax.microedition.media.control.GUIControl;
 import javax.microedition.media.control.RecordControl;
 import javax.microedition.media.control.VideoControl;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
+import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
@@ -42,7 +49,14 @@ import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.ObjectChoiceField;
+import net.rim.device.api.ui.component.RadioButtonField;
+import net.rim.device.api.ui.component.RadioButtonGroup;
+import net.rim.device.api.ui.component.RichTextField;
+import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.container.PopupScreen;
+import net.rim.device.api.ui.container.VerticalFieldManager;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * This screen allows the user to record videos to a file or to a stream and
@@ -58,6 +72,9 @@ public class VideoRecordingScreen extends MainScreen {
     private Player _player;
     private VideoControl _videoControl;
     private RecordControl _recordControl;
+    private FlashControl _flashControl;
+    private ZoomControl _zoomControl;
+    private ImageEffectControl _effectControl;
     private boolean _displayVisible;
     private boolean _recordToStream;
 
@@ -88,6 +105,181 @@ public class VideoRecordingScreen extends MainScreen {
             throw new NullPointerException("File path can not be null");
         }
 
+        _commit =
+                new MenuItem(new StringProvider("Commit recording"), 0x230010,
+                        0);
+        _commit.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                commitRecording();
+            }
+        }));
+
+        _playRecording =
+                new MenuItem(new StringProvider("Play recording"), 0x230020, 0);
+        _playRecording.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                // Create the playback screen from the chosen video source
+                VideoPlaybackScreen playbackScreen;
+
+                if (_recordToStream) {
+                    playbackScreen =
+                            new VideoPlaybackScreen(new ByteArrayInputStream(
+                                    _outStream.toByteArray()));
+                } else {
+                    playbackScreen = new VideoPlaybackScreen(_videoFile);
+                }
+
+                // Hide the video feed since we cannot display video from the
+                // camera
+                // and video from a file at the same time.
+                _videoControl.setVisible(false);
+                _displayVisible = false;
+
+                UiApplication.getUiApplication().pushScreen(playbackScreen);
+
+            }
+        }));
+
+        _reset =
+                new MenuItem(new StringProvider("Reset recording"), 0x230030, 0);
+        _reset.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                try {
+                    _recordControl.reset();
+                } catch (final Exception e) {
+                    VideoRecordingDemo.errorDialog("RecordControl#reset threw "
+                            + e.toString());
+                }
+            }
+        }));
+
+        _showDisplay =
+                new MenuItem(new StringProvider("Show display"), 0x230040, 0);
+        _showDisplay.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                _videoControl.setVisible(true);
+                _displayVisible = true;
+            }
+        }));
+
+        _hideDisplay =
+                new MenuItem(new StringProvider("Hide display"), 0x230050, 0);
+        _hideDisplay.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                _videoControl.setVisible(false);
+                _displayVisible = false;
+            }
+        }));
+
+        _startRecord =
+                new MenuItem(new StringProvider("Start recording"), 0x230060, 0);
+        _startRecord.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                startRecord();
+            }
+        }));
+
+        _stopRecord =
+                new MenuItem(new StringProvider("Stop recording"), 0x230070, 0);
+        _stopRecord.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                stopRecord();
+            }
+        }));
+
+        _toggleFlash =
+                new MenuItem(new StringProvider("Toggle flash"), 0x230080, 0);
+        _toggleFlash.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                int newMode;
+                switch (_flashControl.getMode()) {
+                case FlashControl.OFF:
+                    newMode = FlashControl.FORCE;
+                    break;
+                default:
+                    newMode = FlashControl.OFF;
+                }
+
+                try {
+                    _flashControl.setMode(newMode);
+                } catch (final Exception e) {
+                }
+            }
+        }));
+
+        _chooseImageEffect =
+                new MenuItem(new StringProvider("Choose effect"), 0x230090, 0);
+        _chooseImageEffect.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                String currentEffect = null;
+                if (_effectControl.isEnabled()) {
+                    final String preset = _effectControl.getPreset();
+                    if (preset != null) {
+                        currentEffect = preset;
+                    }
+                }
+
+                final ImageEffectDialog chooseDialog =
+                        new ImageEffectDialog(currentEffect);
+                UiApplication.getUiApplication().pushModalScreen(chooseDialog);
+
+                final String preset = chooseDialog.getImageEffectPreset();
+                if (preset == null) {
+                    // No preset chosen, turn off effects
+                    _effectControl.setEnabled(false);
+                } else {
+                    // Turn on the chosen effect
+                    _effectControl.setPreset(preset);
+                    _effectControl.setEnabled(true);
+                }
+            }
+        }));
+
         try {
             // Start capturing video from the camera
             _player =
@@ -98,6 +290,15 @@ public class VideoRecordingScreen extends MainScreen {
             _videoControl = (VideoControl) _player.getControl("VideoControl");
             _recordControl =
                     (RecordControl) _player.getControl("RecordControl");
+            _flashControl =
+                    (FlashControl) _player
+                            .getControl("javax.microedition.amms.control.camera.FlashControl");
+            _zoomControl =
+                    (ZoomControl) _player
+                            .getControl("javax.microedition.amms.control.camera.ZoomControl");
+            _effectControl =
+                    (ImageEffectControl) _player
+                            .getControl("javax.microedition.amms.control.imageeffect.ImageEffectControl");
 
             // Initialize the video display
             final Field videoField =
@@ -122,8 +323,6 @@ public class VideoRecordingScreen extends MainScreen {
             } else {
                 _videoFile = filePath;
             }
-
-            startRecord();
         } catch (final Exception e) {
             // Dispose of the player if it was created
             if (_player != null) {
@@ -139,92 +338,49 @@ public class VideoRecordingScreen extends MainScreen {
     }
 
     /**
-     * Commits the current recording
+     * A MenuItem to commit the current recording
      */
-    private final MenuItem _commit = new MenuItem("Commit recording", 0, 0) {
-        public void run() {
-            commitRecording();
-        }
-    };
+    private final MenuItem _commit;
 
     /**
-     * Plays the recording
+     * A MenuItem to play the recording
      */
-    private final MenuItem _playRecording =
-            new MenuItem("Play recording", 0, 0) {
-                public void run() {
-                    // Create the playback screen from the chosen video source
-                    VideoPlaybackScreen playbackScreen;
-
-                    if (_recordToStream) {
-                        playbackScreen =
-                                new VideoPlaybackScreen(
-                                        new ByteArrayInputStream(_outStream
-                                                .toByteArray()));
-                    } else {
-                        playbackScreen = new VideoPlaybackScreen(_videoFile);
-                    }
-
-                    // Hide the video feed since we cannot display video from
-                    // the camera
-                    // and video from a file at the same time.
-                    _videoControl.setVisible(false);
-                    _displayVisible = false;
-
-                    UiApplication.getUiApplication().pushScreen(playbackScreen);
-
-                }
-            };
+    private final MenuItem _playRecording;
 
     /**
-     * Resets the recording
+     * A MenuItem to reset the recording
      */
-    private final MenuItem _reset = new MenuItem("Reset recording", 0, 0) {
-        public void run() {
-            try {
-                _recordControl.reset();
-            } catch (final Exception e) {
-                VideoRecordingDemo.errorDialog("RecordControl#reset threw "
-                        + e.toString());
-            }
-        }
-    };
+    private final MenuItem _reset;
 
     /**
-     * Shows the video display
+     * A MenuItem to show the video display
      */
-    private final MenuItem _showDisplay = new MenuItem("Show display", 0, 0) {
-        public void run() {
-            _videoControl.setVisible(true);
-            _displayVisible = true;
-        }
-    };
+    private final MenuItem _showDisplay;
 
     /**
-     * Hides the video display
+     * A MenuItem to hide the video display
      */
-    private final MenuItem _hideDisplay = new MenuItem("Hide display", 0, 0) {
-        /**
-         * @see java.lang.Runnable#run()
-         */
-        public void run() {
-            _videoControl.setVisible(false);
-            _displayVisible = false;
-        }
-    };
+    private final MenuItem _hideDisplay;
 
-    private final MenuItem _startRecord =
-            new MenuItem("Start recording", 0, 0) {
-                public void run() {
-                    startRecord();
-                }
-            };
+    /**
+     * A MenuItem to start the recording of video
+     */
+    private final MenuItem _startRecord;
 
-    private final MenuItem _stopRecord = new MenuItem("Stop recording", 0, 0) {
-        public void run() {
-            stopRecord();
-        }
-    };
+    /**
+     * A MenuItem to stop the recording of video
+     */
+    private final MenuItem _stopRecord;
+
+    /**
+     * A MenuItem to turn flash on or off
+     */
+    private final MenuItem _toggleFlash;
+
+    /**
+     * A MenuItem to allow users to choose a filter effect
+     */
+    private final MenuItem _chooseImageEffect;
 
     /**
      * @see net.rim.device.api.ui.Screen#onClose()
@@ -258,6 +414,8 @@ public class VideoRecordingScreen extends MainScreen {
             menu.add(_stopRecord);
         } else {
             menu.add(_startRecord);
+            menu.add(_toggleFlash);
+            menu.add(_chooseImageEffect);
         }
 
         // If currently recording video, allow the user to commit
@@ -284,8 +442,7 @@ public class VideoRecordingScreen extends MainScreen {
      * @see net.rim.device.api.ui.Screen#invokeAction(int)
      */
     protected boolean invokeAction(final int action) {
-        switch (action) {
-        case ACTION_INVOKE: // Trackball click
+        if (action == ACTION_INVOKE) {
             if (_recording) {
                 final int response =
                         Dialog.ask(Dialog.D_YES_NO,
@@ -295,9 +452,29 @@ public class VideoRecordingScreen extends MainScreen {
                     this.commitRecording();
                 }
             }
-            return true; // We've consumed the event
+
+            return true;
         }
+
         return super.invokeAction(action);
+    }
+
+    /**
+     * @see net.rim.device.api.ui.Screen#navigationMovement(int, int, int, int)
+     */
+    protected boolean navigationMovement(final int dx, final int dy,
+            final int status, final int time) {
+        if (dy < 0) {
+            // Upwards move
+            _zoomControl.setDigitalZoom(ZoomControl.NEXT);
+            return true;
+        } else if (dy > 0) {
+            // Downwards move
+            _zoomControl.setDigitalZoom(ZoomControl.PREVIOUS);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -368,6 +545,88 @@ public class VideoRecordingScreen extends MainScreen {
         } catch (final Exception e) {
             VideoRecordingDemo.errorDialog("RecordControl#commit() threw "
                     + e.toString());
+        }
+    }
+
+    /**
+     * A popup dialog class which allows the user to pick an image effect to use
+     */
+    private final static class ImageEffectDialog extends PopupScreen {
+        private final RadioButtonGroup _options;
+
+        /**
+         * Creates a new ImageEffectDialog object
+         * 
+         * @param effect
+         *            The name of the effect currently in use by the video
+         *            recording Player
+         */
+        public ImageEffectDialog(final String effect) {
+            super(new VerticalFieldManager());
+
+            // Create radio buttons for the image effect choices
+            _options = new RadioButtonGroup();
+            final RadioButtonField none =
+                    new RadioButtonField("None", _options, effect == null);
+            final RadioButtonField greyscale =
+                    new RadioButtonField("Greyscale", _options,
+                            (effect != null && effect.equals("monochrome")));
+            final RadioButtonField sepia =
+                    new RadioButtonField("Sepia", _options,
+                            (effect != null && effect.equals("sepia")));
+
+            // Add fields to the dialog
+            add(new RichTextField("Choose Effect", Field.NON_FOCUSABLE));
+            add(new SeparatorField());
+            add(none);
+            add(greyscale);
+            add(sepia);
+        }
+
+        /**
+         * @see net.rim.device.api.ui.Screen.invokeAction(int)
+         */
+        protected boolean invokeAction(final int action) {
+            final boolean result = super.invokeAction(action);
+
+            if (action == ACTION_INVOKE) {
+                close();
+                return true;
+            } else {
+                return result;
+            }
+        }
+
+        /**
+         * @see net.rim.device.api.ui.Screen.keyChar(char, int, int)
+         */
+        protected boolean
+                keyChar(final char c, final int status, final int time) {
+            final boolean result = super.keyChar(c, status, time);
+            switch (c) {
+            case Characters.ENTER:
+                close();
+                return true;
+            default:
+                return result;
+            }
+        }
+
+        /**
+         * Returns the image effect currently selected by the user in this
+         * dialog
+         * 
+         * @return The selected image effect preset name
+         */
+        public String getImageEffectPreset() {
+            switch (_options.getSelectedIndex()) {
+            case 1:
+                return "monochrome";
+            case 2:
+                return "sepia";
+            default:
+                return null;
+            }
         }
     }
 }

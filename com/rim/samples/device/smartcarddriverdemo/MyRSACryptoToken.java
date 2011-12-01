@@ -50,9 +50,9 @@ import net.rim.device.api.util.Persistable;
  */
 public final class MyRSACryptoToken extends RSACryptoToken implements
         Persistable {
-    private static String DECRYPT_DESC =
+    private static final String DECRYPT_DESC =
             "The private key will be used to decrypt encrypted data.";
-    private static String SIGN_DESC =
+    private static final String SIGN_DESC =
             "The private key will be used to generate a digital signature.";
 
     /**

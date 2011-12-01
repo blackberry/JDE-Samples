@@ -48,7 +48,7 @@ public class PlayList {
     /**
      * The names of the songs stored in the COD file as resources
      */
-    private static String[] SONG_FILENAMES = { "BlackBerryBold.mp3",
+    private static final String[] SONG_FILENAMES = { "BlackBerryBold.mp3",
             "BlackBerryCurve.mp3", "BlackBerryPowerPlay.mp3",
             "BlackBerryStorm.mp3", };
 

@@ -29,6 +29,9 @@ package com.rim.samples.device.syncdemo;
 import java.io.EOFException;
 import java.util.Vector;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.i18n.Locale;
 import net.rim.device.api.synchronization.ConverterUtilities;
 import net.rim.device.api.synchronization.SyncCollection;
@@ -38,18 +41,26 @@ import net.rim.device.api.synchronization.SyncObject;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
+import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
-import net.rim.device.api.ui.Graphics;
+import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.XYRect;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
-import net.rim.device.api.ui.component.ListField;
-import net.rim.device.api.ui.component.ListFieldCallback;
 import net.rim.device.api.ui.component.Menu;
+import net.rim.device.api.ui.component.table.DataTemplate;
+import net.rim.device.api.ui.component.table.TableController;
+import net.rim.device.api.ui.component.table.TableModelAdapter;
+import net.rim.device.api.ui.component.table.TableView;
+import net.rim.device.api.ui.component.table.TemplateColumnProperties;
+import net.rim.device.api.ui.component.table.TemplateRowProperties;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.decor.BackgroundFactory;
 import net.rim.device.api.util.DataBuffer;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * This application stores contact information in a PersistantObject which can
@@ -60,12 +71,13 @@ import net.rim.device.api.util.DataBuffer;
  * be used for synchronization.
  */
 public final class SyncDemo extends UiApplication implements SyncConverter,
-        SyncCollection, ListFieldCallback {
+        SyncCollection {
     // Members
     // ------------------------------------------------------------------
-    private final ListField _listField;
-    private final AddContactAction _addContactAction;
-    private final ViewContactAction _viewContactAction;
+    private AddContactAction _addContactAction;
+    private ViewContactAction _viewContactAction;
+    private ContactTableModelAdapter _model;
+    private TableView _view;
 
     // Statics
     // ------------------------------------------------------------------
@@ -82,7 +94,7 @@ public final class SyncDemo extends UiApplication implements SyncConverter,
      * Entry point for application.
      * 
      * @param args
-     *            Command line arguments.
+     *            Command line arguments
      */
     public static void main(final String[] args) {
 
@@ -90,7 +102,7 @@ public final class SyncDemo extends UiApplication implements SyncConverter,
         _contacts = (Vector) _persist.getContents();
 
         if (args != null && args.length > 0 && args[0].equals("init")) {
-            // Initialize persistent store on startup.
+            // Initialize persistent store on startup
             if (_contacts == null) {
                 _contacts = new Vector();
                 _persist.setContents(_contacts);
@@ -109,119 +121,207 @@ public final class SyncDemo extends UiApplication implements SyncConverter,
 
     // Inner classes -----------------------------------------------------------
     /**
-     * Adds a contact to the persistent store.
+     * Adapter for displaying ContactData objects in table format
+     */
+    private static class ContactTableModelAdapter extends TableModelAdapter {
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfRows()
+         */
+        public int getNumberOfRows() {
+            return _contacts.size();
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfColumns()
+         */
+        public int getNumberOfColumns() {
+            return 1;
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doAddRow(Object)
+         */
+        protected boolean doAddRow(final Object row) {
+            _contacts.addElement(row);
+            return true;
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doGetRow(int)
+         */
+        protected Object doGetRow(final int index) {
+            return _contacts.elementAt(index);
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doRemoveRowAt(int)
+         */
+        protected boolean doRemoveRowAt(final int index) {
+            _contacts.removeElementAt(index);
+            return true;
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doInsertRowAt(int,
+         *      Object)
+         */
+        protected boolean doInsertRowAt(final int index, final Object row) {
+            _contacts.insertElementAt(row, index);
+            return true;
+        }
+
+        /**
+         * Replaces a row with a new one
+         * 
+         * @param index
+         *            The index at which to replace the row
+         * @param newRow
+         *            The new row to insert
+         */
+        public void replaceRowAt(final int index, final Object newRow) {
+            removeRowAt(index);
+            if (getNumberOfRows() == 0) {
+                // Can't use insert row when there are no entries
+                addRow(newRow);
+            } else {
+                insertRowAt(index, newRow);
+            }
+        }
+    }
+
+    /**
+     * Adds a contact to the persistent store
      */
     private class AddContactAction extends MenuItem {
         /**
-         * Default constructor
+         * Creates a new AddContactAction object
          */
         private AddContactAction() {
-            super("Add", 100000, 10);
-        }
+            super(new StringProvider("Add"), 0x230010, 10);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
 
-        public void run() {
-            final ContactScreen screen = new ContactScreen();
-            UiApplication.getUiApplication().pushModalScreen(screen);
+                    final ContactScreen screen = new ContactScreen();
+                    UiApplication.getUiApplication().pushModalScreen(screen);
 
-            final ContactData contact = screen.getContact();
+                    final ContactData contact = screen.getContact();
 
-            if (contact != null) {
-                _contacts.addElement(contact);
-                _persist.setContents(_contacts);
-                _persist.commit();
-            }
-
-            reloadContactList();
+                    if (contact != null) {
+                        _model.addRow(contact);
+                        _persist.setContents(_contacts);
+                        _persist.commit();
+                    }
+                }
+            }));
         }
     }
 
     /**
-     * Views the selected contact's information.
+     * Views the selected contact's information
      */
     private class ViewContactAction extends MenuItem {
         /**
-         * Default constructor
+         * Create a new ViewContactAction object
          */
         public ViewContactAction() {
-            super("View", 100001, 10);
-        }
-
-        public void run() {
-            final ContactScreen screen =
-                    new ContactScreen((ContactData) _contacts
-                            .elementAt(_listField.getSelectedIndex()), false);
-            UiApplication.getUiApplication().pushScreen(screen);
+            super(new StringProvider("View"), 0x230020, 10);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final ContactScreen screen =
+                            new ContactScreen((ContactData) _model.getRow(_view
+                                    .getRowNumberWithFocus()), false);
+                    UiApplication.getUiApplication().pushScreen(screen);
+                }
+            }));
         }
     }
 
     /**
-     * Edits a contact.
+     * Edits a contact
      */
     private class EditContactAction extends MenuItem {
         private final int _index;
 
         /**
-         * Constructs a menu item to edit a specific contact from the contact
-         * list.
+         * Creates a new EditContactAction object
          * 
          * @param index
          *            The index of the contact in the contact list to edit
          */
         private EditContactAction(final int index) {
-            super("Edit", 100000, 6);
+            super(new StringProvider("Edit"), 0x230030, 6);
             _index = index;
-        }
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final ContactData oldContactData =
+                            (ContactData) _contacts.elementAt(_index);
+                    final ContactScreen screen =
+                            new ContactScreen(oldContactData, true);
+                    UiApplication.getUiApplication().pushModalScreen(screen);
 
-        public void run() {
-            final ContactData oldContactData =
-                    (ContactData) _contacts.elementAt(_index);
-            final ContactScreen screen =
-                    new ContactScreen(oldContactData, true);
-            UiApplication.getUiApplication().pushModalScreen(screen);
+                    final ContactData newContactData = screen.getContact();
 
-            final ContactData newContactData = screen.getContact();
-
-            if (newContactData != null) {
-                if (_contacts.contains(oldContactData)) {
-                    _contacts.setElementAt(newContactData, _contacts
-                            .indexOf(oldContactData));
-                    PersistentObject.commit(_contacts);
+                    if (newContactData != null) {
+                        if (_contacts.contains(oldContactData)) {
+                            _model.replaceRowAt(_index, newContactData);
+                            PersistentObject.commit(_contacts);
+                        }
+                    }
                 }
-            }
-
-            reloadContactList();
+            }));
         }
     }
 
     /**
-     * Deletes a contact.
+     * Deletes a contact
      */
     private class DeleteContactAction extends MenuItem {
         private final int _deleteIndex;
 
         /**
-         * Constructs a menu item to delete a specific contact when invoked.
+         * Creates a new DeleteContactAction object
          * 
          * @param deleteIndex
-         *            The index of the contact to delete.
+         *            The index of the contact to delete
          */
         private DeleteContactAction(final int deleteIndex) {
-            super("Delete", 100000, 7);
+            super(new StringProvider("Delete"), 0x230040, 7);
             _deleteIndex = deleteIndex;
-        }
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final ContactData contactData =
+                            (ContactData) _contacts.elementAt(_deleteIndex);
 
-        public void run() {
-            final ContactData contactData =
-                    (ContactData) _contacts.elementAt(_deleteIndex);
-
-            final int result =
-                    Dialog.ask(Dialog.DELETE, "Delete "
-                            + contactData.getFirst() + " "
-                            + contactData.getLast() + "?");
-            if (result == Dialog.YES) {
-                _contacts.removeElementAt(_deleteIndex);
-                reloadContactList();
-            }
+                    final int result =
+                            Dialog.ask(Dialog.DELETE, "Delete "
+                                    + contactData.getFirst() + " "
+                                    + contactData.getLast() + "?");
+                    if (result == Dialog.YES) {
+                        _model.removeRowAt(_deleteIndex);
+                    }
+                }
+            }));
         }
     }
 
@@ -231,9 +331,11 @@ public final class SyncDemo extends UiApplication implements SyncConverter,
      */
     private final class SyncDemoScreen extends MainScreen {
         /**
-         * Default constructor
+         * Creates a new SyncDemoScreen object
          */
         private SyncDemoScreen() {
+            super(Manager.NO_VERTICAL_SCROLL);
+
             setTitle(new LabelField("Contacts", DrawStyle.ELLIPSIS
                     | Field.USE_ALL_WIDTH));
         }
@@ -248,11 +350,11 @@ public final class SyncDemo extends UiApplication implements SyncConverter,
             if (_contacts.size() > 0) {
 
                 final EditContactAction _editContactAction =
-                        new EditContactAction(_listField.getSelectedIndex());
+                        new EditContactAction(_view.getRowNumberWithFocus());
                 menu.add(_editContactAction);
 
                 final DeleteContactAction _deleteContactAction =
-                        new DeleteContactAction(_listField.getSelectedIndex());
+                        new DeleteContactAction(_view.getRowNumberWithFocus());
                 menu.add(_deleteContactAction);
 
                 menu.add(_viewContactAction);
@@ -265,34 +367,48 @@ public final class SyncDemo extends UiApplication implements SyncConverter,
     }
 
     /**
-     * Default constructor
+     * Creates a new SyncDemo object
      */
     public SyncDemo() {
+        _model = new ContactTableModelAdapter();
 
-        _listField = new ListField();
-        _listField.setCallback(this);
+        // Create the view and the controller
+        _view = new TableView(_model);
+        final TableController controller = new TableController(_model, _view);
+        controller.setFocusPolicy(TableController.ROW_FOCUS);
+        _view.setController(controller);
+
+        _view.setDataTemplateFocus(BackgroundFactory
+                .createLinearGradientBackground(Color.LIGHTBLUE,
+                        Color.LIGHTBLUE, Color.BLUE, Color.BLUE));
+        final DataTemplate dataTemplate = new DataTemplate(_view, 1, 1) {
+            public Field[] getDataFields(final int modelRowIndex) {
+                final ContactData contact =
+                        (ContactData) _model.getRow(modelRowIndex);
+
+                final Field[] fields =
+                        { new LabelField(contact.getFirst() + " "
+                                + contact.getLast(), Field.NON_FOCUSABLE) };
+                return fields;
+            }
+        };
+        dataTemplate.createRegion(new XYRect(0, 0, 1, 1));
+        dataTemplate.setColumnProperties(0, new TemplateColumnProperties(
+                Display.getWidth()));
+        dataTemplate.setRowProperties(0, new TemplateRowProperties(32));
+        _view.setDataTemplate(dataTemplate);
+        dataTemplate.useFixedHeight(true);
 
         _addContactAction = new AddContactAction();
         _viewContactAction = new ViewContactAction();
 
-        // Create a new screen for the application.
+        // Create a new screen for the application
         final SyncDemoScreen screen = new SyncDemoScreen();
 
-        screen.add(_listField);
+        screen.add(_view);
 
-        // Push the screen onto the UI stack for rendering.
+        // Push the screen onto the UI stack for rendering
         pushScreen(screen);
-
-        reloadContactList();
-    }
-
-    /**
-     * Refreshes contact list on screen.
-     * 
-     * @return True
-     */
-    private void reloadContactList() {
-        _listField.setSize(_contacts.size());
     }
 
     // SyncConverter methods
@@ -331,7 +447,7 @@ public final class SyncDemo extends UiApplication implements SyncConverter,
         final ContactData contact = new ContactData(UID);
 
         try {
-            // Extract the contact information from the DataBuffer.
+            // Extract the contact information from the DataBuffer
             while (data.available() > 0) {
                 if (ConverterUtilities.isType(data, FIELDTAG_FIRST_NAME)) {
                     contact.setFirst(new String(ConverterUtilities
@@ -363,7 +479,7 @@ public final class SyncDemo extends UiApplication implements SyncConverter,
      * @see net.rim.device.api.synchronization.SyncCollection#addSyncObject(SyncObject)
      */
     public boolean addSyncObject(final SyncObject object) {
-        _contacts.addElement(object);
+        _model.addRow(object);
 
         return true;
     }
@@ -491,49 +607,5 @@ public final class SyncDemo extends UiApplication implements SyncConverter,
     public void endTransaction() {
         _persist.setContents(_contacts);
         _persist.commit();
-    }
-
-    // ListFieldCallback methods
-    // ------------------------------------------------
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#drawListRow(ListField,Graphics,int,int,int)
-     */
-    public void drawListRow(final ListField listField, final Graphics graphics,
-            final int index, final int y, final int width) {
-        if (listField == _listField && index < _contacts.size()) {
-            final ContactData contact =
-                    (ContactData) _contacts.elementAt(index);
-            final String personal =
-                    contact.getFirst() + " " + contact.getLast();
-            graphics.drawText(personal, 0, y, 0, width);
-        }
-    }
-
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#get(ListField ,
-     *      int)
-     */
-    public Object get(final ListField listField, final int index) {
-        if (listField == _listField) {
-            // If index is out of bounds an exception will be thrown, but that's
-            // the
-            // behaviour we want in that case.
-            return _contacts.elementAt(index);
-        }
-
-        return null;
-    }
-
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#getPreferredWidth(ListField)
-     */
-    public int getPreferredWidth(final ListField listField) {
-        // Use all the width of the current LCD.
-        return Display.getWidth();
-    }
-
-    public int indexOfList(final ListField listField, final String prefix,
-            final int start) {
-        return -1; // Not implemented.
     }
 }

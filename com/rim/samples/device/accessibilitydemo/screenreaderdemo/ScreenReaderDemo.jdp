@@ -38,13 +38,14 @@ HaveImports=0
 ]
 Listing=0
 Options=-quiet 
-OutputFileName=screenreaderdemo
+OutputFileName=ScreenReaderDemo
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Type=2

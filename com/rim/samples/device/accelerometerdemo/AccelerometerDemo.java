@@ -28,6 +28,9 @@ package com.rim.samples.device.accelerometerdemo;
 
 import java.util.Random;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.AccelerometerSensor;
 import net.rim.device.api.system.AccelerometerSensor.Channel;
 import net.rim.device.api.system.Bitmap;
@@ -39,7 +42,9 @@ import net.rim.device.api.ui.Screen;
 import net.rim.device.api.ui.Ui;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
+import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * This sample demonstrates the Accelerometer API. The DrawThread opens the
@@ -75,8 +80,11 @@ public final class AccelerometerDemo extends UiApplication {
 
     private int _tick = 0;
 
+    private MenuItem _startMenuItem;
+    private MenuItem _stopMenuItem;
+
     /**
-     * Entry point for application.
+     * Entry point for application
      * 
      * @param args
      *            Command line arguments (not used)
@@ -88,13 +96,51 @@ public final class AccelerometerDemo extends UiApplication {
         app.enterEventDispatcher();
     }
 
-    // Constructor
+    /**
+     * Creates a new AccelerometerDemo object
+     */
     public AccelerometerDemo() {
         if (AccelerometerSensor.isSupported()) {
-            // Initialize UI
+
+            // Menu item to start the ball moving
+            _startMenuItem =
+                    new MenuItem(new StringProvider("Start"), 0x230010, 0);
+            _startMenuItem.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    if (_thread == null) {
+                        // Start drawing
+                        _thread = new DrawThread();
+                        _thread.start();
+                    }
+                }
+            }));
+
+            // Menu item to stop the ball moving
+            _stopMenuItem =
+                    new MenuItem(new StringProvider("Stop"), 0x230010, 0);
+            _stopMenuItem.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    if (_thread != null) {
+                        synchronized (_thread) {
+                            _thread._running = false;
+                            _thread.notifyAll();
+                            _thread = null;
+                        }
+                    }
+                }
+            }));
+
             _screen = new AccelerometerDemoScreen();
-            _screen.addMenuItem(_startMenuItem);
-            _screen.addMenuItem(_stopMenuItem);
             pushScreen(_screen);
 
             _ball = Bitmap.getBitmapResource("img/ball.png");
@@ -105,7 +151,7 @@ public final class AccelerometerDemo extends UiApplication {
                 _ballHeight = _ball.getHeight();
             }
 
-            // Prevent UI from rotating our screen.
+            // Prevent UI from rotating the screen
             Ui.getUiEngineInstance().setAcceptableDirections(
                     DEFAULT_ORIENTATION);
         } else {
@@ -119,7 +165,7 @@ public final class AccelerometerDemo extends UiApplication {
     }
 
     /**
-     * Calculates ball position.
+     * Calculates ball position
      * 
      * @param xAcc
      *            x axis acceleration
@@ -127,15 +173,15 @@ public final class AccelerometerDemo extends UiApplication {
      *            y axis acceleration
      */
     private void applyForce(final int xAcc, final int yAcc) {
-        // Calculate new speed.
+        // Calculate new speed
         _xSpeed += xAcc * G_NORM;
         _ySpeed += yAcc * G_NORM;
 
-        // Apply table friction.
+        // Apply table friction
         _xSpeed *= TABLE_FRICTION;
         _ySpeed *= TABLE_FRICTION;
 
-        // Move the ball.
+        // Move the ball
         _x += _xSpeed;
         _y += _ySpeed;
 
@@ -163,7 +209,7 @@ public final class AccelerometerDemo extends UiApplication {
     }
 
     /**
-     * A thread class to handle screen updates.
+     * A thread class to handle screen updates
      */
     private class DrawThread extends Thread {
         private boolean _running;
@@ -171,16 +217,16 @@ public final class AccelerometerDemo extends UiApplication {
         public void run() {
             _running = true;
 
-            // Start querying the accelerometer sensor.
+            // Start querying the accelerometer sensor
             openAccelerometerConnection();
 
             while (_running) {
                 _tick++;
 
-                // Get current acceleration.
+                // Get current acceleration
                 readAcceleration();
 
-                // Apply force to the ball.
+                // Apply force to the ball
                 applyForce(-_xyz[0], _xyz[1]);
 
                 try {
@@ -203,13 +249,22 @@ public final class AccelerometerDemo extends UiApplication {
                 _screen.invalidate();
             }
 
-            // Stop querying the sensor to save battery charge.
+            // Stop querying the sensor to save battery charge
             closeAccelerometerConnection();
+        }
+
+        /**
+         * Returns running state of thread
+         * 
+         * @return True if this thread is running, otherwise false
+         */
+        public boolean isRunning() {
+            return _running;
         }
     }
 
     /**
-     * Opens the data channel.
+     * Opens the data channel
      */
     private void openAccelerometerConnection() {
         if (DeviceInfo.isSimulator()) {
@@ -223,23 +278,23 @@ public final class AccelerometerDemo extends UiApplication {
     }
 
     /**
-     * Gets the latest acceleromenter data.
+     * Gets the latest acceleromenter data
      */
     private void readAcceleration() {
         if (_simulated) {
-            // Running in a simulator, simulate random.
+            // Running in a simulator, simulate random
             if (_tick % 10 == 0) {
                 _xyz[0] = (short) (_r.nextInt(400) - 200);
                 _xyz[1] = (short) (_r.nextInt(400) - 200);
             }
         } else {
-            // Real device, call the API for samples.
+            // Real device, call the API for samples
             _accChannel.getLastAccelerationData(_xyz);
         }
     }
 
     /**
-     * Closes the data channel.
+     * Closes the data channel
      */
     private void closeAccelerometerConnection() {
         if (_accChannel != null) {
@@ -249,36 +304,7 @@ public final class AccelerometerDemo extends UiApplication {
     }
 
     /**
-     * Menu item to start the ball moving.
-     */
-    private final MenuItem _startMenuItem = new MenuItem("Start", 0, 0) {
-        public void run() {
-            if (_thread == null) {
-                // Start drawing
-                _thread = new DrawThread();
-                _thread.start();
-            }
-
-        }
-    };
-
-    /**
-     * Menu item to stop the ball moving.
-     */
-    private final MenuItem _stopMenuItem = new MenuItem("Stop", 0, 0) {
-        public void run() {
-            if (_thread != null) {
-                synchronized (_thread) {
-                    _thread._running = false;
-                    _thread.notifyAll();
-                    _thread = null;
-                }
-            }
-        }
-    };
-
-    /**
-     * A screen on which to display the ball.
+     * A screen on which to display the ball
      */
     private class AccelerometerDemoScreen extends MainScreen {
         /**
@@ -289,6 +315,19 @@ public final class AccelerometerDemo extends UiApplication {
                 graphics.drawBitmap(_x, _y, _ballWidth, _ballHeight, _ball, 0,
                         0);
             }
+        }
+
+        /**
+         * @see MainScreen#makeMenu(Menu, int)
+         */
+        protected void makeMenu(final Menu menu, final int instance) {
+            if (_thread == null || !_thread.isRunning()) {
+                menu.add(_startMenuItem);
+            } else {
+                menu.add(_stopMenuItem);
+            }
+
+            super.makeMenu(menu, instance);
         }
 
         /**

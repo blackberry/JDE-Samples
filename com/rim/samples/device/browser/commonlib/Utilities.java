@@ -24,7 +24,7 @@
  * Environment Development Guide associated with this release.
  */
 
-package com.rim.samples.device.blackberry.browser;
+package com.rim.samples.device.browser;
 
 import java.io.IOException;
 import java.io.OutputStream;

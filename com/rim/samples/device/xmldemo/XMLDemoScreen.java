@@ -45,7 +45,7 @@ import org.w3c.dom.NodeList;
 public final class XMLDemoScreen extends MainScreen {
     // Statics
     // -------------------------------------------------------------------------------------
-    private static String _xmlFileName = "/xml/bookstore.xml";
+    private static final String _xmlFileName = "/xml/bookstore.xml";
 
     // Constants
     // -----------------------------------------------------------------------------------

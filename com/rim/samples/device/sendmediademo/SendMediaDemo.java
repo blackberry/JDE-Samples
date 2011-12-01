@@ -71,8 +71,8 @@ import net.rim.device.api.ui.container.MainScreen;
  */
 public final class SendMediaDemo extends UiApplication implements
         RequestListener, PlayerListener, MediaActionHandler {
-    private static String ID = "com.rim.samples.device.sendmediademo";
-    private static String CLASSNAME =
+    private static final String ID = "com.rim.samples.device.sendmediademo";
+    private static final String CLASSNAME =
             "com.rim.samples.device.sendmediademo.SendMediaDemo";
 
     private Player _videoPlayer;
@@ -110,8 +110,7 @@ public final class SendMediaDemo extends UiApplication implements
                 { "image/bmp", "image/png", "image/jpeg", "video/3gpp",
                         "video/mp4", "audio/mp4", "audio/amr", "audio/mpeg" };
         final String[] suffixes =
-                { ".bmp", ".png", ".jpg", ".3GP", ".mp4", ".m4A", ".amr",
-                        ".mp3" };
+                { "bmp", "png", "jpg", "3GP", "mp4", "m4A", "amr", "mp3" };
 
         final String[] actions = { ContentHandler.ACTION_SEND };
         final String[] actionNames = { "Send to demo app" };
@@ -126,9 +125,9 @@ public final class SendMediaDemo extends UiApplication implements
             registry.register(CLASSNAME, types, suffixes, actions,
                     actionNameMaps, ID, null);
         } catch (final ContentHandlerException che) {
-            errorDialog("Registry#register() threw " + che.toString());
+            System.out.println("Registry#register() threw " + che.toString());
         } catch (final ClassNotFoundException cnfe) {
-            errorDialog("Registry#register() threw " + cnfe.toString());
+            System.out.println("Registry#register() threw " + cnfe.toString());
         }
     }
 

@@ -44,8 +44,13 @@ public final class OptionsProviderDemo implements OptionsProvider {
 
     private static OptionsProviderDemo _instance;
 
-    // Constructor
-    public OptionsProviderDemo(final String title) {
+    /**
+     * Creates a new OptionsProviderDemo object
+     * 
+     * @param title
+     *            Title for the options screen
+     */
+    private OptionsProviderDemo(final String title) {
         _title = title;
         _data = OptionsDemoData.load();
     }

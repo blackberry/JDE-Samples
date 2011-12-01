@@ -49,8 +49,8 @@ import net.rim.device.api.ui.container.MainScreen;
 public final class ActiveTextFieldsDemo extends UiApplication {
     private static ApplicationMenuItem[] _menuItems =
             new ApplicationMenuItem[2];
-    private RichTextField _trackingNumber;
-    private RichTextField _statusLocation;
+    private static RichTextField _trackingNumber;
+    private static RichTextField _statusLocation;
 
     /**
      * Entry point for application
@@ -146,7 +146,8 @@ public final class ActiveTextFieldsDemo extends UiApplication {
     // real world situation the application would send the highlighted
     // transaction number back to a server and retrieve the status and location
     // information.
-    private static ApplicationMenuItem statusItem = new ApplicationMenuItem(0) {
+    private static ApplicationMenuItem statusItem = new ApplicationMenuItem(
+            0x230010) {
 
         /**
          * Sets the label and text in the display fields of the handler screen
@@ -156,11 +157,9 @@ public final class ActiveTextFieldsDemo extends UiApplication {
          *            displayed
          */
         public Object run(final Object context) {
-            final ActiveTextFieldsDemo app =
-                    (ActiveTextFieldsDemo) UiApplication.getUiApplication();
-            app._trackingNumber.setLabel("Status for tracking No: ");
-            app._trackingNumber.setText(context.toString());
-            app._statusLocation.setText("< In Progress >");
+            _trackingNumber.setLabel("Status for tracking No: ");
+            _trackingNumber.setText(context.toString());
+            _statusLocation.setText("< In Progress >");
             return null;
         }
 
@@ -169,38 +168,36 @@ public final class ActiveTextFieldsDemo extends UiApplication {
         }
     };
 
-    private static ApplicationMenuItem locationItem =
-            new ApplicationMenuItem(1) {
-                /**
-                 * Sets the label and text in the display fields of the handler
-                 * screen
-                 * 
-                 * @param context
-                 *            The String representation of the context object is
-                 *            displayed
-                 */
-                public Object run(final Object context) {
-                    final ActiveTextFieldsDemo app =
-                            (ActiveTextFieldsDemo) UiApplication
-                                    .getUiApplication();
-                    app._trackingNumber.setLabel("Location for tracking No: ");
-                    app._trackingNumber.setText(context.toString());
-                    app._statusLocation.setText("< 39.3° N 76.6° W >");
-                    return null;
-                }
+    private static ApplicationMenuItem locationItem = new ApplicationMenuItem(
+            0x230020) {
+        /**
+         * Sets the label and text in the display fields of the handler screen
+         * 
+         * @param context
+         *            The String representation of the context object is
+         *            displayed
+         */
+        public Object run(final Object context) {
+            _trackingNumber.setLabel("Location for tracking No: ");
+            _trackingNumber.setText(context.toString());
+            _statusLocation.setText("< 39.3° N 76.6° W >");
+            return null;
+        }
 
-                public String toString() {
-                    return "Location";
-                }
-            };
+        public String toString() {
+            return "Location";
+        }
+    };
 
     /**
      * The screen that is displayed when one of our application menu items is
      * invoked.
      */
-    private final class HandlerScreen extends MainScreen {
+    private static final class HandlerScreen extends MainScreen {
 
-        // Constructor
+        /**
+         * Creates a new HandlerScreen object
+         */
         private HandlerScreen() {
             // Set the screen title
             setTitle("Active Text Fields Handler");
@@ -218,8 +215,9 @@ public final class ActiveTextFieldsDemo extends UiApplication {
  * The screen for the demo version of this application
  */
 final class ActiveTextFieldsScreen extends MainScreen {
-
-    // Constructor
+    /**
+     * Creates a new ActiveTextFieldsScreen object
+     */
     ActiveTextFieldsScreen() {
         // Set the screen title
         setTitle("Active Text Fields Demo");

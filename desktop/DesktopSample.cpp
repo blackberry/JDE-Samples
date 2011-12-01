@@ -25,7 +25,6 @@
  */
 
 // DesktopSample.cpp : Implementation of CDesktopSample
-
 #include "stdafx.h"
 #include "Desktop.h"
 #include "DesktopSample.h"
@@ -76,6 +75,10 @@ HRESULT __stdcall CDesktopSample::raw_Process (
 		
 		//get the contacts table
 		IRimTablePtr contactTable;
+
+		long j;
+		tables->get_Count(&j);
+
 		for(long i=1; i<=tables->GetCount(); i++)
 		{
 			_bstr_t tableName = tables->GetItem(_variant_t(i))->GetName();
@@ -94,6 +97,7 @@ HRESULT __stdcall CDesktopSample::raw_Process (
 		IRimRecordsPtr contacts = contactTable->LoadRecords(RIM_Mode_ReadWrite);
 		
 		ContactList cl(DATAFILE);
+		long x = contacts->Count;
 		if ( contacts->Count <= 0 )
 		{
 			//populate the device with records from the store

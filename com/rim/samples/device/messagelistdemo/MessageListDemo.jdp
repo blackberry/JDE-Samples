@@ -30,6 +30,15 @@ img\messagelistdemo_jde.png
 img\new.png
 img\read.png
 img\replied.png
+img\sm_add_message.png
+img\sm_add_messages_bulk.png
+img\sm_mark_opened.png
+img\sm_mark_unopened.png
+img\sm_open.png
+img\sm_open_messages_app.png
+img\sm_reply.png
+img\sm_start_auto.png
+img\sm_stop_auto.png
 MessageListDemo.java
 MessageListDemoDaemon.java
 MessageListDemoStore.java

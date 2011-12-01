@@ -77,7 +77,7 @@ public class CountryList extends SortedReadableList implements KeywordProvider {
      */
     final static class CountryListComparator implements Comparator {
         /**
-         * Compares two countries by comparing their names' in alphabetical
+         * Compares two countries by comparing their names in alphabetical
          * order.
          * 
          * @see net.rim.device.api.util.Comparator#compare(Object, Object)

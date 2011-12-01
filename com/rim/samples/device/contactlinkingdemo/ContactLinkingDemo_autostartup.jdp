@@ -34,7 +34,7 @@ HaveImports=0
 Listing=0
 MidletClass=autostartup
 Options=-quiet 
-OutputFileName=ContactLinkingDemo_init
+OutputFileName=ContactLinkingDemo_autostartup
 [PackageProtection
 ]
 Platform=0
@@ -42,6 +42,7 @@ RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=1
+SkipCompile=0
 StartupTier=7
 SystemModule=1
 Type=3

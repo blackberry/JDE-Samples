@@ -45,7 +45,7 @@ public final class TextPanel extends SVGPanel implements
     private SVGElement _textbox_text;
 
     // Contains the textfield helper class
-    private final SvgTextFieldHelper _svgTextFieldHelper;
+    private final SVGTextFieldHelper _svgTextFieldHelper;
 
     // Contains the textbox contents
     private String _textboxText;
@@ -67,7 +67,7 @@ public final class TextPanel extends SVGPanel implements
         super.setLastElement(_textbox);
 
         // Textfield helper class is associated with the text panel
-        _svgTextFieldHelper = new SvgTextFieldHelper(_svgFormsScreen, this);
+        _svgTextFieldHelper = new SVGTextFieldHelper(_svgFormsScreen, this);
     }
 
     /**

@@ -26,6 +26,9 @@
 
 package com.rim.samples.device.spellcheckdemo;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.ui.ContextMenu;
 import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
@@ -41,6 +44,7 @@ import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.PopupScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * The MainScreen class for our application. It displays a TestField instance to
@@ -75,6 +79,78 @@ public class SpellCheckDemoScreen extends MainScreen {
         add(separator);
         _testField = new TestField("Test Field: ", "");
         add(_testField);
+
+        _spellCheckItem =
+                new MenuItem(new StringProvider("Spell check"), 0x230010, 1);
+        _spellCheckItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * Checks the spelling in the TestField.
+             * 
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                if (_testField.getText().length() == 0) {
+                    Dialog.alert("Test field cannot be empty");
+                } else {
+                    _app.spellCheck(_testField);
+                }
+            }
+        }));
+
+        _learnWordItem =
+                new MenuItem(new StringProvider("Learn word"), 0x230020, 1);
+        _learnWordItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * Learns the word in the TestField.
+             * 
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                if (_testField.getText().length() == 0) {
+                    Dialog.alert("Test field cannot be empty");
+                } else {
+                    _app.learnWord(_testField.getText());
+                }
+            }
+        }));
+
+        _learnCorrectionItem =
+                new MenuItem(new StringProvider("Learn correction"), 0x230030,
+                        2);
+        _learnCorrectionItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * Shows the user a list of possible corrections for the word in the
+             * TestField.
+             * 
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                if (_testField.getText().length() == 0) {
+                    Dialog.alert("Test field cannot be empty");
+                } else {
+                    final VerticalFieldManager vfm = new VerticalFieldManager();
+                    _popUp = new PopupScreen(vfm);
+                    final LabelField popUpLabel =
+                            new LabelField("Correction for "
+                                    + _testField.getText() + ":");
+                    _correction = new EditField();
+                    _popUp.add(popUpLabel);
+                    _popUp.add(_correction);
+                    final HorizontalFieldManager hfm =
+                            new HorizontalFieldManager(Field.FIELD_HCENTER);
+                    hfm.add(new OkButton());
+                    hfm.add(new CancelButton());
+                    _popUp.add(hfm);
+                    _app.pushScreen(_popUp);
+                }
+            }
+        }));
     }
 
     /**
@@ -92,74 +168,20 @@ public class SpellCheckDemoScreen extends MainScreen {
      * Menu item to invoke the spellCheck() method of the SpellCheckDemo.
      * application, passing in our TestField as the field to be spell checked.
      */
-    private final MenuItem _spellCheckItem = new MenuItem("Spell check", 0, 0) {
-        /**
-         * Checks the spelling in the TestField.
-         * 
-         * @see java.lang.Runnable#run()
-         */
-        public void run() {
-            if (_testField.getText().length() == 0) {
-                Dialog.alert("Test field cannot be empty");
-            } else {
-                _app.spellCheck(_testField);
-            }
-        }
-    };
+    private final MenuItem _spellCheckItem;
 
     /**
      * The run() method of this menu item calls the learnWord() method of the
      * SpellCheckDemo application, passing in the word specified in the
      * TestField.
      */
-    private final MenuItem _learnWordItem = new MenuItem("Learn word", 0, 0) {
-        /**
-         * Learns the word in the TestField.
-         * 
-         * @see java.lang.Runnable#run()
-         */
-        public void run() {
-            if (_testField.getText().length() == 0) {
-                Dialog.alert("Test field cannot be empty");
-            } else {
-                _app.learnWord(_testField.getText());
-            }
-        }
-    };
+    private final MenuItem _learnWordItem;
 
     /**
      * This menu item displays a PopupScreen containing an EditField in which to
      * enter a correction for the word specified in the TestField.
      */
-    private final MenuItem _learnCorrectionItem = new MenuItem(
-            "Learn correction", 0, 0) {
-        /**
-         * Shows the user a list of possible corrections for the word in the
-         * TestField.
-         * 
-         * @see java.lang.Runnable#run()
-         */
-        public void run() {
-            if (_testField.getText().length() == 0) {
-                Dialog.alert("Test field cannot be empty");
-            } else {
-                final VerticalFieldManager vfm = new VerticalFieldManager();
-                _popUp = new PopupScreen(vfm);
-                final LabelField popUpLabel =
-                        new LabelField("Correction for " + _testField.getText()
-                                + ":");
-                _correction = new EditField();
-                _popUp.add(popUpLabel);
-                _popUp.add(_correction);
-                final HorizontalFieldManager hfm =
-                        new HorizontalFieldManager(Field.FIELD_HCENTER);
-                hfm.add(new OkButton());
-                hfm.add(new CancelButton());
-                _popUp.add(hfm);
-                _app.pushScreen(_popUp);
-            }
-        }
-    };
+    private final MenuItem _learnCorrectionItem;
 
     /**
      * This inner class represents the OK button in our 'Learn correction'

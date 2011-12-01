@@ -33,11 +33,15 @@ import net.rim.blackberry.api.mail.event.FolderEvent;
 import net.rim.blackberry.api.mail.event.FolderListener;
 import net.rim.blackberry.api.mail.event.MessageEvent;
 import net.rim.blackberry.api.mail.event.MessageListener;
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.util.SimpleSortingVector;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * This class allows the user to view all of the messages. It uses the
@@ -79,8 +83,15 @@ public final class MessagesViewScreen extends BlackBerryMailDemoScreen
         // Store the UiApplication for use in refreshing the message list field
         _uiApplication = UiApplication.getUiApplication();
 
-        _changeViewMenuItem = new MenuItem("Folders View", 110, 10) {
-            public void run() {
+        _changeViewMenuItem =
+                new MenuItem(new StringProvider("Folders View"), 0x230020, 1);
+        _changeViewMenuItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
                 _currentDisplayMode = FOLDERS_VIEW_MODE;
 
                 final Folder currentFolder =
@@ -90,7 +101,28 @@ public final class MessagesViewScreen extends BlackBerryMailDemoScreen
                         new FoldersViewScreen(currentFolder);
                 UiApplication.getUiApplication().pushScreen(foldersViewScreen);
             }
-        };
+        }));
+
+        _deleteMenuItem =
+                new MenuItem(new StringProvider("Delete Message"), 0x230010, 0);
+        _deleteMenuItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                final int choice =
+                        Dialog.ask(Dialog.D_YES_NO, "Delete message?",
+                                Dialog.YES);
+                if (choice == Dialog.YES) {
+                    final Message message = (Message) getSelectedItem();
+                    final Folder folder = message.getFolder();
+                    folder.deleteMessage(message);
+                    updateScreen();
+                }
+            }
+        }));
     }
 
     /**
@@ -210,19 +242,7 @@ public final class MessagesViewScreen extends BlackBerryMailDemoScreen
     /**
      * MenuItem to delete a message
      */
-    private final MenuItem _deleteMenuItem = new MenuItem("Delete Message",
-            110, 14) {
-        public void run() {
-            final int choice =
-                    Dialog.ask(Dialog.D_YES_NO, "Delete message?", Dialog.YES);
-            if (choice == Dialog.YES) {
-                final Message message = (Message) getSelectedItem();
-                final Folder folder = message.getFolder();
-                folder.deleteMessage(message);
-                updateScreen();
-            }
-        }
-    };
+    private final MenuItem _deleteMenuItem;
 
     // //////////////////////////////////////////////////////////////////////////
     // ********************* Message Listener *************************** //

@@ -24,12 +24,14 @@
  * Environment Development Guide associated with this release.
  */
 
-package com.rim.samples.device.picturescrollfielddemo;
+package com.rim.samples.device.ui.picturescrollfielddemo;
 
 import net.rim.device.api.ui.UiApplication;
 
 /**
- * A sample application to demonstrate the PictureScrollField class
+ * A sample application to demonstrate the PictureScrollField class. Selecting a
+ * picture in the PictureScrollField will display a screen which responds to
+ * pinch gestures by zooming the picture in and out.
  */
 public class PictureScrollFieldDemo extends UiApplication {
     /**

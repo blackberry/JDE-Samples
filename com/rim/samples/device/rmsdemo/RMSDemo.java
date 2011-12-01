@@ -157,16 +157,24 @@ public final class RMSDemo extends MIDlet implements CommandListener {
     /**
      * Retrieves the RMS record id
      * 
-     * @return The RMS record id
+     * @param index
+     *            The index of the record for which to to retrieve the record
+     *            ID.
+     * @return The RMS record id.
      */
-    private int getRecordId() throws RecordStoreNotOpenException,
-            RecordStoreException {
+    private int getRecordId(final int index)
+            throws RecordStoreNotOpenException, RecordStoreException {
         _enum.rebuild();
 
         int recordId = -1;
+        int count = 0;
 
         while (_enum.hasNextElement()) {
             recordId = _enum.nextRecordId();
+            if (count == index) {
+                return recordId;
+            }
+            count++;
         }
 
         return recordId;
@@ -193,7 +201,7 @@ public final class RMSDemo extends MIDlet implements CommandListener {
             } else if (c == _mainDelete) {
                 // Delete CD
                 try {
-                    final int i = getRecordId();
+                    final int i = getRecordId(_list.getSelectedIndex());
                     _db.delete(i);
                     refreshList();
                 } catch (final Exception e) {
@@ -204,7 +212,7 @@ public final class RMSDemo extends MIDlet implements CommandListener {
                 // Edit CD
                 try {
                     _addForm.setTitle("Edit CD");
-                    _editCDRecordId = getRecordId();
+                    _editCDRecordId = getRecordId(_list.getSelectedIndex());
                     final CD selectedCD = _db.getCD(_editCDRecordId);
 
                     _artistCD.setString(selectedCD.getArtist());

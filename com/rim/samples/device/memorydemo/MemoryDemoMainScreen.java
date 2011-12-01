@@ -29,6 +29,9 @@ package com.rim.samples.device.memorydemo;
 import java.util.Calendar;
 import java.util.Date;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.lowmemory.LowMemoryListener;
 import net.rim.device.api.lowmemory.LowMemoryManager;
 import net.rim.device.api.system.Characters;
@@ -46,27 +49,22 @@ import net.rim.device.api.ui.component.ListFieldCallback;
 import net.rim.device.api.ui.container.DialogFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.PopupScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * The main screen for the application.
  */
 public final class MemoryDemoMainScreen extends MainScreen implements
         ListFieldCallback, LowMemoryListener {
-    // Members
-    // -------------------------------------------------------------------------------------
     private final OrderList _orderList;
     private final OrderListField _orderListField;
     private final UiApplication _app;
-
     private ProgressBarDialog _progressDialog;
 
-    // Constants
-    // -----------------------------------------------------------------------------------
     private static final int MAX_RECORDS = 1000;
 
     /**
-     * This constructor builds the main screen, prepares menu items for display,
-     * and shows the list of order records.
+     * Creates a new MemoryDemoMainScreen object
      */
     public MemoryDemoMainScreen() {
         setTitle("Order Records");
@@ -83,37 +81,31 @@ public final class MemoryDemoMainScreen extends MainScreen implements
     }
 
     /**
-     * Called when the main screen (and thus, the application) closes. Removes
-     * this screen as a low memory listener, and commits the order list to the
-     * persistent store.
-     * 
      * @see net.rim.device.api.ui.Screen#onClose()
      */
     public boolean onClose() {
+        // Remove this screen as a low memory listener
         LowMemoryManager.removeLowMemoryListener(this);
+
+        // Commit the order list to persistent store
         _orderList.commit();
 
         return super.onClose();
     }
 
     /**
-     * Handles a trackball click and provides identical behavior to an ENTER
-     * keypress event.
-     * 
      * @see net.rim.device.api.ui.Screen#invokeAction(int)
      */
     protected boolean invokeAction(final int action) {
-        switch (action) {
-        case ACTION_INVOKE: // Trackball click.
+        if (action == ACTION_INVOKE) {
             viewRecord(_orderListField.getSelectedIndex());
-            return true; // We've consumed the event.
+            return true;
         }
+
         return super.invokeAction(action);
     }
 
     /**
-     * Intercepts the ENTER key.
-     * 
      * @see net.rim.device.api.ui.Screen#keyChar(char,int,int)
      */
     protected boolean keyChar(final char key, final int status, final int time) {
@@ -126,19 +118,19 @@ public final class MemoryDemoMainScreen extends MainScreen implements
     }
 
     /**
-     * Displays selected record in view mode.
+     * Displays selected record in view mode
      */
     private void viewRecord(final int index) {
         OrderRecord orderRecord =
                 (OrderRecord) /* outer. */get(_orderListField, index);
         final MemoryDemoOrderScreen screen =
                 new MemoryDemoOrderScreen(orderRecord, false);
-        /* outer. */_app.pushModalScreen(screen);
+        _app.pushModalScreen(screen);
         orderRecord = screen.getUpdatedOrderRecord();
 
         if (orderRecord != null) {
-            /* outer. */_orderList.replaceOrderRecordAt(_orderListField
-                    .getSelectedIndex(), orderRecord);
+            _orderList.replaceOrderRecordAt(_orderListField.getSelectedIndex(),
+                    orderRecord);
         }
     }
 
@@ -258,10 +250,8 @@ public final class MemoryDemoMainScreen extends MainScreen implements
         return freedData;
     }
 
-    // Private Inner Classes
-    // -----------------------------------------------------------------------
     /**
-     * List field that has a custom context menu.
+     * List field that has a custom context menu
      */
     private final class OrderListField extends ListField {
         OrderListField(final int numEntries) {
@@ -275,7 +265,7 @@ public final class MemoryDemoMainScreen extends MainScreen implements
          * number of records, there is an option to fill up the list with random
          * data.
          * 
-         * @return The newly-created context menu.
+         * @return The newly-created context menu
          */
         public ContextMenu getContextMenu() {
             final ContextMenu contextMenu = super.getContextMenu();
@@ -300,133 +290,160 @@ public final class MemoryDemoMainScreen extends MainScreen implements
     }
 
     /**
-     * A menu item to view a record.
+     * A menu item to view a record
      */
     private final class View extends MenuItem {
         private final int _index;
 
         private View(final int index) {
-            super("View", 101, 100);
+            super(new StringProvider("View"), 0x230020, 1);
             _index = index;
-        }
-
-        public void run() {
-            viewRecord(_index);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    viewRecord(_index);
+                }
+            }));
         }
     }
 
     /**
-     * A menu item to edit a record.
+     * A menu item to edit a record
      */
     private final class Edit extends MenuItem {
         private final int _index;
 
         private Edit(final int index) {
-            super("Edit", 102, 102);
+            super(new StringProvider("Edit"), 0x230030, 2);
             _index = index;
-        }
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    OrderRecord orderRecord =
+                            (OrderRecord) /* outer. */get(_orderListField,
+                                    _index);
+                    final MemoryDemoOrderScreen screen =
+                            new MemoryDemoOrderScreen(orderRecord, true);
+                    _app.pushModalScreen(screen);
+                    orderRecord = screen.getUpdatedOrderRecord();
 
-        public void run() {
-
-            OrderRecord orderRecord =
-                    (OrderRecord) /* outer. */get(_orderListField, _index);
-            final MemoryDemoOrderScreen screen =
-                    new MemoryDemoOrderScreen(orderRecord, true);
-            /* outer. */_app.pushModalScreen(screen);
-            orderRecord = screen.getUpdatedOrderRecord();
-
-            if (orderRecord != null) {
-                /* outer. */_orderList
-                        .replaceOrderRecordAt(_index, orderRecord);
-            }
+                    if (orderRecord != null) {
+                        _orderList.replaceOrderRecordAt(_index, orderRecord);
+                    }
+                }
+            }));
         }
     }
 
     /**
-     * A menu item to delete a record.
+     * A menu item to delete a record
      */
     private final class Delete extends MenuItem {
         private final int _index;
 
         private Delete(final int index) {
-            super("Delete", 103, 103);
+            super(new StringProvider("Delete"), 0x230040, 3);
             _index = index;
-        }
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
 
-        public void run() {
-            if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
-
-                final OrderRecord orderRecord =
-                        (OrderRecord) /* outer. */get(_orderListField, _index);
-                /* outer. */_orderList.deleteOrderRecord(orderRecord);
-                /* outer. */_orderListField.setSize( /* outer. */_orderList
-                        .getNumOrderRecords());
-            }
+                        final OrderRecord orderRecord =
+                                (OrderRecord) get(_orderListField, _index);
+                        _orderList.deleteOrderRecord(orderRecord);
+                        _orderListField
+                                .setSize(_orderList.getNumOrderRecords());
+                    }
+                }
+            }));
         }
     }
 
     /**
-     * A menu item to delete all records in the list field.
+     * A menu item to delete all records in the list field
      */
     private final class DeleteAll extends MenuItem {
         private DeleteAll() {
-            super("Delete All", 104, 104);
-        }
-
-        public void run() {
-            if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
-                /* outer. */_orderList.deleteAllOrderRecords();
-                /* outer. */_orderListField.setSize(0);
-            }
+            super(new StringProvider("Delete All"), 0x230050, 4);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
+                        _orderList.deleteAllOrderRecords();
+                        _orderListField.setSize(0);
+                    }
+                }
+            }));
         }
     }
 
     /**
-     * A menu item to populate the list field.
+     * A menu item to populate the list field
      */
     private final class Populate extends MenuItem {
         private Populate() {
-            super("Populate", 100000, 100000);
-        }
+            super(new StringProvider("Populate"), 0x230010, 0);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    _progressDialog =
+                            new ProgressBarDialog(
+                                    "Generating order records...", _orderList
+                                            .getNumRecordsToAdd(MAX_RECORDS));
 
-        public void run() {
-            _progressDialog =
-                    new ProgressBarDialog("Generating order records...",
-                            _orderList.getNumRecordsToAdd(MAX_RECORDS));
+                    new Thread(new Runnable() {
+                        public void run() {
+                            _orderList.populate(MAX_RECORDS, _progressDialog);
 
-            new Thread(new Runnable() {
-                public void run() {
-                    /* outer. */_orderList.populate(MAX_RECORDS,
-                            _progressDialog);
-
-                    UiApplication.getUiApplication().invokeLater(
-                            new Runnable() {
-                                public void run() {
-                                    /* outer. */_orderListField
-                                            .setSize( /* outer. */_orderList
+                            UiApplication.getUiApplication().invokeLater(
+                                    new Runnable() {
+                                        public void run() {
+                                            _orderListField.setSize(_orderList
                                                     .getNumOrderRecords());
-                                }
-                            });
+                                        }
+                                    });
+                        }
+                    }).start();
                 }
-            }).start();
+            }));
         }
     }
 
     /**
-     * Creates a popup dialog box containing a gauge field, displays the
-     * progress as the list is populated.
+     * A clas that creates a popup dialog box containing a gauge field to
+     * display the progress as the list is populated.
      */
     static class ProgressBarDialog implements CountAndSortListener {
         private final DialogFieldManager _manager;
         private final PopupScreen _popupScreen;
         private final GaugeField _gaugeField;
         private final LabelField _lbfield;
-
         private final int _max;
         private final int _stepSize;
 
         /**
-         * Constructor
+         * Creates a new ProgressBarDialog object
          * 
          * @param title
          *            Text to display on _popupScreen.
@@ -434,9 +451,9 @@ public final class MemoryDemoMainScreen extends MainScreen implements
          *            Maximum value of the range _gaugeField can display.
          */
         private ProgressBarDialog(final String title, final int max) {
-            _max = max; // Number of records to be added.
+            _max = max;
 
-            // Make sure that step size is at least one.
+            // Make sure that step size is at least one
             _stepSize = Math.max(_max / 100, 1);
 
             _manager = new DialogFieldManager();
@@ -489,7 +506,7 @@ public final class MemoryDemoMainScreen extends MainScreen implements
          * @see com.rim.samples.device.memorydemo.CountAndSortListener#sortingStarted()
          */
         public void sortingFinished() {
-            // Remove _popupScreen from the stack.
+            // Remove _popupScreen from the stack
             UiApplication.getUiApplication().invokeLater(new Runnable() {
                 public void run() {
                     UiApplication.getUiApplication().popScreen(_popupScreen);
@@ -503,18 +520,21 @@ public final class MemoryDemoMainScreen extends MainScreen implements
      * priority.
      */
     private final class SimulateLmmLow extends MenuItem {
-        // Constructor
-        private SimulateLmmLow() {
-            super("Simulate LMM Low", 300000, 300000);
-        }
-
         /**
-         * Frees a stale object at low priority
-         * 
-         * @see java.lang.Runnable#run()
+         * Creates a new SimulateLmmLow object
          */
-        public void run() {
-            /* outer. */freeStaleObject(LowMemoryListener.LOW_PRIORITY);
+        private SimulateLmmLow() {
+            super(new StringProvider("Simulate LMM Low"), 0x330000, 5);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    freeStaleObject(LowMemoryListener.LOW_PRIORITY);
+                }
+            }));
         }
     }
 
@@ -523,38 +543,44 @@ public final class MemoryDemoMainScreen extends MainScreen implements
      * Medium priority.
      */
     private final class SimulateLmmMedium extends MenuItem {
-        // Constructor
-        private SimulateLmmMedium() {
-            super("Simulate LMM Medium", 300001, 300001);
-        }
-
         /**
-         * Frees a stale object at medium priority
-         * 
-         * @see java.lang.Runnable#run()
+         * Creates a new SimulateLmmMedium object
          */
-        public void run() {
-            /* outer. */freeStaleObject(LowMemoryListener.MEDIUM_PRIORITY);
+        private SimulateLmmMedium() {
+            super(new StringProvider("Simulate LMM Medium"), 0x330010, 6);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    freeStaleObject(LowMemoryListener.MEDIUM_PRIORITY);
+                }
+            }));
         }
     }
 
     /**
-     * A menu item to simulate the execution of the Low Memory Manager with High
-     * priority.
+     * A menu item to simulate the execution of the Low Memory Manager with
+     * Highpriority.
      */
     private final class SimulateLmmHigh extends MenuItem {
-        // Constructor
-        private SimulateLmmHigh() {
-            super("Simulate LMM High", 300002, 300002);
-        }
-
         /**
-         * Frees a stale object at high priority
-         * 
-         * @see java.lang.Runnable#run()
+         * Creates a new SimulateLmmHigh object
          */
-        public void run() {
-            /* outer. */freeStaleObject(LowMemoryListener.HIGH_PRIORITY);
+        private SimulateLmmHigh() {
+            super(new StringProvider("Simulate LMM High"), 0x330020, 7);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    freeStaleObject(LowMemoryListener.HIGH_PRIORITY);
+                }
+            }));
         }
     }
 }

@@ -24,6 +24,8 @@
  * Environment Development Guide associated with this release.
  */
 
+/////////////////////////////////////////////////////////////////////////////
+//ContactList
 #include "stdafx.h"
 #include "ContactList.h"
 using namespace MSXML2;
@@ -38,7 +40,7 @@ ContactList::ContactList(char const * const filename) //:
 	//m_file(filename, CFile::modeReadWrite | CFile::typeText)
 {
 	CHECKHR(CoInitialize(NULL));
-	CHECKHR(m_data.CreateInstance(CLSID_DOMDocument));
+	CHECKHR(m_data.CreateInstance(MSXML2::CLSID_DOMDocument));
 
 	_variant_t varOut((bool)TRUE);
 	char path[_MAX_PATH];
@@ -86,15 +88,15 @@ ContactList::Contact * ContactList::get(char const * firstname, char const * las
 	return toContact(getNode(firstname, lastname));
 }
 
-IXMLDOMNodePtr ContactList::getNode(char const * firstname, char const * lastname)
+MSXML2::IXMLDOMNodePtr ContactList::getNode(char const * firstname, char const * lastname)
 {
 	if ( m_node != NULL)
 	{
-		IXMLDOMNamedNodeMapPtr p = m_node->attributes; //does the current node contain the information required?
+		MSXML2::IXMLDOMNamedNodeMapPtr p = m_node->attributes; //does the current node contain the information required?
 		if ( p != NULL )
 		{
-			IXMLDOMNodePtr fn = p->getNamedItem(_bstr_t("first"));
-			IXMLDOMNodePtr ln = p->getNamedItem(_bstr_t("last"));
+			MSXML2::IXMLDOMNodePtr fn = p->getNamedItem(_bstr_t("first"));
+			MSXML2::IXMLDOMNodePtr ln = p->getNamedItem(_bstr_t("last"));
 			if ( fn != NULL && ln != NULL)
 			{
 				if ( _bstr_t(firstname) == fn->text && _bstr_t(lastname) == ln->text )
@@ -116,12 +118,12 @@ IXMLDOMNodePtr ContactList::getNode(char const * firstname, char const * lastnam
 bool ContactList::put(ContactList::Contact * contact)
 {
 	//if the node already exists in the tree, then just modify it's data
-	IXMLDOMNodePtr node = getNode(contact->m_firstName, contact->m_lastName);
+	MSXML2::IXMLDOMNodePtr node = getNode(contact->m_firstName, contact->m_lastName);
 
 	if ( node != NULL)
 	{
 		//just modify the email address
-		IXMLDOMNodePtr p = node->selectSingleNode(_bstr_t("./email"));
+		MSXML2::IXMLDOMNodePtr p = node->selectSingleNode(_bstr_t("./email"));
 		if ( p != NULL )
 		{
 			//this element has an email address, replace it
@@ -130,7 +132,7 @@ bool ContactList::put(ContactList::Contact * contact)
 		}
 		else
 		{
-			IXMLDOMElementPtr email = m_data->createElement(_bstr_t("email"));
+			MSXML2::IXMLDOMElementPtr email = m_data->createElement(_bstr_t("email"));
 			email->text = _bstr_t(contact->m_email);
 			return node->appendChild(email) != NULL;
 		}
@@ -139,19 +141,19 @@ bool ContactList::put(ContactList::Contact * contact)
 	{
 
 		//add a new node to the tree
-		IXMLDOMElementPtr contactNode = m_data->createElement(_bstr_t("contact"));
+		MSXML2::IXMLDOMElementPtr contactNode = m_data->createElement(_bstr_t("contact"));
 		contactNode->setAttribute(_bstr_t("first"), _variant_t((LPCTSTR)(contact->m_firstName)));
 		contactNode->setAttribute(_bstr_t("last"), _variant_t((LPCTSTR)(contact->m_lastName)));
 
-		IXMLDOMElementPtr first = m_data->createElement(_bstr_t("first"));
+		MSXML2::IXMLDOMElementPtr first = m_data->createElement(_bstr_t("first"));
 		first->text = _bstr_t((LPCTSTR)(contact->m_firstName));
 		contactNode->appendChild(first);
 
-		IXMLDOMElementPtr last = m_data->createElement(_bstr_t("last"));
+		MSXML2::IXMLDOMElementPtr last = m_data->createElement(_bstr_t("last"));
 		last->text = _bstr_t((LPCTSTR)(contact->m_lastName));
 		contactNode->appendChild(last);
 
-		IXMLDOMElementPtr email = m_data->createElement(_bstr_t("email"));
+		MSXML2::IXMLDOMElementPtr email = m_data->createElement(_bstr_t("email"));
 		email->text = _bstr_t((LPCTSTR)(contact->m_email));
 		contactNode->appendChild(email);	
 		
@@ -170,12 +172,12 @@ bool ContactList::save(char const * const filename)
 	return S_OK == m_data->save(_variant_t((LPCTSTR)local));
 }
 
-ContactList::Contact * ContactList::toContact(IXMLDOMNodePtr node)
+ContactList::Contact * ContactList::toContact(MSXML2::IXMLDOMNodePtr node)
 {
 	if ( node == NULL ) return NULL;
 	//extract the various fields
 	//extract the various bits of the node
-	IXMLDOMNodePtr p = node->selectSingleNode(FIRST_QSTRING);
+	MSXML2::IXMLDOMNodePtr p = node->selectSingleNode(FIRST_QSTRING);
 	Contact * c = new Contact();
 	if ( p != NULL )
 	{
@@ -204,7 +206,7 @@ ContactList::Contact ** ContactList::get(int * count)
 	ContactList::Contact ** list = NULL;
 	if ( count != NULL ) *count = 0;
 
-	IXMLDOMNodeListPtr nodes = m_data->documentElement->childNodes;
+	MSXML2::IXMLDOMNodeListPtr nodes = m_data->documentElement->childNodes;
 	if ( nodes != NULL )
 	{
 		if ( NULL != count ) *count = (int)nodes->length;

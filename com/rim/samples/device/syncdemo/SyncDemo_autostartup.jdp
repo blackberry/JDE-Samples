@@ -25,6 +25,7 @@ AutoRestart=0
 ]
 EntryFor=SyncDemo
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 ]
 HaveAlxImports=0
@@ -41,13 +42,14 @@ MidletClass=init
 NoImport=0
 NoRuntime=0
 Options=-quiet 
-OutputFileName=syncdemo_autorun
+OutputFileName=SyncDemo_autostartup
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=1
+SkipCompile=0
 StartupTier=7
 SystemModule=1
 Type=3

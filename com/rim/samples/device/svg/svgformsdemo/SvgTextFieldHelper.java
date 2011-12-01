@@ -1,5 +1,5 @@
 /*
- * SvgTextFieldHelper.java
+ * SVGTextFieldHelper.java
  *
  * Copyright © 1998-2011 Research In Motion Limited
  * 
@@ -29,7 +29,7 @@ package com.rim.samples.device.svg.svgformsdemo;
 /**
  * Helper class for SVG text fields
  */
-public final class SvgTextFieldHelper {
+public final class SVGTextFieldHelper {
     // The main screen
     private final SVGFormsScreen _svgFormsScreen;
 
@@ -43,14 +43,14 @@ public final class SvgTextFieldHelper {
     private final TextBoxManager _textBoxManager;
 
     /**
-     * Constructs a new SvgTextFieldHelper
+     * Creates a new SVGTextFieldHelper object
      * 
      * @param svgFormsScreen
      *            The applications's main screen
      * @param textPanel
      *            The panel that contains the text field
      */
-    public SvgTextFieldHelper(final SVGFormsScreen svgFormsScreen,
+    public SVGTextFieldHelper(final SVGFormsScreen svgFormsScreen,
             final TextPanel textPanel) {
         _svgFormsScreen = svgFormsScreen;
         _textPanel = textPanel;

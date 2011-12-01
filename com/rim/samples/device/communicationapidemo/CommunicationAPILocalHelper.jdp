@@ -1,0 +1,58 @@
+## RIM Java Development Environment
+# RIM Project file
+#
+# This file is generated and managed by BlackBerry developer tools.
+# It SHOULD NOT BE modified manually.
+#
+AddOn=0
+AlwaysBuild=0
+[AlxImports
+]
+AutoRestart=0
+[ClassProtection
+]
+[CustomBuildFiles
+]
+[CustomBuildRules
+]
+[DefFiles
+]
+[DependsOn
+]
+ExcludeFromBuildAll=0
+Exported=0
+[Files
+config\config.xml
+img\communicationapidemo_jde.png
+local\CommunicationController.java
+local\LocalHelper.java
+local\MenuMainScreen.java
+local\SendFireForgetScreen.java
+ui\FullWidthButton.java
+util\Utils.java
+]
+HaveAlxImports=0
+HaveDefs=0
+HaveImports=0
+[Icons
+img\communicationapidemo_jde.png
+]
+[ImplicitRules
+]
+[Imports
+]
+Listing=0
+Options=-quiet 
+OutputFileName=CommunicationAPILocalHelper
+[PackageProtection
+]
+RibbonPosition=0
+[RolloverIcons
+]
+RunOnStartup=0
+SkipCompile=0
+StartupTier=7
+SystemModule=0
+Title=Communication API Local Helper
+Type=0
+Version=0.9

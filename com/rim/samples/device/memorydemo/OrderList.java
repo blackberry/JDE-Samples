@@ -281,8 +281,10 @@ public final class OrderList {
      * Implements a sortable vector which sorts based on chronological order.
      */
     final static class SortableVector extends SimpleSortingVector {
-        // Constructor
-        SortableVector() {
+        /**
+         * Creates a new SortableVector object
+         */
+        public SortableVector() {
             setSortComparator(new Comparator() {
                 public int compare(final Object o1, final Object o2) {
                     final OrderRecord r1 = (OrderRecord) o1;

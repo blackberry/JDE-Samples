@@ -39,6 +39,9 @@ import net.rim.blackberry.api.mail.Session;
 import net.rim.blackberry.api.mail.Store;
 import net.rim.blackberry.api.mail.TextBodyPart;
 import net.rim.blackberry.api.mail.Transport;
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
@@ -48,6 +51,7 @@ import net.rim.device.api.ui.component.EditField;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.component.TextField;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * The ComposeScreen is a screen which displays either a new or saved message.
@@ -57,10 +61,6 @@ import net.rim.device.api.ui.component.TextField;
 public final class ComposeScreen extends MessageScreen {
     private static final int FIRST = 0;
     private static final int SEND_MENU_ITEM_INDEX = 0;
-
-    private final AddHeaderFieldAction _addToMenuItem;
-    private final AddHeaderFieldAction _addCcMenuItem;
-    private final AddHeaderFieldAction _addBccMenuItem;
 
     private final Store _store;
 
@@ -85,65 +85,76 @@ public final class ComposeScreen extends MessageScreen {
 
         // Create and add menu items specific to the Compose action (addTo,
         // addBcc, addCc, etc...).
-        _addToMenuItem =
+        final AddHeaderFieldAction addToMenuItem =
                 new AddHeaderFieldAction(Message.RecipientType.TO, "Add To: ",
                         "To: ");
-        _addCcMenuItem =
+        final AddHeaderFieldAction addCcMenuItem =
                 new AddHeaderFieldAction(Message.RecipientType.CC, "Add Cc: ",
                         "Cc: ");
-        _addBccMenuItem =
+        final AddHeaderFieldAction addBccMenuItem =
                 new AddHeaderFieldAction(Message.RecipientType.BCC,
                         "Add Bcc: ", "Bcc: ");
 
-        addMenuItem(_sendMenuItem);
-        addMenuItem(_saveMenuItem);
-        addMenuItem(_addToMenuItem);
-        addMenuItem(_addCcMenuItem);
-        addMenuItem(_addBccMenuItem);
-    }
-
-    /**
-     * MenuItem to send a message
-     */
-    private final MenuItem _sendMenuItem = new MenuItem("Send", 110, 11) {
-        public void run() {
-            try {
-                _message = getMessage();
-                if (_message != null) {
-                    // Send the message
-                    Transport.send(_message);
-
-                    // Close the screen
+        // MenuItem to save a message
+        final MenuItem saveMenuItem =
+                new MenuItem(new StringProvider("Save Message"), 0x230020, 1);
+        saveMenuItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) { // If the save is completed, then
+                                            // discard this screen
+                if (onSave()) {
                     close();
+                } else
+                // If the message could not be saved, alert the user
+                {
+                    UiApplication.getUiApplication().invokeLater(
+                            new Runnable() {
+                                public void run() {
+                                    Dialog.alert("Message could not be saved");
+                                }
+                            });
                 }
-            } catch (final MessagingException e) {
-                BlackBerryMailDemo.errorDialog("Transport.send(Message) threw "
-                        + e.toString());
             }
-        }
-    };
+        }));
 
-    /**
-     * MenuItem to save a message
-     */
-    private final MenuItem _saveMenuItem =
-            new MenuItem("Save Message", 110, 11) {
-                public void run() {
-                    // If the save is completed, then discard this screen
-                    if (onSave()) {
+        // MenuItem to send a message
+        final MenuItem sendMenuItem =
+                new MenuItem(new StringProvider("Send Message"), 0x230010, 0);
+        sendMenuItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) { // If the save is completed, then
+                                            // discard this screen
+                try {
+                    _message = getMessage();
+                    if (_message != null) {
+                        // Send the message
+                        Transport.send(_message);
+
+                        // Close the screen
                         close();
-                    } else
-                    // If the message could not be saved, alert the user
-                    {
-                        UiApplication.getUiApplication().invokeLater(
-                                new Runnable() {
-                                    public void run() {
-                                        Dialog.alert("Message could not be saved");
-                                    }
-                                });
                     }
+                } catch (final MessagingException e) {
+                    BlackBerryMailDemo
+                            .errorDialog("Transport.send(Message) threw "
+                                    + e.toString());
                 }
-            };
+            }
+        }));
+
+        addMenuItem(sendMenuItem);
+        addMenuItem(saveMenuItem);
+        addMenuItem(addToMenuItem);
+        addMenuItem(addCcMenuItem);
+        addMenuItem(addBccMenuItem);
+    }
 
     /**
      * Overrides MessageScreen.displayMessage(). The message's 'sent' properties
@@ -339,39 +350,50 @@ public final class ComposeScreen extends MessageScreen {
          */
         AddHeaderFieldAction(final int headerType, final String menuItemText,
                 final String fieldLabelText) {
-            super(menuItemText, 100000, 10);
+            super(new StringProvider(menuItemText), 0x240010, 2);
 
             _fieldLabelText = fieldLabelText;
             _headerType = headerType;
-        }
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * Adds a new header field to the message. The field is placed
+                 * so that the header types are grouped together and the most
+                 * recently added one is closest to the bottom.
+                 * 
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final EditField newField =
+                            new EditField(_fieldLabelText, "");
 
-        /**
-         * Adds a new header field to the message. The field is placed so that
-         * the header types are grouped together and the most recently added one
-         * is closest to the bottom.
-         */
-        public void run() {
-            final EditField newField = new EditField(_fieldLabelText, "");
+                    // Find out where the last field of this type was added to
+                    // the
+                    // screen.
+                    Vector fieldsByType = (Vector) _fieldTable.get(_headerType);
+                    int lastInsertedIndex;
+                    if (fieldsByType == null) {
+                        // If a field of _headerType was not made yet, then
+                        // create the
+                        // vector which contains all of the fields of
+                        // _headerType.
+                        fieldsByType = new Vector();
+                        _fieldTable.put(_headerType, fieldsByType);
+                        lastInsertedIndex = getIndexForNewFieldType();
+                    } else {
+                        lastInsertedIndex =
+                                getIndexOfLastFieldOfType(_headerType);
+                    }
 
-            // Find out where the last field of this type was added to the
-            // screen.
-            Vector fieldsByType = (Vector) _fieldTable.get(_headerType);
-            int lastInsertedIndex;
-            if (fieldsByType == null) {
-                // If a field of _headerType was not made yet, then create the
-                // vector which contains all of the fields of _headerType.
-                fieldsByType = new Vector();
-                _fieldTable.put(_headerType, fieldsByType);
-                lastInsertedIndex = getIndexForNewFieldType();
-            } else {
-                lastInsertedIndex = getIndexOfLastFieldOfType(_headerType);
-            }
-
-            // Add the new field to both the screen and the vector keeping track
-            // of all the fields of the same type.
-            ComposeScreen.this.insert(newField, lastInsertedIndex + 1);
-            fieldsByType.addElement(newField);
-            newField.setFocus();
+                    // Add the new field to both the screen and the vector
+                    // keeping track
+                    // of all the fields of the same type.
+                    ComposeScreen.this.insert(newField, lastInsertedIndex + 1);
+                    fieldsByType.addElement(newField);
+                    newField.setFocus();
+                }
+            }));
         }
 
         /**

@@ -62,7 +62,9 @@ public final class TiltDemo extends UiApplication {
         theApp.enterEventDispatcher();
     }
 
-    // Constructor
+    /**
+     * Creates a new TiltDemo object
+     */
     public TiltDemo() {
         final TiltDemoScreen screen = new TiltDemoScreen();
         pushScreen(screen);
@@ -83,8 +85,10 @@ final class TiltDemoScreen extends MainScreen implements FieldChangeListener {
 
     private CustomSpanField _customSpanField;
 
-    // Constructor
-    TiltDemoScreen() {
+    /**
+     * Creates a new TiltDemoScreen object
+     */
+    public TiltDemoScreen() {
         // If this is not a touchscreen device, exit the application.
         if (!Touchscreen.isSupported()) {
             UiApplication.getUiApplication().invokeLater(new Runnable() {
@@ -195,11 +199,10 @@ final class TiltDemoScreen extends MainScreen implements FieldChangeListener {
     }
 
     /**
-     * Prevent the save dialog from being displayed.
-     * 
      * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
      */
     protected boolean onSavePrompt() {
+        // Supress the save dialog
         return true;
     }
 

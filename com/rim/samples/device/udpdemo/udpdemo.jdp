@@ -20,10 +20,11 @@ AutoRestart=0
 [DependsOn
 ]
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 img\udpdemo_jde.png
-UdpClient.java
-UdpDemo.java
+UDPClient.java
+UDPDemo.java
 ]
 HaveAlxImports=0
 HaveDefs=0
@@ -36,14 +37,15 @@ img\udpdemo_jde.png
 [Imports
 ]
 Listing=0
-Options=-quiet
-OutputFileName=udpdemo
+Options=-quiet 
+OutputFileName=UDPDemo
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=UDP Demo

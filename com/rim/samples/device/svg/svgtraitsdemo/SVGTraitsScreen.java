@@ -48,7 +48,8 @@ import org.w3c.dom.svg.SVGSVGElement;
  * corners. The user can adjust the size of the rectangle.
  */
 public final class SVGTraitsScreen extends MainScreen {
-    private static String SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg";
+    private static final String SVG_NAMESPACE_URI =
+            "http://www.w3.org/2000/svg";
     private static final int SCROLL_INCREMENT = 20;
 
     private SVGImage _image;

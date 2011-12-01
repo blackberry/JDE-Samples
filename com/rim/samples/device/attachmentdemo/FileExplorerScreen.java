@@ -28,27 +28,49 @@ package com.rim.samples.device.attachmentdemo;
 
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Vector;
 
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Characters;
+import net.rim.device.api.system.Display;
+import net.rim.device.api.ui.Color;
+import net.rim.device.api.ui.DrawStyle;
+import net.rim.device.api.ui.Field;
+import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
+import net.rim.device.api.ui.Screen;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.XYRect;
 import net.rim.device.api.ui.component.Dialog;
+import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
+import net.rim.device.api.ui.component.table.DataTemplate;
+import net.rim.device.api.ui.component.table.TableController;
+import net.rim.device.api.ui.component.table.TableModelAdapter;
+import net.rim.device.api.ui.component.table.TableView;
+import net.rim.device.api.ui.component.table.TemplateColumnProperties;
+import net.rim.device.api.ui.component.table.TemplateRowProperties;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.decor.BackgroundFactory;
+import net.rim.device.api.util.StringProvider;
 
 /**
- * A MainScreen class to show the listing of all directories/files
+ * Shows the listing of all directories/files
  */
 public class FileExplorerScreen extends MainScreen {
-    private static String ROOT = "file:///SDCard/";
+    private static final String ROOT = "file:///SDCard/";
+    private final Vector _elements = new Vector();
 
-    private final FileExplorerListField _list;
+    private FileExplorerTableModelAdapter _model;
+    private TableView _view;
     private String _parentRoot;
-    private final UiApplication _app;
+    private UiApplication _app;
 
     /**
      * Constructs a new FileExplorerScreen object
@@ -57,13 +79,86 @@ public class FileExplorerScreen extends MainScreen {
      *            Reference to the UiApplication instance
      */
     public FileExplorerScreen(final UiApplication app) {
+        super(Manager.NO_VERTICAL_SCROLL);
+
         _app = app;
 
-        // Instantiate and add ListField
-        _list = new FileExplorerListField();
-        add(_list);
+        _model = new FileExplorerTableModelAdapter();
+
+        _view = new TableView(_model);
+        final TableController controller = new TableController(_model, _view);
+        controller.setFocusPolicy(TableController.ROW_FOCUS);
+        _view.setController(controller);
+
+        // Set the highlight style for the view
+        _view.setDataTemplateFocus(BackgroundFactory
+                .createLinearGradientBackground(Color.LIGHTBLUE,
+                        Color.LIGHTBLUE, Color.BLUE, Color.BLUE));
+
+        // Create a data template that will format the model data as an array of
+        // LabelFields
+        final DataTemplate dataTemplate = new DataTemplate(_view, 1, 1) {
+            public Field[] getDataFields(final int modelRowIndex) {
+                final FileHolder fileholder =
+                        (FileHolder) _model.getRow(modelRowIndex);
+
+                String text;
+
+                if (fileholder.isDirectory()) {
+                    int pathIndex = fileholder.getPath().lastIndexOf('/');
+                    pathIndex =
+                            fileholder.getPath().substring(0, pathIndex)
+                                    .lastIndexOf('/');
+                    text = fileholder.getPath().substring(pathIndex + 1);
+                } else {
+                    text = fileholder.getFileName();
+                }
+
+                final Field[] fields =
+                        { new LabelField(text, DrawStyle.ELLIPSIS
+                                | Field.NON_FOCUSABLE) };
+
+                return fields;
+            }
+        };
+
+        // Define the regions of the data template and column/row size
+        dataTemplate.createRegion(new XYRect(0, 0, 1, 1));
+        dataTemplate.setColumnProperties(0, new TemplateColumnProperties(
+                Display.getWidth()));
+        dataTemplate.setRowProperties(0, new TemplateRowProperties(24));
+
+        _view.setDataTemplate(dataTemplate);
+        dataTemplate.useFixedHeight(true);
+
+        // Add the file to the screen
+        add(_view);
 
         readRoots(ROOT);
+
+        _selectItem = new MenuItem(new StringProvider("Select"), 0x230010, 0);
+        _selectItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                selectAction();
+            }
+        }));
+
+        _backItem = new MenuItem(new StringProvider("Go Back"), 0x230020, 1);
+        _backItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                goBack();
+            }
+        }));
     }
 
     /**
@@ -73,14 +168,12 @@ public class FileExplorerScreen extends MainScreen {
         // Enter key will take action on directory/file. Escape key will go up
         // one directory or close screen if at top level.
         switch (c) {
-        case Characters.ENTER:
-            selectAction();
-            return true;
         case Characters.ESCAPE:
             if (goBack()) {
                 return true;
             }
         }
+
         return super.keyChar(c, status, time);
     }
 
@@ -96,6 +189,7 @@ public class FileExplorerScreen extends MainScreen {
                 menu.add(_backItem);
             }
         }
+
         super.makeMenu(menu, instance);
     }
 
@@ -107,7 +201,8 @@ public class FileExplorerScreen extends MainScreen {
             selectAction();
             return true;
         }
-        return false;
+
+        return super.invokeAction(action);
     }
 
     /**
@@ -120,8 +215,8 @@ public class FileExplorerScreen extends MainScreen {
         _parentRoot = root;
         setTitle(root);
 
-        // Reset the list field
-        _list.removeAll();
+        // Reset the table contents
+        _model.removeAllRows();
 
         FileConnection fc = null;
         Enumeration rootEnum = null;
@@ -131,7 +226,7 @@ public class FileExplorerScreen extends MainScreen {
             try {
                 fc = (FileConnection) Connector.open(root);
                 rootEnum = fc.list();
-            } catch (final Exception e) {
+            } catch (final IOException e) {
                 AttachmentDemo.errorDialog(e.toString());
                 return;
             } finally {
@@ -179,13 +274,13 @@ public class FileExplorerScreen extends MainScreen {
             // connection is not left open
             final FileHolder fileholder =
                     new FileHolder(file, fc.isDirectory());
-            _list.add(fileholder);
+            _model.addRow(fileholder);
         } catch (final IOException e) {
             AttachmentDemo
                     .errorDialog("Connector.open() threw " + e.toString());
         } finally {
             if (fc != null) {
-                // Everything is read, make sure to close the connection
+                // Everything is read. Close the connection.
                 try {
                     fc.close();
                     fc = null;
@@ -200,7 +295,7 @@ public class FileExplorerScreen extends MainScreen {
      */
     private void selectAction() {
         final FileHolder fileholder =
-                (FileHolder) _list.get(_list, _list.getSelectedIndex());
+                (FileHolder) _model.getRow(_view.getRowNumberWithFocus());
 
         if (fileholder != null) {
             // If the FileHolder represents a directory, then show what's
@@ -254,20 +349,63 @@ public class FileExplorerScreen extends MainScreen {
     }
 
     /**
+     * Adapter for displaying file explorer entries in table format
+     */
+    private class FileExplorerTableModelAdapter extends TableModelAdapter {
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfRows()
+         */
+        public int getNumberOfRows() {
+            return _elements.size();
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfColumns()
+         */
+        public int getNumberOfColumns() {
+            return 1;
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doAddRow(Object)
+         */
+        protected boolean doAddRow(final Object row) {
+            _elements.addElement(row);
+            return true;
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doRemoveRowAt()
+         */
+        protected boolean doRemoveRowAt(final int index) {
+            _elements.removeElementAt(index);
+            return true;
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doGetRow(int)
+         */
+        protected Object doGetRow(final int index) {
+            return _elements.elementAt(index);
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#removeAllRows()
+         */
+        public void removeAllRows() {
+            while (getNumberOfRows() > 0) {
+                removeRowAt(0);
+            }
+        }
+    }
+
+    /**
      * Menu item for displaying information on a selected file
      */
-    private final MenuItem _selectItem = new MenuItem("Select", 500, 500) {
-        public void run() {
-            selectAction();
-        }
-    };
+    private MenuItem _selectItem;
 
     /**
      * Menu item for going back one directory in the directory hierarchy
      */
-    private final MenuItem _backItem = new MenuItem("Go Back", 500, 500) {
-        public void run() {
-            goBack();
-        }
-    };
+    private MenuItem _backItem;
 }

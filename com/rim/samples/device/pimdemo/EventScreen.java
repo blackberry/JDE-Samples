@@ -51,6 +51,9 @@ import net.rim.blackberry.api.mail.Session;
 import net.rim.blackberry.api.mail.SupportedAttachmentPart;
 import net.rim.blackberry.api.mail.TextBodyPart;
 import net.rim.blackberry.api.mail.Transport;
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
@@ -61,78 +64,75 @@ import net.rim.device.api.ui.component.ObjectChoiceField;
 import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 public final class EventScreen extends MainScreen {
     private final EditField _subject, _location, _desc;
     private final ObjectChoiceField _recur;
-    private final InviteContactMenuItem _inviteContactMenuItem;
-    private final SaveMenuItem _saveMenuItem;
     private final Vector _invitees;
     private ContactListScreen _contactListScreen;
     private final DateField _startTime, _endTime;
     private Event _event;
 
-    // Inner classes
-    // ------------------------------------------------------------
-    private final class InviteContactMenuItem extends MenuItem {
-        /**
-         * This class is responsible for adding an invite field to the create
-         * screen
-         */
-        private InviteContactMenuItem() {
-            super("Invite Contact", 0, 0);
-        }
-
-        public void run() {
-            _contactListScreen = new ContactListScreen();
-            UiApplication.getUiApplication()
-                    .pushModalScreen(_contactListScreen);
-
-            Contact contact;
-            // Get selected contact from contact list.
-            if ((contact = _contactListScreen.getSelectedContact()) != null) {
-                final String name = PIMDemo.getDisplayName(contact);
-
-                final EditField newField =
-                        new EditField("Invite: ", name,
-                                TextField.DEFAULT_MAXCHARS, Field.READONLY);
-
-                if (_invitees.isEmpty()) // Add a separator to screen.
-                {
-                    insert(new SeparatorField(), getFieldCount());
-                }
-
-                // Store contact for email retrieval.
-                _invitees.addElement(contact);
-                insert(newField, getFieldCount());
-            }
-        }
-    }
-
-    private final class SaveMenuItem extends MenuItem {
-        private SaveMenuItem() {
-            super("Save Event", 0, 1);
-        }
-
-        public void run() {
-            // If successful display message and close screen.
-            if (onSave()) {
-                Dialog.alert("Event was saved successfully");
-                UiApplication.getUiApplication().pushScreen(new EventScreen());
-                onClose();
-            }
-        }
-    }
-
     /**
      * Creates a new EventScreen object
      */
     public EventScreen() {
-        _saveMenuItem = new SaveMenuItem();
+        final MenuItem saveMenuItem =
+                new MenuItem(new StringProvider("Save Event"), 0x230020, 1);
+        saveMenuItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                // If successful display message and close screen.
+                if (onSave()) {
+                    Dialog.alert("Event was saved successfully");
+                    UiApplication.getUiApplication().pushScreen(
+                            new EventScreen());
+                    onClose();
+                }
+            }
+        }));
+        ;
 
         _invitees = new Vector();
-        _inviteContactMenuItem = new InviteContactMenuItem();
+        // MenuItem for adding an invite field to the create screen
+        final MenuItem inviteContactMenuItem =
+                new MenuItem(new StringProvider("Invite Contact"), 0x230010, 0);
+        inviteContactMenuItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                _contactListScreen = new ContactListScreen();
+                UiApplication.getUiApplication().pushModalScreen(
+                        _contactListScreen);
 
+                Contact contact;
+                // Get selected contact from contact list.
+                if ((contact = _contactListScreen.getSelectedContact()) != null) {
+                    final String name = PIMDemo.getDisplayName(contact);
+
+                    final EditField newField =
+                            new EditField("Invite: ", name,
+                                    TextField.DEFAULT_MAXCHARS, Field.READONLY);
+
+                    if (_invitees.isEmpty()) // Add a separator to screen.
+                    {
+                        insert(new SeparatorField(), getFieldCount());
+                    }
+
+                    // Store contact for email retrieval.
+                    _invitees.addElement(contact);
+                    insert(newField, getFieldCount());
+                }
+            }
+        }));
         setTitle("PIM Demo");
 
         _subject = new EditField("Subject: ", "");
@@ -165,8 +165,8 @@ public final class EventScreen extends MainScreen {
         _recur = new ObjectChoiceField("Recurrence: ", choices, 0);
         add(_recur);
 
-        addMenuItem(_inviteContactMenuItem);
-        addMenuItem(_saveMenuItem);
+        addMenuItem(inviteContactMenuItem);
+        addMenuItem(saveMenuItem);
     }
 
     /**
@@ -299,7 +299,7 @@ public final class EventScreen extends MainScreen {
             _event.addDate(Event.END, PIMItem.ATTR_NONE, endTime);
             _event.addString(Event.NOTE, PIMItem.ATTR_NONE, description);
 
-            final RepeatRule rule = new RepeatRule();
+            RepeatRule rule = new RepeatRule();
 
             // Set RepeatRule field and value based on user selection. See
             // javadocs for
@@ -319,6 +319,10 @@ public final class EventScreen extends MainScreen {
 
             case 4:
                 rule.setInt(RepeatRule.FREQUENCY, RepeatRule.YEARLY);
+                break;
+
+            default:
+                rule = null;
                 break;
             }
 

@@ -26,28 +26,44 @@
 
 package com.rim.samples.device.otabackuprestoredemo;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.synchronization.SyncManager;
+import net.rim.device.api.synchronization.SyncObject;
 import net.rim.device.api.synchronization.UIDGenerator;
 import net.rim.device.api.system.Display;
-import net.rim.device.api.ui.Graphics;
+import net.rim.device.api.ui.Color;
+import net.rim.device.api.ui.Field;
+import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
-import net.rim.device.api.ui.component.ListField;
-import net.rim.device.api.ui.component.ListFieldCallback;
+import net.rim.device.api.ui.XYRect;
+import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
+import net.rim.device.api.ui.component.table.AbstractTableModel;
+import net.rim.device.api.ui.component.table.DataTemplate;
+import net.rim.device.api.ui.component.table.TableController;
+import net.rim.device.api.ui.component.table.TableModelAdapter;
+import net.rim.device.api.ui.component.table.TableView;
+import net.rim.device.api.ui.component.table.TemplateColumnProperties;
+import net.rim.device.api.ui.component.table.TemplateRowProperties;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.decor.BackgroundFactory;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * This application demonstrates how to use the
  * OTABackUpRestoreContactCollection class to back up contacts over the air onto
  * a BES. See the "readme.txt" file in this project for setup details.
  */
-public class OTABackupRestoreDemo extends UiApplication implements
-        ListFieldCallback {
-    private static ListField _listField;
-    private static AddContactAction _addContactAction;
+public class OTABackupRestoreDemo extends UiApplication {
+    private static boolean _startup;
+    private static OTABackupRestoreContactCollection _collection;
+    private TableView _view;
+    private AbstractTableModel _model;
 
-    private static OTABackupRestoreContactCollection _contacts;
+    private AddContactAction _addContactAction;
 
     /**
      * Adds a contact to the contact list
@@ -57,36 +73,40 @@ public class OTABackupRestoreDemo extends UiApplication implements
          * Creates a new AddContactAction object
          */
         private AddContactAction() {
-            super("Add", 100000, 10);
-        }
+            super(new StringProvider("Add"), 0x230000, 10);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * Adds a contact to the contact list
+                 * 
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    // Retrieve the contact's information from the user
+                    final OTAContactScreen screen = new OTAContactScreen();
+                    UiApplication.getUiApplication().pushModalScreen(screen);
 
-        /**
-         * Adds a contact to the contact list
-         */
-        public void run() {
-            // Retrieve the contact's information from the user
-            final OTAContactScreen screen = new OTAContactScreen();
-            UiApplication.getUiApplication().pushModalScreen(screen);
+                    final OTAContactData contact = screen.getContact();
 
-            final OTAContactData contact = screen.getContact();
+                    // Add the contact
+                    if (contact != null) {
+                        // Create a unique id for the contact - required for OTA
+                        // sync.
+                        contact.setUID(UIDGenerator.getUID());
 
-            // Add the contact
-            if (contact != null) {
-                // Create a unique id for the contact - required for ota sync.
-                contact.setUID(UIDGenerator.getUID());
-
-                // Add the contact to the collection.
-                _contacts.addSyncObject(contact);
-            }
-
-            reloadContactList();
+                        // Add the contact to the collection.
+                        _model.addRow(contact);
+                    }
+                }
+            }));
         }
     }
 
     /**
      * Views a contact from the contact list
      */
-    private static class ViewContactAction extends MenuItem {
+    private class ViewContactAction extends MenuItem {
         private final int _index;
 
         /**
@@ -97,26 +117,31 @@ public class OTABackupRestoreDemo extends UiApplication implements
          *            The index of the contact from the contact list to view
          */
         private ViewContactAction(final int index) {
-            super("View", 100000, 5);
+            super(new StringProvider("View"), 0x230020, 5);
             _index = index;
-        }
+            this.setCommand(new Command(new CommandHandler() {
 
-        /**
-         * Displays the contact information.
-         * 
-         * @see java.lang.Runnable#run()
-         */
-        public void run() {
-            final OTAContactScreen screen =
-                    new OTAContactScreen(_contacts.contactAt(_index), false);
-            UiApplication.getUiApplication().pushScreen(screen);
+                /**
+                 * Displays the contact information.
+                 * 
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final OTAContactScreen screen =
+                            new OTAContactScreen((OTAContactData) _model
+                                    .getRow(_index), false);
+                    UiApplication.getUiApplication().pushScreen(screen);
+                }
+            }));
         }
     }
 
     /**
      * A class to edits a contact
      */
-    private static class EditContactAction extends MenuItem {
+    private class EditContactAction extends MenuItem {
         private final int _index;
 
         /**
@@ -127,26 +152,30 @@ public class OTABackupRestoreDemo extends UiApplication implements
          *            The index of the contact in the contact list to edit
          */
         private EditContactAction(final int index) {
-            super("Edit", 100000, 6);
+            super(new StringProvider("Edit"), 0x230030, 6);
             _index = index;
-        }
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * Edits the contact
+                 * 
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final OTAContactScreen screen =
+                            new OTAContactScreen((OTAContactData) _model
+                                    .getRow(_index), true);
+                    UiApplication.getUiApplication().pushModalScreen(screen);
 
-        /**
-         * Edits the contact
-         * 
-         * @see java.lang.Runnable#run()
-         */
-        public void run() {
-            final OTAContactData oldContact = _contacts.contactAt(_index);
-            final OTAContactScreen screen =
-                    new OTAContactScreen(oldContact, true);
-            UiApplication.getUiApplication().pushModalScreen(screen);
+                    // Get the newly updated contact
+                    final OTAContactData newContact = screen.getContact();
 
-            // Get the newly updated contact
-            final OTAContactData newContact = screen.getContact();
-
-            // Update the contact in the collection.
-            _contacts.updateSyncObject(oldContact, newContact);
+                    // Update the contact in the collection.
+                    _model.removeRowAt(_index);
+                    _model.insertRowAt(_index, newContact);
+                }
+            }));
         }
     }
 
@@ -154,7 +183,15 @@ public class OTABackupRestoreDemo extends UiApplication implements
      * This is the main screen which displays the contact list and creates the
      * menu to let the user manipulate the contacts.
      */
-    private static class OTABackupRestoreDemoScreen extends MainScreen {
+    private class OTABackupRestoreDemoScreen extends MainScreen {
+
+        /**
+         * Create a new OTABackupRestoreDemoScreen object
+         */
+        public OTABackupRestoreDemoScreen() {
+            super(Manager.NO_VERTICAL_SCROLL);
+        }
+
         /**
          * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
          */
@@ -163,9 +200,9 @@ public class OTABackupRestoreDemo extends UiApplication implements
 
             menu.addSeparator();
 
-            final int index = _listField.getSelectedIndex();
+            final int index = _view.getRowNumberWithFocus();
 
-            if (index >= 0) {
+            if (_model.getNumberOfRows() > 0 && index >= 0) {
                 menu.add(new ViewContactAction(index));
                 menu.add(new EditContactAction(index));
             }
@@ -180,6 +217,9 @@ public class OTABackupRestoreDemo extends UiApplication implements
      * Creates a new OTABackupRestoreDemo object
      */
     public OTABackupRestoreDemo() {
+        // Get the collection enabled for ota backup/restore
+        _collection = OTABackupRestoreContactCollection.getInstance();
+
         // Create a new screen for the application
         final OTABackupRestoreDemoScreen screen =
                 new OTABackupRestoreDemoScreen();
@@ -188,69 +228,98 @@ public class OTABackupRestoreDemo extends UiApplication implements
 
         screen.setTitle("OTA Backup/Restore Contacts");
 
-        _listField = new ListField();
-        _listField.setCallback(this);
-        screen.add(_listField);
+        // Create an adapter to display the contact collection in table format
+        _model = new ContactTableModelAdapter();
+
+        // Create view and controller
+        _view = new TableView(_model);
+        final TableController controller = new TableController(_model, _view);
+        controller.setFocusPolicy(TableController.ROW_FOCUS);
+        _view.setController(controller);
+
+        // Set the highlight background for the row with focus
+        _view.setDataTemplateFocus(BackgroundFactory
+                .createLinearGradientBackground(Color.LIGHTBLUE,
+                        Color.LIGHTBLUE, Color.BLUE, Color.BLUE));
+        final DataTemplate dataTemplate = new DataTemplate(_view, 1, 1) {
+            /**
+             * @see net.rim.device.api.ui.component.table.DataTemplate#getDataFields(int)
+             */
+            public Field[] getDataFields(final int modelRowIndex) {
+                // Format the contact name for display
+                final OTAContactData contact =
+                        (OTAContactData) _model.getRow(modelRowIndex);
+                final String personal =
+                        contact.getFirst() + " " + contact.getLast();
+
+                final Field[] fields =
+                        { new LabelField(personal, Field.NON_FOCUSABLE) };
+
+                return fields;
+            }
+        };
+
+        // Create regions for formatting table
+        dataTemplate.createRegion(new XYRect(0, 0, 1, 1));
+        dataTemplate.setColumnProperties(0, new TemplateColumnProperties(
+                Display.getWidth()));
+        dataTemplate.setRowProperties(0, new TemplateRowProperties(32));
+        _view.setDataTemplate(dataTemplate);
+        dataTemplate.useFixedHeight(true);
+
+        screen.add(_view);
 
         // Push the screen onto the UI stack for rendering
         pushScreen(screen);
-
-        reloadContactList();
     }
 
     /**
-     * Refreshes the contact list on screen
+     * Adapter for displaying contact data in table format
      */
-    private void reloadContactList() {
-        _listField.setSize(_contacts.size());
-    }
-
-    // ListFieldCallback methods
-    // ------------------------------------------------
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#drawListRow(ListField,
-     *      Graphics, int, int, int)
-     */
-    public void drawListRow(final ListField listField, final Graphics graphics,
-            final int index, final int y, final int width) {
-        if (listField == _listField && index < _contacts.size()) {
-            final OTAContactData contact = _contacts.contactAt(index);
-            final String personal =
-                    contact.getFirst() + " " + contact.getLast();
-            graphics.drawText(personal, 0, y, 0, width);
-        }
-    }
-
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#get(ListField,
-     *      int)
-     */
-    public Object get(final ListField listField, final int index) {
-        if (listField == _listField) {
-            // If index is out of bounds an exception will be thrown, but
-            // that's the behaviour we want in that case.
-            return _contacts.contactAt(index);
+    private static class ContactTableModelAdapter extends TableModelAdapter {
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfRows()
+         */
+        public int getNumberOfRows() {
+            return _collection.size();
         }
 
-        return null;
-    }
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfColumns()
+         */
+        public int getNumberOfColumns() {
+            return 1;
+        }
 
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#getPreferredWidth(ListField)
-     */
-    public int getPreferredWidth(final ListField listField) {
-        // Use all the width of the current LCD
-        return Display.getWidth();
-    }
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doGetRow(int)
+         */
+        protected Object doGetRow(final int index) {
+            return _collection.getSyncObjectAt(index);
+        }
 
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#indexOfList(ListField
-     *      , String, int)
-     */
-    public int indexOfList(final ListField listField, final String prefix,
-            final int start) {
-        return -1; // Not implemented.
-    }
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doAddRow(Object)
+         */
+        protected boolean doAddRow(final Object row) {
+            return _collection.addSyncObject((SyncObject) row);
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doRemoveRowAt(int)
+         */
+        protected boolean doRemoveRowAt(final int index) {
+            return _collection.removeSyncObject((SyncObject) getRow(index));
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doInsertRowAt(int,
+         *      Object)
+         */
+        protected boolean doInsertRowAt(final int index, final Object newRow) {
+            return _collection.insertSyncObjectAt(index, (SyncObject) newRow);
+        }
+    };
 
     /**
      * Entry point for the application.
@@ -259,25 +328,25 @@ public class OTABackupRestoreDemo extends UiApplication implements
      *            Command line arguments
      */
     public static void main(final String[] args) {
-        boolean startup = false;
+        _startup = false;
 
         for (int i = 0; i < args.length; ++i) {
             if (args[i].startsWith("init")) {
-                startup = true;
+                _startup = true;
             }
         }
 
         // Get the collection enabled for ota backup/restore
-        _contacts = OTABackupRestoreContactCollection.getInstance();
+        _collection = OTABackupRestoreContactCollection.getInstance();
 
-        if (startup) {
-            // Enable app for synchronization
-            SyncManager.getInstance().enableSynchronization(_contacts);
-        } else {
-            // Create a new instance of the application and make the currently
-            // running thread the application's event dispatch thread.
-            final OTABackupRestoreDemo app = new OTABackupRestoreDemo();
-            app.enterEventDispatcher();
+        // Enable app for synchronization
+        if (_startup) {
+            SyncManager.getInstance().enableSynchronization(_collection);
         }
+
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
+        final OTABackupRestoreDemo app = new OTABackupRestoreDemo();
+        app.enterEventDispatcher();
     }
 }

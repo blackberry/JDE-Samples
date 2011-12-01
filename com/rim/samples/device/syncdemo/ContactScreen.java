@@ -26,6 +26,9 @@
 
 package com.rim.samples.device.syncdemo;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
@@ -36,6 +39,7 @@ import net.rim.device.api.ui.component.EditField;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * This screen allows the user to view and edit a contact's information.
@@ -57,20 +61,24 @@ public final class ContactScreen extends MainScreen {
          * Default constructor
          */
         private SaveMenuItem() {
-            super("Save", 100000, 5);
-        }
-
-        /**
-         * Saves and closes this screen.
-         * 
-         * @see java.lang.Runnable#run()
-         */
-        public void run() {
-            // If successful, return to contact list.
-            if (onSave()) {
-                final UiApplication uiapp = UiApplication.getUiApplication();
-                uiapp.popScreen(uiapp.getActiveScreen());
-            }
+            super(new StringProvider("Save"), 0x230010, 5);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * Saves and closes this screen.
+                 * 
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    // If successful, return to contact list.
+                    if (onSave()) {
+                        final UiApplication uiapp =
+                                UiApplication.getUiApplication();
+                        uiapp.popScreen(uiapp.getActiveScreen());
+                    }
+                }
+            }));
         }
     }
 

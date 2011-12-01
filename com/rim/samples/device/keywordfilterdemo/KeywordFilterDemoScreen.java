@@ -26,6 +26,9 @@
 
 package com.rim.samples.device.keywordfilterdemo;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
@@ -34,55 +37,83 @@ import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.EditField;
 import net.rim.device.api.ui.component.KeywordFilterField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
- * This class represents the main screen for the KeywordFilterDemo application.
+ * The main screen for the KeywordFilterDemo application
  */
 public final class KeywordFilterDemoScreen extends MainScreen {
     private final KeywordFilterDemo _app;
     private final KeywordFilterField _keywordFilterField;
 
     /**
-     * Creates a new KeywordFilterDemoScreen.
+     * Creates a new KeywordFilterDemoScreen object
      * 
      * @param app
      *            The UiApplication creating an instance of this class.
      */
     public KeywordFilterDemoScreen(final KeywordFilterDemo app) {
-        // A reference to the UiApplication instance for use in this class.
+        // A reference to the UiApplication instance for use in this class
         _app = app;
 
-        // We need a reference to the UiApplication's KeywordFilterField.
+        // Obtain a reference to the UiApplication's KeywordFilterField
         _keywordFilterField = _app.getKeywordFilterField();
 
-        // Add menu item to the screen's menu.
+        // MenuItem to add a country to the list
+        final MenuItem addElementItem =
+                new MenuItem(new StringProvider("Add country"), 0x230010, 0);
+        addElementItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) { // Clear the search field
+                _keywordFilterField.setKeyword("");
+
+                // Create a Dialog instance which will allow a user to add a new
+                // country to the keyword list.
+                final String[] selections = { "Add", "Cancel" };
+                final Dialog addDialog =
+                        new Dialog("Add Country", selections, null, 0, null);
+                final EditField inputField = new EditField("Country: ", "");
+                addDialog.add(inputField);
+
+                // Display the dialog and add a new element to the list
+                // of countries.
+                if (addDialog.doModal() == 0) // User selected "Add"
+                {
+                    _app.addElementToList(new Country(inputField.getText(), "",
+                            ""));
+                }
+            }
+        }));
+
+        // Add menu item to the screen's menu
         addMenuItem(addElementItem);
     }
 
     /**
-     * Intercepts the ENTER key and displays info screen.
-     * 
-     * @see net.rim.device.api.ui.Screen#keyChar(char,int,int)
+     * @see net.rim.device.api.ui.Screen#keyChar(char, int, int)
      */
     protected boolean keyChar(final char key, final int status, final int time) {
         if (key == Characters.ENTER) {
             displayInfoScreen();
-            return true; // We've consumed the event.
+            return true;
         }
+
         return super.keyChar(key, status, time);
     }
 
     /**
-     * Handles a trackball click.
-     * 
      * @see net.rim.device.api.ui.Screen#invokeAction(int)
      */
     public boolean invokeAction(final int action) {
-        switch (action) {
-        case ACTION_INVOKE: // Trackball click.
+        if (action == ACTION_INVOKE) {
             displayInfoScreen();
-            return true; // We've consumed the event.
+            return true;
         }
+
         return super.invokeAction(action);
     }
 
@@ -91,9 +122,10 @@ public final class KeywordFilterDemoScreen extends MainScreen {
      * rendering.
      */
     private void displayInfoScreen() {
-        // Retrieve the selected Country and use it to invoke a new InfoScreen.
+        // Retrieve the selected Country and use it to invoke a new InfoScreen
         final Country country =
                 (Country) _keywordFilterField.getSelectedElement();
+
         if (country != null) {
             final InfoScreen infoScreen = new InfoScreen(country);
             _app.pushScreen(infoScreen);
@@ -101,40 +133,12 @@ public final class KeywordFilterDemoScreen extends MainScreen {
     }
 
     /**
-     * Prevent the save dialog from being displayed.
-     * 
      * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
      */
     public boolean onSavePrompt() {
+        // Suppress the save dialog
         return true;
     }
-
-    // Inner classes------------------------------------------------------------
-    /**
-     * Adds a country to the list
-     */
-    private final MenuItem addElementItem = new MenuItem("Add country", 0, 0) {
-
-        public void run() {
-            // Clear the search field.
-            _keywordFilterField.setKeyword("");
-
-            // Create a Dialog instance which will allow a user to add a new
-            // country to the keyword list.
-            final String[] selections = { "Add", "Cancel" };
-            final Dialog addDialog =
-                    new Dialog("Add Country", selections, null, 0, null);
-            final EditField inputField = new EditField("Country: ", "");
-            addDialog.add(inputField);
-
-            // Display the dialog and add a new element to the list
-            // of countries.
-            if (addDialog.doModal() == 0) // User selected "Add".
-            {
-                _app.addElementToList(new Country(inputField.getText(), "", ""));
-            }
-        }
-    };
 
     /**
      * A MainScreen class to display secondary information for a selected
@@ -142,13 +146,13 @@ public final class KeywordFilterDemoScreen extends MainScreen {
      */
     private final static class InfoScreen extends MainScreen {
         /**
-         * Constructs a screen to display
+         * Creates a new InfoScreen object
          * 
          * @param country
          *            The country to display secondary information about
          */
         InfoScreen(final Country country) {
-            // Set up and display UI elements.
+            // Set up and display UI elements
             setTitle(country.toString());
             final BasicEditField popField =
                     new BasicEditField("Population: ", country.getPopulation(),

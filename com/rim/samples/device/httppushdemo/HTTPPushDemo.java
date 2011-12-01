@@ -52,7 +52,7 @@ import net.rim.device.api.util.DataBuffer;
 public class HTTPPushDemo extends UiApplication {
     // Constants
     // ----------------------------------------------------------------
-    private static String URL = "http://:100"; // PORT 100.
+    private static final String URL = "http://:100"; // PORT 100.
     private static final int CHUNK_SIZE = 256;
 
     // Members
@@ -104,7 +104,7 @@ public class HTTPPushDemo extends UiApplication {
     // ------------------------------------------------------------
     /**
      * This class implements a Thread object which trys to connect to a HTTP url
-     * and retreive the url's contents to render to the screen.
+     * and retrieves the url's contents to render to the screen.
      */
     private class ListeningThread extends Thread {
         private boolean _stop = false;

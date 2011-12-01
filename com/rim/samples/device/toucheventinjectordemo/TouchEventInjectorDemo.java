@@ -35,7 +35,9 @@ import net.rim.device.api.ui.component.Dialog;
  * class to programatically inject touch screen events.
  */
 public final class TouchEventInjectorDemo extends UiApplication {
-    // Constructor
+    /**
+     * Creates a new TouchEventInjectorDemo object
+     */
     public TouchEventInjectorDemo() {
         // Check if current device has a touch screen
         if (Touchscreen.isSupported()) {

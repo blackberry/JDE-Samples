@@ -30,6 +30,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.crypto.BlockDecryptor;
 import net.rim.device.api.crypto.BlockEncryptor;
 import net.rim.device.api.crypto.CryptoTokenException;
@@ -48,6 +51,7 @@ import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.util.Arrays;
 import net.rim.device.api.util.DataBuffer;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * This sample application demonstrates basic functionality of the
@@ -71,7 +75,9 @@ public class CryptoDemo extends UiApplication {
         theApp.enterEventDispatcher();
     }
 
-    // Constructor
+    /**
+     * Creates a new CryptoDemo object
+     */
     public CryptoDemo() {
         final MainScreen screen = new MainScreen();
         screen.setTitle("Crypto Demo");
@@ -86,11 +92,14 @@ public class CryptoDemo extends UiApplication {
         screen.add(_statusField);
 
         // Add the menu item
-        screen.addMenuItem(new MenuItem("Go", 100, 10) {
+        final MenuItem go = new MenuItem(new StringProvider("Go"), 0x230010, 0);
+        go.setCommand(new Command(new CommandHandler() {
             /**
-             * @see java.lang.Runnable#run()
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
              */
-            public void run() {
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
                 final String text = _inputField.getText();
                 if (text.length() > 0) {
                     runTest(text);
@@ -98,7 +107,9 @@ public class CryptoDemo extends UiApplication {
                     Dialog.alert("Please enter some text");
                 }
             }
-        });
+        }));
+
+        screen.addMenuItem(go);
 
         pushScreen(screen);
     }

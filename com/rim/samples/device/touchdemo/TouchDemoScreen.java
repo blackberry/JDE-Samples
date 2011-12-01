@@ -29,6 +29,9 @@ package com.rim.samples.device.touchdemo;
 import javax.microedition.m2g.SVGImage;
 import javax.microedition.m2g.ScalableGraphics;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
@@ -41,6 +44,7 @@ import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.NumericChoiceField;
 import net.rim.device.api.ui.component.ObjectChoiceField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.svg.SVGElement;
@@ -86,39 +90,103 @@ public final class TouchDemoScreen extends MainScreen {
     private int _titleHeight;
 
     // SVG constants
-    private static String SVG_LINE = "line";
-    private static String X1 = "x1";
-    private static String X2 = "x2";
-    private static String Y1 = "y1";
-    private static String Y2 = "y2";
-    private static String STROKE = "stroke";
-    private static String STROKE_WIDTH = "stroke-width";
+    private static final String SVG_LINE = "line";
+    private static final String X1 = "x1";
+    private static final String X2 = "x2";
+    private static final String Y1 = "y1";
+    private static final String Y2 = "y2";
+    private static final String STROKE = "stroke";
+    private static final String STROKE_WIDTH = "stroke-width";
 
     // Color constants
-    private static String COLOR_BLACK = "Black";
-    private static String COLOR_RED = "Red";
-    private static String COLOR_BLUE = "Blue";
-    private static String COLOR_GREEN = "Green";
-    private static String COLOR_YELLOW = "Yellow";
+    private static final String COLOR_BLACK = "Black";
+    private static final String COLOR_RED = "Red";
+    private static final String COLOR_BLUE = "Blue";
+    private static final String COLOR_GREEN = "Green";
+    private static final String COLOR_YELLOW = "Yellow";
 
     /**
-     * Constructor.
+     * Creates a new TouchDemoScreen object
      */
     public TouchDemoScreen() {
         setTitle("Touch Demo");
 
-        // Initialize SVG.
+        // Initialize SVG
         _image = SVGImage.createEmptyImage(null);
         _document = _image.getDocument();
         _svg = (SVGSVGElement) _document.getDocumentElement();
         _scalableGraphics = ScalableGraphics.createInstance();
 
-        // Add menu items.
-        addMenuItem(_eraseMenu);
-        addMenuItem(_colourMenu);
-        addMenuItem(_widthMenu);
+        // A menu item used to erase all elements on the screen
+        final MenuItem eraseMenu =
+                new MenuItem(new StringProvider("Erase Canvas"), 0x230010, 0);
+        eraseMenu.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                // Reset the last x and y coordinates.
+                _lastX = -1;
+                _lastY = -1;
 
-        // Set the initial line color to black;
+                // Remove all children from the svg node.
+                SVGElement line = (SVGElement) _svg.getFirstElementChild();
+                while (line != null) {
+                    _svg.removeChild(line);
+                    line = (SVGElement) _svg.getFirstElementChild();
+                }
+
+                // Indicate that the screen requires re-painting.
+                invalidate();
+            }
+        }));
+
+        // A menu item used to select a line color
+        final MenuItem colourMenu =
+                new MenuItem(new StringProvider("Change Colour"), 0x230020, 1);
+        colourMenu.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                final ColorChangeDialog dialog =
+                        new ColorChangeDialog(_colorIndex);
+
+                if (dialog.doModal() == Dialog.OK) {
+                    _colorIndex = dialog.getColorIndex();
+                    _color = dialog.getColor(_colorIndex);
+                }
+            }
+        }));
+
+        // A menu item used to select a line color
+        final MenuItem widthMenu =
+                new MenuItem(new StringProvider("Change Width"), 0x230030, 2);
+        widthMenu.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                final WidthChangeDialog dialog = new WidthChangeDialog(_width);
+
+                if (dialog.doModal() == Dialog.OK) {
+                    _width = dialog.getLineWidth() * 2;
+                }
+            }
+        }));
+
+        // Add menu items
+        addMenuItem(eraseMenu);
+        addMenuItem(colourMenu);
+        addMenuItem(widthMenu);
+
+        // Set the initial line color to black
         _color = COLOR_BLACK;
     }
 
@@ -126,7 +194,7 @@ public final class TouchDemoScreen extends MainScreen {
      * @see Screen#touchEvent(TouchEvent)
      */
     protected boolean touchEvent(final TouchEvent message) {
-        // Retrieve the new x and y touch positions.
+        // Retrieve the new x and y touch positions
         final int x = message.getX(1);
         final int y = message.getY(1);
 
@@ -134,23 +202,23 @@ public final class TouchDemoScreen extends MainScreen {
 
         if (eventCode == TouchEvent.DOWN) {
             // If this event is followed by a move event we'll need
-            // to know our starting point.
+            // to know the starting point.
             _lastX = x;
             _lastY = y;
         }
 
         if (eventCode == TouchEvent.MOVE) {
             if (_lastY > _titleHeight && _lastY < Display.getHeight()) {
-                // Add a new line and repaint the screen.
+                // Add a new line and repaint the screen
                 drawLine(_color, _width, x, y);
                 invalidate();
             }
 
-            // x and y will be the starting point for the next segment.
+            // x and y will be the starting point for the next segment
             _lastX = x;
             _lastY = y;
         } else if (eventCode == TouchEvent.UP) {
-            // We have lost contact with the screen, reset the last x and y.
+            // We have lost contact with the screen, reset the last x and y
             _lastX = -1;
             _lastY = -1;
         }
@@ -167,20 +235,20 @@ public final class TouchDemoScreen extends MainScreen {
 
     /**
      * Draws a line on the canvas between the last touch point and the current
-     * one.
+     * one
      * 
      * @param color
-     *            The color of the line to be drawn.
+     *            The color of the line to be drawn
      * @param width
      *            The width of the line to be drawn
      * @param x
-     *            The ending x coordinate.
+     *            The ending x coordinate
      * @param y
-     *            The ending y coordinate.
+     *            The ending y coordinate
      */
     private void drawLine(final String color, final int width, final int x,
             final int y) {
-        // Create new element.
+        // Create new element
         final SVGElement newElement =
                 (SVGElement) _document.createElementNS(SVG_NAMESPACE_URI,
                         SVG_LINE);
@@ -194,66 +262,18 @@ public final class TouchDemoScreen extends MainScreen {
     }
 
     /**
-     * A menu item used to erase all elements on the screen.
-     */
-    private final MenuItem _eraseMenu = new MenuItem("Erase Canvas", 2, 0) {
-        public void run() {
-            // Reset the last x and y coordinates.
-            _lastX = -1;
-            _lastY = -1;
-
-            // Remove all children from the svg node.
-            SVGElement line = (SVGElement) _svg.getFirstElementChild();
-            while (line != null) {
-                _svg.removeChild(line);
-                line = (SVGElement) _svg.getFirstElementChild();
-            }
-
-            // Indicate that the screen requires re-painting.
-            invalidate();
-        }
-    };
-
-    /**
-     * A menu item used to select a line color.
-     */
-    private final MenuItem _colourMenu = new MenuItem("Change Colour", 0, 0) {
-        public void run() {
-            final ColorChangeDialog dialog = new ColorChangeDialog(_colorIndex);
-
-            if (dialog.doModal() == Dialog.OK) {
-                _colorIndex = dialog.getColorIndex();
-                _color = dialog.getColor(_colorIndex);
-            }
-        }
-    };
-
-    /**
-     * A menu item used to select a line color.
-     */
-    private final MenuItem _widthMenu = new MenuItem("Change Width", 1, 0) {
-        public void run() {
-            final WidthChangeDialog dialog = new WidthChangeDialog(_width);
-
-            if (dialog.doModal() == Dialog.OK) {
-                _width = dialog.getLineWidth() * 2;
-            }
-        }
-    };
-
-    /**
      * @see Manager#sublayout(int, int)
      */
     protected void sublayout(final int height, final int width) {
         super.sublayout(height, width);
 
-        // Calculate the title height.
+        // Calculate the title height
         final Manager manager = getMainManager();
         final XYRect extent = manager.getExtent(); // Scrollable section of the
-                                                   // screen.
-        _titleHeight = extent.y; // Top of the scrollable section.
+                                                   // screen
+        _titleHeight = extent.y; // Top of the scrollable section
 
-        // Set the viewport dimensions for the current orientation.
+        // Set the viewport dimensions for the current orientation
         _image.setViewportHeight(Display.getHeight() - _titleHeight);
         _image.setViewportWidth(Display.getWidth());
     }
@@ -264,34 +284,34 @@ public final class TouchDemoScreen extends MainScreen {
     protected void paint(final Graphics graphics) {
         super.paint(graphics);
 
-        // Make sure image is non-null.
+        // Make sure image is non-null
         if (_image == null) {
             return;
         }
 
-        // Bind target Graphics.
+        // Bind target Graphics
         _scalableGraphics.bindTarget(graphics);
 
-        // Render the svg image/ model.
+        // Render the svg image/model
         _scalableGraphics.render(0, _titleHeight, _image);
 
-        // Release bindings on Graphics.
+        // Release bindings on Graphics
         _scalableGraphics.releaseTarget();
     }
 
     /**
-     * A dialog window used to change the line color.
+     * A dialog window used to change the line color
      */
     private static class ColorChangeDialog extends Dialog {
         /** An array of pre-defined color names. */
-        private static String[] _colors = { COLOR_BLACK, COLOR_RED, COLOR_BLUE,
-                COLOR_GREEN, COLOR_YELLOW };
+        private static final String[] _colors = { COLOR_BLACK, COLOR_RED,
+                COLOR_BLUE, COLOR_GREEN, COLOR_YELLOW };
 
         /** A field used to choose a color. */
         private final ObjectChoiceField _colorChooser;
 
         /**
-         * Constructor.
+         * Create a new ColorChangeDialog object
          */
         public ColorChangeDialog(final int index) {
             super(Dialog.D_OK_CANCEL, "Choose Colour", Dialog.OK, null,
@@ -302,20 +322,20 @@ public final class TouchDemoScreen extends MainScreen {
         }
 
         /**
-         * Retrieve the color selection.
+         * Retrieve the color selection
          * 
-         * @return The selected line color.
+         * @return The selected line color
          */
         int getColorIndex() {
             return _colorChooser.getSelectedIndex();
         }
 
         /**
-         * Retrieve the color selection.
+         * Retrieve the color selection
          * 
          * @param index
-         *            The color array index for the selected color.
-         * @return The selected line color.
+         *            The color array index for the selected color
+         * @return The selected line color
          */
         String getColor(final int index) {
             return _colors[index].toLowerCase();
@@ -323,14 +343,14 @@ public final class TouchDemoScreen extends MainScreen {
     }
 
     /**
-     * A dialog window used to change the line width.
+     * A dialog window used to change the line width
      */
     private static class WidthChangeDialog extends Dialog {
         /** A field used to choose a color. */
         private final NumericChoiceField _widthChooser;
 
         /**
-         * Constructor.
+         * Creates a new WidthChangeDialog object
          * 
          * @param previousWidth
          *            The previous line width
@@ -344,9 +364,9 @@ public final class TouchDemoScreen extends MainScreen {
         }
 
         /**
-         * Retrieve the width selection.
+         * Retrieve the width selection
          * 
-         * @return The selected line width.
+         * @return The selected line width
          */
         int getLineWidth() {
             return _widthChooser.getSelectedValue();

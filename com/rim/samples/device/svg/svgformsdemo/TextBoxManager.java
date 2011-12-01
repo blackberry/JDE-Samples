@@ -32,7 +32,9 @@ import net.rim.device.api.ui.Manager;
  * Manages the text fields.
  */
 public final class TextBoxManager extends Manager {
-    // Constructor
+    /**
+     * Creates a new TextBoxManager object
+     */
     public TextBoxManager() {
         super(0);
     }

@@ -40,13 +40,14 @@ img\camerademo_jde.png
 ]
 Listing=0
 Options=-quiet 
-OutputFileName=camerademo
+OutputFileName=CameraDemo
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=Camera Demo

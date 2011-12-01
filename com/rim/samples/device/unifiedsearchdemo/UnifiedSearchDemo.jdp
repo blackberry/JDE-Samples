@@ -1,0 +1,65 @@
+## RIM Java Development Environment
+# RIM Project file
+#
+# This file is generated and managed by BlackBerry developer tools.
+# It SHOULD NOT BE modified manually.
+#
+AddOn=0
+AlwaysBuild=0
+[AlxImports
+]
+AutoRestart=0
+[ClassProtection
+]
+[CustomBuildFiles
+]
+[CustomBuildRules
+]
+[DefFiles
+]
+[DependsOn
+]
+ExcludeFromBuildAll=0
+Exported=0
+[Files
+data\POIs.txt
+GraphicsHelper.java
+img\contact.png
+img\default.png
+img\location.png
+img\unifiedsearchdemo_jde.png
+img\url.png
+PointOfInterest.java
+PointOfInterestEntity.java
+PointOfInterestPublisher.java
+PointOfInterestSearchable.java
+UnifiedSearchDemo.java
+UnifiedSearchDemoFileReader.java
+UnifiedSearchDemoPublisherScreen.java
+UnifiedSearchDemoSearchScreen.java
+]
+HaveAlxImports=0
+HaveDefs=0
+HaveImports=0
+[Icons
+img\unifiedsearchdemo_jde.png
+]
+[ImplicitRules
+]
+[Imports
+]
+Listing=0
+Options=-quiet
+OutputFileName=UnifiedSearchDemo
+[PackageProtection
+]
+RibbonPosition=0
+[RolloverIcons
+]
+RunOnStartup=0
+SkipCompile=0
+StartupTier=7
+SystemModule=0
+Title=Unified Search Demo
+Type=0
+Version=0.9

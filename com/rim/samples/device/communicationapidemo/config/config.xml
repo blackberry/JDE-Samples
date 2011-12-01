@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<config>
+    <!-- configuration settings of demo application -->
+    <timeout>30</timeout>
+    <echo-server-uri>http://10.22.33.44:8105/</echo-server-uri>
+    <mdscs>
+        <!-- IP of MDS-CS used to enable internet access on the simulator-->
+        <ip>127.0.0.1</ip>
+        <port>8080</port>
+    </mdscs>
+    
+</config>
+
+

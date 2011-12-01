@@ -28,23 +28,33 @@ package com.rim.samples.device.camerademo;
 
 import java.util.Vector;
 
+import javax.microedition.amms.control.camera.ZoomControl;
 import javax.microedition.media.Manager;
 import javax.microedition.media.Player;
 import javax.microedition.media.control.GUIControl;
 import javax.microedition.media.control.VideoControl;
 
+import net.rim.device.api.amms.control.camera.EnhancedFocusControl;
+import net.rim.device.api.system.Application;
+import net.rim.device.api.system.EncodedImage;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
+import net.rim.device.api.ui.TouchEvent;
+import net.rim.device.api.ui.TouchGesture;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.input.InputSettings;
+import net.rim.device.api.ui.input.NavigationDeviceSettings;
+import net.rim.device.api.util.StringProvider;
 import net.rim.device.api.util.StringUtilities;
 
 /**
  * A sample application used to demonstrate the VideoControl.getSnapshot()
- * method. Creates a custom camera which can take snapshots from the
- * Blackberry's camera.
+ * method. This application can take snapshots using the BlackBerry device's
+ * camera. Swiping the trackpad in a north or south direction will zoom the
+ * viewfinder in and out.
  */
 public final class CameraDemo extends UiApplication {
     /**
@@ -61,17 +71,16 @@ public final class CameraDemo extends UiApplication {
     }
 
     /**
-     * Constructs a new CameraDemo object
+     * Creates a new CameraDemo object
      */
     public CameraDemo() {
         UiApplication.getUiApplication().invokeLater(new Runnable() {
             public void run() {
-                Dialog.alert("Click the trackball or screen to take a picture. You can change the image settings by selecting 'Encoding Settings' from the menu.");
+                Dialog.alert("Click the trackball or screen to take a picture. Zoom in or out by swiping the trackpad up or down. You can change the image settings by selecting 'Encoding Settings' from the menu.");
             }
         });
         final CameraScreen screen = new CameraScreen();
         pushScreen(screen);
-
     }
 
     /**
@@ -104,8 +113,11 @@ final class CameraScreen extends MainScreen {
 
     private int _indexOfEncoding = 0;
 
+    private EnhancedFocusControl _efc;
+    private ZoomControl _zoomControl;
+
     /**
-     * Constructor. Initializes the camera and creates the UI.
+     * Constructor - initializes the camera and creates the UI.
      */
     public CameraScreen() {
         // Set the title of the screen
@@ -121,23 +133,83 @@ final class CameraScreen extends MainScreen {
         if (_videoField != null) {
             createUI();
             addMenuItem(_encodingMenuItem);
+            addMenuItem(_toggleAutoFocusMenuItem);
         }
         // If not, display an error message to the user
         else {
             add(new RichTextField("Error connecting to camera."));
         }
+
+        // Allow the screen to capture trackpad swipes
+        final InputSettings settings =
+                NavigationDeviceSettings.createEmptySet();
+        settings.set(NavigationDeviceSettings.DETECT_SWIPE, 1);
+        addInputSettings(settings);
+    }
+
+    /**
+     * @see net.rim.device.api.ui.Field#touchEvent(TouchEvent)
+     */
+    protected boolean touchEvent(final TouchEvent event) {
+        if (event.getEvent() == TouchEvent.GESTURE) {
+            final TouchGesture gesture = event.getGesture();
+
+            // Handle only trackpad swipe gestures
+            if (gesture.getEvent() == TouchGesture.NAVIGATION_SWIPE) {
+                final int direction = gesture.getSwipeDirection();
+
+                Application.getApplication().invokeLater(new Runnable() {
+                    public void run() {
+                        // Determine the direction of the swipe
+                        if (direction == TouchGesture.SWIPE_NORTH) {
+                            _zoomControl.setDigitalZoom(ZoomControl.NEXT);
+                        } else if (direction == TouchGesture.SWIPE_SOUTH) {
+                            _zoomControl.setDigitalZoom(ZoomControl.PREVIOUS);
+                        }
+                    }
+                });
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
      * Displays the various encoding choices available
      */
-    private final MenuItem _encodingMenuItem = new MenuItem(
-            "Encoding Settings", 10, 100) {
+    private final MenuItem _encodingMenuItem = new MenuItem(new StringProvider(
+            "Encoding Settings"), 0x230010, 0) {
         public void run() {
             final EncodingPropertiesScreen s =
                     new EncodingPropertiesScreen(_encodings, CameraScreen.this,
                             _indexOfEncoding);
             UiApplication.getUiApplication().pushModalScreen(s);
+        }
+    };
+
+    /**
+     * Toggles auto focus for the camera
+     */
+    private final MenuItem _toggleAutoFocusMenuItem = new MenuItem(
+            new StringProvider("Toggle Auto-focus"), 0x230020, 0) {
+        public void run() {
+            try {
+                if (_efc != null) {
+                    if (_efc.isAutoFocusLocked()) {
+                        _efc.stopAutoFocus();
+                    } else {
+                        _efc.startAutoFocus();
+                    }
+                } else {
+                    CameraDemo
+                            .errorDialog("ERROR: Focus control not initialized.");
+                }
+            } catch (final Exception e) {
+                CameraDemo.errorDialog("ERROR " + e.getClass() + ":  "
+                        + e.getMessage());
+            }
         }
     };
 
@@ -150,7 +222,7 @@ final class CameraScreen extends MainScreen {
             // use the default snapshot encoding.
             String encoding = null;
 
-            if (_encodings != null) {
+            if (_encodings != null && _encodings.length > 0) {
                 // Use the user-selected encoding
                 encoding = _encodings[_indexOfEncoding].getFullEncoding();
             }
@@ -165,11 +237,10 @@ final class CameraScreen extends MainScreen {
     }
 
     /**
-     * Prevent the save dialog from being displayed
-     * 
      * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
      */
     protected boolean onSavePrompt() {
+        // Prevent the save dialog from being displayed
         return true;
     }
 
@@ -201,6 +272,16 @@ final class CameraScreen extends MainScreen {
 
             // Set the player to the STARTED state (see Player javadoc)
             player.start();
+
+            // Enable auto-focus for the camera
+            _efc =
+                    (EnhancedFocusControl) player
+                            .getControl("net.rim.device.api.amms.control.camera.EnhancedFocusControl");
+
+            // Enable zoom for the camera
+            _zoomControl =
+                    (ZoomControl) player
+                            .getControl("javax.microedition.amms.control.camera.ZoomControl");
         } catch (final Exception e) {
             CameraDemo.errorDialog("ERROR " + e.getClass() + ":  "
                     + e.getMessage());
@@ -223,12 +304,11 @@ final class CameraScreen extends MainScreen {
             // The list of encodings
             final Vector encodingList = new Vector();
 
-            // Strings representing the four properties of an encoding as
+            // Strings representing the three properties of an encoding as
             // returned by System.getProperty().
             final String encoding = "encoding";
             final String width = "width";
             final String height = "height";
-            final String quality = "quality";
 
             EncodingProperties temp = null;
 
@@ -252,14 +332,10 @@ final class CameraScreen extends MainScreen {
                     // Set the new encoding's height
                     ++i;
                     temp.setHeight(properties[i]);
-                } else if (properties[i].equals(quality)) {
-                    // Set the new encoding's quality
-                    ++i;
-                    temp.setQuality(properties[i]);
                 }
             }
 
-            // If there is a leftover complete encoding, add it.
+            // If there is a leftover complete encoding, add it
             if (temp != null && temp.isComplete()) {
                 encodingList.addElement(temp);
             }
@@ -289,11 +365,16 @@ final class CameraScreen extends MainScreen {
      *            A byte array representing an image
      */
     private void createImageScreen(final byte[] raw) {
-        // Initialize the screen
-        final ImageScreen imageScreen = new ImageScreen(raw);
+        // Create image to be displayed
+        final EncodedImage encodedImage =
+                EncodedImage.createEncodedImage(raw, 0, raw.length);
 
-        // Push this screen to display it to the user
+        // Initialize the screen
+        final ImageScreen imageScreen = new ImageScreen(raw, encodedImage);
+
+        // Push screen to display it to the user
         UiApplication.getUiApplication().pushScreen(imageScreen);
+
     }
 
     /**
@@ -313,14 +394,12 @@ final class CameraScreen extends MainScreen {
         final boolean handled = super.invokeAction(action);
 
         if (!handled) {
-            switch (action) {
-            case ACTION_INVOKE: // Trackball click
-            {
+            if (action == ACTION_INVOKE) {
                 takePicture();
                 return true;
             }
-            }
         }
+
         return handled;
     }
 }

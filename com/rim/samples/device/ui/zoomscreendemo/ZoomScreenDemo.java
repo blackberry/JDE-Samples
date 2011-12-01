@@ -57,7 +57,7 @@ public final class ZoomScreenDemo extends UiApplication {
     public ZoomScreenDemo() {
         UiApplication.getUiApplication().invokeLater(new Runnable() {
             public void run() {
-                Dialog.alert("Click trackball or screen to zoom");
+                Dialog.alert("Click trackpad or screen to zoom");
             }
         });
 
@@ -87,8 +87,9 @@ public final class ZoomScreenDemo extends UiApplication {
          * @see Screen#navigationClick(int, int)
          */
         protected boolean navigationClick(final int status, final int time) {
-            // Push a new ZoomScreen if track ball or screen is clicked
-            UiApplication.getUiApplication().pushScreen(new ZoomScreen(_image));
+            // Push a new ZoomScreen if trackpad or screen is clicked
+            UiApplication.getUiApplication().pushScreen(
+                    new DemoZoomScreen(_image));
             return true;
         }
 
@@ -98,9 +99,33 @@ public final class ZoomScreenDemo extends UiApplication {
         protected boolean touchEvent(final TouchEvent message) {
             if (message.getEvent() == TouchEvent.CLICK) {
                 UiApplication.getUiApplication().pushScreen(
-                        new ZoomScreen(_image));
+                        new DemoZoomScreen(_image));
+                return true;
             }
             return super.touchEvent(message);
+        }
+    }
+
+    /**
+     * A ZoomScreen sub-class. The zoomedOutNearToFit() method is overidden to
+     * close the ZoomScreen when the image size is at or near the original size.
+     */
+    static class DemoZoomScreen extends ZoomScreen {
+        /**
+         * Creates a new DemoZoomScreen object
+         * 
+         * @param image
+         *            The image to display in the ZoomScreen
+         */
+        DemoZoomScreen(final EncodedImage image) {
+            super(image);
+        }
+
+        /**
+         * @see ZoomScreen#zoomedOutNearToFit()
+         */
+        public void zoomedOutNearToFit() {
+            close();
         }
     }
 }

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<statuses type="array">
+<status>
+  <created_at>Thu May 06 17:48:23 +0000 2010</created_at>
+  <id>13499722000</id>
+  <text>Did not realize that &quot;Lover's spit&quot; by Broken Social Scene is a song about giving head.</text>
+  <source>&lt;a href=&quot;http://www.tweetdeck.com&quot; rel=&quot;nofollow&quot;&gt;TweetDeck&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <favorited>false</favorited>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <user>
+    <id>14438926</id>
+    <name>DavidHuynh</name>
+    <screen_name>DavidHuynh</screen_name>
+    <location>iPhone: 29.570757,-95.686569</location>
+    <description>On my grind in Houston. I'm a dreamer, I make things happen, I'm a lover, and I'm pretty awesome. RAGE!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/423275197/Twittar_normal.jpg</profile_image_url>
+    <url>http://walkinmypants.wordpress.com/</url>
+    <protected>false</protected>
+    <followers_count>252</followers_count>
+    <profile_background_color>000000</profile_background_color>
+    <profile_text_color>6e6e6e</profile_text_color>
+    <profile_link_color>545454</profile_link_color>
+    <profile_sidebar_fill_color>292929</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>787878</profile_sidebar_border_color>
+    <friends_count>189</friends_count>
+    <created_at>Fri Apr 18 23:57:03 +0000 2008</created_at>
+    <favourites_count>33</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/46488352/fatlace08logo-772915.jpg</profile_background_image_url>
+    <profile_background_tile>false</profile_background_tile>
+    <notifications></notifications>
+    <geo_enabled>true</geo_enabled>
+    <verified>false</verified>
+    <following></following>
+    <statuses_count>8798</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+</status>
+</statuses>

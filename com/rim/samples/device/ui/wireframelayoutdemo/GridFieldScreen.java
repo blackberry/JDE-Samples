@@ -81,18 +81,42 @@ public class GridFieldScreen extends MainScreen {
         add(new SeparatorField());
 
         // Instantiate button fields
-        _buttonFieldOne = new ButtonField("1", ButtonField.NEVER_DIRTY);
-        _buttonFieldTwo = new ButtonField("2", ButtonField.NEVER_DIRTY);
-        _buttonFieldThree = new ButtonField("3", ButtonField.NEVER_DIRTY);
-        _buttonFieldFour = new ButtonField("4", ButtonField.NEVER_DIRTY);
-        _buttonFieldFive = new ButtonField("5", ButtonField.NEVER_DIRTY);
-        _buttonFieldSix = new ButtonField("6", ButtonField.NEVER_DIRTY);
-        _buttonFieldSeven = new ButtonField("7", ButtonField.NEVER_DIRTY);
-        _buttonFieldEight = new ButtonField("8", ButtonField.NEVER_DIRTY);
-        _buttonFieldNine = new ButtonField("9", ButtonField.NEVER_DIRTY);
-        _buttonFieldStar = new ButtonField("*", ButtonField.NEVER_DIRTY);
-        _buttonFieldZero = new ButtonField("0", ButtonField.NEVER_DIRTY);
-        _buttonFieldPound = new ButtonField("#", ButtonField.NEVER_DIRTY);
+        _buttonFieldOne =
+                new ButtonField("1", ButtonField.NEVER_DIRTY
+                        | ButtonField.CONSUME_CLICK);
+        _buttonFieldTwo =
+                new ButtonField("2", ButtonField.NEVER_DIRTY
+                        | ButtonField.CONSUME_CLICK);
+        _buttonFieldThree =
+                new ButtonField("3", ButtonField.NEVER_DIRTY
+                        | ButtonField.CONSUME_CLICK);
+        _buttonFieldFour =
+                new ButtonField("4", ButtonField.NEVER_DIRTY
+                        | ButtonField.CONSUME_CLICK);
+        _buttonFieldFive =
+                new ButtonField("5", ButtonField.NEVER_DIRTY
+                        | ButtonField.CONSUME_CLICK);
+        _buttonFieldSix =
+                new ButtonField("6", ButtonField.NEVER_DIRTY
+                        | ButtonField.CONSUME_CLICK);
+        _buttonFieldSeven =
+                new ButtonField("7", ButtonField.NEVER_DIRTY
+                        | ButtonField.CONSUME_CLICK);
+        _buttonFieldEight =
+                new ButtonField("8", ButtonField.NEVER_DIRTY
+                        | ButtonField.CONSUME_CLICK);
+        _buttonFieldNine =
+                new ButtonField("9", ButtonField.NEVER_DIRTY
+                        | ButtonField.CONSUME_CLICK);
+        _buttonFieldStar =
+                new ButtonField("*", ButtonField.NEVER_DIRTY
+                        | ButtonField.CONSUME_CLICK);
+        _buttonFieldZero =
+                new ButtonField("0", ButtonField.NEVER_DIRTY
+                        | ButtonField.CONSUME_CLICK);
+        _buttonFieldPound =
+                new ButtonField("#", ButtonField.NEVER_DIRTY
+                        | ButtonField.CONSUME_CLICK);
 
         // Add button fields to the GridFieldManager
         gridFieldManager.add(_buttonFieldOne);

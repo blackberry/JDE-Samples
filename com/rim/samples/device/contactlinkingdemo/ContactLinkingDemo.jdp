@@ -25,23 +25,25 @@ Exported=0
 ContactLinkingDemo.java
 ContactListScreen.java
 EventScreen.java
-img\icon_jde.png
-SampleAddressBookFieldFactory.java
+img\contactlinkingdemo_jde.png
+img\logo_black.jpg
+img\logo_blue.jpg
 SampleContact.java
+SampleLinkedContactInfoProvider.java
 SampleMenuItem.java
 ]
 HaveAlxImports=0
 HaveDefs=0
 HaveImports=0
 [Icons
-img\icon_jde.png
+img\contactlinkingdemo_jde.png
 ]
 [ImplicitRules
 ]
 [Imports
 ]
 Listing=0
-Options=-quiet 
+Options=-quiet
 OutputFileName=ContactLinkingDemo
 [PackageProtection
 ]
@@ -50,6 +52,7 @@ RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=Contact Linking Demo

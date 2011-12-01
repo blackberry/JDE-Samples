@@ -81,12 +81,12 @@ public:
 	bool save(char const * const filename); 
 	
 private:
-	IXMLDOMNodePtr getNode(char const * firstname, char const * lastname);
-	Contact * toContact(IXMLDOMNodePtr p);
+	MSXML2::IXMLDOMNodePtr getNode(char const * firstname, char const * lastname);
+	Contact * toContact(MSXML2::IXMLDOMNodePtr p);
 
 private:
-	IXMLDOMDocument2Ptr m_data;
-	IXMLDOMNodePtr m_node; //place holder to allow some optimization
+	MSXML2::IXMLDOMDocument2Ptr m_data;
+	MSXML2::IXMLDOMNodePtr m_node; //place holder to allow some optimization
 	CString m_homePath;
 };
 

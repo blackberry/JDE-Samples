@@ -37,43 +37,56 @@ import net.rim.blackberry.api.phone.phonelogs.ConferencePhoneCallLog;
 import net.rim.blackberry.api.phone.phonelogs.PhoneCallLog;
 import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
 import net.rim.blackberry.api.phone.phonelogs.PhoneLogs;
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.system.KeyListener;
-import net.rim.device.api.ui.ContextMenu;
+import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.Field;
-import net.rim.device.api.ui.Graphics;
+import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.Screen;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.XYRect;
 import net.rim.device.api.ui.component.BasicEditField;
 import net.rim.device.api.ui.component.DateField;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
-import net.rim.device.api.ui.component.ListField;
-import net.rim.device.api.ui.component.ListFieldCallback;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.ObjectChoiceField;
 import net.rim.device.api.ui.component.RichTextField;
+import net.rim.device.api.ui.component.table.DataTemplate;
+import net.rim.device.api.ui.component.table.TableController;
+import net.rim.device.api.ui.component.table.TableModelAdapter;
+import net.rim.device.api.ui.component.table.TableModelChangeEvent;
+import net.rim.device.api.ui.component.table.TableView;
+import net.rim.device.api.ui.component.table.TemplateColumnProperties;
+import net.rim.device.api.ui.component.table.TemplateRowProperties;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.decor.BackgroundFactory;
+import net.rim.device.api.util.StringProvider;
 
 /**
- * The main class for the PhoneLogs API demo app.
+ * The main class for the PhoneLogs API demo app
  */
 public final class PhoneLogsDemo extends UiApplication {
     // Members
     // -------------------------------------------------------------------------------------
     private final PhoneLogs _phoneLogs;
-    private final PhoneCallListField _normalCallList;
-    private final PhoneCallListField _missedCallList;
+    private final PhoneCallTableModelAdapter _normalCallModel;
+    private final PhoneCallTableModelAdapter _missedCallModel;
 
-    // Constructor
+    // Create a new PhoneLogsDemo object
     public PhoneLogsDemo() {
         _phoneLogs = PhoneLogs.getInstance();
-        _normalCallList = new PhoneCallListField(PhoneLogs.FOLDER_NORMAL_CALLS);
-        _missedCallList = new PhoneCallListField(PhoneLogs.FOLDER_MISSED_CALLS);
+        _normalCallModel =
+                new PhoneCallTableModelAdapter(PhoneLogs.FOLDER_NORMAL_CALLS);
+        _missedCallModel =
+                new PhoneCallTableModelAdapter(PhoneLogs.FOLDER_MISSED_CALLS);
 
-        /* parent. */pushScreen(new PhoneLogsDemoScreen());
+        pushScreen(new PhoneLogsDemoScreen());
     }
 
     /**
@@ -81,7 +94,7 @@ public final class PhoneLogsDemo extends UiApplication {
      * and begins listening for events.
      * 
      * @param args
-     *            Command-line arguments (not used).
+     *            Command-line arguments (not used)
      */
     public static void main(final String[] args) {
         // Create a new instance of the application and make the currently
@@ -93,140 +106,197 @@ public final class PhoneLogsDemo extends UiApplication {
     // -----------------------------------------------------------------------
 
     /**
-     * This class represents a list field for displaying the call logs of a
-     * specific folder on the device (either "normal calls" or "missed calls").
+     * Adapter class for displaying phone logs in table format
      */
-    private final class PhoneCallListField extends ListField {
-        // Members ----------------------------------------------
+    private class PhoneCallTableModelAdapter extends TableModelAdapter {
         private final long _folder;
-        private final MenuItem _addPhoneCallLog;
-        private final MenuItem _addConferencePhoneCallLog;
-        private final MenuItem _deleteAllItem;
 
         /**
-         * This constructor stores the call log folder that this list field
-         * represents, and creates menu item to be included in the context menu.
+         * Create a new PhoneCallTableModelAdapter object
          * 
          * @param folder
-         *            The call log folder that this list field represents.
+         *            The folder of logs to display
          */
-        public PhoneCallListField(final long folder) {
-            super(PhoneLogsDemo.this._phoneLogs.numberOfCalls(folder));
-
+        PhoneCallTableModelAdapter(final long folder) {
             _folder = folder;
-
-            // Create menu item for adding a new phone call log.
-            _addPhoneCallLog = new MenuItem("Add Phone Call", 200000, 110) {
-                public void run() {
-                    PhoneLogsDemo.this.pushScreen(new AddPhoneCallLogScreen());
-                }
-            };
-
-            // Create menu item for adding a new conference phone call log.
-            _addConferencePhoneCallLog =
-                    new MenuItem("Add Conference Call", 200000, 110) {
-                        public void run() {
-                            PhoneLogsDemo.this
-                                    .pushScreen(new AddConferencePhoneCallLogScreen());
-                        }
-                    };
-
-            // Create menu item for deleting all call logs in a folder.
-            _deleteAllItem = new MenuItem("Delete All", 300000, 130) {
-                public void run() {
-                    if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
-                        while (PhoneLogsDemo.this._phoneLogs
-                                .numberOfCalls(_folder) > 0) {
-                            PhoneLogsDemo.this._phoneLogs
-                                    .deleteCall(0, _folder);
-                        }
-
-                        /* parent. */setSize(0);
-                    }
-                }
-            };
         }
 
         /**
-         * Retrieves the string to be displayed when this list field is empty.
-         * 
-         * @return The string to be displayed.
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfRows()
          */
-        public String getEmptyString() {
-            return "* No Phone Calls *";
+        public int getNumberOfRows() {
+            return PhoneLogsDemo.this._phoneLogs.numberOfCalls(_folder);
         }
 
         /**
-         * Retrieves the call log folder that this list field represents.
-         * 
-         * @return The call folder.
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfColumns()
          */
-        public long getFolder() {
-            return _folder;
+        public int getNumberOfColumns() {
+            return 1;
         }
 
         /**
-         * Creates the context menu for this list field, which includes items
-         * for adding a phone call and a conference call. If any calls exist in
-         * this list field, items are also included that allow viewing, editing,
-         * and deleting.
-         * 
-         * @return This list field's context menu.
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doAddRow(Object)
          */
-        public ContextMenu getContextMenu() {
-            final ContextMenu contextMenu = super.getContextMenu();
-            contextMenu.addItem(_addPhoneCallLog);
-            contextMenu.addItem(_addConferencePhoneCallLog);
-
-            if (PhoneLogsDemo.this._phoneLogs.numberOfCalls(_folder) > 0) {
-                final int index = getSelectedIndex();
-                final CallLog callLog =
-                        (CallLog) /* parent. */getCallback().get(this, index);
-
-                final MenuItem viewItem = new MenuItem("View", 300000, 100) {
-                    public void run() {
-                        PhoneLogsDemo.this.pushScreen(new ViewCallLogScreen(
-                                callLog, index, _folder));
-                    }
-                };
-                contextMenu.addItem(viewItem);
-
-                final MenuItem editItem = new MenuItem("Edit", 300000, 110) {
-                    public void run() {
-                        PhoneLogsDemo.this.pushScreen(new EditCallLogScreen(
-                                callLog, index, _folder));
-                    }
-                };
-                contextMenu.addItem(editItem);
-
-                final MenuItem deleteItem =
-                        new MenuItem("Delete", 300000, 120) {
-                            public void run() {
-                                if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
-                                    delete(index);
-                                }
-                            }
-                        };
-
-                contextMenu.addItem(deleteItem);
-                contextMenu.addItem(_deleteAllItem);
-            }
-
-            return contextMenu;
+        protected boolean doAddRow(final Object data) {
+            PhoneLogsDemo.this._phoneLogs.addCall((CallLog) data);
+            return true;
         }
 
-        // Adds a phone call to this list field.
-        public void add(final CallLog callLog) {
-            PhoneLogsDemo.this._phoneLogs.addCall(callLog);
-            /* parent. */setSize(PhoneLogsDemo.this._phoneLogs
-                    .numberOfCalls(_folder));
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doGetRow(int)
+         */
+        protected Object doGetRow(final int index) {
+            return PhoneLogsDemo.this._phoneLogs.callAt(index, _folder);
         }
 
-        // Deletes a phone call from this list field.
-        public void delete(final int index) {
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doRemoveRowAt(int)
+         */
+        protected boolean doRemoveRowAt(final int index) {
             PhoneLogsDemo.this._phoneLogs.deleteCall(index, _folder);
-            /* parent. */setSize(PhoneLogsDemo.this._phoneLogs
-                    .numberOfCalls(_folder));
+            return true;
+        }
+
+        /**
+         * Swaps one row in the model with a new row
+         * 
+         * @param index
+         *            Index of the row to replace
+         * @param row
+         *            The row to insert
+         */
+        public void swapRow(final int index, final Object row) {
+            PhoneLogsDemo.this._phoneLogs.swapCall((CallLog) row, index,
+                    _folder);
+            notifyListeners(new TableModelChangeEvent(
+                    TableModelChangeEvent.ROW_UPDATED, this, index, -1));
+        }
+
+        /**
+         * Delete all rows in the model
+         */
+        public void deleteAllRows() {
+            while (PhoneLogsDemo.this._phoneLogs.numberOfCalls(_folder) > 0) {
+                removeRowAt(0);
+            }
+        }
+    }
+
+    /**
+     * This class represents a table for displaying the call logs of a specific
+     * folder on the device (either "normal calls" or "missed calls").
+     */
+    private static final class PhoneCallTable {
+        // Members ----------------------------------------------
+
+        private PhoneCallTableModelAdapter _model;
+        private TableView _view;
+
+        /**
+         * Creates a new PhoneCallTable object
+         * 
+         * @param model
+         *            The model representing the phone logs this table will
+         *            display
+         */
+        public PhoneCallTable(final PhoneCallTableModelAdapter model) {
+            _model = model;
+
+            _view = new TableView(_model);
+
+            final TableController controller =
+                    new TableController(_model, _view);
+            controller.setFocusPolicy(TableController.ROW_FOCUS);
+            _view.setController(controller);
+
+            // Create a DataTemplate to format Phone Log data for table rows
+            _view.setDataTemplateFocus(BackgroundFactory
+                    .createLinearGradientBackground(Color.LIGHTBLUE,
+                            Color.LIGHTBLUE, Color.BLUE, Color.BLUE));
+            final DataTemplate dataTemplate = new DataTemplate(_view, 1, 1) {
+                public Field[] getDataFields(final int modelRowIndex) {
+                    final CallLog log = (CallLog) _model.getRow(modelRowIndex);
+                    String text;
+                    if (log instanceof PhoneCallLog) {
+                        final PhoneCallLog phoneCallLog = (PhoneCallLog) log;
+                        text = phoneCallLog.getParticipant().getNumber();
+                    } else {
+                        text = "Conference call";
+                    }
+
+                    final Field[] fields =
+                            { new LabelField(text, Field.NON_FOCUSABLE) };
+
+                    return fields;
+                }
+            };
+            dataTemplate.createRegion(new XYRect(0, 0, 1, 1));
+            dataTemplate.setColumnProperties(0, new TemplateColumnProperties(
+                    Display.getWidth()));
+            dataTemplate.setRowProperties(0, new TemplateRowProperties(32));
+            _view.setDataTemplate(dataTemplate);
+            dataTemplate.useFixedHeight(true);
+
+        }
+
+        /**
+         * Retries the field representing the view component of the table
+         * 
+         * @return The table view
+         */
+        public Field getView() {
+            return _view;
+        }
+
+        /**
+         * Deletes the currently selected item in the table
+         */
+        public void deleteSelectedItem() {
+            _model.removeRowAt(_view.getRowNumberWithFocus());
+        }
+
+        /**
+         * Delete all items in the table
+         */
+        public void deleteAll() {
+            _model.deleteAllRows();
+        }
+
+        /**
+         * Returns the number of rows in the table
+         * 
+         * @return The number of rows in the table
+         */
+        public int getNumberOfRows() {
+            return _model.getNumberOfRows();
+        }
+
+        /**
+         * Returns the currently selected CallLog
+         * 
+         * @return The currently selected CallLog
+         */
+        public CallLog getSelectedItem() {
+            return (CallLog) _model.getRow(_view.getRowNumberWithFocus());
+        }
+
+        /**
+         * Returns the model for the data displayed in this table
+         * 
+         * @return The model
+         */
+        public PhoneCallTableModelAdapter getModel() {
+            return _model;
+        }
+
+        /**
+         * Returns the index of the currently selected item
+         * 
+         * @return The index of the currently selected item
+         */
+        public int getSelectedIndex() {
+            return _view.getRowNumberWithFocus();
         }
     }
 
@@ -235,123 +305,227 @@ public final class PhoneLogsDemo extends UiApplication {
      * displays two lists of phone calls: a "normal call" list and a
      * "missed call" list (the is a folder for each in the PhoneLogs API).
      */
-    private final class PhoneLogsDemoScreen extends MainScreen implements
-            ListFieldCallback {
+    private final class PhoneLogsDemoScreen extends MainScreen {
+        private final PhoneCallTable _normalCallTable;
+        private final PhoneCallTable _missedCallTable;
+
+        private final MenuItem _addPhoneCallLog;
+        private final MenuItem _addConferencePhoneCallLog;
+        private final MenuItem _deleteAllItem;
+
         /**
-         * This constructor displays the two call log lists.
+         * Creares a new PhoneLogsDemoScreen object
          */
         public PhoneLogsDemoScreen() {
-            super();
+            super(Manager.NO_VERTICAL_SCROLL);
 
-            /* parent. */setTitle("PhoneLogs API Demo");
+            setTitle("PhoneLogs API Demo");
 
-            /* parent. */add(new RichTextField("Normal Calls",
+            add(new RichTextField("Normal Calls",
                     RichTextField.TEXT_ALIGN_HCENTER | Field.NON_FOCUSABLE));
 
-            PhoneLogsDemo.this._normalCallList.setCallback(this);
-            /* parent. */add(PhoneLogsDemo.this._normalCallList);
+            _normalCallTable = new PhoneCallTable(_normalCallModel);
 
-            /* parent. */add(new RichTextField("Missed Calls",
+            add(_normalCallTable.getView());
+
+            add(new RichTextField("Missed Calls",
                     RichTextField.TEXT_ALIGN_HCENTER | Field.NON_FOCUSABLE));
 
-            PhoneLogsDemo.this._missedCallList.setCallback(this);
-            /* parent. */add(PhoneLogsDemo.this._missedCallList);
+            _missedCallTable = new PhoneCallTable(_missedCallModel);
 
-            /* parent. */addKeyListener(new PhoneLogsDemoKeyListener(this));
+            add(_missedCallTable.getView());
+
+            addKeyListener(new PhoneLogsDemoKeyListener(this));
+
+            // Create menu item for adding a new phone call log
+            _addPhoneCallLog =
+                    new MenuItem(new StringProvider("Add Phone Call"),
+                            0x230010, 0);
+            _addPhoneCallLog.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    PhoneLogsDemo.this.pushScreen(new AddPhoneCallLogScreen());
+                }
+            }));
+
+            // Create menu item for adding a new conference phone call log
+            _addConferencePhoneCallLog =
+                    new MenuItem(new StringProvider("Add Conference Call"),
+                            0x230020, 1);
+            _addConferencePhoneCallLog.setCommand(new Command(
+                    new CommandHandler() {
+                        /**
+                         * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                         *      Object)
+                         */
+                        public void execute(
+                                final ReadOnlyCommandMetadata metadata,
+                                final Object context) {
+                            PhoneLogsDemo.this
+                                    .pushScreen(new AddConferencePhoneCallLogScreen());
+                        }
+                    }));
+
+            // Create menu item for deleting all call logs in a folder
+            _deleteAllItem =
+                    new MenuItem(new StringProvider("Delete All"), 0x230030,
+                            130);
+            _deleteAllItem.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
+                        _normalCallTable.deleteAll();
+                        _missedCallTable.deleteAll();
+                    }
+                }
+            }));
         }
 
-        // ListFieldCallback methods
-        // -------------------------------------------------------------------
-
         /**
-         * @see net.rim.device.api.ui.component.ListFieldCallback#drawListRow(ListField,Graphics,int,int,int)
+         * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
          */
-        public void drawListRow(final ListField listField,
-                final Graphics graphics, final int index, final int y,
-                final int width) {
-            final PhoneCallListField pcListField =
-                    (PhoneCallListField) listField;
-            final CallLog callLog =
-                    PhoneLogsDemo.this._phoneLogs.callAt(index, pcListField
-                            .getFolder());
+        protected void makeMenu(final Menu menu, final int instance) {
+            menu.add(_addPhoneCallLog);
+            menu.add(_addConferencePhoneCallLog);
 
-            if (callLog instanceof PhoneCallLog) {
-                final PhoneCallLog phoneCallLog = (PhoneCallLog) callLog;
-                graphics.drawText(phoneCallLog.getParticipant().getNumber(), 0,
-                        y, 0, width);
-            } else {
-                graphics.drawText("Conference Call", 0, y, 0, width);
+            // Get the table that currently has focus, if any
+            PhoneCallTable table = null;
+            if (_normalCallTable.getView().isFocus()) {
+                table = _normalCallTable;
+            } else if (_missedCallTable.getView().isFocus()) {
+                table = _missedCallTable;
             }
-        }
 
-        /**
-         * @see net.rim.device.api.ui.component.ListFieldCallback#getPreferredWidth(ListField)
-         */
-        public int getPreferredWidth(final ListField listField) {
-            return Display.getWidth();
-        }
+            if (table != null) {
+                // Create a new reference to the currently seleccted table. Must
+                // be final
+                // so that it can be referenced from anonymous inner classes.
+                final PhoneCallTable tableRef = table;
+                if (tableRef.getNumberOfRows() > 0) {
+                    final CallLog callLog = table.getSelectedItem();
 
-        /**
-         * @see net.rim.device.api.ui.component.ListFieldCallback#get(ListField
-         *      , int)
-         */
-        public Object get(final ListField listField, final int index) {
-            final PhoneCallListField pcListField =
-                    (PhoneCallListField) listField;
-            return PhoneLogsDemo.this._phoneLogs.callAt(index, pcListField
-                    .getFolder());
-        }
+                    // Create menu item to view the currently selected call
+                    final MenuItem viewItem =
+                            new MenuItem(new StringProvider("View"), 0x230010,
+                                    100);
+                    viewItem.setCommand(new Command(new CommandHandler() {
+                        /**
+                         * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                         *      Object)
+                         */
+                        public void execute(
+                                final ReadOnlyCommandMetadata metadata,
+                                final Object context) {
+                            PhoneLogsDemo.this
+                                    .pushScreen(new ViewCallLogScreen(callLog,
+                                            tableRef.getSelectedIndex(),
+                                            tableRef.getModel()));
+                        }
+                    }));
+                    menu.add(viewItem);
 
-        /**
-         * @see net.rim.device.api.ui.component.ListFieldCallback#indexOfList(ListField
-         *      , String , int)
-         */
-        public int indexOfList(final ListField listField, final String prefix,
-                final int start) {
-            return -1; // Not implemented.
+                    // Create menu item to edit the currently selected call
+                    final MenuItem editItem =
+                            new MenuItem(new StringProvider("Edit"), 0x230020,
+                                    110);
+                    editItem.setCommand(new Command(new CommandHandler() {
+                        /**
+                         * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                         *      Object)
+                         */
+                        public void execute(
+                                final ReadOnlyCommandMetadata metadata,
+                                final Object context) {
+                            PhoneLogsDemo.this
+                                    .pushScreen(new EditCallLogScreen(callLog,
+                                            tableRef.getSelectedIndex(),
+                                            tableRef.getModel()));
+                        }
+                    }));
+                    menu.add(editItem);
+
+                    // Create menu item to delete the currently selected call
+                    final MenuItem deleteItem =
+                            new MenuItem(new StringProvider("Delete"),
+                                    0x230030, 120);
+                    deleteItem.setCommand(new Command(new CommandHandler() {
+                        /**
+                         * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                         *      Object)
+                         */
+                        public void execute(
+                                final ReadOnlyCommandMetadata metadata,
+                                final Object context) {
+                            if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
+                                tableRef.deleteSelectedItem();
+                            }
+                        }
+                    }));
+
+                    menu.add(deleteItem);
+                    menu.add(_deleteAllItem);
+                }
+            }
+            super.makeMenu(menu, instance);
         }
     }
 
     /**
-     * Screen for creating a new phone call log and saving it to the phone logs.
+     * Screen for creating a new phone call log
      */
     private final class AddPhoneCallLogScreen extends MainScreen {
         // Members
         // ---------------------------------------------------------------------------------
         PhoneCallLogController _controller;
 
-        // Constructor
+        // Creates a new AddPhoneCallLogScreen object
         public AddPhoneCallLogScreen() {
             super();
 
-            /* parent. */setTitle(new LabelField("Add Phone Call Log"));
+            setTitle(new LabelField("Add Phone Call Log"));
 
             _controller = new PhoneCallLogController();
             final Vector fields = _controller.getFields(CallLogController.ADD);
             final int numFields = fields.size();
 
             for (int i = 0; i < numFields; ++i) {
-                /* parent. */add((Field) fields.elementAt(i));
+                add((Field) fields.elementAt(i));
             }
 
-            final MenuItem saveItem = new MenuItem("Save", 100000, 100) {
-                public void run() {
+            // Create a menu item to save the new call
+            final MenuItem saveItem =
+                    new MenuItem(new StringProvider("Save"), 0x230010, 100);
+            saveItem.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
                     if (savePhoneCallLog()) {
                         PhoneLogsDemo.this
                                 .popScreen(AddPhoneCallLogScreen.this);
                     }
                 }
-            };
-            /* parent. */addMenuItem(saveItem);
+            }));
+            addMenuItem(saveItem);
 
-            /* parent. */addKeyListener(new PhoneLogsDemoKeyListener(this));
+            addKeyListener(new PhoneLogsDemoKeyListener(this));
         }
 
         /**
          * Saves the screen's information if the user changes anything and tries
          * to exit without saving.
          * 
-         * @return True if the screen's information was saved; false otherwise.
+         * @return True if the screen's information was saved; false otherwise
          * 
          * @see net.rim.device.api.ui.Screen#onSave()
          */
@@ -372,9 +546,9 @@ public final class PhoneLogsDemo extends UiApplication {
 
                 if (phoneCallLog.getType() == PhoneCallLog.TYPE_MISSED_CALL_UNOPENED
                         || phoneCallLog.getType() == PhoneCallLog.TYPE_MISSED_CALL_OPENED) {
-                    PhoneLogsDemo.this._missedCallList.add(phoneCallLog);
+                    PhoneLogsDemo.this._missedCallModel.addRow(phoneCallLog);
                 } else {
-                    PhoneLogsDemo.this._normalCallList.add(phoneCallLog);
+                    PhoneLogsDemo.this._normalCallModel.addRow(phoneCallLog);
                 }
 
                 return true;
@@ -386,7 +560,7 @@ public final class PhoneLogsDemo extends UiApplication {
 
     /**
      * Screen for creating a new conference phone call log and saving it to the
-     * phone logs.
+     * phone logs
      */
     private final class AddConferencePhoneCallLogScreen extends MainScreen {
         // Members --------------------------------------------------
@@ -398,29 +572,40 @@ public final class PhoneLogsDemo extends UiApplication {
                                                               // participant
                                                               // field.
 
+        /**
+         * Create a new AddConferencePhoneCallLogScreen object
+         */
         public AddConferencePhoneCallLogScreen() {
             super();
 
-            /* parent. */setTitle("Add Conference Phone Call Log");
+            setTitle("Add Conference Phone Call Log");
             _controller = new ConferencePhoneCallLogController();
             final Vector fields = _controller.getFields(CallLogController.ADD);
             final int numFields = fields.size();
 
             for (int i = 0; i < numFields; ++i) {
-                /* parent. */add((Field) fields.elementAt(i));
+                add((Field) fields.elementAt(i));
             }
 
-            final MenuItem saveItem = new MenuItem("Save", 100000, 100) {
-                public void run() {
+            // Create a menu item to save the new call
+            final MenuItem saveItem =
+                    new MenuItem(new StringProvider("Save"), 0x230010, 100);
+            saveItem.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
                     if (saveConferencePhoneCallLog()) {
                         PhoneLogsDemo.this
                                 .popScreen(AddConferencePhoneCallLogScreen.this);
                     }
                 }
-            };
-            /* parent. */addMenuItem(saveItem);
+            }));
+            addMenuItem(saveItem);
 
-            /* parent. */addKeyListener(new PhoneLogsDemoKeyListener(this));
+            addKeyListener(new PhoneLogsDemoKeyListener(this));
         }
 
         /**
@@ -456,7 +641,7 @@ public final class PhoneLogsDemo extends UiApplication {
                                                                    // conference
                                                                    // call.
             {
-                final Field field = /* parent. */getLeafFieldWithFocus();
+                final Field field = getLeafFieldWithFocus();
                 final int index = field.getIndex();
 
                 if (index >= FIRST_PARTICIPANT_INDEX) {
@@ -477,7 +662,8 @@ public final class PhoneLogsDemo extends UiApplication {
             if (_controller.validate()) {
                 final ConferencePhoneCallLog conferencePhoneCallLog =
                         (ConferencePhoneCallLog) _controller.getCallLog();
-                PhoneLogsDemo.this._normalCallList.add(conferencePhoneCallLog);
+                PhoneLogsDemo.this._normalCallModel
+                        .addRow(conferencePhoneCallLog);
 
                 return true;
             }
@@ -493,60 +679,93 @@ public final class PhoneLogsDemo extends UiApplication {
          * phone call log.
          */
         private final class AddParticipant extends MenuItem {
+            /**
+             * Create a new AddParticipant object
+             */
             public AddParticipant() {
-                super("Add Participant", 150000, 110);
-            }
-
-            public void run() {
-                _controller.addParticipant();
-                final Field field =
-                        (Field) _controller.getFields(CallLogController.EDIT)
-                                .lastElement();
-                AddConferencePhoneCallLogScreen.this.add(field);
-                AddConferencePhoneCallLogScreen.this.doPaint();
+                super(new StringProvider("Add Participant"), 0x230020, 110);
+                this.setCommand(new Command(new CommandHandler() {
+                    /**
+                     * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                     *      Object)
+                     */
+                    public void execute(final ReadOnlyCommandMetadata metadata,
+                            final Object context) {
+                        _controller.addParticipant();
+                        final Field field =
+                                (Field) _controller.getFields(
+                                        CallLogController.EDIT).lastElement();
+                        AddConferencePhoneCallLogScreen.this.add(field);
+                        AddConferencePhoneCallLogScreen.this.doPaint();
+                    }
+                }));
             }
         }
 
         /**
          * This class is a menu item for deleting a participant from a
-         * conference call.
+         * conference call
          */
         private final class DeleteParticipant extends MenuItem {
             private final int _index;
             private final Field _field;
 
+            /**
+             * Create a new DeleteParticipant object
+             * 
+             * @param index
+             *            The index of the participant to delete
+             * @param field
+             *            The field in which the participant is displayed
+             */
             public DeleteParticipant(final int index, final Field field) {
-                super("Delete Participant", 150000, 110);
+                super(new StringProvider("Delete Participant"), 0x230030, 110);
                 _index = index;
                 _field = field;
-            }
-
-            public void run() {
-                _controller.removeParticipantAt(_index);
-                AddConferencePhoneCallLogScreen.this.delete(_field);
-                AddConferencePhoneCallLogScreen.this.doPaint();
+                this.setCommand(new Command(new CommandHandler() {
+                    /**
+                     * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                     *      Object)
+                     */
+                    public void execute(final ReadOnlyCommandMetadata metadata,
+                            final Object context) {
+                        _controller.removeParticipantAt(_index);
+                        AddConferencePhoneCallLogScreen.this.delete(_field);
+                        AddConferencePhoneCallLogScreen.this.doPaint();
+                    }
+                }));
             }
         }
     }
 
     /**
-     * A screen for viewing a call log.
+     * A screen for viewing a call log
      */
     private final class ViewCallLogScreen extends MainScreen {
         // Members
         // ---------------------------------------------------------------------------------
         private CallLogController _controller;
         private final int _index;
-        private final long _folder;
+        private final PhoneCallTableModelAdapter _model;
 
+        /**
+         * Create a new ViewCallLogScreen object
+         * 
+         * @param callLog
+         *            The CallLog to view
+         * @param index
+         *            The index of the CallLog in the model
+         * @param model
+         *            The model through which the CallLog is manipulated
+         */
         public ViewCallLogScreen(final CallLog callLog, final int index,
-                final long folder) {
+                final PhoneCallTableModelAdapter model) {
             super();
 
             _index = index;
-            _folder = folder;
+            _model = model;
 
-            /* parent. */setTitle(new LabelField("View Call Log"));
+            setTitle(new LabelField("View Call Log"));
 
             if (callLog instanceof PhoneCallLog) {
                 final PhoneCallLog phoneCallLog = (PhoneCallLog) callLog;
@@ -563,56 +782,66 @@ public final class PhoneLogsDemo extends UiApplication {
             final int numFields = fields.size();
 
             for (int i = 0; i < numFields; ++i) {
-                /* parent. */add((Field) fields.elementAt(i));
+                add((Field) fields.elementAt(i));
             }
 
-            final MenuItem editItem = new MenuItem("Edit", 300000, 110) {
-                public void run() {
+            // Menu item to edit the displayed CallLog
+            final MenuItem editItem =
+                    new MenuItem(new StringProvider("Edit"), 0x230010, 110);
+            editItem.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
                     PhoneLogsDemo.this.popScreen(ViewCallLogScreen.this);
                     PhoneLogsDemo.this.pushScreen(new EditCallLogScreen(
-                            _controller.getCallLog(), _index, _folder));
+                            _controller.getCallLog(), _index, _model));
                 }
-            };
+            }));
 
-            /* parent. */addMenuItem(editItem);
+            addMenuItem(editItem);
 
-            /* parent. */addKeyListener(new PhoneLogsDemoKeyListener(this));
+            addKeyListener(new PhoneLogsDemoKeyListener(this));
         }
     }
 
     /**
-     * A screen for editing a call log.
+     * A screen for editing a call log
      */
     private final class EditCallLogScreen extends MainScreen {
         // Members --------------------------------------------------
         private CallLogController _controller;
         private final int _index;
-        private final long _folder;
+        private final PhoneCallTableModelAdapter _model;
 
         // Constants ------------------------------------------------
         private static final int FIRST_PARTICIPANT_INDEX = 4;
 
         /**
+         * Creates a new EditCallLogScreen object
+         * 
          * This constructor makes a copy of the callLog parameter, which can be
          * edited and used to replace the old callLog. It then creates a
          * controller based on the copied call log, and place all its fields on
          * the screen.
          * 
          * @param callLog
-         *            The call log to be copied and edited.
+         *            The call log to be copied and edited
          * @param index
-         *            The index of the call log to be edited.
+         *            The index of the call log to be edited
          * @param folder
-         *            The folder to which the call log belongs.
+         *            The folder to which the call log belongs
          */
         public EditCallLogScreen(final CallLog callLog, final int index,
-                final long folder) {
+                final PhoneCallTableModelAdapter model) {
             super();
 
             _index = index;
-            _folder = folder;
+            _model = model;
 
-            /* parent. */setTitle(new LabelField("Edit Call Log"));
+            setTitle(new LabelField("Edit Call Log"));
 
             if (callLog instanceof PhoneCallLog) {
                 final PhoneCallLog phoneCallLog = (PhoneCallLog) callLog;
@@ -630,20 +859,28 @@ public final class PhoneLogsDemo extends UiApplication {
             final int numFields = fields.size();
 
             for (int i = 0; i < numFields; ++i) {
-                /* parent. */add((Field) fields.elementAt(i));
+                add((Field) fields.elementAt(i));
             }
 
-            final MenuItem saveItem = new MenuItem("Save", 100000, 100) {
-                public void run() {
+            // Menu itme to save the current phone log
+            final MenuItem saveItem =
+                    new MenuItem(new StringProvider("Save"), 0x230010, 100);
+            saveItem.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
                     if (saveEdits()) {
                         PhoneLogsDemo.this.popScreen(EditCallLogScreen.this);
                     }
                 }
-            };
+            }));
 
-            /* parent. */addMenuItem(saveItem);
+            addMenuItem(saveItem);
 
-            /* parent. */addKeyListener(new PhoneLogsDemoKeyListener(this));
+            addKeyListener(new PhoneLogsDemoKeyListener(this));
         }
 
         /**
@@ -674,7 +911,7 @@ public final class PhoneLogsDemo extends UiApplication {
                 menu.add(new AddParticipant());
 
                 if (conferencePhoneCallLog.numberOfParticipants() > 2) {
-                    final Field field = /* parent. */getLeafFieldWithFocus();
+                    final Field field = getLeafFieldWithFocus();
                     final int index = field.getIndex();
 
                     if (index >= FIRST_PARTICIPANT_INDEX) {
@@ -694,8 +931,7 @@ public final class PhoneLogsDemo extends UiApplication {
          */
         private boolean saveEdits() {
             if (_controller.validate()) {
-                PhoneLogsDemo.this._phoneLogs.swapCall(
-                        _controller.getCallLog(), _index, _folder);
+                _model.swapRow(_index, _controller.getCallLog());
 
                 return true;
             }
@@ -704,11 +940,11 @@ public final class PhoneLogsDemo extends UiApplication {
         }
 
         /**
-         * Makes a copy of a phone call log.
+         * Makes a copy of a phone call log
          * 
          * @param callLog
-         *            The phone call log to be copied.
-         * @return A copy of the phone call log.
+         *            The phone call log to be copied
+         * @return A copy of the phone call log
          */
         private PhoneCallLog copyPhoneCallLog(final PhoneCallLog callLog) {
             return new PhoneCallLog(new Date(callLog.getDate().getTime()),
@@ -718,11 +954,11 @@ public final class PhoneLogsDemo extends UiApplication {
         }
 
         /**
-         * Makes a copy of a conference phone call log.
+         * Makes a copy of a conference phone call log
          * 
          * @param callLog
-         *            The conference phone call log to be copied.
-         * @return A copy of the conference phone call log.
+         *            The conference phone call log to be copied
+         * @return A copy of the conference phone call log
          */
         private ConferencePhoneCallLog copyConferencePhoneCallLog(
                 final ConferencePhoneCallLog callLog) {
@@ -748,47 +984,68 @@ public final class PhoneLogsDemo extends UiApplication {
         // -----------------------------
 
         /**
-         * This class is a menu item allowing a user to add a participant to
-         * this screen.
+         * Menu item allowing a user to add a participant to this screen
          */
         private final class AddParticipant extends MenuItem {
+            /**
+             * Create a new AddParticipant object
+             */
             public AddParticipant() {
-                super("Add Participant", 150000, 100);
-            }
-
-            public void run() {
-                final ConferencePhoneCallLogController controller =
-                        (ConferencePhoneCallLogController) _controller;
-                controller.addParticipant();
-                final Field field =
-                        (Field) controller.getFields(CallLogController.EDIT)
-                                .lastElement();
-                EditCallLogScreen.this.add(field);
-                EditCallLogScreen.this.doPaint();
+                super(new StringProvider("Add Participant"), 0x230020, 100);
+                this.setCommand(new Command(new CommandHandler() {
+                    /**
+                     * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                     *      Object)
+                     */
+                    public void execute(final ReadOnlyCommandMetadata metadata,
+                            final Object context) {
+                        final ConferencePhoneCallLogController controller =
+                                (ConferencePhoneCallLogController) _controller;
+                        controller.addParticipant();
+                        final Field field =
+                                (Field) controller.getFields(
+                                        CallLogController.EDIT).lastElement();
+                        EditCallLogScreen.this.add(field);
+                        EditCallLogScreen.this.doPaint();
+                    }
+                }));
             }
         }
 
         /**
-         * This class is a menu item allowing a user to delete a participant
-         * from this screen.
+         * Menu item allowing a user to delete a participant from this screen
          */
         private final class DeleteParticipant extends MenuItem {
             private final int _index;
             private final Field _field;
 
+            /**
+             * Create a new DeleteParticipant object
+             * 
+             * @param index
+             *            The index of the participant to delete
+             * @param field
+             *            The field in which the participant is displayed
+             */
             public DeleteParticipant(final int index, final Field field) {
-                super("Delete Participant", 150000, 100);
+                super(new StringProvider("Delete Participant"), 0x230030, 100);
 
                 _index = index;
                 _field = field;
-            }
-
-            public void run() {
-                final ConferencePhoneCallLogController controller =
-                        (ConferencePhoneCallLogController) _controller;
-                controller.removeParticipantAt(_index);
-                EditCallLogScreen.this.delete(_field);
-                EditCallLogScreen.this.doPaint();
+                this.setCommand(new Command(new CommandHandler() {
+                    /**
+                     * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                     *      Object)
+                     */
+                    public void execute(final ReadOnlyCommandMetadata metadata,
+                            final Object context) {
+                        final ConferencePhoneCallLogController controller =
+                                (ConferencePhoneCallLogController) _controller;
+                        controller.removeParticipantAt(_index);
+                        EditCallLogScreen.this.delete(_field);
+                        EditCallLogScreen.this.doPaint();
+                    }
+                }));
             }
         }
     }
@@ -815,15 +1072,15 @@ public final class PhoneLogsDemo extends UiApplication {
         public static final int EDIT = 2;
 
         /**
-         * CallLogController constructor. Creates the fields used to
+         * Creates a new CallLogController object. Creates the fields used to
          * display/edit a call log's information.
          * 
          * @param callLog
-         *            The call log whose information is to be displayed/edited.
+         *            The call log whose information is to be displayed/edited
          */
         public CallLogController(final CallLog callLog) {
-            // Don't want this array to be a static class variable because the
-            // locale may change.
+            // This array should not be a static class variable because the
+            // locale may change
             final String[] choices =
                     { "Normal", "Busy", "Congestion error",
                             "Path unavailability error", "Number unobtainable",
@@ -860,9 +1117,9 @@ public final class PhoneLogsDemo extends UiApplication {
 
         /**
          * Returns a call log updated with the controller's most recent
-         * information.
+         * information
          * 
-         * @return The updated call log.
+         * @return The updated call log
          */
         public CallLog getCallLog() {
             updateLog();
@@ -871,14 +1128,13 @@ public final class PhoneLogsDemo extends UiApplication {
         }
 
         /**
-         * Returns a vector of fields for display and/or edit, depending on
-         * type.
+         * Returns a vector of fields for display and/or edit, depending on type
          * 
          * @param type
-         *            The usage type.
-         * @return A vector of this controller's fields.
+         *            The usage type
+         * @return A vector of this controller's fields
          * @throws IllegalArgumentException
-         *             if type is an invalid usage type.
+         *             if type is an invalid usage type
          */
         protected Vector getFields(final int type) {
             switch (type) {
@@ -907,7 +1163,7 @@ public final class PhoneLogsDemo extends UiApplication {
 
         /**
          * Updates the call log with the current information in this
-         * controller's fields.
+         * controller's fields
          */
         protected void updateLog() {
             _callLog.setNotes(_notes.getText());
@@ -918,11 +1174,10 @@ public final class PhoneLogsDemo extends UiApplication {
 
         /**
          * Sets the fields in this controller to be either editable or
-         * non-editable.
+         * non-editable
          * 
          * @param editable
-         *            Whether or not this controller's fields should be
-         *            editable.
+         *            Whether or not this controller's fields should be editable
          */
         protected void setEditable(final boolean editable) {
             _notes.setEditable(editable);
@@ -942,6 +1197,9 @@ public final class PhoneLogsDemo extends UiApplication {
         private final Vector _participants; // Participants in the conference
                                             // call.
 
+        /**
+         * Creates a new ConferencePhoneCallLogController object
+         */
         public ConferencePhoneCallLogController() {
             this(new ConferencePhoneCallLog(new Date(), 0,
                     CallLog.STATUS_NORMAL, new PhoneCallLogID(""),
@@ -997,14 +1255,13 @@ public final class PhoneLogsDemo extends UiApplication {
         }
 
         /**
-         * Returns a vector of fields for display and/or edit, depending on
-         * type.
+         * Returns a vector of fields for display and/or edit, depending on type
          * 
          * @param type
-         *            The usage type.
-         * @return A vector of this controller's fields.
+         *            The usage type
+         * @return A vector of this controller's fields
          * @throws IllegalArgumentException
-         *             if type is an invalid usage type.
+         *             if type is an invalid usage type
          */
         public Vector getFields(final int type) {
             final Vector fields = super.getFields(type);
@@ -1019,7 +1276,7 @@ public final class PhoneLogsDemo extends UiApplication {
 
         /**
          * Updates the call log with the current information in this
-         * controller's fields.
+         * controller's fields
          */
         protected void updateLog() {
             super.updateLog();
@@ -1044,11 +1301,10 @@ public final class PhoneLogsDemo extends UiApplication {
         }
 
         /**
-         * Sets the fields in this controller to be editable or non-editable.
+         * Sets the fields in this controller to be editable or non-editable
          * 
          * @param editable
-         *            Whether or not this controller's fields should be
-         *            editable.
+         *            Whether or not this controller's fields should be editable
          */
         protected void setEditable(final boolean editable) {
             super.setEditable(editable);
@@ -1063,7 +1319,7 @@ public final class PhoneLogsDemo extends UiApplication {
         }
 
         /**
-         * Adds a new participant field to this controller.
+         * Adds a new participant field to this controller
          */
         public void addParticipant() {
             _participants.addElement(new BasicEditField("Participant: ", "",
@@ -1074,10 +1330,10 @@ public final class PhoneLogsDemo extends UiApplication {
         }
 
         /**
-         * Removes a participant field from this controller.
+         * Removes a participant field from this controller
          * 
          * @param index
-         *            The index of the participant to be removed.
+         *            The index of the participant to be removed
          */
         public void removeParticipantAt(final int index) {
             _participants.removeElementAt(index);
@@ -1088,7 +1344,7 @@ public final class PhoneLogsDemo extends UiApplication {
     }
 
     /**
-     * This class controls the information specific to a phone call log.
+     * This class controls the information specific to a phone call log
      */
     private final class PhoneCallLogController extends CallLogController {
         // Members
@@ -1098,6 +1354,8 @@ public final class PhoneLogsDemo extends UiApplication {
         private int _oldType;
 
         /**
+         * Creates a new PhoneCallLogController object.
+         * 
          * This constructor creates a new instance of a phone call log, and sets
          * the old call type to -1, meaning there is no "old type". The old type
          * is used for validation when the phone call log is edited.
@@ -1109,7 +1367,7 @@ public final class PhoneLogsDemo extends UiApplication {
         }
 
         /**
-         * Constructs a PhoneCallLogController
+         * Creates a new PhoneCallLogController object
          * 
          * @param phoneCallLog
          *            The phoneCallLog to control
@@ -1117,8 +1375,7 @@ public final class PhoneLogsDemo extends UiApplication {
         public PhoneCallLogController(final PhoneCallLog phoneCallLog) {
             super(phoneCallLog);
 
-            // Don't want this array to be a class variable because the locale
-            // may change.
+            // Should not be a class variable because the locale may change
             final String[] choices =
                     { "Received Call", "Placed Call", "Missed Call (Unopened)",
                             "Missed Call (Opened)" };
@@ -1171,14 +1428,13 @@ public final class PhoneLogsDemo extends UiApplication {
         }
 
         /**
-         * Returns a vector of fields for display and/or edit, depending on
-         * type.
+         * Returns a vector of fields for display and/or edit, depending on type
          * 
          * @param type
-         *            The usage type.
-         * @return A vector of this controller's fields.
+         *            The usage type
+         * @return A vector of this controller's fields
          * @throws IllegalArgumentException
-         *             if type is an invalid usage type.
+         *             if type is an invalid usage type
          */
         public Vector getFields(final int type) {
             final Vector fields = super.getFields(type);
@@ -1190,7 +1446,7 @@ public final class PhoneLogsDemo extends UiApplication {
 
         /**
          * Updates the call log with the current information in this
-         * controller's fields.
+         * controller's fields
          */
         protected void updateLog() {
             super.updateLog();
@@ -1202,11 +1458,10 @@ public final class PhoneLogsDemo extends UiApplication {
         }
 
         /**
-         * Sets the fields in this controller to be editable or non-editable.
+         * Sets the fields in this controller to be editable or non-editable
          * 
          * @param editable
-         *            Whether or not this controller's fields should be
-         *            editable.
+         *            Whether or not this controller's fields should be editable
          */
         protected void setEditable(final boolean editable) {
             super.setEditable(editable);
@@ -1218,13 +1473,13 @@ public final class PhoneLogsDemo extends UiApplication {
 
     /**
      * This class implements a key listener so a menu is displayed when the user
-     * presses ENTER.
+     * presses ENTER
      */
     private static final class PhoneLogsDemoKeyListener implements KeyListener {
         private final Screen _screen;
 
         /**
-         * Constructor
+         * Creates a new PhoneLogsDemoKeyListener object
          * 
          * @param screen
          *            The screen in which to display the menu on

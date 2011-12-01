@@ -24,10 +24,13 @@
  * Environment Development Guide associated with this release.
  */
 
-package com.rim.samples.device.phonemultilinedemo;
+package com.rim.samples.device.phone.phonemultilinedemo;
 
 import net.rim.blackberry.api.phone.InvalidIDException;
 import net.rim.blackberry.api.phone.Phone;
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.RadioException;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
@@ -35,13 +38,12 @@ import net.rim.device.api.ui.component.BasicEditField;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.ObjectChoiceField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * The MainScreen class for the Phone Multi Line Demo application
  */
 public final class PhoneMultiLineScreen extends MainScreen {
-    private final MenuItem _callWithSelectedLineMenuItem;
-    private final MenuItem _switchLineMenuItem;
     private final BasicEditField _basicEditField;
     private final PhoneMultiLineAction _action;
     private final ObjectChoiceField _choiceField;
@@ -65,9 +67,17 @@ public final class PhoneMultiLineScreen extends MainScreen {
         add(_choiceField);
 
         // Menu item to initiate outgoing call with the selected line
-        _callWithSelectedLineMenuItem =
-                new MenuItem("Call With Selected Line", 110, 10) {
-                    public void run() {
+        final MenuItem _callWithSelectedLineMenuItem =
+                new MenuItem(new StringProvider("Call With Selected Line"),
+                        0x230010, 0);
+        _callWithSelectedLineMenuItem.setCommand(new Command(
+                new CommandHandler() {
+                    /**
+                     * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                     *      Object)
+                     */
+                    public void execute(final ReadOnlyCommandMetadata metadata,
+                            final Object context) {
                         final String text = _basicEditField.getText();
                         if (text == null || text.trim().length() == 0) {
                             Dialog.alert("Please enter phone number");
@@ -90,18 +100,25 @@ public final class PhoneMultiLineScreen extends MainScreen {
                             }
                         }
                     }
-                };
+                }));
         addMenuItem(_callWithSelectedLineMenuItem);
 
-        _switchLineMenuItem =
-                new MenuItem("Switch To The Selected Line", 110, 10) {
-                    public void run() {
-                        final Choice choice =
-                                (Choice) _choiceField.getChoice(_choiceField
-                                        .getSelectedIndex());
-                        Phone.setPreferredLine(choice.getLineId());
-                    }
-                };
+        final MenuItem _switchLineMenuItem =
+                new MenuItem(new StringProvider("Switch To The Selected Line"),
+                        0x230020, 1);
+        _switchLineMenuItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                final Choice choice =
+                        (Choice) _choiceField.getChoice(_choiceField
+                                .getSelectedIndex());
+                Phone.setPreferredLine(choice.getLineId());
+            }
+        }));
         addMenuItem(_switchLineMenuItem);
 
         // Edit field for users to enter a phone number

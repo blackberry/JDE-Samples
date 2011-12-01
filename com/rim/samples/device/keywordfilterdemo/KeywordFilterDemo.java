@@ -77,7 +77,9 @@ public final class KeywordFilterDemo extends UiApplication {
         app.enterEventDispatcher();
     }
 
-    // Constructor
+    /**
+     * Creates a new KeywordFilterDemo object
+     */
     public KeywordFilterDemo() {
         // Populate vector with data from file.
         _countries = getDataFromFile();

@@ -26,6 +26,8 @@
 
 package com.rim.samples.device.ui.locationpickerdemo;
 
+import java.util.Enumeration;
+
 import javax.microedition.location.Landmark;
 import javax.microedition.location.QualifiedCoordinates;
 
@@ -35,6 +37,7 @@ import net.rim.device.api.gps.GPSInfo;
 import net.rim.device.api.lbs.picker.ContactsLocationPicker;
 import net.rim.device.api.lbs.picker.EnterLocationPicker;
 import net.rim.device.api.lbs.picker.GPSLocationPicker;
+import net.rim.device.api.lbs.picker.GeotaggedPhotoPicker;
 import net.rim.device.api.lbs.picker.LocationPicker;
 import net.rim.device.api.lbs.picker.MapsLocationPicker;
 import net.rim.device.api.lbs.picker.RecentLocationPicker;
@@ -77,7 +80,10 @@ public class LocationPickerDemo extends UiApplication {
             LocationPicker.Listener, FieldChangeListener {
         private final LocationPicker _locationPicker;
         private final ButtonField _buttonField;
-        private final LabelField _labelField;
+        private final LabelField _nameLabel;
+        private final LabelField _descLabel;
+        private final LabelField _coordLabel;
+        private boolean _mapsPresent = false;
 
         /**
          * Creates a new LocationPickerDemoScreen object
@@ -86,12 +92,16 @@ public class LocationPickerDemo extends UiApplication {
             // Initialize screen
             setTitle("Location Picker Demo");
             _buttonField =
-                    new ButtonField("Choose location",
-                            ButtonField.CONSUME_CLICK | ButtonField.NEVER_DIRTY);
+                    new ButtonField("Choose location", ButtonField.NEVER_DIRTY
+                            | ButtonField.CONSUME_CLICK);
             _buttonField.setChangeListener(this);
             add(_buttonField);
-            _labelField = new LabelField();
-            add(_labelField);
+            _nameLabel = new LabelField();
+            _descLabel = new LabelField();
+            _coordLabel = new LabelField();
+            add(_nameLabel);
+            add(_descLabel);
+            add(_coordLabel);
 
             // Define suggested locations
             final Landmark[] landmarks =
@@ -105,30 +115,63 @@ public class LocationPickerDemo extends UiApplication {
                                             -73.966667, Float.NaN, Float.NaN,
                                             Float.NaN), null) };
 
-            // Define an array containing individual picker types. If
-            // GPSInfo.getGPSDataSource() returns a null object,
-            // GPS is not supported on the current BlackBerry Smartphone in
-            // which case we will initialize the array to have five elements
-            // instead of six elements.
+            int arraySize = 7; // We will create an array of pickers with a max
+                               // size of seven
+
+            // Check for BlackBerry Maps support
+            LocationPicker.Picker mapsLocationPicker = null;
+            try {
+                mapsLocationPicker = MapsLocationPicker.getInstance();
+                _mapsPresent = true;
+            } catch (final IllegalStateException ise) {
+                arraySize--; // No maps, reduce array size
+            }
+
+            // Check for GPS support
+            final boolean gpsSupported = GPSInfo.getGPSDataSource() != null;
+            if (!gpsSupported) {
+                arraySize--; // No GPS, reduce array size
+            }
+
+            // Define an array containing individual picker types.
             final LocationPicker.Picker[] locationPickersArray =
-                    new LocationPicker.Picker[GPSInfo.getGPSDataSource() == null ? 5
-                            : 6];
-            locationPickersArray[0] = EnterLocationPicker.getInstance(false);
-            locationPickersArray[1] =
+                    new LocationPicker.Picker[arraySize];
+            locationPickersArray[--arraySize] =
+                    EnterLocationPicker.getInstance(false);
+            locationPickersArray[--arraySize] =
                     SuggestedLocationPicker.getInstance("App specific...",
                             landmarks);
-            locationPickersArray[2] = RecentLocationPicker.getInstance();
-            locationPickersArray[3] = MapsLocationPicker.getInstance();
-            locationPickersArray[4] = ContactsLocationPicker.getInstance(false);
+            locationPickersArray[--arraySize] =
+                    RecentLocationPicker.getInstance();
+            locationPickersArray[--arraySize] =
+                    ContactsLocationPicker.getInstance(false);
+            locationPickersArray[--arraySize] =
+                    GeotaggedPhotoPicker.getInstance();
 
-            if (locationPickersArray.length == 6) {
+            if (_mapsPresent) {
+                // Blackberry Maps is present on the device, add a
+                // MapsLocationPicker
+                locationPickersArray[--arraySize] = mapsLocationPicker;
+            }
+
+            if (gpsSupported) {
                 // GPS is supported, add a GPSLocationPicker
-                locationPickersArray[5] = GPSLocationPicker.getInstance();
+                locationPickersArray[--arraySize] =
+                        GPSLocationPicker.getInstance();
             }
 
             // Get a LocationPicker instance containing individual picker types
             // and make this class a location picker listener.
             _locationPicker = LocationPicker.getInstance(locationPickersArray);
+            final Enumeration globalPickers =
+                    _locationPicker.getGlobalLocationPickers();
+
+            while (globalPickers.hasMoreElements()) {
+                _locationPicker
+                        .addLocationPicker((LocationPicker.Picker) globalPickers
+                                .nextElement());
+            }
+
             _locationPicker.setListener(this);
         }
 
@@ -138,30 +181,34 @@ public class LocationPickerDemo extends UiApplication {
          */
         public void locationPicked(final LocationPicker.Picker picker,
                 final Landmark location) {
+            if (picker instanceof LocationPicker) {
+                final LocationPicker locationPicker = (LocationPicker) picker;
+                locationPicker.close();
+            }
             if (location != null) {
-                final StringBuffer buff = new StringBuffer("Location: ");
-                final String desc = location.getDescription();
-                if (desc != null) {
-                    buff.append(location.getDescription());
-                } else {
-                    final QualifiedCoordinates coordinates =
-                            location.getQualifiedCoordinates();
+                _nameLabel.setText("Location name: " + location.getName());
+                _descLabel.setText("Description: " + location.getDescription());
+
+                final QualifiedCoordinates coordinates =
+                        location.getQualifiedCoordinates();
+                if (coordinates != null) {
+                    final StringBuffer buff = new StringBuffer("Coordinates: ");
                     final double latitude = coordinates.getLatitude();
                     final double longitude = coordinates.getLongitude();
-                    buff.append("Latitude - ");
+                    buff.append("Latitude:");
                     buff.append(latitude);
-                    buff.append(", Longitude - ");
+                    buff.append(", Longitude: ");
                     buff.append(longitude);
+                    _coordLabel.setText(buff.toString());
                 }
-
-                // Update the screen
-                _labelField.setText(buff.toString());
 
                 // Invoke the BlackBerry Maps application with the
                 // chosen location.
-                final Landmark[] landmark = { location };
-                final MapsArguments mapsArgs = new MapsArguments(landmark);
-                Invoke.invokeApplication(Invoke.APP_TYPE_MAPS, mapsArgs);
+                if (_mapsPresent) {
+                    final Landmark[] landmark = { location };
+                    final MapsArguments mapsArgs = new MapsArguments(landmark);
+                    Invoke.invokeApplication(Invoke.APP_TYPE_MAPS, mapsArgs);
+                }
             }
         }
 

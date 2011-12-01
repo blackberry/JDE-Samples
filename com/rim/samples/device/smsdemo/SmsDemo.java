@@ -1,5 +1,5 @@
 /**
- * SmsDemo.java
+ * SMSDemo.java
  * 
  * Copyright © 1998-2011 Research In Motion Limited
  * 
@@ -36,6 +36,9 @@ import javax.wireless.messaging.Message;
 import javax.wireless.messaging.MessageConnection;
 import javax.wireless.messaging.TextMessage;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.io.DatagramBase;
 import net.rim.device.api.io.DatagramConnectionBase;
 import net.rim.device.api.io.SmsAddress;
@@ -50,6 +53,7 @@ import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.EditField;
 import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * A demo application for sending and receiving SMS messages. Running this
@@ -63,10 +67,10 @@ import net.rim.device.api.ui.container.MainScreen;
  * SMS and MMS application as well as being received by this application's
  * listening thread.
  */
-public class SmsDemo extends UiApplication {
+public class SMSDemo extends UiApplication {
     private static final int MAX_PHONE_NUMBER_LENGTH = 32;
 
-    private static String NON_ZERO_PORT_NUMBER = "3590";
+    private static final String NON_ZERO_PORT_NUMBER = "3590";
 
     private EditField _sendText;
     private EditField _address;
@@ -89,26 +93,6 @@ public class SmsDemo extends UiApplication {
     }
 
     /**
-     * Sends an SMS message
-     */
-    private final MenuItem _sendMenuItem = new MenuItem("Send", 100, 10) {
-        public void run() {
-            final String text = _sendText.getText();
-            final String addr = _address.getText();
-
-            if (addr.length() == 0) {
-                Dialog.alert("Destination field cannot be blank");
-                _address.setFocus();
-            } else if (text.length() == 0) {
-                Dialog.alert("Message field cannot be blank");
-                _sendText.setFocus();
-            } else {
-                _sender.send(addr, text, _port);
-            }
-        }
-    };
-
-    /**
      * Entry point for application
      * 
      * @param args
@@ -117,8 +101,8 @@ public class SmsDemo extends UiApplication {
     public static void main(final String[] args) {
         // Create a new instance of the application and make the currently
         // running thread the application's event dispatch thread.
-        final SmsDemo sms = new SmsDemo();
-        sms.enterEventDispatcher();
+        final SMSDemo smsDemo = new SMSDemo();
+        smsDemo.enterEventDispatcher();
     }
 
     /**
@@ -352,7 +336,32 @@ public class SmsDemo extends UiApplication {
             _status = new EditField(Field.NON_FOCUSABLE);
             add(_status);
 
-            addMenuItem(_sendMenuItem);
+            // Sends an SMS message
+            final MenuItem sendMenuItem =
+                    new MenuItem(new StringProvider("Send"), 0x230010, 0);
+            sendMenuItem.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final String text = _sendText.getText();
+                    final String addr = _address.getText();
+
+                    if (addr.length() == 0) {
+                        Dialog.alert("Destination field cannot be blank");
+                        _address.setFocus();
+                    } else if (text.length() == 0) {
+                        Dialog.alert("Message field cannot be blank");
+                        _sendText.setFocus();
+                    } else {
+                        _sender.send(addr, text, _port);
+                    }
+                }
+            }));
+
+            addMenuItem(sendMenuItem);
         }
 
         /**
@@ -378,9 +387,9 @@ public class SmsDemo extends UiApplication {
     }
 
     /**
-     * Default constructor
+     * Creates a new SMSDemo object
      */
-    public SmsDemo() {
+    public SMSDemo() {
         invokeLater(new Runnable() {
 
             public void run() {

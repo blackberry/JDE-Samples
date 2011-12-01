@@ -26,8 +26,6 @@
 
 package com.rim.samples.device.contactlinkingdemo;
 
-import java.util.Vector;
-
 import javax.microedition.pim.Contact;
 import javax.microedition.pim.PIM;
 import javax.microedition.pim.PIMException;
@@ -40,20 +38,33 @@ import net.rim.blackberry.api.pdap.BlackBerryContactList;
 import net.rim.blackberry.api.pdap.contactlinking.DefaultLinkableContact;
 import net.rim.blackberry.api.pdap.contactlinking.LinkableContact;
 import net.rim.blackberry.api.pdap.contactlinking.LinkedContactUtilities;
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Display;
+import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.DrawStyle;
-import net.rim.device.api.ui.FieldChangeListener;
-import net.rim.device.api.ui.Graphics;
+import net.rim.device.api.ui.Field;
+import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
+import net.rim.device.api.ui.XYRect;
 import net.rim.device.api.ui.component.Dialog;
-import net.rim.device.api.ui.component.ListField;
-import net.rim.device.api.ui.component.ListFieldCallback;
+import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
+import net.rim.device.api.ui.component.table.AbstractTableModel;
+import net.rim.device.api.ui.component.table.DataTemplate;
+import net.rim.device.api.ui.component.table.TableController;
+import net.rim.device.api.ui.component.table.TableModelAdapter;
+import net.rim.device.api.ui.component.table.TableView;
+import net.rim.device.api.ui.component.table.TemplateColumnProperties;
+import net.rim.device.api.ui.component.table.TemplateRowProperties;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.decor.BackgroundFactory;
+import net.rim.device.api.util.StringProvider;
 import net.rim.device.api.util.StringUtilities;
 
 /**
- * The main screen class for the Contact Linking Demo application
+ * A screen displaying a list of contacts
  */
 public final class ContactListScreen extends MainScreen {
     private static SampleContact[] _contacts;
@@ -61,17 +72,20 @@ public final class ContactListScreen extends MainScreen {
     private static final int SELECT_CONTACT = 0;
     private static final int CREATE_NEW = 1;
 
-    private final MenuItem _viewEmailMenuItem;
-    private final MenuItem _viewPhoneMenuItem;
-    private final MenuItem _linkToBbContact;
-    private final MenuItem _altLinkToBbContact;
+    private MenuItem _viewEmailMenuItem;
+    private MenuItem _viewPhoneMenuItem;
+    private MenuItem _linkToBbContact;
+    private MenuItem _altLinkToBbContact;
 
-    private final SampleContactListField _listField;
+    private AbstractTableModel _model;
+    private TableView _view;
 
     /**
      * Creates a new ContactListScreen object
      */
     public ContactListScreen() {
+        super(Manager.NO_VERTICAL_SCROLL);
+
         // Initialize UI
         setTitle("Contact Linking Demo");
 
@@ -80,12 +94,55 @@ public final class ContactListScreen extends MainScreen {
         _linkToBbContact = new LinkToContactMenuItem();
         _altLinkToBbContact = new AltLinkToContactMenuItem();
 
-        // Initialize the contact list with all contact's information
+        // Initialize the contact list with all contact information
         initializeContacts();
-        _listField = new SampleContactListField(_contacts);
+
+        // Create an adapter for displaying contact data in table
+        _model = new ContactTableModelAdapter();
+
+        _view = new TableView(_model);
+        final TableController controller = new TableController(_model, _view);
+        controller.setFocusPolicy(TableController.ROW_FOCUS);
+        _view.setController(controller);
+
+        // Set the highlight style for the view
+        _view.setDataTemplateFocus(BackgroundFactory
+                .createLinearGradientBackground(Color.LIGHTBLUE,
+                        Color.LIGHTBLUE, Color.BLUE, Color.BLUE));
+
+        // Create a data template that will format the model data as an array of
+        // LabelFields
+        final DataTemplate dataTemplate = new DataTemplate(_view, 1, 1) {
+            public Field[] getDataFields(final int modelRowIndex) {
+                final Field[] fields =
+                        { new LabelField(((SampleContact) _model
+                                .getRow(modelRowIndex)).toString(),
+                                DrawStyle.ELLIPSIS | Field.NON_FOCUSABLE) };
+
+                return fields;
+            }
+        };
+
+        // Define the regions of the data template and column/row size
+        dataTemplate.createRegion(new XYRect(0, 0, 1, 1));
+        dataTemplate.setColumnProperties(0, new TemplateColumnProperties(
+                Display.getWidth()));
+        dataTemplate.setRowProperties(0, new TemplateRowProperties(24));
+
+        _view.setDataTemplate(dataTemplate);
+        dataTemplate.useFixedHeight(true);
 
         // Add the contact list to the screen
-        add(_listField);
+        add(_view);
+    }
+
+    /**
+     * Returns the contact currently highlighted in table
+     * 
+     * @return The currently selected contact
+     */
+    private SampleContact getSelectedContact() {
+        return (SampleContact) _model.getRow(_view.getRowNumberWithFocus());
     }
 
     /**
@@ -341,8 +398,18 @@ public final class ContactListScreen extends MainScreen {
                 new AddressBookArguments(AddressBookArguments.ARG_NEW, contact);
         Invoke.invokeApplication(Invoke.APP_TYPE_ADDRESSBOOK, abArg);
 
-        // Link the linkable contact with the new BlackBerry contact
-        contact = LinkedContactUtilities.linkContact(contact, linkableContact);
+        try {
+            // Commit changes to the contact model
+            contact.commit();
+
+            // Link the linkable contact with the new BlackBerry contact
+            contact =
+                    LinkedContactUtilities
+                            .linkContact(contact, linkableContact);
+        } catch (final PIMException e) {
+            Dialog.inform("BlackBerryContact.commit() threw exception: "
+                    + e.toString());
+        }
 
         return contact;
     }
@@ -353,8 +420,7 @@ public final class ContactListScreen extends MainScreen {
     protected void makeMenu(final Menu menu, final int instance) {
         menu.add(_viewEmailMenuItem);
         menu.add(_viewPhoneMenuItem);
-        final LinkableContact selected =
-                _contacts[_listField.getSelectedIndex()];
+        final LinkableContact selected = getSelectedContact();
         if (LinkedContactUtilities.getLinkedContact(selected) != null) {
             menu.add(new UnlinkContactMenuItem());
         } else {
@@ -373,16 +439,48 @@ public final class ContactListScreen extends MainScreen {
     }
 
     /**
+     * Adapter for displaying contact information in table format
+     */
+    private static class ContactTableModelAdapter extends TableModelAdapter {
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfRows()
+         */
+        public int getNumberOfRows() {
+            return _contacts.length;
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfColumns()
+         */
+        public int getNumberOfColumns() {
+            return 1;
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doGetRow(int)
+         */
+        public Object doGetRow(final int rowIndex) {
+            return _contacts[rowIndex];
+        }
+    };
+
+    /**
      * MenuItem class to display a contact's email address
      */
     private class ViewEmailMenuItem extends MenuItem {
         public ViewEmailMenuItem() {
-            super("View Email", 0x00000000, 0);
-        }
-
-        public void run() {
-            Dialog.inform(_contacts[_listField.getSelectedIndex()]
-                    .getString(LinkableContact.EMAIL));
+            super(new StringProvider("View Email"), 0x230020, 0);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    Dialog.inform(getSelectedContact().getString(
+                            LinkableContact.EMAIL));
+                }
+            }));
         }
     }
 
@@ -391,12 +489,18 @@ public final class ContactListScreen extends MainScreen {
      */
     private class ViewPhoneMenuItem extends MenuItem {
         public ViewPhoneMenuItem() {
-            super("View Phone", 0x00000001, 0);
-        }
-
-        public void run() {
-            Dialog.inform(_contacts[_listField.getSelectedIndex()]
-                    .getString(LinkableContact.MOBILE_PHONE));
+            super(new StringProvider("View Phone"), 0x230020, 0);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    Dialog.inform(getSelectedContact().getString(
+                            LinkableContact.MOBILE_PHONE));
+                }
+            }));
         }
     }
 
@@ -405,11 +509,17 @@ public final class ContactListScreen extends MainScreen {
      */
     private class LinkToContactMenuItem extends MenuItem {
         public LinkToContactMenuItem() {
-            super("Link To BlackBerry Contact", 0x00010000, 0);
-        }
-
-        public void run() {
-            linkContact(_contacts[_listField.getSelectedIndex()]);
+            super(new StringProvider("Link To BlackBerry Contact"), 0x230030, 0);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    linkContact(getSelectedContact());
+                }
+            }));
         }
     }
 
@@ -420,22 +530,30 @@ public final class ContactListScreen extends MainScreen {
      */
     private class AltLinkToContactMenuItem extends MenuItem {
         public AltLinkToContactMenuItem() {
-            super("Secondary Link To BlackBerry Contact", 0x00010001, 0);
-        }
-
-        public void run() {
-            final LinkableContact linkableContact =
-                    _contacts[_listField.getSelectedIndex()];
-            final DefaultLinkableContact copy =
-                    new DefaultLinkableContact(linkableContact.getContactID(),
-                            ContactLinkingDemo.SECONDARY_APPLICATION_ID);
-            copy.setString(Contact.NAME, linkableContact
-                    .getString(Contact.NAME));
-            copy.setString(Contact.EMAIL, linkableContact
-                    .getString(Contact.EMAIL));
-            copy.setString(Contact.ATTR_MOBILE, linkableContact
-                    .getString(Contact.ATTR_MOBILE));
-            linkContact(copy);
+            super(new StringProvider("Secondary Link To BlackBerry Contact"),
+                    0x230040, 0);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final LinkableContact linkableContact =
+                            getSelectedContact();
+                    final DefaultLinkableContact copy =
+                            new DefaultLinkableContact(linkableContact
+                                    .getContactID(),
+                                    ContactLinkingDemo.SECONDARY_APPLICATION_ID);
+                    copy.setString(Contact.NAME, linkableContact
+                            .getString(Contact.NAME));
+                    copy.setString(Contact.EMAIL, linkableContact
+                            .getString(Contact.EMAIL));
+                    copy.setString(Contact.ATTR_MOBILE, linkableContact
+                            .getString(Contact.ATTR_MOBILE));
+                    linkContact(copy);
+                }
+            }));
         }
     }
 
@@ -446,16 +564,23 @@ public final class ContactListScreen extends MainScreen {
      */
     private class AltUnlinkContactMenuItem extends MenuItem {
         public AltUnlinkContactMenuItem() {
-            super("Secondary Unlink Contact", 0x00010003, 0);
-        }
-
-        public void run() {
-            final LinkableContact linkableContact =
-                    _contacts[_listField.getSelectedIndex()];
-            final DefaultLinkableContact copy =
-                    new DefaultLinkableContact(linkableContact.getContactID(),
-                            ContactLinkingDemo.SECONDARY_APPLICATION_ID);
-            unlinkContact(copy);
+            super(new StringProvider("Secondary Unlink Contact"), 0x230050, 0);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final LinkableContact linkableContact =
+                            getSelectedContact();
+                    final DefaultLinkableContact copy =
+                            new DefaultLinkableContact(linkableContact
+                                    .getContactID(),
+                                    ContactLinkingDemo.SECONDARY_APPLICATION_ID);
+                    unlinkContact(copy);
+                }
+            }));
         }
     }
 
@@ -510,86 +635,17 @@ public final class ContactListScreen extends MainScreen {
      */
     private class UnlinkContactMenuItem extends MenuItem {
         public UnlinkContactMenuItem() {
-            super("Unlink Contact", 0x00010002, 0);
+            super(new StringProvider("Unlink Contact"), 0x230060, 0);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    unlinkContact(getSelectedContact());
+                }
+            }));
         }
-
-        public void run() {
-            unlinkContact(_contacts[_listField.getSelectedIndex()]);
-        }
-    }
-}
-
-/**
- * A ListField class to display SampleContact objects
- */
-class SampleContactListField extends ListField implements ListFieldCallback {
-    private final Vector _list = new Vector();
-
-    /**
-     * Creates a new SampleContactListField object
-     * 
-     * @param contacts
-     *            An array of SampleContact objects to display
-     */
-    public SampleContactListField(final SampleContact[] contacts) {
-        super();
-        displayData(contacts);
-        setCallback(this);
-        setEmptyString("", DrawStyle.HCENTER);
-    }
-
-    /**
-     * Displays the data for this ListField
-     * 
-     * @param list
-     *            The array of contacts to be displayed
-     */
-    private void displayData(SampleContact[] list) {
-        if (list == null) {
-            list = new SampleContact[0];
-        }
-
-        _list.setSize(list.length);
-
-        for (int lv = list.length - 1; lv >= 0; --lv) {
-            _list.setElementAt(list[lv], lv);
-        }
-
-        setSize(list.length, 0);
-
-        fieldChangeNotify(FieldChangeListener.PROGRAMMATIC);
-    }
-
-    // ListFieldCallback implementation ----------------------------------------
-    /**
-     * @see ListFieldCallback#getPreferredWidth(ListField)
-     */
-    public int getPreferredWidth(final ListField listField) {
-        return Display.getWidth();
-    }
-
-    /**
-     * @see ListFieldCallback#indexOfList(ListField, String, int)
-     */
-    public int indexOfList(final ListField listField, final String prefix,
-            final int start) {
-        return -1;
-    }
-
-    /**
-     * @see ListFieldCallback#get(ListField, int)
-     */
-    public Object get(final ListField listField, final int index) {
-        return _list.elementAt(index);
-    }
-
-    /**
-     * @see ListFieldCallback#drawListRow(ListField, Graphics, int, int, int)
-     */
-    public void drawListRow(final ListField listField, final Graphics graphics,
-            final int index, final int y, final int width) {
-        // 4 pixel padding from left and right
-        graphics.drawText(_list.elementAt(index).toString(), 0, y,
-                DrawStyle.HDEFAULT, width);
     }
 }

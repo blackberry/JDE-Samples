@@ -1,5 +1,5 @@
 /*
- * UdpDemo.java
+ * UDPDemo.java
  *
  * Copyright © 1998-2011 Research In Motion Limited
  * 
@@ -26,6 +26,9 @@
 
 package com.rim.samples.device.udpdemo;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
@@ -39,17 +42,18 @@ import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * Sample application to demonstrate client/server UDP capability. Run this
  * application after executing run.bat in the com.rim.samples.server.udpdemo
  * directory.
  */
-public final class UdpDemo extends UiApplication {
+public final class UDPDemo extends UiApplication {
     private final UdpDemoScreen _screen;
 
     /**
-     * Entry point for application.
+     * Entry point for application
      * 
      * @param args
      *            Command line arguments (not used)
@@ -57,21 +61,22 @@ public final class UdpDemo extends UiApplication {
     public static void main(final String[] args) {
         // Create a new instance of the application and make the currently
         // running thread the application's event dispatch thread.
-        final UdpDemo theApp = new UdpDemo();
+        final UDPDemo theApp = new UDPDemo();
         theApp.enterEventDispatcher();
     }
 
-    // Constructor
-    public UdpDemo() {
-        // Create our main screen and push it onto the UI stack.
+    /**
+     * Creates a new UDPDemo object
+     */
+    public UDPDemo() {
         _screen = new UdpDemoScreen();
         pushScreen(_screen);
     }
 
     /**
-     * Provides access to the UI screen.
+     * Provides access to the UI screen
      * 
-     * @return The UI screen.
+     * @return The UI screen
      */
     UdpDemoScreen getScreen() {
         return _screen;
@@ -79,7 +84,7 @@ public final class UdpDemo extends UiApplication {
 }
 
 /**
- * This MainScreen class provides standard GUI behavior.
+ * MainScreen class for this application
  */
 final class UdpDemoScreen extends MainScreen implements FieldChangeListener {
     private final EditField _messageField;
@@ -88,11 +93,13 @@ final class UdpDemoScreen extends MainScreen implements FieldChangeListener {
     private final ButtonField _clearButton;
     private final StringBuffer _status;
 
-    // Constructor
+    /**
+     * Creates a new UdpDemoScreen object
+     */
     UdpDemoScreen() {
         _status = new StringBuffer();
 
-        // Initialize UI components.
+        // Initialize UI components
         setTitle("UDP Demo");
 
         final UdpDemoVFM verticalManager = new UdpDemoVFM();
@@ -104,9 +111,9 @@ final class UdpDemoScreen extends MainScreen implements FieldChangeListener {
 
         final HorizontalFieldManager hfm =
                 new HorizontalFieldManager(Field.FIELD_HCENTER);
-        _sendButton = new ButtonField("Send");
+        _sendButton = new ButtonField("Send", ButtonField.CONSUME_CLICK);
         _sendButton.setChangeListener(this);
-        _clearButton = new ButtonField("Clear");
+        _clearButton = new ButtonField("Clear", ButtonField.CONSUME_CLICK);
         _clearButton.setChangeListener(this);
         hfm.add(_sendButton);
         hfm.add(_clearButton);
@@ -115,26 +122,54 @@ final class UdpDemoScreen extends MainScreen implements FieldChangeListener {
         _statusField = new LabelField();
         add(_statusField);
 
-        addMenuItem(_sendItem);
-        addMenuItem(_clearItem);
+        // This menu item provides an alternative to clicking the send button
+        final MenuItem sendItem =
+                new MenuItem(new StringProvider("Send"), 0x230010, 0);
+        sendItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                handleSend();
+            }
+        }));
+
+        // This menu item provides an alternative to clicking the clear button
+        final MenuItem clearItem =
+                new MenuItem(new StringProvider("Clear"), 0x230020, 0);
+        clearItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                handleClear();
+            }
+        }));
+
+        addMenuItem(sendItem);
+        addMenuItem(clearItem);
     }
 
     /**
-     * A customized VerticalFieldManager.
+     * A customized VerticalFieldManager
      */
     private static class UdpDemoVFM extends VerticalFieldManager {
-        // Constructor
+        /**
+         * Creates a new UdpDemoVFM object
+         */
         UdpDemoVFM() {
             super(Manager.VERTICAL_SCROLL | Manager.VERTICAL_SCROLLBAR);
         }
 
         /**
-         * We override this method to prevent size of text area changing when
-         * typing on a new line.
-         * 
          * @see net.rim.device.api.ui.container.VerticalFieldManager#sublayout(int,int)
          */
         protected void sublayout(final int width, final int height) {
+            // Prevent size of text area changing when typing on a new line
             final Field field = getField(0);
             layoutChild(field, Display.getWidth(), 100);
             setPositionChild(field, 0, 0);
@@ -143,12 +178,12 @@ final class UdpDemoScreen extends MainScreen implements FieldChangeListener {
     }
 
     /**
-     * Creates a new client thread.
+     * Initializes a new client thread
      */
     private void createClient() {
-        // Our UdpClient class needs to be run in a separate thread as
+        // The UDPClient class needs to be run in a separate thread as
         // blocking operations are not permitted on event dispatch thread.
-        final UdpClient client = new UdpClient(_messageField.getText());
+        final UDPClient client = new UDPClient(_messageField.getText());
         client.start();
     }
 
@@ -156,13 +191,11 @@ final class UdpDemoScreen extends MainScreen implements FieldChangeListener {
      * @see net.rim.device.api.ui.MainScreen#onSavePrompt()
      */
     protected boolean onSavePrompt() {
+        // Supress the save dialog
         return true;
     }
 
     /**
-     * We are implementing this method to intercept property changes on the send
-     * and clear buttons.
-     * 
      * @see FieldChangeListener#fieldChanged(Field, int)
      */
     public void fieldChanged(final Field field, final int context) {
@@ -174,22 +207,8 @@ final class UdpDemoScreen extends MainScreen implements FieldChangeListener {
         }
     }
 
-    // This menu item provides an alternative to clicking the send button.
-    private final MenuItem _sendItem = new MenuItem("Send", 11000, 0) {
-        public void run() {
-            handleSend();
-        }
-    };
-
-    // This menu item provides an alternative to clicking the clear button.
-    private final MenuItem _clearItem = new MenuItem("Clear", 11001, 0) {
-        public void run() {
-            handleClear();
-        }
-    };
-
     /**
-     * Handles a send button or send menu item click.
+     * Handles a send button or send menu item click
      */
     private void handleSend() {
         if (_messageField.getTextLength() > 0) {
@@ -203,7 +222,7 @@ final class UdpDemoScreen extends MainScreen implements FieldChangeListener {
     }
 
     /**
-     * Handles a clear button or clear menu item click.
+     * Handles a clear button or clear menu item click
      */
     private void handleClear() {
         _statusField.setText("");
@@ -213,10 +232,10 @@ final class UdpDemoScreen extends MainScreen implements FieldChangeListener {
     }
 
     /**
-     * Updates the status field.
+     * Updates the status field
      * 
      * @param text
-     *            The text with which to update the status field.
+     *            The text with which to update the status field
      */
     void updateStatus(final String text) {
         _status.append(text + '\n');
@@ -230,14 +249,12 @@ final class UdpDemoScreen extends MainScreen implements FieldChangeListener {
         final boolean handled = super.invokeAction(action);
 
         if (!handled) {
-            switch (action) {
-            case ACTION_INVOKE: // Trackball click.
-            {
+            if (action == ACTION_INVOKE) {
                 // Suppress the menu
                 return true;
             }
-            }
         }
+
         return handled;
     }
 }

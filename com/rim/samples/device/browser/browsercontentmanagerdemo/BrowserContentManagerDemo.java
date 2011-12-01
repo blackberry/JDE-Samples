@@ -24,7 +24,7 @@
  * Environment Development Guide associated with this release.
  */
 
-package com.rim.samples.device.blackberry.browser;
+package com.rim.samples.device.browser;
 
 import java.io.IOException;
 
@@ -54,7 +54,7 @@ import net.rim.device.api.ui.container.MainScreen;
  */
 public final class BrowserContentManagerDemo extends UiApplication implements
         RenderingApplication {
-    private static String REFERER = "referer";
+    private static final String REFERER = "referer";
 
     private final BrowserContentManager _browserContentManager;
     private HttpConnection _currentConnection;
@@ -74,7 +74,9 @@ public final class BrowserContentManagerDemo extends UiApplication implements
         app.enterEventDispatcher();
     }
 
-    // Constructor
+    /**
+     * Creates a new BrowserContentManagerDemo object
+     */
     public BrowserContentManagerDemo() {
         _browserContentManager = new BrowserContentManager(0);
         final RenderingOptions renderingOptions =

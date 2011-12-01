@@ -40,7 +40,7 @@ public final class PhoneScreenDemo2 extends Application {
      * Constructs a new PhoneScreenDemo2 object
      */
     public PhoneScreenDemo2() {
-        Phone.addPhoneListener(new PhoneScreenAction2(this));
+        Phone.addPhoneListener(new PhoneScreenDataSender2());
     }
 
     /**
@@ -49,6 +49,7 @@ public final class PhoneScreenDemo2 extends Application {
      * @param args
      *            Command line args (not used)
      * @throws UnsupportedOperationException
+     *             if PhoneScreen API not supported on current device
      */
     public static void main(final String[] args) {
         if (PhoneScreen.isSupported()) {
@@ -57,7 +58,7 @@ public final class PhoneScreenDemo2 extends Application {
             new PhoneScreenDemo2().enterEventDispatcher();
         } else {
             throw new UnsupportedOperationException(
-                    "Could not start Phone Screen Demo 2. Phone Screen API not supported on this device");
+                    "Could not start Phone Screen Demo 2. PhoneScreen API not supported on this device");
         }
     }
 }

@@ -28,7 +28,6 @@ package com.rim.samples.device.mmsdemo;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Vector;
 
 import javax.microedition.io.Connection;
 import javax.microedition.io.Connector;
@@ -41,6 +40,7 @@ import net.rim.device.api.system.Bitmap;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.EditField;
+import net.rim.device.api.ui.component.table.TableModel;
 import net.rim.device.api.ui.container.MainScreen;
 
 /**
@@ -50,19 +50,20 @@ import net.rim.device.api.ui.container.MainScreen;
  */
 public final class MMSDemo extends UiApplication {
     // The application ID that the MMS connection is opened with
-    private static String APP_ID = "com.rim.samples.device.mmsdemo";
+    private static final String APP_ID = "com.rim.samples.device.mmsdemo";
 
     private static final int CLIENT_CHOICE = 0;
     private static final int SERVER_CHOICE = 1;
-    private static String[] CHOICES = { "Send MMS", "Receive MMS", "Exit" };
+    private static final String[] CHOICES =
+            { "Send MMS", "Receive MMS", "Exit" };
 
     static final int PICTURE = 0;
     static final int AUDIO = 1;
 
     // Parallel arrays containg file information
-    private static String[] MIME_TYPES = { "image/png", "audio/mp3" };
-    private static String[] FOLDER_NAMES = { "picture", "audio" };
-    private static String[] EXTENSIONS = { ".png", ".mp3" };
+    private static final String[] MIME_TYPES = { "image/png", "audio/mp3" };
+    private static final String[] FOLDER_NAMES = { "picture", "audio" };
+    private static final String[] EXTENSIONS = { ".png", ".mp3" };
 
     private Connection _sendConn;
     private Connection _recConn;
@@ -71,13 +72,13 @@ public final class MMSDemo extends UiApplication {
     private final MainScreen _blankScreen;
 
     // Vector to hold MessagePart objects
-    private final Vector _messageParts;
+    private final TableModel _messageParts;
 
     /**
      * Creates a new MMSDemo object
      */
     public MMSDemo() {
-        _messageParts = new Vector();
+        _messageParts = new TableModel();
         _blankScreen = new MainScreen();
         _blankScreen.setTitle("MMS Demo");
         pushScreen(_blankScreen);
@@ -98,9 +99,9 @@ public final class MMSDemo extends UiApplication {
         // is no point in attaching the same file twice. Note that every
         // MessagePart contained within a MultipartMessage must have a unique
         // content id.
-        for (int i = 0; i < getMessageParts().size(); i++) {
+        for (int i = 0; i < getMessageParts().getNumberOfRows(); i++) {
             final MessagePart messagePart =
-                    (MessagePart) getMessageParts().elementAt(i);
+                    (MessagePart) getMessageParts().getRow(i);
             final String contentLocation = messagePart.getContentLocation();
             if (contentLocation.equals(FOLDER_NAMES[type] + '0'
                     + EXTENSIONS[type])) {
@@ -126,9 +127,6 @@ public final class MMSDemo extends UiApplication {
                         new MessagePart(contentData, MIME_TYPES[type],
                                 FOLDER_NAMES[type], filename, null);
                 addMessagePart(messagePart);
-
-                _mmsDemoSendScreen.updateScreen();
-
             } catch (final IOException ioe) {
                 errorDialog(ioe.toString());
             }
@@ -165,7 +163,7 @@ public final class MMSDemo extends UiApplication {
      * 
      * @return A vector that contains the message parts
      */
-    Vector getMessageParts() {
+    TableModel getMessageParts() {
         return _messageParts;
     }
 
@@ -176,7 +174,7 @@ public final class MMSDemo extends UiApplication {
      *            The MessagePart object to be added
      */
     void addMessagePart(final MessagePart messagePart) {
-        _messageParts.addElement(messagePart);
+        _messageParts.addRow(messagePart);
     }
 
     /**
@@ -215,9 +213,9 @@ public final class MMSDemo extends UiApplication {
                         .getBytes(), "text/plain", "text", null, null));
 
                 // Add any attachments
-                for (int i = 0; i < _messageParts.size(); i++) {
+                for (int i = 0; i < _messageParts.getNumberOfRows(); i++) {
                     multipartMessage.addMessagePart((MessagePart) _messageParts
-                            .elementAt(i));
+                            .getRow(i));
                 }
             } catch (final IOException ioe) {
                 errorDialog(ioe.toString() + " when creating message.");
@@ -273,6 +271,12 @@ public final class MMSDemo extends UiApplication {
         private String _msgText;
         private Bitmap _bitmap;
 
+        /**
+         * Create a new ProcessMMSThread object
+         * 
+         * @param multipartMessage
+         *            Message to display on the screen
+         */
         ProcessMMSThread(final MultipartMessage multipartMessage) {
             _multipartMessage = multipartMessage;
         }

@@ -26,7 +26,7 @@ BlackBerryMailDemo.java
 BlackBerryMailDemoScreen.java
 ComposeScreen.java
 FoldersViewScreen.java
-img\icon_jde.png
+img\blackberrymaildemo_jde.png
 MessageScreen.java
 MessagesListField.java
 MessagesViewScreen.java
@@ -36,7 +36,7 @@ HaveAlxImports=0
 HaveDefs=0
 HaveImports=0
 [Icons
-img\icon_jde.png
+img\blackberrymaildemo_jde.png
 ]
 [ImplicitRules
 ]
@@ -44,13 +44,14 @@ img\icon_jde.png
 ]
 Listing=0
 Options=-quiet 
-OutputFileName=blackberrymaildemo
+OutputFileName=BlackberryMailDemo
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=BlackBerry Mail Demo

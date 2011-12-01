@@ -27,109 +27,121 @@
 package com.rim.samples.device.chapidemo;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Vector;
 
 import javax.microedition.content.ContentHandler;
 import javax.microedition.content.ContentHandlerException;
-import javax.microedition.content.ContentHandlerServer;
 import javax.microedition.content.Invocation;
 import javax.microedition.content.Registry;
-import javax.microedition.content.RequestListener;
-import javax.microedition.io.StreamConnection;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.registrar.CommandRegistrarConnection;
+import net.rim.device.api.command.registrar.CommandRequest;
+import net.rim.device.api.command.registrar.RemoteCommandRegistrarConnection;
+import net.rim.device.api.content.ContentHandlerMenu;
+import net.rim.device.api.content.DefaultContentHandlerRegistry;
+import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.ui.Field;
-import net.rim.device.api.ui.MenuItem;
+import net.rim.device.api.ui.FieldChangeListener;
+import net.rim.device.api.ui.Screen;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.component.ButtonField;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
-import net.rim.device.api.ui.component.RichTextField;
+import net.rim.device.api.ui.component.Menu;
+import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.menu.CommandItem;
+import net.rim.device.api.ui.menu.CommandItemProvider;
+import net.rim.device.api.ui.menu.DefaultContextMenuProvider;
+import net.rim.device.api.util.StringProvider;
 
 /**
- * This sample demonstrates the JSR 211 Content Handler API. This application is
- * acting as both the invoking application and the handler application.
+ * This sample application demonstrates the JSR 211 Content Handler API. The
+ * application is acting as both an invoking application and a handler
+ * application.
  * <p>
- * You will need to configure the 'Data' folder of this project as the location
- * of the csv file for which this application will be invoked as a handler. This
- * can be done as follows:
- * <p>
- * Under Edit/Preferences/Simulator, select a simulator profile other than
- * 'Default'. On the Memory tab, select the 'Use PC filesystem for SD Card
- * files' checkbox. Then browse for the 'Data' folder (e.g., C:\Program
- * Files\Research In Motion\BlackBerry JDE
- * 5.0.0\samples\com\rim\samples\device\chapidemo\Data).
+ * This application demonstrates the following:
+ * <ol>
+ * <li>Registering a handler: See {@link DemoContentHandler#register}</li>
+ * <li>Unregistering a handler: See {@link DemoContentHandler#unregister}</li>
+ * <li>Invoking a handler: See {@link DemoContentHandler#doInvoke}</li>
+ * <li>Implementing a handler: See {@link DemoContentHandler#register} and
+ * {@link DemoContentHandler#invocationRequestNotify}</li>
+ * <li>Setting a default handler: See {@link #toggleDefaultHandler()}</li>
+ * <li>Using the content handler menu: See {@link CHAPIDemoScreen#makeMenu}</li>
+ * <li>Using the content handler graphical context menu: See
+ * {@link CHAPIDemoScreen#getItems} and {@link CHAPIDemoScreen#getContext}</li>
+ * </ol>
  */
-public class CHAPIDemo extends UiApplication implements RequestListener {
-    // The Content Handler ID
-    private static String ID = "com.rim.samples.device.chapidemo";
-
-    // The content handler class name
-    private static String CLASSNAME = ID + ".CHAPIDemo";
-
-    // The URL pointing to the location of the file we want to open
-    private static String URL = "file:///SDCard/rim.csv";
+public class CHAPIDemo extends UiApplication {
+    private final Registry _registry = Registry.getRegistry(getClass()
+            .getName());
+    private final DefaultContentHandlerRegistry _defaultRegistry =
+            DefaultContentHandlerRegistry
+                    .getDefaultContentHandlerRegistry(_registry);
 
     /**
      * Entry point for application
      * 
      * @param args
-     *            Command line arguments
+     *            Command line arguments (not used)
      */
     public static void main(final String[] args) {
-        if (args != null && args.length > 0 && args[0].equals("startup")) {
-            registerApp(); // Register this app as a content handler on startup
-        } else {
+        try {
+            // Register multiple handlers for the same types, suffixes,
+            // and actions. These handlers are unregistered when the
+            // screen closes.
+            DemoContentHandler.register(DemoContentHandler.class.getName(),
+                    DemoContentHandler.TYPES, DemoContentHandler.SUFFIXES,
+                    DemoContentHandler.ACTIONS, null, DemoContentHandler.ID,
+                    null, "Handler 1", new DemoContentHandler());
+
+            DemoContentHandler.register(DemoContentHandler2.class.getName(),
+                    DemoContentHandler.TYPES, DemoContentHandler.SUFFIXES,
+                    DemoContentHandler.ACTIONS, null, DemoContentHandler2.ID,
+                    null, "Handler 2", new DemoContentHandler2());
+
             // Create a new instance of the application and make the currently
             // running thread the application's event dispatch thread.
             final CHAPIDemo app = new CHAPIDemo();
             app.enterEventDispatcher();
+        } catch (final ContentHandlerException che) {
+            System.out.println("Registry#register() threw " + che.toString());
+        } catch (final ClassNotFoundException cnfe) {
+            System.out.println("Registry#register() threw " + cnfe.toString());
         }
     }
 
     /**
-     * Registers this application with specified types, suffixes, actions and
-     * classname. This method will run on startup.
+     * Creates a new CHAPIDemo object
      */
-    private static void registerApp() {
-        try {
-            // This app will be a handler for csv files and will be invoked
-            // with ACTION_OPEN.
-            final String[] types = { "text/csv" };
-            final String[] suffixes = { ".csv" };
-            final String[] actions = { ContentHandler.ACTION_OPEN };
-
-            // Get access to the registry and register as a content handler
-            final Registry registry = Registry.getRegistry(CLASSNAME);
-            registry.register(CLASSNAME, types, suffixes, actions, null, ID,
-                    null);
-
-        } catch (final ContentHandlerException che) {
-            errorDialog("Registry#register() threw " + che.toString());
-        } catch (final ClassNotFoundException cnfe) {
-            errorDialog("Registry#register() threw " + cnfe.toString());
-        }
-    }
-
-    // Constructor
     public CHAPIDemo() {
-        try {
-            // Get access to the ContentHandlerServer for this application and
-            // register as a listener.
-            final ContentHandlerServer contentHandlerServer =
-                    Registry.getServer(CLASSNAME);
-            contentHandlerServer.setListener(this);
-        } catch (final ContentHandlerException che) {
-            UiApplication.getUiApplication().invokeLater(new Runnable() {
-                public void run() {
-                    Dialog.alert("Could not access Content Handler Server");
-                    System.exit(0);
-                }
-            });
-        }
-
         // Push a new GUI screen
         final CHAPIDemoScreen CHAPIDemoScreen = new CHAPIDemoScreen();
         pushScreen(CHAPIDemoScreen);
+    }
+
+    /**
+     * Creates a demo invocation. The URL of the invocation actually does not
+     * exist. The types, actions, and suffixes are from the
+     * <code>DemoContentHandler</code>.
+     * 
+     * @return A demo invocation whose URL does not point to a real file
+     */
+    private Invocation getInvocation() {
+        // The URL pointing to the location of the file we want to open
+        // This file doesn't actually exist.
+        final String url = "file:///rim." + DemoContentHandler.SUFFIXES[0];
+
+        final Invocation invoc = new Invocation(url);
+        invoc.setType(DemoContentHandler.TYPES[0]);
+        invoc.setResponseRequired(false); // We don't require a response
+
+        // We want to invoke a handler that has registered with ACTION_OPEN
+        invoc.setAction(DemoContentHandler.ACTIONS[0]);
+
+        return invoc;
     }
 
     /**
@@ -138,89 +150,53 @@ public class CHAPIDemo extends UiApplication implements RequestListener {
      */
     private void doInvoke() {
         try {
-            // Create the Invocation with the hard-coded URL
-            final Invocation invoc = new Invocation(URL);
-            invoc.setResponseRequired(false); // We don't require a response
-
-            // We want to invoke a handler that has registered with ACTION_OPEN
-            invoc.setAction(ContentHandler.ACTION_OPEN);
+            final Invocation invoc = getInvocation();
 
             // Get access to the Registry and pass it the Invocation
-            final Registry registry = Registry.getRegistry(CLASSNAME);
-            registry.invoke(invoc);
+            _registry.invoke(invoc);
         } catch (final IOException ioe) {
             errorDialog("Registry#invoke() threw " + ioe.toString());
         }
     }
 
     /**
-     * Reads text from the file pointed to by the URL contained in the
-     * Invocation.
+     * Toggles the default handler between DemoContentHandler and
+     * DemoContentHandler2.
      * 
-     * @param invoc
-     *            The invocation holding the url
-     * @return The text from the file pointed to by the URL contained in the
-     *         Invocation
+     * @return The new default handler name pulled from the
+     *         ApplicationDescriptor
      */
-    private static String getViaStreamConnection(final Invocation invoc) {
-        // Create a StreamConnection and use it to open an
-        // InputStream for reading.
-        StreamConnection streamConnection = null;
-        InputStream inputStream = null;
-        final StringBuffer buf = new StringBuffer();
+    private String toggleDefaultHandler() {
+        final Invocation invocation = getInvocation();
+        String newDefaultHandlerName = null;
+
         try {
-            streamConnection = (StreamConnection) invoc.open(false);
-            inputStream = streamConnection.openInputStream();
-            int ch;
+            final ContentHandler defaultHandler =
+                    _defaultRegistry.getDefaultContentHandler(invocation);
 
-            // Read from the InputStream and build text string
-            while ((ch = inputStream.read()) != -1) {
-                buf.append((char) ch);
-            }
-        } catch (final IOException ioe) {
-            errorDialog(ioe.toString());
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (final IOException ioe) {
-                }
-            }
-            if (streamConnection != null) {
-                try {
-                    streamConnection.close();
-                } catch (final IOException ioe) {
-                }
-            }
+            // Toggle the new handler ID based on the current one
+            final String newDefaultHandlerId =
+                    defaultHandler != null
+                            && defaultHandler.getID().equals(
+                                    DemoContentHandler.ID) ? DemoContentHandler2.ID
+                            : DemoContentHandler.ID;
+
+            // Set the default handler using the types, suffixes, and actions
+            // defined in DemoContentHandler
+            _defaultRegistry.setDefaultContentHandler(DemoContentHandler.TYPES,
+                    DemoContentHandler.SUFFIXES, DemoContentHandler.ACTIONS,
+                    newDefaultHandlerId);
+
+            // Get the handler app name from the descriptor
+            final ApplicationDescriptor handlerDescriptor =
+                    _defaultRegistry
+                            .getApplicationDescriptor(newDefaultHandlerId);
+            newDefaultHandlerName = handlerDescriptor.getName();
+        } catch (final IOException e) {
+            errorDialog("Can't set default handler: " + e.getMessage());
         }
-        return buf.toString();
-    }
 
-    /**
-     * Implementation of RequestListener
-     * 
-     * @param handler
-     *            The content handler server from which to request Invocation
-     *            objects
-     */
-    public void invocationRequestNotify(final ContentHandlerServer server) {
-        // Retreive Invocation from the content handler server
-        final Invocation invoc = server.getRequest(false);
-        if (invoc != null) {
-            Dialog.alert("Handler has been invoked for: " + invoc.getURL());
-            final String content = getViaStreamConnection(invoc);
-
-            if (content != null && content.length() > 0) {
-                // Display the content
-                final DisplayContentScreen displayContentScreen =
-                        new DisplayContentScreen();
-                displayContentScreen.displayContent(content);
-                pushScreen(displayContentScreen);
-            }
-
-            // Finish the invocation and set its status
-            server.finish(invoc, Invocation.OK);
-        }
+        return newDefaultHandlerName;
     }
 
     /**
@@ -229,7 +205,7 @@ public class CHAPIDemo extends UiApplication implements RequestListener {
      * @param message
      *            The text to display
      */
-    public static void errorDialog(final String message) {
+    private static void errorDialog(final String message) {
         UiApplication.getUiApplication().invokeLater(new Runnable() {
             public void run() {
                 Dialog.alert(message);
@@ -238,60 +214,148 @@ public class CHAPIDemo extends UiApplication implements RequestListener {
     }
 
     /**
-     * Simple GUI screen from which to create an Invocation
+     * The MainScreen class for the CHAPI Demo sample application
      */
-    private final class CHAPIDemoScreen extends MainScreen {
-        // Constructor
-        private CHAPIDemoScreen() {
-            // Initialize UI components
+    final class CHAPIDemoScreen extends MainScreen implements
+            CommandItemProvider {
+        private final ButtonField _invokeButton;
+        private final ButtonField _toggleButton;
+        private final LabelField _contentHandlerMenuLabel;
+
+        /**
+         * Creates a new CHAPIDemoScreen object
+         */
+        CHAPIDemoScreen() {
             setTitle(new LabelField("CHAPI Demo Screen", Field.FIELD_HCENTER));
-            add(new LabelField("Select Invoke from the menu"));
-            addMenuItem(new MenuItem("Invoke", 5, 5) {
-                public void run() {
+
+            final LabelField toggleDescription =
+                    new LabelField(
+                            "Press this button to change the default handler:");
+
+            String defaultHandlerName;
+
+            // Set the default handler using the types, suffixes, and actions
+            // defined in DemoContentHandler
+            _defaultRegistry.setDefaultContentHandler(DemoContentHandler.TYPES,
+                    DemoContentHandler.SUFFIXES, DemoContentHandler.ACTIONS,
+                    DemoContentHandler.ID);
+
+            // Get the app name for the current default handler
+            try {
+                final Invocation invocation = getInvocation();
+                final ContentHandler defaultHandler =
+                        _defaultRegistry.getDefaultContentHandler(invocation);
+                final String id = defaultHandler.getID();
+                final ApplicationDescriptor handlerDescriptor =
+                        _defaultRegistry.getApplicationDescriptor(id);
+                defaultHandlerName = handlerDescriptor.getName();
+            } catch (final IOException e) {
+                defaultHandlerName = toggleDefaultHandler();
+            }
+
+            _toggleButton =
+                    new ButtonField("Default: " + defaultHandlerName,
+                            ButtonField.NEVER_DIRTY | ButtonField.CONSUME_CLICK);
+
+            _toggleButton.setChangeListener(new FieldChangeListener() {
+                public void fieldChanged(final Field field, final int context) {
+                    final String newDefaultHandlerName = toggleDefaultHandler();
+                    if (newDefaultHandlerName != null) {
+                        _toggleButton.setLabel("default: "
+                                + newDefaultHandlerName);
+                    }
+                }
+            });
+
+            _invokeButton =
+                    new ButtonField("Invoke Handler", ButtonField.NEVER_DIRTY
+                            | ButtonField.CONSUME_CLICK);
+
+            _invokeButton.setChangeListener(new FieldChangeListener() {
+                public void fieldChanged(final Field field, final int context) {
                     doInvoke();
                 }
             });
+
+            _contentHandlerMenuLabel =
+                    new LabelField("Focus here and open the menu",
+                            Field.FOCUSABLE);
+
+            add(toggleDescription);
+            add(_toggleButton);
+            add(new SeparatorField());
+            add(_invokeButton);
+            add(new SeparatorField());
+            add(_contentHandlerMenuLabel);
+
+            setContextMenuProvider(new DefaultContextMenuProvider());
+            _contentHandlerMenuLabel.setCommandItemProvider(this);
         }
 
+        /**
+         * @see MainScreen#makeMenu(Menu, int)
+         */
+        protected void makeMenu(final Menu menu, final int instance) {
+            super.makeMenu(menu, instance);
+            final Field focusField = getLeafFieldWithFocus();
+
+            // Create the "open with" context menu item
+            if (focusField == _contentHandlerMenuLabel) {
+                final ContentHandlerMenu contentHandlerMenu =
+                        new ContentHandlerMenu(getInvocation(), _registry,
+                                "Open with", 0, 0);
+                menu.add(contentHandlerMenu);
+            }
+        }
+
+        /**
+         * @see CommandItemProvider#getContext(Field)
+         */
+        public Object getContext(final Field field) {
+            Object context = null;
+
+            if (field == _contentHandlerMenuLabel) {
+                context = getInvocation();
+            }
+
+            return context;
+        }
+
+        /**
+         * @see CommandItemProvider#getItems(Field)
+         */
+        public Vector getItems(final Field field) {
+            Vector items = null;
+
+            if (field == _contentHandlerMenuLabel) {
+                final CommandRegistrarConnection connection =
+                        new RemoteCommandRegistrarConnection();
+                final CommandRequest request =
+                        new CommandRequest("ContentHandlerCommand");
+                final Command command = connection.getCommand(request);
+                items = new Vector();
+                items.addElement(new CommandItem(
+                        new StringProvider("Open with"), null, command));
+            }
+
+            return items;
+        }
+
+        /**
+         * @see Screen#close()
+         */
         public void close() {
             try {
-                // Deregister ourselves as a listener
-                final ContentHandlerServer contentHandlerServer =
-                        Registry.getServer(CLASSNAME);
-                contentHandlerServer.setListener(null);
+                // Deregister the handlers
+                DemoContentHandler.unregister(DemoContentHandler.class
+                        .getName());
+                DemoContentHandler.unregister(DemoContentHandler2.class
+                        .getName());
             } catch (final ContentHandlerException che) {
                 errorDialog("Registry.getServer() threw " + che.toString());
             }
 
             super.close();
-        }
-    }
-
-    /**
-     * This screen will be used to display the content we are handling
-     */
-    private static class DisplayContentScreen extends MainScreen {
-        // A field to display content
-        private final RichTextField _contentField = new RichTextField(
-                Field.NON_FOCUSABLE);
-
-        // Constructor
-        private DisplayContentScreen() {
-            setTitle(new LabelField("Display Content Screen",
-                    Field.FIELD_HCENTER));
-            add(_contentField);
-        }
-
-        /**
-         * Displays the comma-separated values on the screen.
-         * 
-         * @param content
-         *            The content holding the comma separated values
-         */
-        private void displayContent(final String content) {
-            // Assume that the content is of the form
-            // "<value1>,<value2>,...,<valueN>."
-            _contentField.setText(content.replace(',', '\n'));
         }
     }
 }

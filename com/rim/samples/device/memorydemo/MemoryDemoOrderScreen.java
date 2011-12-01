@@ -28,6 +28,9 @@ package com.rim.samples.device.memorydemo;
 
 import java.util.Vector;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
@@ -35,6 +38,7 @@ import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * Screen used for displaying and/or editing an order record.
@@ -49,23 +53,12 @@ public final class MemoryDemoOrderScreen extends MainScreen {
     /**
      * Allow the user to make this screen editable
      */
-    private final MenuItem _editItem = new MenuItem("Edit", 0, 100) {
-        public void run() {
-            /* outer. */makeEditScreen();
-        }
-    };
+    private final MenuItem _editItem;
 
     /**
      * Save the order record and removes this screen
      */
-    private final MenuItem _saveItem = new MenuItem("Save", 0, 200) {
-        public void run() {
-            if ( /* outer. */onSave()) {
-                UiApplication.getUiApplication().popScreen(
-                        MemoryDemoOrderScreen.this);
-            }
-        }
-    };
+    private final MenuItem _saveItem;
 
     /**
      * This constructor makes a view or edit screen for an order record.
@@ -97,6 +90,33 @@ public final class MemoryDemoOrderScreen extends MainScreen {
         for (int i = 0; i < numFields; ++i) {
             add((Field) fields.elementAt(i));
         }
+
+        _editItem = new MenuItem(new StringProvider("Edit"), 0x230010, 0);
+        _editItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                /* outer. */makeEditScreen();
+            }
+        }));
+
+        _saveItem = new MenuItem(new StringProvider("Save"), 0x230010, 0);
+        _saveItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                if ( /* outer. */onSave()) {
+                    UiApplication.getUiApplication().popScreen(
+                            MemoryDemoOrderScreen.this);
+                }
+            }
+        }));
     }
 
     /**

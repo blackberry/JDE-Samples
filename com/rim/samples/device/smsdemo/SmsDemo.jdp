@@ -1,5 +1,9 @@
 ## RIM Java Development Environment
 # RIM Project file
+#
+# This file is generated and managed by BlackBerry developer tools.
+# It SHOULD NOT BE modified manually.
+#
 AddOn=0
 AlwaysBuild=0
 [AlxImports
@@ -21,9 +25,10 @@ AutoRestart=0
 ]
 Description=A simple SMS sample demonstrating both send and receive
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 img\smsdemo_jde.png
-SmsDemo.java
+SMSDemo.java
 ]
 HaveAlxImports=0
 HaveDefs=0
@@ -38,12 +43,15 @@ img\smsdemo_jde.png
 Listing=0
 NoImport=0
 NoRuntime=0
-Options=-quiet
-OutputFileName=SMSDemo
+Options=-quiet 
+OutputFileName=SmsDemo
 [PackageProtection
 ]
 RibbonPosition=0
+[RolloverIcons
+]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=SMS Demo

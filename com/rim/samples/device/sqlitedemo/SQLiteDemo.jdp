@@ -26,6 +26,7 @@ Category.java
 DirectoryItem.java
 img\sqlitedemo_jde.png
 ItemScreen.java
+readme.txt
 SQLiteDemo.java
 SQLiteDemoDirectory
 SQLiteDemoScreen.java
@@ -52,6 +53,7 @@ RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=SQLite Demo

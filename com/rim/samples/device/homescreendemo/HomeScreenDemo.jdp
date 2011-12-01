@@ -1,0 +1,54 @@
+## RIM Java Development Environment
+# RIM Project file
+#
+# This file is generated and managed by BlackBerry developer tools.
+# It SHOULD NOT BE modified manually.
+#
+AddOn=0
+AlwaysBuild=0
+[AlxImports
+]
+AutoRestart=0
+[ClassProtection
+]
+[CustomBuildFiles
+]
+[CustomBuildRules
+]
+[DefFiles
+]
+[DependsOn
+]
+ExcludeFromBuildAll=0
+Exported=0
+[Files
+HomeScreenDemo.java
+HomeScreenDemoSecondaryScreen.java
+img\homescreendemo_jde.png
+img\logo_black.jpg
+img\logo_blue.jpg
+]
+HaveAlxImports=0
+HaveDefs=0
+HaveImports=0
+[Icons
+img\homescreendemo_jde.png
+]
+[ImplicitRules
+]
+[Imports
+]
+Listing=0
+Options=-quiet 
+OutputFileName=homescreendemo
+[PackageProtection
+]
+RibbonPosition=0
+[RolloverIcons
+]
+RunOnStartup=0
+SkipCompile=0
+StartupTier=7
+SystemModule=0
+Title=Home Screen Demo
+Type=0

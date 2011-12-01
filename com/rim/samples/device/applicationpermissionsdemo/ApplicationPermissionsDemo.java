@@ -174,29 +174,29 @@ public final class ApplicationPermissionsDemo extends UiApplication implements
 
         if (_eventInjectorButton == null) {
             _eventInjectorButton =
-                    new ButtonField("Event Injector", ButtonField.CONSUME_CLICK
-                            | ButtonField.NEVER_DIRTY);
+                    new ButtonField("Event Injector", ButtonField.NEVER_DIRTY
+                            | ButtonField.CONSUME_CLICK);
             _eventInjectorButton.setChangeListener(this);
         }
 
         if (_phoneButton == null) {
             _phoneButton =
-                    new ButtonField("Phone", ButtonField.CONSUME_CLICK
-                            | ButtonField.NEVER_DIRTY);
+                    new ButtonField("Phone", ButtonField.NEVER_DIRTY
+                            | ButtonField.CONSUME_CLICK);
             _phoneButton.setChangeListener(this);
         }
 
         if (_deviceSettingsButton == null) {
             _deviceSettingsButton =
-                    new ButtonField("Device Settings",
-                            ButtonField.CONSUME_CLICK | ButtonField.NEVER_DIRTY);
+                    new ButtonField("Device Settings", ButtonField.NEVER_DIRTY
+                            | ButtonField.CONSUME_CLICK);
             _deviceSettingsButton.setChangeListener(this);
         }
 
         if (_emailButton == null) {
             _emailButton =
-                    new ButtonField("Email", ButtonField.CONSUME_CLICK
-                            | ButtonField.NEVER_DIRTY);
+                    new ButtonField("Email", ButtonField.NEVER_DIRTY
+                            | ButtonField.CONSUME_CLICK);
             _emailButton.setChangeListener(this);
         }
 

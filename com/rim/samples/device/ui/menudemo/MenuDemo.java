@@ -48,10 +48,12 @@ import net.rim.device.api.ui.decor.Border;
 import net.rim.device.api.ui.decor.BorderFactory;
 import net.rim.device.api.ui.image.Image;
 import net.rim.device.api.ui.image.ImageFactory;
+import net.rim.device.api.ui.menu.SubMenu;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * This sample application demonstrates the ability to customize the background,
- * border and font of a menu, and the ability to add an image to a menu item.
+ * border and font of a menu, add an image to a menu item and create sub menus.
  */
 public class MenuDemo extends UiApplication {
     /**
@@ -84,9 +86,11 @@ public class MenuDemo extends UiApplication {
         private Font _menuFont;
         private final FontFamily[] _fontFamilies;
         private final RadioButtonField _radioButtonImage;
+        private final RadioButtonField _radioButtonSubMenu;
         private final RadioButtonField _radioButtonDecor;
         private final ImageMenuItem _imageMenuItem;
         private final ObjectChoiceField _fontChoiceField;
+        private final SubMenu _phoneSubMenu;
 
         // Creates a new MenuDemoScreen object
         MenuDemoScreen() {
@@ -104,12 +108,16 @@ public class MenuDemo extends UiApplication {
             _radioButtonImage =
                     new RadioButtonField("Menu with image", radioButtonGroup,
                             true);
+            _radioButtonSubMenu =
+                    new RadioButtonField("Menu with sub menu",
+                            radioButtonGroup, false);
             _radioButtonDecor =
                     new RadioButtonField(
                             "Menu with custom border, background and font",
                             radioButtonGroup, false);
             _radioButtonDecor.setChangeListener(this);
             add(_radioButtonImage);
+            add(_radioButtonSubMenu);
             add(_radioButtonDecor);
 
             add(new SeparatorField());
@@ -139,6 +147,28 @@ public class MenuDemo extends UiApplication {
             _menuBorder =
                     BorderFactory.createBevelBorder(thickPadding, colors,
                             colors);
+
+            // Create an array of demo menu items
+            final DemoMenuItem[] demoMenuItems = new DemoMenuItem[3];
+            demoMenuItems[0] = new DemoMenuItem("Hold", 100, 1);
+            demoMenuItems[1] = new DemoMenuItem("Add Participant", 200, 2);
+            demoMenuItems[2] = new DemoMenuItem("Volume", 300, 3);
+
+            // Create a SubMenu populated with the array of menu items
+            _phoneSubMenu = new SubMenu(demoMenuItems, "Phone", 200, 2);
+        }
+
+        /**
+         * The class is strictly meant to demonstrate the SubMenu API.
+         */
+        static final class DemoMenuItem extends MenuItem {
+            /**
+             * Creates a new DemoMenuItem object
+             */
+            DemoMenuItem(final String text, final int ordinal,
+                    final int priority) {
+                super(new StringProvider(text), ordinal, priority);
+            }
         }
 
         /**
@@ -176,6 +206,9 @@ public class MenuDemo extends UiApplication {
                 menu.setBackground(_menuBackground);
                 menu.setBorder(_menuBorder);
                 menu.setFont(_menuFont);
+            } else if (_radioButtonSubMenu.isSelected()) {
+                // Add the phone sub menu to the menu
+                menu.add(_phoneSubMenu);
             }
 
             super.makeMenu(menu, context);
@@ -197,7 +230,7 @@ public class MenuDemo extends UiApplication {
              * Creates a new MenuDemoMenuItem object
              */
             ImageMenuItem() {
-                super("Image menu item", 0, 0);
+                super(new StringProvider("Image menu item"), 0x230100, 0);
 
                 // Create Image object from project resource
                 final Bitmap bitmap = Bitmap.getBitmapResource("img.png");
@@ -205,10 +238,6 @@ public class MenuDemo extends UiApplication {
 
                 // Set image as this menu item's icon
                 setIcon(image);
-            }
-
-            public void run() {
-                // Not implemented
             }
         }
     }

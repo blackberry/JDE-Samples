@@ -28,12 +28,19 @@ package com.rim.samples.device.attachmentdemo;
 
 import java.io.IOException;
 
+import javax.microedition.io.Connector;
+import javax.microedition.io.file.FileConnection;
+
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * The main screen class for the Attachment Demo sample application
@@ -60,8 +67,56 @@ public final class AttachmentDemoScreen extends MainScreen {
                         "Open the menu to download or upload attachments",
                         Field.NON_FOCUSABLE);
         add(_statusField);
-        addMenuItem(_downloadItem);
-        addMenuItem(_uploadItem);
+        final MenuItem downloadItem =
+                new MenuItem(new StringProvider("Download Attachments"),
+                        0x230010, 0);
+        downloadItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                _statusField.setText("");
+                if (_action.getMessages()) {
+                    try {
+                        _action.download(Dialog.ask(Dialog.D_YES_NO,
+                                "Download only png and msword attachments?") == Dialog.NO);
+                    } catch (final IOException ex) {
+                        AttachmentDemo
+                                .errorDialog("DownloadManager.download() threw "
+                                        + ex.toString());
+                    }
+                } else {
+                    displayStatus("Mailbox is empty.");
+                }
+            }
+        }));
+        final MenuItem uploadItem =
+                new MenuItem(new StringProvider("Send Attachment"), 0x230020, 1);
+        uploadItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                _statusField
+                        .setText("Open the menu to download or upload attachments");
+
+                // Check if SD card is inserted
+                try {
+                    final FileConnection fc =
+                            (FileConnection) Connector.open("file:///SDCard/");
+                    fc.close();
+                    _app.pushScreen(new FileExplorerScreen(_app));
+                } catch (final IOException e) {
+                    Dialog.inform("Please insert an SD card to upload items.");
+                }
+            }
+        }));
+        addMenuItem(downloadItem);
+        addMenuItem(uploadItem);
     }
 
     /**
@@ -77,31 +132,4 @@ public final class AttachmentDemoScreen extends MainScreen {
             }
         });
     }
-
-    // Menu items --------------------------------------------------------------
-    MenuItem _downloadItem = new MenuItem("Download Attachments", 110, 10) {
-        public void run() {
-            _statusField.setText("");
-            if (_action.getMessages()) {
-                try {
-                    _action.download(Dialog.ask(Dialog.D_YES_NO,
-                            "Download only png and msword attachments?") == Dialog.NO);
-                } catch (final IOException ex) {
-                    AttachmentDemo
-                            .errorDialog("DownloadManager.download() threw "
-                                    + ex.toString());
-                }
-            } else {
-                displayStatus("Mailbox is empty.");
-            }
-        }
-    };
-
-    MenuItem _uploadItem = new MenuItem("Send Attachment", 110, 10) {
-        public void run() {
-            _statusField
-                    .setText("Open the menu to download or upload attachments");
-            _app.pushScreen(new FileExplorerScreen(_app));
-        }
-    };
 }

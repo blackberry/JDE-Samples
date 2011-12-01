@@ -24,13 +24,16 @@
  * Environment Development Guide associated with this release.
  */
 
-package com.rim.samples.device.picturescrollfielddemo;
+package com.rim.samples.device.ui.picturescrollfielddemo;
 
 import net.rim.device.api.system.Bitmap;
 import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
+import net.rim.device.api.ui.Screen;
 import net.rim.device.api.ui.TouchEvent;
+import net.rim.device.api.ui.Touchscreen;
+import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.CheckboxField;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
@@ -47,9 +50,17 @@ import net.rim.device.api.ui.extension.component.PictureScrollField.ScrollEntry;
  */
 public final class PictureScrollFieldDemoScreen extends MainScreen implements
         FieldChangeListener {
-    private static String CALL_OUT_TEXT = "Call-out ";
+    private static final String CALL_OUT_TEXT = "Call-out ";
+
+    private static final int NUM_ENTRIES = 4;
 
     private final PictureScrollField _pictureScrollField;
+    private boolean _overlap;
+    private final CheckboxField _centerLensCheckBox;
+    private final CheckboxField _overlapCheckBox;
+    private final ObjectChoiceField _choiceField;
+
+    private final Bitmap[] _bitmaps;
 
     /**
      * Creates a new PictureScrollFieldDemoScreen object
@@ -57,20 +68,23 @@ public final class PictureScrollFieldDemoScreen extends MainScreen implements
     public PictureScrollFieldDemoScreen() {
         setTitle("Picture Scroll Field Demo");
 
+        // Initialize an array of Bitmaps
+        _bitmaps = new Bitmap[NUM_ENTRIES];
+        _bitmaps[0] = Bitmap.getBitmapResource("berry.jpg");
+        _bitmaps[1] = Bitmap.getBitmapResource("logo_blue.jpg");
+        _bitmaps[2] = Bitmap.getBitmapResource("logo_black.jpg");
+        _bitmaps[3] = Bitmap.getBitmapResource("building.jpg");
+
         // Initialize an array of scroll entries
-        final ScrollEntry[] entries = new ScrollEntry[4];
+        final ScrollEntry[] entries = new ScrollEntry[NUM_ENTRIES];
         entries[0] =
-                new ScrollEntry(Bitmap.getBitmapResource("berry.jpg"),
-                        "BlackBerry", CALL_OUT_TEXT + 1);
+                new ScrollEntry(_bitmaps[0], "BlackBerry", CALL_OUT_TEXT + 1);
         entries[1] =
-                new ScrollEntry(Bitmap.getBitmapResource("logo_blue.jpg"),
-                        "Blue logo", CALL_OUT_TEXT + 2);
+                new ScrollEntry(_bitmaps[1], "Blue logo", CALL_OUT_TEXT + 2);
         entries[2] =
-                new ScrollEntry(Bitmap.getBitmapResource("logo_black.jpg"),
-                        "Black logo", CALL_OUT_TEXT + 3);
+                new ScrollEntry(_bitmaps[2], "Black logo", CALL_OUT_TEXT + 3);
         entries[3] =
-                new ScrollEntry(Bitmap.getBitmapResource("building.jpg"),
-                        "Building", CALL_OUT_TEXT + 4);
+                new ScrollEntry(_bitmaps[3], "Building", CALL_OUT_TEXT + 4);
 
         // Initialize the picture scroll field
         _pictureScrollField = new PictureScrollField(150, 100);
@@ -80,6 +94,7 @@ public final class PictureScrollFieldDemoScreen extends MainScreen implements
         _pictureScrollField.setBackground(BackgroundFactory
                 .createSolidBackground(Color.LIGHTBLUE));
         _pictureScrollField.setLabelsVisible(true);
+        _pictureScrollField.setLensShrink(0.4f);
         add(_pictureScrollField);
 
         // Initialize a choice field for highlight style selection
@@ -92,20 +107,26 @@ public final class PictureScrollFieldDemoScreen extends MainScreen implements
                         "Illuminate with shrink lens" };
         add(new SeparatorField());
         add(new LabelField("Select highlight style", Field.FIELD_HCENTER));
-        final ObjectChoiceField choiceField =
+        _choiceField =
                 new ObjectChoiceField("", choices, HighlightStyle.ILLUMINATE,
                         Field.FIELD_HCENTER);
-        choiceField.setChangeListener(this);
-        add(choiceField);
+        _choiceField.setChangeListener(this);
+        add(_choiceField);
 
         add(new SeparatorField());
 
         // Initialize a check box for toggling the center lens
-        final CheckboxField checkBox =
+        _centerLensCheckBox =
                 new CheckboxField("Enable center lens", false,
                         Field.FIELD_HCENTER);
-        checkBox.setChangeListener(this);
-        add(checkBox);
+        _centerLensCheckBox.setChangeListener(this);
+        add(_centerLensCheckBox);
+
+        // Initialize a check box for overlapping images
+        _overlapCheckBox =
+                new CheckboxField("Overlap images", false, Field.FIELD_HCENTER);
+        _overlapCheckBox.setChangeListener(this);
+        add(_overlapCheckBox);
     }
 
     /**
@@ -121,8 +142,15 @@ public final class PictureScrollFieldDemoScreen extends MainScreen implements
      */
     protected boolean navigationClick(final int status, final int time) {
         if (_pictureScrollField.isFocus()) {
-            Dialog.inform("You selected item "
-                    + _pictureScrollField.getCurrentImageIndex());
+            if (Touchscreen.isSupported()) {
+                UiApplication.getUiApplication().pushScreen(
+                        new PinchScreen(_bitmaps[_pictureScrollField
+                                .getCurrentImageIndex()]));
+            } else {
+                Dialog.inform("You selected item "
+                        + _pictureScrollField.getCurrentImageIndex());
+            }
+
             return true;
         }
 
@@ -135,12 +163,18 @@ public final class PictureScrollFieldDemoScreen extends MainScreen implements
     protected boolean touchEvent(final TouchEvent message) {
         if (message.getEvent() == TouchEvent.CLICK) {
             if (_pictureScrollField.isFocus()) {
-                Dialog.inform("You selected item "
-                        + _pictureScrollField.getCurrentImageIndex());
+                if (Touchscreen.isSupported()) {
+                    UiApplication.getUiApplication().pushScreen(
+                            new PinchScreen(_bitmaps[_pictureScrollField
+                                    .getCurrentImageIndex()]));
+                } else {
+                    Dialog.inform("You selected item "
+                            + _pictureScrollField.getCurrentImageIndex());
+                }
+
                 return true;
             }
         }
-
         return super.touchEvent(message);
     }
 
@@ -148,9 +182,9 @@ public final class PictureScrollFieldDemoScreen extends MainScreen implements
      * @see FieldChangeListener(Field, int)
      */
     public void fieldChanged(final Field field, final int context) {
-        // if(field == _choiceField)
-        if (field instanceof ObjectChoiceField) {
-            final int index = ((ObjectChoiceField) field).getSelectedIndex();
+        if (field == _choiceField) {
+            // Set the highlight style
+            final int index = _choiceField.getSelectedIndex();
             switch (index) {
             case HighlightStyle.NO_HIGHLIGHT:
                 _pictureScrollField
@@ -188,12 +222,21 @@ public final class PictureScrollFieldDemoScreen extends MainScreen implements
                 _pictureScrollField
                         .setHighlightStyle(HighlightStyle.ILLUMINATE_WITH_SHRINK_LENS);
                 break;
-
             }
             _pictureScrollField.setFocus();
-        } else if (field instanceof CheckboxField) {
+        } else if (field == _centerLensCheckBox) {
+            // Enable/disable the lens
             _pictureScrollField.setCenteredLens(!_pictureScrollField
                     .hasCenteredLens());
+        } else if (field == _overlapCheckBox) {
+            // Toggle overlapping
+            if (_overlap) {
+                _pictureScrollField.setImageDistance(150);
+                _overlap = false;
+            } else {
+                _pictureScrollField.setImageDistance(100);
+                _overlap = true;
+            }
         }
         _pictureScrollField.setFocus();
     }

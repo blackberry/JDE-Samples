@@ -54,10 +54,10 @@ public class MyCryptoSmartCard extends CryptoSmartCard implements Persistable {
 
     private final static AnswerToReset _myATR = new AnswerToReset(MY_ATR);
 
-    private static String LABEL = "RIM Sample";
-    private static String DISPLAY_SETTINGS =
+    private static final String LABEL = "RIM Sample";
+    private static final String DISPLAY_SETTINGS =
             "Show driver properties/settings now";
-    private static String RSA = "RSA";
+    private static final String RSA = "RSA";
 
     /**
      * Called on startup of the device. Register this driver with the smart card

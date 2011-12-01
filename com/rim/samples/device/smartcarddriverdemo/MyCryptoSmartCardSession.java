@@ -65,11 +65,11 @@ public class MyCryptoSmartCardSession extends CryptoSmartCardSession {
     private static final byte SIGNING_PKI = (byte) 0x01;
     private static final byte ENCRYPTION_PKI = (byte) 0x02;
 
-    private static String WAITING_MSG = "Please Wait";
-    private static String ID_STRING = "John H. Smith";
-    private static String ID_CERT = "ID Certificate";
-    private static String SIGNING_CERT = "Signing Certificate";
-    private static String ENCRYPTION_CERT = "Encryption Certificate";
+    private static final String WAITING_MSG = "Please Wait";
+    private static final String ID_STRING = "John H. Smith";
+    private static final String ID_CERT = "ID Certificate";
+    private static final String SIGNING_CERT = "Signing Certificate";
+    private static final String ENCRYPTION_CERT = "Encryption Certificate";
 
     /**
      * Constructs a <code>MyCryptoSmartCardSession</code> object.

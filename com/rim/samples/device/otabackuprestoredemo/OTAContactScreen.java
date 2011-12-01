@@ -26,6 +26,9 @@
 
 package com.rim.samples.device.otabackuprestoredemo;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BasicEditField;
@@ -34,6 +37,7 @@ import net.rim.device.api.ui.component.EditField;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * This screen allows the user to view and edit contact information
@@ -53,20 +57,26 @@ public final class OTAContactScreen extends MainScreen {
          * Creates a new SaveMenuItem object
          */
         private SaveMenuItem() {
-            super("Save", 100000, 5);
-        }
+            super(new StringProvider("Save"), 0x230010, 5);
+            this.setCommand(new Command(new CommandHandler() {
 
-        /**
-         * Saves the contact and closes this screen
-         * 
-         * @see java.lang.Runnable#run()
-         */
-        public void run() {
-            // If successful, return to contact list.
-            if (onSave()) {
-                final UiApplication uiapp = UiApplication.getUiApplication();
-                uiapp.popScreen(uiapp.getActiveScreen());
-            }
+                /**
+                 * Saves the contact and closes this screen
+                 * 
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+
+                    // If successful, return to contact list.
+                    if (onSave()) {
+                        final UiApplication uiapp =
+                                UiApplication.getUiApplication();
+                        uiapp.popScreen(uiapp.getActiveScreen());
+                    }
+                }
+            }));
         }
     }
 
@@ -78,17 +88,22 @@ public final class OTAContactScreen extends MainScreen {
          * Creates a new BackMenuItem object
          */
         private BackMenuItem() {
-            super("Back", 100000, 5);
-        }
+            super(new StringProvider("Back"), 0x230020, 5);
+            this.setCommand(new Command(new CommandHandler() {
 
-        /**
-         * Closes this screen
-         * 
-         * @see java.lang.Runnable#run()
-         */
-        public void run() {
-            final UiApplication uiapp = UiApplication.getUiApplication();
-            uiapp.popScreen(uiapp.getActiveScreen());
+                /**
+                 * Closes this screen
+                 * 
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final UiApplication uiapp =
+                            UiApplication.getUiApplication();
+                    uiapp.popScreen(uiapp.getActiveScreen());
+                }
+            }));
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * UsbDemo.java
+ * USBDemo.java
  *
  * Copyright © 1998-2011 Research In Motion Limited
  * 
@@ -34,6 +34,9 @@ import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.SystemListener2;
 import net.rim.device.api.system.USBPort;
 import net.rim.device.api.system.USBPortListener;
@@ -42,14 +45,15 @@ import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.util.DataBuffer;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * A sample application to demonstrate opening of the USB port for communication
  * with a desktop USB client (one that uses the COM interfaces exposed by
  * BBDevMgr.exe).
  */
-public final class UsbDemo extends UiApplication {
-    private static String CHANNEL = "JDE_USBClient";
+public final class USBDemo extends UiApplication {
+    private static final String CHANNEL = "JDE_USBClient";
     private final RichTextField _output;
     private UsbThread _usbThread;
 
@@ -62,16 +66,16 @@ public final class UsbDemo extends UiApplication {
     public static final void main(final String[] args) {
         // Create a new instance of the application and make the currently
         // running thread the application's event dispatch thread.
-        new UsbDemo().enterEventDispatcher();
+        new USBDemo().enterEventDispatcher();
     }
 
     /**
-     * Creates a new UsbDemo object
+     * Creates a new USBDemo object
      */
-    public UsbDemo() {
+    public USBDemo() {
 
         final USBScreen screen = new USBScreen();
-        screen.setTitle("Usb Demo");
+        screen.setTitle("USB Demo");
 
         _output = new RichTextField("<output>");
 
@@ -89,8 +93,46 @@ public final class UsbDemo extends UiApplication {
          * Creates a new USBScreen object
          */
         private USBScreen() {
-            addMenuItem(_connectGCF);
-            addMenuItem(_connectLowLevel);
+            // Connects through a GCF USB connection
+            final MenuItem connectGCF =
+                    new MenuItem(new StringProvider("Connect (GCF)"), 0x230010,
+                            0);
+            connectGCF.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    // Cleanup the old thread if present
+                    onExit();
+
+                    _usbThread = new GCFUsbThread();
+                    connect();
+                }
+            }));
+            /*
+             * Connects through a low level USB connection.
+             */
+            final MenuItem connectLowLevel =
+                    new MenuItem(new StringProvider("Connect (low level)"),
+                            0x230020, 1);
+            connectLowLevel.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    // Cleanup old thread if present.
+                    onExit();
+
+                    _usbThread = new LowLevelUsbThread();
+                    connect();
+                }
+            }));
+            addMenuItem(connectGCF);
+            addMenuItem(connectLowLevel);
         }
 
         /**
@@ -109,34 +151,6 @@ public final class UsbDemo extends UiApplication {
 
             super.close();
         }
-
-        /**
-         * Connects through a GCF USB connection
-         */
-        private final MenuItem _connectGCF = new MenuItem("Connect (GCF)", 10,
-                10) {
-            public void run() {
-                // Cleanup the old thread if present
-                onExit();
-
-                _usbThread = new GCFUsbThread();
-                connect();
-            }
-        };
-
-        /**
-         * Connects through a low level USB connection.
-         */
-        private final MenuItem _connectLowLevel = new MenuItem(
-                "Connect (low level)", 11, 11) {
-            public void run() {
-                // Cleanup old thread if present.
-                onExit();
-
-                _usbThread = new LowLevelUsbThread();
-                connect();
-            }
-        };
     }
 
     /**
@@ -347,8 +361,8 @@ public final class UsbDemo extends UiApplication {
             // NOTE: These are here for demonstration, but
             // they can be used in GCF thread if needed.
 
-            UsbDemo.this.addIOPortListener(this);
-            UsbDemo.this.addSystemListener(this);
+            USBDemo.this.addIOPortListener(this);
+            USBDemo.this.addSystemListener(this);
 
             message("using low level usb interface");
 

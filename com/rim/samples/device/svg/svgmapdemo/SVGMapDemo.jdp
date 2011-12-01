@@ -20,6 +20,7 @@ AutoRestart=0
 [DependsOn
 ]
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 img\burger.png
 img\castle.png
@@ -39,21 +40,19 @@ HaveImports=0
 img\svgmapdemo_jde.png
 ]
 [ImplicitRules
-svg
-svg
-echo nothing
 ]
 [Imports
 ]
 Listing=0
 Options=-quiet 
-OutputFileName=svgmapdemo
+OutputFileName=SVGMapDemo
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=SVG Map Demo

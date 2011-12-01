@@ -78,22 +78,22 @@ public class WireFrameLayoutDemo extends UiApplication {
             // Instantiate buttons
             _basicScrollingButton =
                     new ButtonField("Basic Scrolling Screen",
-                            ButtonField.CONSUME_CLICK | ButtonField.NEVER_DIRTY);
+                            ButtonField.NEVER_DIRTY | ButtonField.CONSUME_CLICK);
             _invertedScrollingButton =
                     new ButtonField("Inverted Scrolling Screen",
-                            ButtonField.CONSUME_CLICK | ButtonField.NEVER_DIRTY);
+                            ButtonField.NEVER_DIRTY | ButtonField.CONSUME_CLICK);
             _searchButton =
-                    new ButtonField("Search Screen", ButtonField.CONSUME_CLICK
-                            | ButtonField.NEVER_DIRTY);
+                    new ButtonField("Search Screen", ButtonField.NEVER_DIRTY
+                            | ButtonField.CONSUME_CLICK);
             _horizontalVerticalCenteredButton =
                     new ButtonField("Horizontal Vertical Centered Screen",
-                            ButtonField.CONSUME_CLICK | ButtonField.NEVER_DIRTY);
+                            ButtonField.NEVER_DIRTY | ButtonField.CONSUME_CLICK);
             _gridFieldButton =
                     new ButtonField("Grid Field Screen",
-                            ButtonField.CONSUME_CLICK | ButtonField.NEVER_DIRTY);
+                            ButtonField.NEVER_DIRTY | ButtonField.CONSUME_CLICK);
             _mediaHubButton =
-                    new ButtonField("Media Hub Screen",
-                            ButtonField.CONSUME_CLICK | ButtonField.NEVER_DIRTY);
+                    new ButtonField("Media Hub Screen", ButtonField.NEVER_DIRTY
+                            | ButtonField.CONSUME_CLICK);
 
             // Make this class a change listener for the buttons
             _basicScrollingButton.setChangeListener(this);

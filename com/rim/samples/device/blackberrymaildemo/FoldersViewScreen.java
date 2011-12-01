@@ -29,12 +29,16 @@ package com.rim.samples.device.blackberrymaildemo;
 import net.rim.blackberry.api.mail.Folder;
 import net.rim.blackberry.api.mail.Message;
 import net.rim.blackberry.api.mail.MessagingException;
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.component.ListField;
 import net.rim.device.api.ui.component.ObjectListField;
 import net.rim.device.api.util.Arrays;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * This class displays the messages organized by the folders they belong to
@@ -53,12 +57,19 @@ public final class FoldersViewScreen extends BlackBerryMailDemoScreen {
 
         _currentFolder = currentFolder;
 
-        _changeViewMenuItem = new MenuItem("Messages View", 110, 10) {
-            public void run() {
+        _changeViewMenuItem =
+                new MenuItem(new StringProvider("Messages View"), 0x230010, 0);
+        _changeViewMenuItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
                 _currentDisplayMode = MESSAGES_VIEW_MODE;
                 close();
             }
-        };
+        }));
 
         _listField = new FolderObjectListField();
         add(_listField);

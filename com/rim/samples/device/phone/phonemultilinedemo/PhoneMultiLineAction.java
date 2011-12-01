@@ -25,7 +25,7 @@
  *
  */
 
-package com.rim.samples.device.phonemultilinedemo;
+package com.rim.samples.device.phone.phonemultilinedemo;
 
 import net.rim.blackberry.api.phone.InvalidIDException;
 import net.rim.blackberry.api.phone.MultiLineListener;

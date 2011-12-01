@@ -26,12 +26,16 @@
 
 package com.rim.samples.device.notificationsdemo;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.notification.NotificationsConstants;
 import net.rim.device.api.notification.NotificationsManager;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * An example of use of the Notifications API. This application has an alternate
@@ -44,7 +48,7 @@ public final class NotificationsDemo extends UiApplication {
     static final long NOTIFICATIONS_ID_1 = 0xdc5bf2f81374095L;
 
     /**
-     * Entry point for application.
+     * Entry point for application
      * 
      * @param args
      *            Command-line arguments
@@ -58,13 +62,13 @@ public final class NotificationsDemo extends UiApplication {
             // Notification dialogs.
             nd.enterEventDispatcher();
         } else {
-            // Start a new app instance for GUI operations.
+            // Start a new app instance for GUI operations
             new NotificationsDemo().showGui();
         }
     }
 
     /**
-     * Displays the NotificationDemoScreen.
+     * Displays the NotificationDemoScreen
      */
     private void showGui() {
         // Create a new instance of the application and make the currently
@@ -74,10 +78,10 @@ public final class NotificationsDemo extends UiApplication {
     }
 
     /**
-     * Registers this application as the notification manager.
+     * Registers this application as the notification manager
      */
     private void registerNotificationObjects() {
-        // A source is registered to tell the system that our application will
+        // A source is registered to tell the system that the application will
         // be sending notification events. This will will cause a new user
         // editable configuration to be added to the Profiles application.
         NotificationsManager.registerSource(NOTIFICATIONS_ID_1, new Object() {
@@ -91,44 +95,51 @@ public final class NotificationsDemo extends UiApplication {
         NotificationsManager.registerNotificationsEngineListener(
                 NOTIFICATIONS_ID_1, new NotificationsEngineListenerImpl(this));
 
-        // Our Consequence implementation will invoked whenever an immediate
+        // Our Consequence implementation will be invoked whenever an immediate
         // event occurs.
         NotificationsManager.registerConsequence(ConsequenceImpl.ID,
                 new ConsequenceImpl());
     }
 
     /**
-     * The MainScreen class for our UiApplication.
+     * The MainScreen class for the Notifications Demo application
      */
     private static class NotificationsDemoScreen extends MainScreen {
         private long _eventId;
 
-        // Constructor
+        /**
+         * Creates a new NotificationsDemoScreen object
+         */
         private NotificationsDemoScreen() {
-            // Initialize UI components.
+            // Initialize UI components
             setTitle("Notifications Demo");
             add(new RichTextField("Trigger notification from menu."));
-            addMenuItem(_notifyItem);
+
+            // A menu item to generate immediate and deferred events
+            final MenuItem notifyItem =
+                    new MenuItem(new StringProvider("Notify (ID1)"), 0x230010,
+                            0);
+            notifyItem.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final int trigger = NotificationsConstants.MANUAL_TRIGGER;
+
+                    // The timeout parameter is IGNORED unless the TRIGGER
+                    // is OUT_OF_HOLSTER_TRIGGER.
+                    final long timeout = -1;
+
+                    final Event e =
+                            new Event(NotificationsDemo.NOTIFICATIONS_ID_1,
+                                    _eventId, 500, timeout, trigger);
+                    _eventId++;
+                    e.fire();
+                }
+            }));
+            addMenuItem(notifyItem);
         }
-
-        /**
-         * A menu item to generate immediate and deferred events.
-         */
-        private final MenuItem _notifyItem = new MenuItem("Notify (ID1)",
-                100000, 25) {
-            public void run() {
-                final int trigger = NotificationsConstants.MANUAL_TRIGGER;
-
-                // The timeout parameter is IGNORED unless the TRIGGER
-                // is OUT_OF_HOLSTER_TRIGGER.
-                final long timeout = -1;
-
-                final Event e =
-                        new Event(NotificationsDemo.NOTIFICATIONS_ID_1,
-                                _eventId, 500, timeout, trigger);
-                _eventId++;
-                e.fire();
-            }
-        };
     }
 }

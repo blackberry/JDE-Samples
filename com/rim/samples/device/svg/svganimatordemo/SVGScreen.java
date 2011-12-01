@@ -54,16 +54,16 @@ import org.w3c.dom.svg.SVGElement;
  */
 public final class SVGScreen extends MainScreen {
     // String constants.
-    private static String BOUNCING_BALL = "bouncingBall";
-    private static String PLANETS = "planets";
-    private static String RUNNER = "runner";
-    private static String DISPLAY_ATTR = "display";
-    private static String NONE_VALUE = "none";
-    private static String INLINE_VALUE = "inline";
+    private static final String BOUNCING_BALL = "bouncingBall";
+    private static final String PLANETS = "planets";
+    private static final String RUNNER = "runner";
+    private static final String DISPLAY_ATTR = "display";
+    private static final String NONE_VALUE = "none";
+    private static final String INLINE_VALUE = "inline";
 
     // The svg files we want to demo.
-    private static String SAMPLE_URL = "/sample.svg";
-    private static String FIELD_PACKAGE = "net.rim.device.api.ui.Field";
+    private static final String SAMPLE_URL = "/sample.svg";
+    private static final String FIELD_PACKAGE = "net.rim.device.api.ui.Field";
 
     private SVGImage _image;
 

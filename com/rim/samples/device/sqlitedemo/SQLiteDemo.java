@@ -38,6 +38,7 @@ import javax.microedition.io.file.FileSystemRegistry;
 import net.rim.device.api.database.Database;
 import net.rim.device.api.database.DatabaseException;
 import net.rim.device.api.database.DatabaseFactory;
+import net.rim.device.api.database.DatabaseOptions;
 import net.rim.device.api.database.DatabaseSecurityOptions;
 import net.rim.device.api.io.URI;
 import net.rim.device.api.system.CodeModuleManager;
@@ -52,8 +53,10 @@ import net.rim.device.api.ui.component.Dialog;
  * SDCard is available) if a database does not already exist at that location.
  * The default root for SQLite databases is
  * 'file:///SDCard/databases/*project-name*'. Certain BlackBerry Smartphone
- * devices are capable of creating databases in eMMC memory. However, using eMMC
- * memory to store large databases is not recommended.
+ * devices are capable of creating databases in eMMC memory which is of a fixed
+ * capacity. Storage location for SQLite databases should be based on the
+ * availability of eMMC memory, potential size of the database, and whether a
+ * portable solution is required for a given application.
  * 
  * This sample is a business directory application which uses the SQLite back
  * end database for persistent storage of its data. The database contains a
@@ -76,7 +79,7 @@ import net.rim.device.api.ui.component.Dialog;
  * the resulting cod file with the XYZ private key.
  */
 public final class SQLiteDemo extends UiApplication {
-    private static String DB_NAME = "SQLiteDemoDirectory";
+    private static final String DB_NAME = "SQLiteDemoDirectory";
 
     /**
      * Entry point for this application
@@ -157,8 +160,13 @@ public final class SQLiteDemo extends UiApplication {
                 errorDialog("Encryption failed - " + dbe.toString());
             }
 
+            // Create a new DatabaseOptions object forcing foreign key
+            // constraints
+            final DatabaseOptions databaseOptions = new DatabaseOptions();
+            databaseOptions.set("foreign_key_constraints", "on");
+
             // Open the database
-            db = DatabaseFactory.open(uri);
+            db = DatabaseFactory.open(uri, databaseOptions);
 
             // Create a new main screen and push it onto the display stack
             final SQLiteDemoScreen screen =

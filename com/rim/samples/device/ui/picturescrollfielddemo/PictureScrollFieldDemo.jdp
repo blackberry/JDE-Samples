@@ -29,6 +29,7 @@ img\logo_blue.jpg
 img\picturescrollfielddemo_jde.png
 PictureScrollFieldDemo.java
 PictureScrollFieldDemoScreen.java
+PinchScreen.java
 ]
 HaveAlxImports=0
 HaveDefs=0
@@ -50,6 +51,7 @@ RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=Picture Scroll Field Demo

@@ -31,8 +31,10 @@ import java.io.InputStream;
 
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
-import javax.microedition.io.StreamConnection;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.io.IOCancelledException;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.ui.MenuItem;
@@ -44,20 +46,21 @@ import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * This sample makes a an http or https connection to a specified URL and
  * retrieves and displays html content.
  */
 public class HTTPDemo extends UiApplication {
-    private static String SAMPLE_HTTPS_PAGE =
+    private static final String SAMPLE_HTTPS_PAGE =
             "https://www.blackberry.com/go/mobile/samplehttps.shtml";
-    private static String[] HTTP_PROTOCOL = { "http://", "http:\\", "https://",
-            "https:\\" };
+    private static final String[] HTTP_PROTOCOL = { "http://", "http:\\",
+            "https://", "https:\\" };
     private static final char HTML_TAG_OPEN = '<';
     private static final char HTML_TAG_CLOSE = '>';
-    private static String HEADER_CONTENTTYPE = "content-type";
-    private static String CONTENTTYPE_TEXTHTML = "text/html";
+    private static final String HEADER_CONTENTTYPE = "content-type";
+    private static final String CONTENTTYPE_TEXTHTML = "text/html";
 
     private static final int STATE_0 = 0;
     private static final int STATE_1 = 1;
@@ -92,8 +95,90 @@ public class HTTPDemo extends UiApplication {
         theApp.enterEventDispatcher();
     }
 
-    // Constructor
+    /**
+     * Creates a new HTTPDemo object
+     */
     public HTTPDemo() {
+        _fetchMenuItem = new MenuItem(new StringProvider("Fetch"), 0x230010, 0);
+        _fetchMenuItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                // Don't execute on a blank url.
+                if (_url.getText().length() > 0) {
+                    if (!_connectionThread.isStarted()) {
+                        fetchPage(_url.getText());
+                    } else {
+                        createNewFetch(_url.getText());
+                    }
+                }
+            }
+        }));
+
+        _clearContent =
+                new MenuItem(new StringProvider("Clear Content"), 0x230020, 3);
+        _clearContent.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                _content.setText("<content>");
+            }
+        }));
+
+        _fetchHTTPSPage =
+                new MenuItem(new StringProvider("Fetch Sample HTTPS Page"),
+                        0x230030, 2);
+        _fetchHTTPSPage.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                if (!_connectionThread.isStarted()) {
+                    // Menu items are executed on the event thread, therefore we
+                    // can edit the
+                    // URL field in place.
+                    _url.setText(SAMPLE_HTTPS_PAGE);
+                    fetchPage(SAMPLE_HTTPS_PAGE);
+                } else {
+                    createNewFetch(_url.getText());
+                }
+            }
+        }));
+
+        _wapStackOption =
+                new MenuItem(new StringProvider("Use Wap Stack"), 0x230040, 4);
+        _wapStackOption.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                _useWapStack = !_useWapStack; // Toggle the wap stack option.
+            }
+        }));
+
+        _wapStackOptionScreen =
+                new MenuItem(new StringProvider("Wap Options"), 0x230050, 5);
+        _wapStackOptionScreen.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                _wapOptionsScreen.display();
+            }
+        }));
+
         _wapOptionsScreen = new WapOptionsScreen(this);
         _mainScreen = new HTTPDemoScreen();
         _mainScreen.setTitle("HTTP Demo");
@@ -119,66 +204,27 @@ public class HTTPDemo extends UiApplication {
     /**
      * Menu item to fetch content from URL specified in URL field.
      */
-    private final MenuItem _fetchMenuItem = new MenuItem("Fetch", 100, 10) {
-        public void run() {
-            // Don't execute on a blank url.
-            if (_url.getText().length() > 0) {
-                if (!_connectionThread.isStarted()) {
-                    fetchPage(_url.getText());
-                } else {
-                    createNewFetch(_url.getText());
-                }
-            }
-        }
-    };
+    private final MenuItem _fetchMenuItem;
 
     /**
      * Clears the content field.
      */
-    private final MenuItem _clearContent = new MenuItem("Clear Content", 105,
-            10) {
-        public void run() {
-            _content.setText("<content>");
-        }
-    };
+    private final MenuItem _clearContent;
 
     /**
      * Menu item to fetch pre-defined sample HTTPS page.
      */
-    private final MenuItem _fetchHTTPSPage = new MenuItem(
-            "Fetch Sample HTTPS Page", 110, 10) {
-        public void run() {
-            if (!_connectionThread.isStarted()) {
-                // Menu items are executed on the event thread, therefore we can
-                // edit the
-                // URL field in place.
-                _url.setText(SAMPLE_HTTPS_PAGE);
-                fetchPage(SAMPLE_HTTPS_PAGE);
-            } else {
-                createNewFetch(_url.getText());
-            }
-        }
-    };
+    private final MenuItem _fetchHTTPSPage;
 
     /**
      * Toggles the wap stack option.
      */
-    private final MenuItem _wapStackOption = new MenuItem("Use Wap Stack", 115,
-            10) {
-        public void run() {
-            _useWapStack = !_useWapStack; // Toggle the wap stack option.
-        }
-    };
+    private final MenuItem _wapStackOption;
 
     /**
      * Menu item to display the wap options screen.
      */
-    private final MenuItem _wapStackOptionScreen = new MenuItem("Wap Options",
-            120, 10) {
-        public void run() {
-            _wapOptionsScreen.display();
-        }
-    };
+    private final MenuItem _wapStackOptionScreen;
 
     /**
      * Stops current fetch and initiates a new fetch.
@@ -439,9 +485,8 @@ public class HTTPDemo extends UiApplication {
 
                 // Open the connection and extract the data.
                 try {
-                    StreamConnection s = null;
-                    s = (StreamConnection) Connector.open(getUrl());
-                    final HttpConnection httpConn = (HttpConnection) s;
+                    final HttpConnection httpConn =
+                            (HttpConnection) Connector.open(getUrl());
 
                     final int status = httpConn.getResponseCode();
 
@@ -454,7 +499,7 @@ public class HTTPDemo extends UiApplication {
                                         && contentType
                                                 .startsWith(CONTENTTYPE_TEXTHTML);
 
-                        final InputStream input = s.openInputStream();
+                        final InputStream input = httpConn.openInputStream();
 
                         final byte[] data = new byte[256];
                         int len = 0;
@@ -467,7 +512,6 @@ public class HTTPDemo extends UiApplication {
                             // causing the thread to terminate.
                             if (_stop) {
                                 httpConn.close();
-                                s.close();
                                 input.close();
                             }
                             raw.append(new String(data, 0, len));
@@ -486,7 +530,7 @@ public class HTTPDemo extends UiApplication {
                     } else {
                         content = "response code = " + status;
                     }
-                    s.close();
+                    httpConn.close();
                 } catch (final IOCancelledException e) {
                     System.out.println(e.toString());
                     return;
@@ -662,7 +706,7 @@ public class HTTPDemo extends UiApplication {
             }
 
             sb.append("Use Wap Stack");
-            _wapStackOption.setText(sb.toString());
+            _wapStackOption.setText(new StringProvider(sb.toString()));
             menu.add(_wapStackOption);
 
             menu.addSeparator();

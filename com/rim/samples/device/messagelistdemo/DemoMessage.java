@@ -33,8 +33,8 @@ import net.rim.device.api.system.EncodedImage;
 
 /**
  * This class provides a sample implementation of the ApplicationMessage
- * interface. It demonstrates how a 3rd party application can define their own
- * message formats for use with the message store.
+ * interface. It demonstrates how an application can define its own message
+ * formats for use with the message store.
  */
 public final class DemoMessage implements ApplicationMessage {
     static final int DEMO_MESSAGE_TYPE = 0x01;
@@ -50,14 +50,14 @@ public final class DemoMessage implements ApplicationMessage {
     private EncodedImage _previewPicture;
 
     /**
-     * Default constructor.
+     * Creates a new DemoMesage object
      */
     public DemoMessage() {
         _isNew = true;
     }
 
     /**
-     * Constructs a DemoMessage with specified properties.
+     * Constructs a DemoMessage object with specified properties
      * 
      * @param sender
      *            The name of the sender
@@ -66,7 +66,7 @@ public final class DemoMessage implements ApplicationMessage {
      * @param message
      *            The body of the message
      * @param receivedTime
-     *            The timestamp of when the message was received
+     *            The time stamp for when the message was received
      */
     DemoMessage(final String sender, final String subject,
             final String message, final long receivedTime) {
@@ -78,7 +78,7 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * Stores the reply message and sets the reply time.
+     * Stores the reply message and sets the reply time
      * 
      * @param message
      *            The reply message
@@ -90,7 +90,7 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * Marks this message as deleted.
+     * Marks this message as deleted
      */
     void messageDeleted() {
         _isNew = false;
@@ -98,7 +98,7 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * Marks this message as new.
+     * Marks this message as new
      */
     void markAsNew() {
         _isNew = true;
@@ -106,14 +106,14 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * Marks this message as read.
+     * Marks this message as read
      */
     void markRead() {
         _isNew = false;
     }
 
     /**
-     * Returns whether this message is new or not.
+     * Indicates whether this message is new or not
      * 
      * @return True if the message is new, false otherwise
      */
@@ -122,7 +122,7 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * Returns whether this message has been replied to or not.
+     * Indicates whether this message has been replied to or not
      * 
      * @return True if the message has been replied to, false otherwise
      */
@@ -131,7 +131,7 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * Sets the name of the sender who sent this message.
+     * Sets the name of the sender who sent this message
      * 
      * @param sender
      *            The name of the sender
@@ -141,7 +141,7 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * Sets the subject of this message.
+     * Sets the subject of this message
      * 
      * @param subject
      *            The subject of this message
@@ -151,17 +151,17 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * Sets the time this message was received.
+     * Sets the time at which this message was received
      * 
      * @param receivedTime
-     *            The time this message was received
+     *            The time at which this message was received
      */
     void setReceivedTime(final long receivedTime) {
         _receivedTime = receivedTime;
     }
 
     /**
-     * Sets the message body.
+     * Sets the message body
      * 
      * @param message
      *            The message body
@@ -171,7 +171,7 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * Gets the message body.
+     * Retrieves the message body
      * 
      * @return The message body
      */
@@ -180,7 +180,7 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * Sets the preview picture of this message.
+     * Sets the preview picture for this message
      * 
      * @param image
      *            The desired preview picture of this message
@@ -191,8 +191,6 @@ public final class DemoMessage implements ApplicationMessage {
 
     // Implementation of ApplicationMessage ------------------------------------
     /**
-     * @return The sender of this message.
-     * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getContact()
      */
     public String getContact() {
@@ -200,12 +198,10 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * @return This message's status.
-     * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getStatus()
      */
     public int getStatus() {
-        // Form message list status based on current message state.
+        // Form message list status based on current message state
         if (_isNew) {
             return MessageListDemo.STATUS_NEW;
         }
@@ -219,7 +215,6 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * @return The subject of this message.
      * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getSubject()
      */
@@ -232,8 +227,6 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * @return The timestamp of when this message was received.
-     * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getTimestamp()
      */
     public long getTimestamp() {
@@ -241,18 +234,14 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * @return DemoMessage.DEMO_MESSAGE_TYPE
-     * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getType()
      */
     public int getType() {
-        // All messages have the same type.
+        // All messages have the same type
         return DEMO_MESSAGE_TYPE;
     }
 
     /**
-     * @return The preview text if defined, null otherwise.
-     * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getPreviewText()
      */
     public String getPreviewText() {
@@ -272,8 +261,6 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * @return The cookie value if provided by the message, null otherwise.
-     * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getCookie()
      */
     public Object getCookie(final int cookieId) {
@@ -281,7 +268,6 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * @return The preview picture if provided by the message, null otherwise.
      * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getPreviewPicture()
      */

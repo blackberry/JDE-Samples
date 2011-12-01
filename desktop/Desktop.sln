@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Desktop", "Desktop.vcproj", "{E77E09AE-D103-4105-8E93-7D42B86AA7F0}"
+EndProject
+Global
+	GlobalSection(SourceCodeControl) = preSolution
+		SccNumberOfProjects = 1
+		SccProjectUniqueName0 = Desktop.vcproj
+		SccProjectName0 = Desktop
+		SccLocalPath0 = .
+		SccProvider0 = MSSCCI:Perforce\u0020SCM
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release MinDependency|Win32 = Release MinDependency|Win32
+		Release MinSize|Win32 = Release MinSize|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E77E09AE-D103-4105-8E93-7D42B86AA7F0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E77E09AE-D103-4105-8E93-7D42B86AA7F0}.Debug|Win32.Build.0 = Debug|Win32
+		{E77E09AE-D103-4105-8E93-7D42B86AA7F0}.Release MinDependency|Win32.ActiveCfg = Release MinDependency|Win32
+		{E77E09AE-D103-4105-8E93-7D42B86AA7F0}.Release MinDependency|Win32.Build.0 = Release MinDependency|Win32
+		{E77E09AE-D103-4105-8E93-7D42B86AA7F0}.Release MinSize|Win32.ActiveCfg = Release MinSize|Win32
+		{E77E09AE-D103-4105-8E93-7D42B86AA7F0}.Release MinSize|Win32.Build.0 = Release MinSize|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

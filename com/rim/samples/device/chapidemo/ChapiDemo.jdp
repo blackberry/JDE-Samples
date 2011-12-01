@@ -20,9 +20,11 @@ AutoRestart=0
 [DependsOn
 ]
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 CHAPIDemo.java
-Data\rim.csv
+DemoContentHandler.java
+DemoContentHandler2.java
 img\chapidemo_jde.png
 ]
 HaveAlxImports=0
@@ -44,6 +46,7 @@ RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=Chapi Demo

@@ -43,13 +43,14 @@ Listing=0
 NoImport=0
 NoRuntime=0
 Options=-quiet 
-OutputFileName=HttpFilterDemo
+OutputFileName=HTTPFilterDemo
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=1
+SkipCompile=0
 StartupTier=7
 SystemModule=1
 Title=HTTP Filter Demo

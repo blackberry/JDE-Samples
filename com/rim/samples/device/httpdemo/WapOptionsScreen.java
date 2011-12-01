@@ -26,6 +26,9 @@
 
 package com.rim.samples.device.httpdemo;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BasicEditField;
@@ -33,20 +36,21 @@ import net.rim.device.api.ui.component.EditField;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * A screen that allows the user to specify the WAP parameters to use when
  * opening an HTTP connection.
  */
 public final class WapOptionsScreen extends MainScreen {
-    private static String WAP_PARAMETERKEY_GWAYIP = ";WapGatewayIP=";
-    private static String WAP_PARAMETERKEY_GWAYPORT = ";WapGatewayPort=";
-    private static String WAP_PARAMETERKEY_APN = ";WapGatewayAPN=";
-    private static String WAP_PARAMETERKEY_SRCIP = ";WapSourceIP=";
-    private static String WAP_PARAMETERKEY_SRCPORT = ";WapSourcePort=";
-    private static String WAP_DEFAULT_GWAYPORT = "9201";
-    private static String WAP_DEFAULT_SOURCEIP = "127.0.0.1";
-    private static String WAP_DEFAULT_SOURCEPORT = "8205";
+    private static final String WAP_PARAMETERKEY_GWAYIP = ";WapGatewayIP=";
+    private static final String WAP_PARAMETERKEY_GWAYPORT = ";WapGatewayPort=";
+    private static final String WAP_PARAMETERKEY_APN = ";WapGatewayAPN=";
+    private static final String WAP_PARAMETERKEY_SRCIP = ";WapSourceIP=";
+    private static final String WAP_PARAMETERKEY_SRCPORT = ";WapSourcePort=";
+    private static final String WAP_DEFAULT_GWAYPORT = "9201";
+    private static final String WAP_DEFAULT_SOURCEIP = "127.0.0.1";
+    private static final String WAP_DEFAULT_SOURCEPORT = "8205";
 
     private final UiApplication _app;
     private final EditField _gateway;
@@ -56,20 +60,28 @@ public final class WapOptionsScreen extends MainScreen {
     private final EditField _sourcePort;
     private String _wapParameters = "";
     private final MainScreen _this;
-    private final MenuItem _save;
 
-    // Constructor
+    /**
+     * Creates a new WapOptionsScreen object
+     */
     public WapOptionsScreen(final UiApplication app) {
         super();
         _this = this;
         _app = app;
 
-        _save = new MenuItem("Ok", 105, 10) {
-            public void run() {
+        final MenuItem save =
+                new MenuItem(new StringProvider("Ok"), 0x230010, 0);
+        save.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
                 formatWapParameters();
                 _app.popScreen(_this);
             }
-        };
+        }));
 
         setTitle(new LabelField("Wap Options"));
 
@@ -91,7 +103,7 @@ public final class WapOptionsScreen extends MainScreen {
         add(_sourcePort);
         add(_sourceIP);
 
-        addMenuItem(_save);
+        addMenuItem(save);
     }
 
     /**

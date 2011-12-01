@@ -20,6 +20,7 @@ AutoRestart=0
 [DependsOn
 ]
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 img\svgpickdemo_jde.png
 sample.svg
@@ -33,21 +34,19 @@ HaveImports=0
 img\svgpickdemo_jde.png
 ]
 [ImplicitRules
-svg
-svg
-echo nothing
 ]
 [Imports
 ]
 Listing=0
 Options=-quiet 
-OutputFileName=svgpickdemo
+OutputFileName=SVGPickDemo
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=SVG Pick Demo

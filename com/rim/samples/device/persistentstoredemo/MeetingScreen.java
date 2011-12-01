@@ -26,44 +26,53 @@
 
 package com.rim.samples.device.persistentstoredemo;
 
-import java.util.Vector;
-
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Display;
+import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
-import net.rim.device.api.ui.Graphics;
+import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.XYRect;
 import net.rim.device.api.ui.component.ButtonField;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.EditField;
 import net.rim.device.api.ui.component.LabelField;
-import net.rim.device.api.ui.component.ListField;
-import net.rim.device.api.ui.component.ListFieldCallback;
-import net.rim.device.api.ui.component.RichTextField;
+import net.rim.device.api.ui.component.table.AbstractTableModel;
+import net.rim.device.api.ui.component.table.DataTemplate;
+import net.rim.device.api.ui.component.table.TableController;
+import net.rim.device.api.ui.component.table.TableModelAdapter;
+import net.rim.device.api.ui.component.table.TableView;
+import net.rim.device.api.ui.component.table.TemplateColumnProperties;
+import net.rim.device.api.ui.component.table.TemplateRowProperties;
 import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.PopupScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
+import net.rim.device.api.ui.decor.BackgroundFactory;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * This screen allows the user to update the meeting information stored in an
  * associated Meeting object.
  */
-public final class MeetingScreen extends MainScreen implements
-        ListFieldCallback {
-    private final EditField _nameField;
-    private final EditField _descField;
-    private final EditField _dateField;
-    private final EditField _timeField;
-    private final EditField _notesField;
+public final class MeetingScreen extends MainScreen {
+    private EditField _nameField;
+    private EditField _descField;
+    private EditField _dateField;
+    private EditField _timeField;
+    private EditField _notesField;
     private PopupScreen _popUp;
     private EditField _addAttendeeField;
-    private final PersistentStoreDemo _uiApp;
-    private final ListField _attendeesList;
-    private final MeetingScreen _screen;
-    private final Meeting _meeting;
-    private final int _index;
+    private PersistentStoreDemo _uiApp;
+    private MeetingScreen _screen;
+    private Meeting _meeting;
+    private int _index;
+    private AbstractTableModel _model;
+    private TableView _view;
 
     /**
      * Creates a new MeetingScreen object
@@ -78,6 +87,8 @@ public final class MeetingScreen extends MainScreen implements
      */
     public MeetingScreen(final Meeting meeting, final int index,
             final boolean editable) {
+        super(Manager.NO_VERTICAL_SCROLL);
+
         _meeting = meeting;
         _index = index;
 
@@ -101,6 +112,45 @@ public final class MeetingScreen extends MainScreen implements
         add(_timeField);
         add(_notesField);
 
+        // Menu item to save the displayed meeting
+        final MenuItem saveItem =
+                new MenuItem(new StringProvider("Save"), 0x230020, 11);
+        saveItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                if (onSave()) {
+                    close();
+                }
+            }
+        }));
+
+        // Menu item to add an attendee to meeting
+        final MenuItem addAttendeeItem =
+                new MenuItem(new StringProvider("Add Attendee"), 0x230010, 10);
+        addAttendeeItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                final VerticalFieldManager vfm = new VerticalFieldManager();
+                _popUp = new PopupScreen(vfm);
+                _addAttendeeField = new EditField("Enter Name: ", "");
+                _popUp.add(_addAttendeeField);
+                final HorizontalFieldManager hfm =
+                        new HorizontalFieldManager(Field.FIELD_HCENTER);
+                hfm.add(new AddButton());
+                hfm.add(new CancelButton());
+                _popUp.add(hfm);
+                _uiApp.pushScreen(_popUp);
+            }
+        }));
+
         // Customize screen based on our editable state
         if (editable) {
             setTitle("Edit Screen");
@@ -115,21 +165,35 @@ public final class MeetingScreen extends MainScreen implements
             _notesField.setEditable(false);
         }
 
-        // Initialize the attendees list field
-        _attendeesList = new ListField();
-        add(new RichTextField("Attendees:", Field.NON_FOCUSABLE));
-        add(_attendeesList);
+        _model = new AttendeeTableModelAdapter();
 
-        // Set callback and update list of attendees
-        _attendeesList.setCallback(this);
-        updateList();
-    }
+        // Create view and controller
+        _view = new TableView(_model);
+        final TableController controller = new TableController(_model, _view);
+        controller.setFocusPolicy(TableController.ROW_FOCUS);
+        _view.setController(controller);
 
-    /**
-     * Refreshes the attendees list field
-     */
-    private void updateList() {
-        _attendeesList.setSize(_meeting.getAttendees().size());
+        _view.setDataTemplateFocus(BackgroundFactory
+                .createLinearGradientBackground(Color.LIGHTBLUE,
+                        Color.LIGHTBLUE, Color.BLUE, Color.BLUE));
+        final DataTemplate dataTemplate = new DataTemplate(_view, 1, 1) {
+            public Field[] getDataFields(final int modelRowIndex) {
+                final String text = (String) _model.getRow(modelRowIndex);
+                final Field[] fields =
+                        { new LabelField(text, Field.NON_FOCUSABLE) };
+
+                return fields;
+            }
+        };
+        dataTemplate.createRegion(new XYRect(0, 0, 1, 1));
+        dataTemplate.setColumnProperties(0, new TemplateColumnProperties(
+                Display.getWidth()));
+        dataTemplate.setRowProperties(0, new TemplateRowProperties(32));
+        _view.setDataTemplate(dataTemplate);
+        dataTemplate.useFixedHeight(true);
+
+        add(_view);
+
     }
 
     /**
@@ -154,34 +218,37 @@ public final class MeetingScreen extends MainScreen implements
 
     // Inner classes------------------------------------------------------------
 
-    private final MenuItem addAttendeeItem = new MenuItem("Add Attendee",
-            11000, 10) {
+    /**
+     * Adapter to display meeting data in table format
+     */
+    private class AttendeeTableModelAdapter extends TableModelAdapter {
         /**
-         * Display popup screen which allows user to enter the name of an
-         * attendee.
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfRows()
          */
-        public void run() {
-            final VerticalFieldManager vfm = new VerticalFieldManager();
-            _popUp = new PopupScreen(vfm);
-            _addAttendeeField = new EditField("Enter Name: ", "");
-            _popUp.add(_addAttendeeField);
-            final HorizontalFieldManager hfm =
-                    new HorizontalFieldManager(Field.FIELD_HCENTER);
-            hfm.add(new AddButton());
-            hfm.add(new CancelButton());
-            _popUp.add(hfm);
-            _uiApp.pushScreen(_popUp);
+        public int getNumberOfRows() {
+            return _meeting.getAttendees().size();
         }
-    };
 
-    private final MenuItem saveItem = new MenuItem("Save", 11000, 11) {
         /**
-         * Saves the meeting and closes this screen.
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfColumns()
          */
-        public void run() {
-            if (onSave()) {
-                close();
-            }
+        public int getNumberOfColumns() {
+            return 1;
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doGetRow(int)
+         */
+        protected Object doGetRow(final int index) {
+            return _meeting.getAttendees().elementAt(index);
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doAddRow(Object)
+         */
+        protected boolean doAddRow(final Object row) {
+            _meeting.addAttendee((String) row);
+            return true;
         }
     };
 
@@ -203,8 +270,7 @@ public final class MeetingScreen extends MainScreen implements
         protected void fieldChangeNotify(final int context) {
             if ((context & FieldChangeListener.PROGRAMMATIC) == 0) {
                 // Add attendee name and refresh list
-                _meeting.addAttendee(_addAttendeeField.getText());
-                _screen.updateList();
+                _model.addRow(_addAttendeeField.getText());
 
                 // If no other fields have been edited, we need to set the
                 // screen's state to dirty so that a save dialog will be
@@ -239,39 +305,4 @@ public final class MeetingScreen extends MainScreen implements
         }
     }
 
-    // ListFieldCallback methods
-    // ----------------------------------------------------------------------
-
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#drawListRow(ListField,Graphics,int,int,int)
-     */
-    public void drawListRow(final ListField list, final Graphics graphics,
-            final int index, final int y, final int w) {
-        final Vector attendees = _meeting.getAttendees();
-        final String text = (String) attendees.elementAt(index);
-        graphics.drawText(text, 0, y, 0, w);
-    }
-
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#get(ListField ,
-     *      int)
-     */
-    public Object get(final ListField list, final int index) {
-        return null; // Not implemented
-    }
-
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#indexOfList(ListField
-     *      , String , int)
-     */
-    public int indexOfList(final ListField list, final String p, final int s) {
-        return 0; // Not implemented
-    }
-
-    /**
-     * @see net.rim.device.api.ui.component.ListFieldCallback#getPreferredWidth(ListField)
-     */
-    public int getPreferredWidth(final ListField list) {
-        return Display.getWidth();
-    }
 }

@@ -61,7 +61,9 @@ public class NotificationsEngineListenerImpl implements
     // any given time. This global variable is shared between threads.
     private boolean _dialogShowing;
 
-    // Constructor
+    /**
+     * Creates a new NotificationsEngineListenerImpl object
+     */
     public NotificationsEngineListenerImpl(final UiApplication app) {
         _app = app;
         _dialogShowing = false;

@@ -22,7 +22,7 @@ AutoRestart=0
 ExcludeFromBuildAll=0
 Exported=0
 [Files
-img\icon_jde.png
+img\preprocessordemo_jde.png
 PreprocessorDemo.java
 PreprocessorDemoScreen.java
 readme.txt
@@ -31,7 +31,7 @@ HaveAlxImports=0
 HaveDefs=0
 HaveImports=0
 [Icons
-img\icon_jde.png
+img\preprocessordemo_jde.png
 ]
 [ImplicitRules
 ]
@@ -46,6 +46,7 @@ RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=0
+SkipCompile=0
 StartupTier=7
 SystemModule=0
 Title=Preprocessor Demo

@@ -26,6 +26,9 @@
 
 package com.rim.samples.device.socketdemo;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.RadioInfo;
 import net.rim.device.api.ui.Field;
@@ -40,6 +43,7 @@ import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * A MainScreen class to allow for user interaction.
@@ -51,7 +55,9 @@ public class SocketDemoScreen extends MainScreen {
     private final StringBuffer _message;
     private boolean _threadRunning = false;
 
-    // Constructor
+    /**
+     * Creates a new SocketDemoScreen object
+     */
     public SocketDemoScreen() {
         setTitle(new LabelField("Socket Demo"));
 
@@ -74,6 +80,33 @@ public class SocketDemoScreen extends MainScreen {
         add(_statusField);
 
         _message = new StringBuffer();
+
+        _go = new MenuItem(new StringProvider("Go"), 0x230010, 0);
+        _go.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) { // Don't do anything unless there is
+                                            // a host name in the _host field.
+                if (_hostField.getText().length() > 0) {
+                    new ConnectThread().start();
+                    _threadRunning = true;
+
+                    // Hide the virtual keyboard so the user can see status
+                    // updates.
+                    if (VirtualKeyboard.isSupported()) {
+                        final VirtualKeyboard keyboard = getVirtualKeyboard();
+                        if (keyboard.getVisibility() != VirtualKeyboard.HIDE) {
+                            keyboard.setVisibility(VirtualKeyboard.HIDE);
+                        }
+                    }
+                } else {
+                    Dialog.ask(Dialog.D_OK, "Please enter a valid host name");
+                }
+            }
+        }));
     }
 
     /**
@@ -170,23 +203,5 @@ public class SocketDemoScreen extends MainScreen {
      * An anonymous MenuItem class.
      */
 
-    private final MenuItem _go = new MenuItem("Go", 11000, 0) {
-        public void run() {
-            // Don't do anything unless there is a host name in the _host field.
-            if (_hostField.getText().length() > 0) {
-                new ConnectThread().start();
-                _threadRunning = true;
-
-                // Hide the virtual keyboard so the user can see status updates.
-                if (VirtualKeyboard.isSupported()) {
-                    final VirtualKeyboard keyboard = getVirtualKeyboard();
-                    if (keyboard.getVisibility() != VirtualKeyboard.HIDE) {
-                        keyboard.setVisibility(VirtualKeyboard.HIDE);
-                    }
-                }
-            } else {
-                Dialog.ask(Dialog.D_OK, "Please enter a valid host name");
-            }
-        }
-    };
+    private final MenuItem _go;
 }

@@ -36,8 +36,6 @@ import net.rim.device.api.io.transport.options.TcpCellularOptions;
 import net.rim.device.api.io.transport.options.WapOptions;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
-import net.rim.device.api.ui.Font;
-import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BasicEditField;
 import net.rim.device.api.ui.component.ButtonField;
@@ -61,7 +59,7 @@ import net.rim.device.api.util.IntVector;
  * and so on until success or failure occurs. Clicking the "Show Options" button
  * shows all available connection options.
  */
-public class ConnectionTestsScreen extends MainScreen implements
+public final class ConnectionTestsScreen extends MainScreen implements
         FieldChangeListener, ConnectionAttemptListener {
     // Edit box to enter URL
     private final BasicEditField _urlEditField;
@@ -80,29 +78,30 @@ public class ConnectionTestsScreen extends MainScreen implements
 
     // Enables connection timeout option when checked
     private final CheckboxField _timeoutSupported;
+
     // Specifies connection timeout in milliseconds
     private final BasicEditField _connectionTimeout;
 
     // Enables "tls/ssl" end to end connection options
-    private final CheckboxField _endToEndRequiered;
+    private final CheckboxField _endToEndRequired;
     private final CheckboxField _endToEndDesired;
 
-    private final SeparatorField _separator0;
     // Retries options
     private final LabelField _labelRetriesOpt;
+
     // Specifies how long ConnectionFactory should try to establish a connection
     private final BasicEditField _timeLimit;
+
     // Specifies how many times ConnectionFactory should try to establish a
     // connection
     private final BasicEditField _attemptsLimit;
+
     // Specifies retry factor @see ConnectionFactory.setRetryFactor()
     private final BasicEditField _retryFactor;
 
-    private final SeparatorField _separator1;
-
     // Transport options
     // Enables transport selection and order when checked
-    private final CheckboxField _trasnportSelection;
+    private final CheckboxField _transportSelection;
 
     // Transport selection types: "none", "TCP Cellular", "Wap", "Wap2", "Mds",
     // "Bis B", "TCP Wifi"
@@ -112,8 +111,6 @@ public class ConnectionTestsScreen extends MainScreen implements
     private final ObjectChoiceField _order4;
     private final ObjectChoiceField _order5;
     private final ObjectChoiceField _order6;
-
-    private final SeparatorField _separator2;
 
     private final LabelField _labelDisallowedTrasnports;
 
@@ -125,20 +122,18 @@ public class ConnectionTestsScreen extends MainScreen implements
     private final CheckboxField _disallowBisB;
     private final CheckboxField _disallowWifi;
 
-    private final SeparatorField _separator3;
-
     // TCP Cellular options
     private final LabelField _labelTcpCellular;
+
     // Edit boxes to enter APN settings if different from Options>Advanced
     // Options>TCP/IP
     private final EditField _tcpApn;
     private final EditField _tcpApnUser;
     private final EditField _tcpApnPassword;
 
-    private final SeparatorField _separator4;
-
     // Wap options
     private final LabelField _labelWap;
+
     // Edit boxes to enter WAP settings if different from Options>Advanced
     // Options>Service Book
     private final EditField _wapGatewayApn;
@@ -150,13 +145,13 @@ public class ConnectionTestsScreen extends MainScreen implements
     private final EditField _wapPassword;
     private final CheckboxField _wapEnableWTLS;
 
-    private final SeparatorField _separator5;
-
     // BisB options
     private final LabelField _labelBisB;
     private final EditField _bisBConnectionType;
 
     private boolean _optionsHidden;
+
+    private final UiApplication _uiApp;
 
     /**
      * Creates a new ConnectionTestsScreen object
@@ -164,58 +159,37 @@ public class ConnectionTestsScreen extends MainScreen implements
     public ConnectionTestsScreen() {
         setTitle("Connection Tests");
 
-        // Regions to layout URL label and edit box side by side
-        final HorizontalFieldManager hfm =
-                new HorizontalFieldManager(Manager.NO_HORIZONTAL_SCROLL);
-        final HorizontalFieldManager lHfm =
-                new HorizontalFieldManager(Manager.NO_HORIZONTAL_SCROLL
-                        | Field.FIELD_LEFT);
-        final HorizontalFieldManager rHfm =
-                new HorizontalFieldManager(Manager.HORIZONTAL_SCROLL
-                        | Manager.NO_HORIZONTAL_SCROLLBAR | Field.FIELD_RIGHT);
-
-        // Display "URL:" label
-        lHfm.add(new FixedWidthLabelField("URL: ", Font.getDefault()
-                .getAdvance("URL: ")));
-        // Display URL edit box
-        _urlEditField =
-                new BasicEditField("", "http://www.blackberry.com", 128,
-                        BasicEditField.FILTER_URL);
-        rHfm.add(_urlEditField);
-
-        hfm.add(lHfm);
-        hfm.add(rHfm);
         // Display URL label and edit box on top of the screen
-        add(hfm);
+        _urlEditField =
+                new BasicEditField("URL: ", "http://www.blackberry.com", 128,
+                        BasicEditField.FILTER_URL);
+        add(_urlEditField);
 
         // Display "Connect" button that triggers connection to be established
-        // with the specified URL
+        // with the specified URL.
         final ButtonField connectBtn =
-                new ButtonField("Connect", ButtonField.CONSUME_CLICK
-                        | Field.FIELD_HCENTER);
+                new ButtonField("Connect", Field.FIELD_HCENTER
+                        | ButtonField.CONSUME_CLICK);
         connectBtn.setChangeListener(this);
 
-        // Display "Show Options" button that shows connection options when
+        // Display "Show Options" button that displays connection options when
         // clicked
         _optionsBtn =
-                new ButtonField("Show Options", ButtonField.CONSUME_CLICK
-                        | Field.FIELD_HCENTER);
+                new ButtonField("Show Options", Field.FIELD_HCENTER
+                        | ButtonField.CONSUME_CLICK);
         _optionsBtn.setChangeListener(this);
         _optionsHidden = true;
 
         add(new SeparatorField());
+
         // Region to layout "Connect" and "Show Options" buttons side by side
-        final HorizontalFieldManager hfmBtns = new HorizontalFieldManager();
+        final HorizontalFieldManager hfmBtns =
+                new HorizontalFieldManager(Field.FIELD_HCENTER);
         hfmBtns.add(connectBtn);
         hfmBtns.add(_optionsBtn);
-
         add(hfmBtns);
 
         add(new SeparatorField());
-
-        // Initialize connection options UI field without adding them to the
-        // screen
-        _separator0 = new SeparatorField();
 
         _labelConnectionOpt = new LabelField("Connection Settings [optional]");
 
@@ -231,12 +205,10 @@ public class ConnectionTestsScreen extends MainScreen implements
                         BasicEditField.FILTER_INTEGER);
 
         // Connection security settings for tls/ssl
-        _endToEndRequiered =
+        _endToEndRequired =
                 new CheckboxField("  tls/ssl end to end required", false);
         _endToEndDesired =
                 new CheckboxField("  tls/ssl end to end desired", false);
-
-        _separator1 = new SeparatorField();
 
         // Connection retry options
         _labelRetriesOpt = new LabelField("Retry options [optional]");
@@ -255,16 +227,14 @@ public class ConnectionTestsScreen extends MainScreen implements
                 { "none", "TCP Cellular", "Wap", "Wap2", "Mds", "Bis B",
                         "TCP Wifi" };
 
-        _separator2 = new SeparatorField();
-
         // Preferred transport types option
-        _trasnportSelection =
+        _transportSelection =
                 new CheckboxField("Preferred Transport Types [Optional]", false);
-        _trasnportSelection.setChangeListener(new FieldChangeListener() {
+        _transportSelection.setChangeListener(new FieldChangeListener() {
             public void fieldChanged(final Field field, final int context) {
-                if (_trasnportSelection.getChecked()) {
-                    // Transport selection check box is checked
-                    // Enable drop downs for choosing the preferred transport
+                if (_transportSelection.getChecked()) {
+                    // Transport selection check box is checked. Enable drop
+                    // downs for choosing the preferred transport.
                     _order1.setEditable(true);
                     _order2.setEditable(true);
                     _order3.setEditable(true);
@@ -272,9 +242,11 @@ public class ConnectionTestsScreen extends MainScreen implements
                     _order5.setEditable(true);
                     _order6.setEditable(true);
                 } else {
-                    // Transport selection check box is not checked
-                    // Disable drop downs for choosing the preferred transport
-                    // and set them to "none"
+                    // Transport selection check box is not checked. Disable
+                    // drop
+                    // downs for choosing the preferred transport and set them
+                    // to
+                    // "none".
                     _order1.setSelectedIndex(0);
                     _order1.setEditable(false);
                     _order2.setSelectedIndex(0);
@@ -291,8 +263,8 @@ public class ConnectionTestsScreen extends MainScreen implements
             }
         });
 
-        // Initialize preferred transport types option
-        // By default disable the options
+        // Initialize preferred transport types option.
+        // By default disable the options.
         _order1 = new ObjectChoiceField("First:", transportNames);
         _order1.setEditable(false);
         _order2 = new ObjectChoiceField("Second:", transportNames);
@@ -316,15 +288,11 @@ public class ConnectionTestsScreen extends MainScreen implements
         _disallowBisB = new CheckboxField("Bis B", false);
         _disallowWifi = new CheckboxField("TCP Wifi", false);
 
-        _separator3 = new SeparatorField();
-
         // Initialize TCP Cellular transport options
         _labelTcpCellular = new LabelField("TCP Cellular Options [optional]:");
         _tcpApn = new EditField("  APN: ", "");
         _tcpApnUser = new EditField("  Username: ", "");
         _tcpApnPassword = new EditField("  Password: ", "");
-
-        _separator4 = new SeparatorField();
 
         // Initialize WAP transport options
         _labelWap = new LabelField("WAP Options [optional]:");
@@ -338,8 +306,6 @@ public class ConnectionTestsScreen extends MainScreen implements
 
         _wapEnableWTLS = new CheckboxField("  Enable WTLS", false);
 
-        _separator5 = new SeparatorField();
-
         // Initialize BisB transport options
         _labelBisB = new LabelField("BisB Options [mandatory for BisB]");
         _bisBConnectionType = new EditField("  Connection Type: ", "");
@@ -349,19 +315,20 @@ public class ConnectionTestsScreen extends MainScreen implements
         _optionFieldsManager.add(_labelConnectionOpt);
         _optionFieldsManager.add(_connectionMode);
         _optionFieldsManager.add(_timeoutSupported);
-
-        _optionFieldsManager.add(_endToEndRequiered);
+        _optionFieldsManager.add(_endToEndRequired);
         _optionFieldsManager.add(_endToEndDesired);
         _optionFieldsManager.add(_connectionTimeout);
 
-        _optionFieldsManager.add(_separator0);
+        _optionFieldsManager.add(new SeparatorField());
+
         _optionFieldsManager.add(_labelRetriesOpt);
         _optionFieldsManager.add(_timeLimit);
         _optionFieldsManager.add(_attemptsLimit);
         _optionFieldsManager.add(_retryFactor);
 
-        _optionFieldsManager.add(_separator1);
-        _optionFieldsManager.add(_trasnportSelection);
+        _optionFieldsManager.add(new SeparatorField());
+
+        _optionFieldsManager.add(_transportSelection);
         _optionFieldsManager.add(_order1);
         _optionFieldsManager.add(_order2);
         _optionFieldsManager.add(_order3);
@@ -369,7 +336,8 @@ public class ConnectionTestsScreen extends MainScreen implements
         _optionFieldsManager.add(_order5);
         _optionFieldsManager.add(_order6);
 
-        _optionFieldsManager.add(_separator2);
+        _optionFieldsManager.add(new SeparatorField());
+
         _optionFieldsManager.add(_labelDisallowedTrasnports);
         _optionFieldsManager.add(_disallowDirectTCP);
         _optionFieldsManager.add(_disallowWap);
@@ -378,13 +346,15 @@ public class ConnectionTestsScreen extends MainScreen implements
         _optionFieldsManager.add(_disallowBisB);
         _optionFieldsManager.add(_disallowWifi);
 
-        _optionFieldsManager.add(_separator3);
+        _optionFieldsManager.add(new SeparatorField());
+
         _optionFieldsManager.add(_labelTcpCellular);
         _optionFieldsManager.add(_tcpApn);
         _optionFieldsManager.add(_tcpApnUser);
         _optionFieldsManager.add(_tcpApnPassword);
 
-        _optionFieldsManager.add(_separator4);
+        _optionFieldsManager.add(new SeparatorField());
+
         _optionFieldsManager.add(_labelWap);
         _optionFieldsManager.add(_wapGatewayApn);
         _optionFieldsManager.add(_wapGatewayIp);
@@ -395,9 +365,12 @@ public class ConnectionTestsScreen extends MainScreen implements
         _optionFieldsManager.add(_wapSourcePort);
         _optionFieldsManager.add(_wapEnableWTLS);
 
-        _optionFieldsManager.add(_separator5);
+        _optionFieldsManager.add(new SeparatorField());
+
         _optionFieldsManager.add(_labelBisB);
         _optionFieldsManager.add(_bisBConnectionType);
+
+        _uiApp = UiApplication.getUiApplication();
     }
 
     /**
@@ -422,7 +395,7 @@ public class ConnectionTestsScreen extends MainScreen implements
         final String url = _urlEditField.getText().trim();
 
         if ("".equals(url)) {
-            // URL is empty display a warning
+            // URL is empty, display a warning
             displayMessage("Please provide a URL");
             return;
         }
@@ -433,7 +406,6 @@ public class ConnectionTestsScreen extends MainScreen implements
         // Register as listener
         factory.setConnectionAttemptListener(this);
 
-        // Customize factory if options specified
         // Set connection mode
         switch (_connectionMode.getSelectedIndex()) {
         case 0:
@@ -450,6 +422,9 @@ public class ConnectionTestsScreen extends MainScreen implements
         // Set connection timeout
         factory.setTimeoutSupported(_timeoutSupported.getChecked());
 
+        factory.setEndToEndDesired(_endToEndDesired.getChecked());
+        factory.setEndToEndRequired(_endToEndRequired.getChecked());
+
         try {
             final String connectionTimeoutText = _connectionTimeout.getText();
             if (connectionTimeoutText != null
@@ -462,15 +437,14 @@ public class ConnectionTestsScreen extends MainScreen implements
                     factory.setConnectionTimeout(connectionTimeout);
                 }
             }
-        } catch (final NumberFormatException e) {
-            // Ignore
+        } catch (final NumberFormatException nfe) {
+            displayMessage("Long.parseLong(String) threw : " + nfe.toString());
         }
 
         // Set connection security settings for tls/ssl
         factory.setEndToEndDesired(_endToEndDesired.getChecked());
-        factory.setEndToEndRequired(_endToEndRequiered.getChecked());
+        factory.setEndToEndRequired(_endToEndRequired.getChecked());
 
-        // Set retry options
         // Set time limit
         final long timeLimit = Long.parseLong(_timeLimit.getText());
         if (timeLimit > 0) {
@@ -534,7 +508,7 @@ public class ConnectionTestsScreen extends MainScreen implements
         // Get preferred transports option
         int[] preferredTransports = null;
 
-        if (_trasnportSelection.getChecked()) {
+        if (_transportSelection.getChecked()) {
             if (_order1.getSelectedIndex() == 0
                     && _order2.getSelectedIndex() == 0
                     && _order3.getSelectedIndex() == 0
@@ -543,7 +517,7 @@ public class ConnectionTestsScreen extends MainScreen implements
                     && _order6.getSelectedIndex() == 0) {
                 // Display a warning if none of the preferred transport is
                 // specified when "Preferred Transports" check box is checked
-                displayMessage("Please select at least a transport or uncheck \"Preferred Transports\"");
+                displayMessage("Please select at least one transport or uncheck \"Preferred Transports\"");
                 return;
             }
 
@@ -639,8 +613,7 @@ public class ConnectionTestsScreen extends MainScreen implements
             sb.append(exception.getClass().getName());
         }
 
-        // Display a status message for 1.5 seconds
-        showStatus(sb.toString(), 1500);
+        showStatus(sb.toString(), 2000);
     }
 
     /**
@@ -663,8 +636,7 @@ public class ConnectionTestsScreen extends MainScreen implements
         }
         sb.append("\n Attempt Number: ").append(attemptNumber);
 
-        // Display a status message for 1.5 seconds
-        showStatus(sb.toString(), 1500);
+        showStatus(sb.toString(), 2000);
     }
 
     /**
@@ -684,8 +656,7 @@ public class ConnectionTestsScreen extends MainScreen implements
         }
         sb.append("\n Attempt Number: ").append(attemptNumber);
 
-        // Display a status message for 1 second
-        showStatus(sb.toString(), 1000);
+        showStatus(sb.toString(), 2000);
 
         return true;
     }
@@ -694,7 +665,6 @@ public class ConnectionTestsScreen extends MainScreen implements
      * @see ConnectionAttemptListener#attemptAborted(String, Exception)
      */
     public void attemptAborted(final String url, final Exception exception) {
-        // Display "Attempt Aborted" message for 2 seconds
         showStatus("Attempt Aborted: "
                 + (exception != null ? exception.getMessage()
                         : "Reason Unkwown"), 2000);
@@ -708,15 +678,15 @@ public class ConnectionTestsScreen extends MainScreen implements
      */
     private void
             conDescriptorRetrieved(final ConnectionDescriptor conDescriptor) {
-        UiApplication.getUiApplication().invokeLater(new Runnable() {
+        _uiApp.invokeLater(new Runnable() {
             public void run() {
                 if (conDescriptor != null) {
-                    // Connection can be established; display the result of a
-                    // connection
+                    // Connection can be established. Display the result
+                    // of a connection
                     displayConnectionDescriptor(conDescriptor);
                 } else {
-                    // Connection can not be established; display failure
-                    // message
+                    // Connection can not be established. Display failure
+                    // message.
                     displayMessage("Connection Failed");
                 }
             }
@@ -726,11 +696,13 @@ public class ConnectionTestsScreen extends MainScreen implements
     /**
      * A class to retrieve a ConnectionDescriptor
      */
-    private class ConnectionDescriptorRetriever implements Runnable {
+    private final class ConnectionDescriptorRetriever implements Runnable {
         // URL provided by the user
         final String _url;
+
         // Factory that creates connections
         final ConnectionFactory _factory;
+
         // Preferred transports to use when opening a connection
         final int[] _preferredTransports;
 
@@ -746,11 +718,12 @@ public class ConnectionTestsScreen extends MainScreen implements
          * @throws IllegalArgumentException
          *             if ConnectionFactory argument is null
          */
-        public ConnectionDescriptorRetriever(final String url,
+        ConnectionDescriptorRetriever(final String url,
                 final ConnectionFactory factory, final int[] preferredTransports) {
             if (factory == null) {
                 throw new IllegalArgumentException();
             }
+
             _url = url;
             _factory = factory;
             _preferredTransports = preferredTransports;
@@ -761,6 +734,7 @@ public class ConnectionTestsScreen extends MainScreen implements
          */
         public void run() {
             ConnectionDescriptor conDescriptor = null;
+
             if (_preferredTransports != null) {
                 // Set factory to use preferred transports
                 if (_preferredTransports.length > 1) {
@@ -773,9 +747,10 @@ public class ConnectionTestsScreen extends MainScreen implements
                 }
             } else {
                 // Use default factory setting to try all transports until a
-                // successful connection is established
+                // successful connection is established .
                 conDescriptor = _factory.getConnection(_url);
             }
+
             // Consume the connection
             conDescriptorRetrieved(conDescriptor);
         }
@@ -810,7 +785,10 @@ public class ConnectionTestsScreen extends MainScreen implements
      *            The message to be displayed
      */
     private void displayMessage(final String msg) {
-        UiApplication.getUiApplication().invokeLater(new Runnable() {
+        _uiApp.invokeLater(new Runnable() {
+            /**
+             * @see Runnable#run()
+             */
             public void run() {
                 Dialog.alert(msg);
             }
@@ -826,7 +804,10 @@ public class ConnectionTestsScreen extends MainScreen implements
      *            The time in milliseconds the dialog is displayed
      */
     private void showStatus(final String msg, final int time) {
-        UiApplication.getUiApplication().invokeAndWait(new Runnable() {
+        _uiApp.invokeAndWait(new Runnable() {
+            /**
+             * @see Runnable#run()
+             */
             public void run() {
                 Status.show(msg, time);
             }
@@ -840,7 +821,7 @@ public class ConnectionTestsScreen extends MainScreen implements
      *            The ConnectionDescriptor that describes the connection
      */
     private void displayConnectionDescriptor(final ConnectionDescriptor con) {
-        UiApplication.getUiApplication().pushScreen(
-                new ConnectionDetailsScreen(con, _urlEditField.getText()));
+        _uiApp.pushScreen(new ConnectionDetailsScreen(con, _urlEditField
+                .getText()));
     }
 }

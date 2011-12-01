@@ -67,7 +67,9 @@ public class EmbeddedMediaDemo extends UiApplication {
         new EmbeddedMediaDemo().enterEventDispatcher();
     }
 
-    // Constructor
+    /**
+     * Creates a new EmbeddedMediaDemo object
+     */
     public EmbeddedMediaDemo() {
         final EmbeddedMediaScreen screen = new EmbeddedMediaScreen();
         pushScreen(screen);
@@ -89,7 +91,7 @@ public class EmbeddedMediaDemo extends UiApplication {
 }
 
 /**
- * A UI screen to display our media player.
+ * A UI screen to display a media player
  */
 final class EmbeddedMediaScreen extends MainScreen implements
         FieldChangeListener, PlayerListener {
@@ -107,7 +109,9 @@ final class EmbeddedMediaScreen extends MainScreen implements
 
     private TimerUpdateThread _timerUpdateThread;
 
-    // Constructor
+    /**
+     * Creates a new EmbeddedMediaScreen object
+     */
     EmbeddedMediaScreen() {
         setTitle("Embedded Media Demo");
 
@@ -120,8 +124,8 @@ final class EmbeddedMediaScreen extends MainScreen implements
 
                 // If initialization was successful...
                 if (_videoField != null) {
-                    initializeUiComponents();
-                    addComponentsToScreen();
+                    createUI();
+
                     updateVideoSize();
                 } else {
                     _statusField.setText("Error: Could not load media");
@@ -131,19 +135,14 @@ final class EmbeddedMediaScreen extends MainScreen implements
     }
 
     /**
-     * Implementation of FieldChangeListener.
-     * 
-     * @param field
-     *            The field that changed.
-     * @param context
-     *            Information specifying the origin of the change.
-     * 
-     * @see net.rim.device.api.ui.FieldChangeListener#fieldChanged(Field , int)
+     * @see net.rim.device.api.ui.FieldChangeListener#fieldChanged(Field, int)
      */
     public void fieldChanged(final Field field, final int context) {
-        if (_controlButton.getLabel().equals("Start")) {
+        final int playerState = _player.getState();
+
+        if (playerState == Player.PREFETCHED || playerState == Player.REALIZED) {
             try {
-                // Start/resume the media player.
+                // Start/resume the media player
                 _player.start();
 
                 _timerUpdateThread = new TimerUpdateThread();
@@ -152,9 +151,9 @@ final class EmbeddedMediaScreen extends MainScreen implements
                 EmbeddedMediaDemo.errorDialog("Player#start() threw "
                         + pe.toString());
             }
-        } else {
+        } else if (playerState == Player.STARTED) {
             try {
-                // Stop/pause the media player.
+                // Stop/pause the media player
                 _player.stop();
 
                 _timerUpdateThread.stop();
@@ -167,10 +166,6 @@ final class EmbeddedMediaScreen extends MainScreen implements
 
     /**
      * @see net.rim.device.api.ui.Manager#sublayout(int,int)
-     * @param width
-     *            Width available for this screen.
-     * @param height
-     *            Height available for this screen.
      */
     protected void sublayout(final int width, final int height) {
         super.sublayout(width, height);
@@ -178,13 +173,15 @@ final class EmbeddedMediaScreen extends MainScreen implements
     }
 
     /**
-     * Initializes UI Components
+     * Initializes UI Components and adds them to the screen
      */
-    private void initializeUiComponents() {
+    private void createUI() {
         delete(_statusField);
 
         _hfm1 = new HorizontalFieldManager(Field.FIELD_HCENTER);
-        _controlButton = new ButtonField("Start", ButtonField.NEVER_DIRTY);
+        _controlButton =
+                new ButtonField("Start", ButtonField.NEVER_DIRTY
+                        | ButtonField.CONSUME_CLICK);
         _controlButton.setChangeListener(this);
         _hfm1.add(_controlButton);
 
@@ -198,12 +195,7 @@ final class EmbeddedMediaScreen extends MainScreen implements
         _hfm2.add(_duration);
         _hfm2.add(new LabelField("\t\t"));
         _hfm2.add(_volumeDisplay);
-    }
 
-    /**
-     * Adds UI components to the main screen.
-     */
-    private void addComponentsToScreen() {
         add(_videoField);
         add(_hfm1);
         add(_hfm2);
@@ -215,12 +207,12 @@ final class EmbeddedMediaScreen extends MainScreen implements
      */
     private void initializeMedia() {
         try {
-            /*
-             * For the purpose of this sample we are supplying a URL to a media
-             * file that is included in the project itself. See the
-             * javax.microedition.media.Manager javadoc for more information on
-             * handling data residing on a server.
-             */
+            // For the purpose of this sample we are supplying a URL to a media
+            // file
+            // that is included in the project itself. See the
+            // javax.microedition.media.Manager javadoc for more information on
+            // handling data residing on a server.
+
             final InputStream is =
                     getClass().getResourceAsStream("/media/BlackBerry.mp4");
             _player =
@@ -251,7 +243,7 @@ final class EmbeddedMediaScreen extends MainScreen implements
     }
 
     /**
-     * Updates the video size according to the current screen dimensions.
+     * Updates the video size according to the current screen dimensions
      * 
      * @param screenWidth
      *            The screen's width.
@@ -285,7 +277,7 @@ final class EmbeddedMediaScreen extends MainScreen implements
      */
     protected boolean
             keyControl(final char c, final int status, final int time) {
-        // Capture volume control key press and adjust volume accordingly.
+        // Capture volume control key press and adjust volume accordingly
         switch (c) {
         case Characters.CONTROL_VOLUME_DOWN:
             _volumeControl.setLevel(_volumeControl.getLevel() - 10);
@@ -313,12 +305,12 @@ final class EmbeddedMediaScreen extends MainScreen implements
                     _currentTime.setText(" ");
                     _controlButton.setLabel("Pause");
                 } else if (event.equals(STOPPED)) {
-                    _currentTime.setText(_player.getMediaTime() / 1000000 + "");
                     _controlButton.setLabel("Start");
                 } else if (event.equals(DURATION_UPDATED)) {
                     _duration.setText(_player.getDuration() / 1000000 + " s");
                 } else if (event.equals(END_OF_MEDIA)) {
                     _controlButton.setLabel("Start");
+                    _timerUpdateThread.stop();
                 }
             }
         });
@@ -331,12 +323,9 @@ final class EmbeddedMediaScreen extends MainScreen implements
         final boolean handled = super.invokeAction(action);
 
         if (!handled) {
-            switch (action) {
-            case ACTION_INVOKE: // Trackball click.
-            {
+            if (action == ACTION_INVOKE) {
                 // Suppress the menu
                 return true;
-            }
             }
         }
         return handled;
@@ -356,16 +345,14 @@ final class EmbeddedMediaScreen extends MainScreen implements
             while (_threadCanRun) {
                 UiApplication.getUiApplication().invokeLater(new Runnable() {
                     public void run() {
-                        _currentTime.setText(_player.getMediaTime() / 1000000
-                                + "");
+                        _currentTime.setText(String.valueOf(_player
+                                .getMediaTime() / 1000000));
                     }
                 });
 
                 try {
                     Thread.sleep(500L);
                 } catch (final InterruptedException e) {
-                    EmbeddedMediaDemo.errorDialog("Thread.sleep(long) threw "
-                            + e.toString());
                 }
             }
         }

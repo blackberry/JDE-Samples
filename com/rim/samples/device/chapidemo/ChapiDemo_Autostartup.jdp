@@ -21,6 +21,7 @@ AutoRestart=0
 ]
 EntryFor=CHAPIDemo
 ExcludeFromBuildAll=0
+Exported=0
 HaveAlxImports=0
 HaveDefs=0
 HaveImports=0
@@ -33,13 +34,14 @@ HaveImports=0
 Listing=0
 MidletClass=startup
 Options=-quiet 
-OutputFileName=CHAPIdemo_autostartup
+OutputFileName=CHAPIDemo_autostartup
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
 RunOnStartup=1
+SkipCompile=0
 StartupTier=7
 SystemModule=1
 Type=3

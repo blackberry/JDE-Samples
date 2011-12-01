@@ -30,9 +30,12 @@ import java.util.Calendar;
 
 import net.rim.device.api.i18n.DateFormat;
 import net.rim.device.api.i18n.SimpleDateFormat;
+import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.Field;
+import net.rim.device.api.ui.Keypad;
 import net.rim.device.api.ui.Screen;
 import net.rim.device.api.ui.TouchEvent;
+import net.rim.device.api.ui.TouchGesture;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BasicEditField;
 import net.rim.device.api.ui.component.DateField;
@@ -43,6 +46,8 @@ import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.PopupScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
+import net.rim.device.api.ui.decor.Background;
+import net.rim.device.api.ui.decor.BackgroundFactory;
 import net.rim.device.api.ui.picker.DateTimePicker;
 
 /**
@@ -56,12 +61,16 @@ public class SpinnerDemoScreen extends MainScreen {
     private static final int EXPIRY = 5;
     private static final int SPINBOX = 6;
 
-    private final BasicEditField _editFieldDefault;
-    private final BasicEditField _editFieldDate;
-    private final BasicEditField _editFieldTime;
-    private final BasicEditField _editFieldLong;
-    private final BasicEditField _editFieldExpiry;
-    private final BasicEditField _editFieldSpinbox;
+    private static final int SELECTION_FIELD_HEIGHT = 50;
+
+    private final DateField _dateField;
+
+    private final SelectionField _editFieldDefault;
+    private final SelectionField _editFieldDate;
+    private final SelectionField _editFieldTime;
+    private final SelectionField _editFieldLong;
+    private final SelectionField _editFieldExpiry;
+    private final SelectionField _editFieldSpinbox;
 
     private final SimpleDateFormat _defaultDateFormat = new SimpleDateFormat(
             SimpleDateFormat.DATETIME_DEFAULT | SimpleDateFormat.TIME_DEFAULT);
@@ -91,43 +100,53 @@ public class SpinnerDemoScreen extends MainScreen {
         // Initialize a VerticalFieldManager
         final VerticalFieldManager fieldManager = new VerticalFieldManager();
 
+        final Background background =
+                BackgroundFactory.createSolidBackground(Color.LIGHTBLUE);
+
+        final LabelField dateLabel =
+                new LabelField("Date Field", Field.FIELD_HCENTER);
+        dateLabel.setBackground(background);
+        fieldManager.add(dateLabel);
+
         // Add a typical date field to the VerticalFieldManager
-        fieldManager.add(new LabelField("Date Field\n", Field.FIELD_HCENTER));
-        final DateField dateField =
+        _dateField =
                 new DateField("Date/time: ", System.currentTimeMillis(),
                         DateField.DATE_TIME);
-        fieldManager.add(dateField);
+        fieldManager.add(_dateField);
+
+        fieldManager.add(new SeparatorField());
 
         // Add UI elements to the VerticalFieldManager, including fields
         // which will allow a user to make selections from date/time and
         // custom spinners.
-        fieldManager.add(new SeparatorField());
+        final LabelField dateTimeLabel =
+                new LabelField("Date Time Picker", Field.FIELD_HCENTER);
+        dateTimeLabel.setBackground(background);
+        fieldManager.add(dateTimeLabel);
 
-        fieldManager.add(new LabelField("Date Time Picker\n",
-                Field.FIELD_HCENTER));
-
-        _editFieldDefault = new BasicEditField("Default: ", "Click to select");
+        _editFieldDefault = new SelectionField("Default: ");
         fieldManager.add(_editFieldDefault);
 
-        _editFieldDate = new BasicEditField("Date only: ", "Click to select");
+        _editFieldDate = new SelectionField("Date only: ");
         fieldManager.add(_editFieldDate);
 
-        _editFieldTime = new BasicEditField("Time only: ", "Click to select");
+        _editFieldTime = new SelectionField("Time only: ");
         fieldManager.add(_editFieldTime);
 
-        _editFieldLong = new BasicEditField("Long date: ", "Click to select");
+        _editFieldLong = new SelectionField("Long date: ");
         fieldManager.add(_editFieldLong);
 
-        _editFieldExpiry =
-                new BasicEditField("Expiry date: ", "Click to select");
+        _editFieldExpiry = new SelectionField("Expiry date: ");
         fieldManager.add(_editFieldExpiry);
 
         fieldManager.add(new SeparatorField());
 
-        fieldManager.add(new LabelField("Text Spin Box Field\n",
-                Field.FIELD_HCENTER));
+        final LabelField textSpinLabel =
+                new LabelField("Text Spin Box Field", Field.FIELD_HCENTER);
+        textSpinLabel.setBackground(background);
+        fieldManager.add(textSpinLabel);
 
-        _editFieldSpinbox = new BasicEditField("City: ", "Click to select");
+        _editFieldSpinbox = new SelectionField("City: ");
         fieldManager.add(_editFieldSpinbox);
 
         // Add the VerticalFieldManager to the screen
@@ -213,7 +232,15 @@ public class SpinnerDemoScreen extends MainScreen {
      * @see Screen#touchEvent(TouchEvent)
      */
     protected boolean touchEvent(final TouchEvent message) {
-        if (message.getEvent() == TouchEvent.CLICK) {
+        TouchGesture touchGesture = null;
+
+        final int event = message.getEvent();
+        if (event == TouchEvent.GESTURE) {
+            touchGesture = message.getGesture();
+        }
+
+        if (message.getEvent() == TouchEvent.CLICK || touchGesture != null
+                && touchGesture.getEvent() == TouchGesture.TAP) {
             int type = 0;
 
             if (_editFieldDefault.isFocus()) {
@@ -232,7 +259,9 @@ public class SpinnerDemoScreen extends MainScreen {
             if (type > 0) {
                 showSpinnerDialog(type);
             }
-            return true;
+            if (!_dateField.isFocus()) {
+                return true;
+            }
         }
         return super.touchEvent(message);
     }
@@ -242,31 +271,31 @@ public class SpinnerDemoScreen extends MainScreen {
      */
     protected boolean navigationClick(final int status, final int time) {
         int type = 0;
-        boolean returnValue = false;
+        boolean eventConsumed = false;
 
         if (_editFieldDefault.isFocus()) {
             type = DEFAULT;
-            returnValue = true;
+            eventConsumed = true;
         } else if (_editFieldDate.isFocus()) {
             type = DATE;
-            returnValue = true;
+            eventConsumed = true;
         } else if (_editFieldTime.isFocus()) {
             type = TIME;
-            returnValue = true;
+            eventConsumed = true;
         } else if (_editFieldLong.isFocus()) {
             type = LONG;
-            returnValue = true;
+            eventConsumed = true;
         } else if (_editFieldExpiry.isFocus()) {
             type = EXPIRY;
-            returnValue = true;
+            eventConsumed = true;
         } else if (_editFieldSpinbox.isFocus()) {
             type = SPINBOX;
-            returnValue = true;
+            eventConsumed = true;
         }
         if (type > 0) {
             showSpinnerDialog(type);
         }
-        return returnValue;
+        return eventConsumed;
     }
 
     /**
@@ -275,6 +304,53 @@ public class SpinnerDemoScreen extends MainScreen {
     protected boolean onSavePrompt() {
         // Suppress the save dialog
         return true;
+    }
+
+    /**
+     * @see Screen#keyChar(char, int, int)
+     */
+    protected boolean keyChar(final char key, final int status, final int time) {
+        if (key == Keypad.KEY_ENTER) {
+            return navigationClick(status, time);
+        }
+
+        return super.keyChar(key, status, time);
+    }
+
+    /**
+     * A BasicEditField which can not be edited manually
+     */
+    static class SelectionField extends BasicEditField {
+        /**
+         * Creates a new SelectionField object
+         * 
+         * @param label
+         *            Label for this field
+         * @param text
+         *            Display text for this field
+         */
+        SelectionField(final String label) {
+            super(label, "Click or tap to select");
+        }
+
+        /**
+         * @see TextField#layout(int, int)
+         */
+        protected void layout(final int width, final int height) {
+            super.layout(width, height);
+            setExtent(width, SELECTION_FIELD_HEIGHT);
+        }
+
+        /**
+         * @see Field#keyChar(char, int, int)
+         */
+        protected boolean keyChar(final char key, final int status,
+                final int time) {
+            if (key == Keypad.KEY_ENTER) {
+                return false;
+            }
+            return super.keyChar(key, status, time);
+        }
     }
 
     /**
@@ -323,17 +399,43 @@ public class SpinnerDemoScreen extends MainScreen {
         }
 
         /**
+         * @see Screen#touchEvent(TouchEvent)
+         */
+        protected boolean touchEvent(final TouchEvent message) {
+            if (message.getEvent() == TouchEvent.GESTURE) {
+                final TouchGesture touchGesture = message.getGesture();
+                if (touchGesture.getEvent() == TouchGesture.TAP) {
+                    _isSet = true;
+                    close();
+                    return true;
+                }
+            }
+            return super.touchEvent(message);
+        }
+
+        /**
          * @see Screen#invokeAction(int)
          */
         protected boolean invokeAction(final int action) {
             if (action == ACTION_INVOKE) {
-                if (!_isSet) {
-                    _isSet = true;
-                }
+                _isSet = true;
                 close();
                 return true;
             }
-            return false;
+            return super.invokeAction(action);
+        }
+
+        /**
+         * @see Screen#keyChar(char, int, int)
+         */
+        protected boolean keyChar(final char key, final int status,
+                final int time) {
+            if (key == Keypad.KEY_ENTER) {
+                _isSet = true;
+                close();
+                return true;
+            }
+            return super.keyChar(key, status, time);
         }
 
         /**

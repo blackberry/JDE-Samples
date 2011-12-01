@@ -39,7 +39,7 @@ import net.rim.device.api.ui.container.MainScreen;
  */
 public final class VideoRecordingSetupScreen extends MainScreen implements
         FieldChangeListener {
-    private static String FILE_SYSTEM_URI_HEADER = "file:///";
+    private static final String FILE_SYSTEM_URI_HEADER = "file:///";
 
     private final ObjectChoiceField _encodings;
     private final ObjectChoiceField _fileSystems;
@@ -74,8 +74,8 @@ public final class VideoRecordingSetupScreen extends MainScreen implements
         add(_fileSystems);
 
         _launchRecorder =
-                new ButtonField("Start recording", ButtonField.CONSUME_CLICK
-                        | Field.FIELD_RIGHT);
+                new ButtonField("Start Video Camera", Field.FIELD_RIGHT
+                        | ButtonField.CONSUME_CLICK);
         _launchRecorder.setChangeListener(this);
         add(_launchRecorder);
     }

@@ -35,6 +35,9 @@ import javax.microedition.pim.PIM;
 import javax.microedition.pim.PIMException;
 import javax.microedition.pim.PIMItem;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.MenuItem;
@@ -44,6 +47,7 @@ import net.rim.device.api.ui.component.ListField;
 import net.rim.device.api.ui.component.ListFieldCallback;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 public final class ContactListScreen extends MainScreen implements
         ListFieldCallback {
@@ -62,22 +66,30 @@ public final class ContactListScreen extends MainScreen implements
          * Creates a new SelectContactAction object
          */
         private SelectContactAction() {
-            super("Select Contact", 0, 0);
-        }
+            super(new StringProvider("Select Contact"), 0x230010, 0);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
 
-        public void run() {
-            final int index = _listField.getSelectedIndex();
+                    final int index = _listField.getSelectedIndex();
 
-            if (index != -1 && !_contacts.isEmpty()) {
-                _contact =
-                        (Contact) _contacts.elementAt(_listField
-                                .getSelectedIndex());
-            } else {
-                _contact = null;
-            }
+                    if (index != -1 && !_contacts.isEmpty()) {
+                        _contact =
+                                (Contact) _contacts.elementAt(_listField
+                                        .getSelectedIndex());
+                    } else {
+                        _contact = null;
+                    }
 
-            final UiApplication uiapp = UiApplication.getUiApplication();
-            uiapp.popScreen(uiapp.getActiveScreen());
+                    final UiApplication uiapp =
+                            UiApplication.getUiApplication();
+                    uiapp.popScreen(uiapp.getActiveScreen());
+                }
+            }));
         }
     }
 
@@ -91,22 +103,28 @@ public final class ContactListScreen extends MainScreen implements
          * Creates a new AddContactAction object
          */
         private AddContactAction() {
-            super("Add New Contact", 0, 1);
+            super(new StringProvider("Add New Contact"), 0x230020, 1);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    if (_screen == null) {
+                        throw new IllegalStateException(
+                                "PIMDemo: No screen set for AddContactAction!");
+                    }
+
+                    UiApplication.getUiApplication().pushModalScreen(
+                            new ContactScreen());
+                    reloadContactList();
+                }
+            }));
         }
 
         private void setScreen(final Screen s) {
             _screen = s;
-        }
-
-        public void run() {
-            if (_screen == null) {
-                throw new IllegalStateException(
-                        "PIMDemo: No screen set for AddContactAction!");
-            }
-
-            UiApplication.getUiApplication().pushModalScreen(
-                    new ContactScreen());
-            reloadContactList();
         }
     }
 

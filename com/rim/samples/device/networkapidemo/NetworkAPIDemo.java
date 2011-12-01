@@ -26,12 +26,10 @@
 
 package com.rim.samples.device.networkapidemo;
 
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.ButtonField;
-import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.container.MainScreen;
 
 /**
@@ -39,9 +37,11 @@ import net.rim.device.api.ui.container.MainScreen;
  * 
  * Clicking the "Transport Info" button shows network transports availability
  * and coverage. Obtaining a connection through available transports can be
- * tested by clicking the "Connection Tests" button.
+ * tested by clicking the "Connection Tests" button. The "UDP Client" button
+ * displays a screen which acts as a UDP client for the UDP server component
+ * found in the com.rim.samples.server.udpdemo directory.
  */
-public class NetworkAPIDemo extends UiApplication {
+public final class NetworkAPIDemo extends UiApplication {
     /**
      * Entry point for application
      * 
@@ -68,42 +68,37 @@ public class NetworkAPIDemo extends UiApplication {
      */
     private static class NetworkAPIDemoScreen extends MainScreen implements
             FieldChangeListener {
-        // Button that triggers a display of network transports' availability
-        // and coverage information screen
-        private final FullWidthButton _transportInfoBtn;
-        // Button that triggers a display of network connection test screen
-        private final FullWidthButton _connectionTestsBtn;
+        private final ButtonField _transportInfoBtn;
+        private final ButtonField _connectionTestsBtn;
+        private final ButtonField _udpBtn;
+        private final UiApplication _uiApp;
 
         /**
          * Creates a new NetworkAPIDemoScreen object
          */
-        public NetworkAPIDemoScreen() {
-            // Sets screen's title to "Network API Demo"
-            setTitle(new LabelField("Network API Demo", DrawStyle.ELLIPSIS
-                    | Field.USE_ALL_WIDTH));
-
-            // "Transport Info" button
+        NetworkAPIDemoScreen() {
+            // Initialize UI components
+            setTitle("Network API Demo");
             _transportInfoBtn =
-                    new FullWidthButton("Transport Info",
-                            ButtonField.CONSUME_CLICK);
-            // "Connection Tests" button
+                    new ButtonField("Transport Info", ButtonField.NEVER_DIRTY
+                            | Field.FIELD_HCENTER | ButtonField.CONSUME_CLICK);
             _connectionTestsBtn =
-                    new FullWidthButton("Connection Tests",
-                            ButtonField.CONSUME_CLICK);
+                    new ButtonField("Connection Tests", ButtonField.NEVER_DIRTY
+                            | Field.FIELD_HCENTER | ButtonField.CONSUME_CLICK);
+            _udpBtn =
+                    new ButtonField("UDP Client", ButtonField.NEVER_DIRTY
+                            | Field.FIELD_HCENTER | ButtonField.CONSUME_CLICK);
 
             _transportInfoBtn.setChangeListener(this);
             _connectionTestsBtn.setChangeListener(this);
+            _udpBtn.setChangeListener(this);
 
+            // Add components to screen
             add(_transportInfoBtn);
             add(_connectionTestsBtn);
-        }
+            add(_udpBtn);
 
-        /**
-         * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
-         */
-        public boolean onSavePrompt() {
-            // Prevent the save dialog from being displayed
-            return true;
+            _uiApp = UiApplication.getUiApplication();
         }
 
         /**
@@ -114,6 +109,8 @@ public class NetworkAPIDemo extends UiApplication {
                 doTransportInfoBtn();
             } else if (field == _connectionTestsBtn) {
                 doConnectBestEffortBtn();
+            } else if (field == _udpBtn) {
+                doUDPBtn();
             }
         }
 
@@ -121,16 +118,21 @@ public class NetworkAPIDemo extends UiApplication {
          * Displays a TransportInfoScreen
          */
         private void doTransportInfoBtn() {
-            UiApplication.getUiApplication().pushScreen(
-                    new TransportInfoScreen());
+            _uiApp.pushScreen(new TransportInfoScreen());
         }
 
         /**
          * Displays a ConnectionTestsScreen
          */
         private void doConnectBestEffortBtn() {
-            UiApplication.getUiApplication().pushScreen(
-                    new ConnectionTestsScreen());
+            _uiApp.pushScreen(new ConnectionTestsScreen());
+        }
+
+        /**
+         * Displays a UDPClientScreen
+         */
+        private void doUDPBtn() {
+            _uiApp.pushScreen(new UDPClientScreen());
         }
     }
 }

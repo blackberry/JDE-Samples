@@ -26,6 +26,9 @@
 
 package com.rim.samples.device.localizationdemo;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
@@ -64,7 +67,9 @@ public class LocalizationDemo extends UiApplication {
         theApp.enterEventDispatcher();
     }
 
-    // Constructor
+    /**
+     * Creates a new LocalizationDemo object
+     */
     public LocalizationDemo() {
         pushScreen(new LocalizationDemoScreen());
     }
@@ -82,8 +87,10 @@ final class LocalizationDemoScreen extends MainScreen implements
     private static ResourceBundle _resources = ResourceBundle.getBundle(
             BUNDLE_ID, BUNDLE_NAME);
 
-    // Constructor
-    LocalizationDemoScreen() {
+    /**
+     * Creates a new LocalizationDemoScreen object
+     */
+    public LocalizationDemoScreen() {
         final LabelField title =
                 new LabelField(_resources.getString(APPLICATION_TITLE));
         setTitle(title);
@@ -100,22 +107,25 @@ final class LocalizationDemoScreen extends MainScreen implements
         _choiceField.setChangeListener(this);
         add(_choiceField);
 
-        addMenuItem(_viewItem);
+        // Views the country's information
+        final MenuItem viewItem =
+                new MenuItem(_resources, MENUITEM_VIEW, 0x230010, 0);
+        viewItem.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                pushInfoScreen();
+            }
+        }));
+        addMenuItem(viewItem);
 
         _infoScreen = new InfoScreen();
 
         _choiceField.setFocus();
     }
-
-    /**
-     * Views the country's information
-     */
-    private final MenuItem _viewItem = new MenuItem(_resources, MENUITEM_VIEW,
-            110, 10) {
-        public void run() {
-            pushInfoScreen();
-        }
-    };
 
     /**
      * FieldChangeListener implementation.
@@ -166,8 +176,10 @@ class InfoScreen extends MainScreen implements LocalizationDemoResource {
     private static ResourceBundle _resources = ResourceBundle.getBundle(
             BUNDLE_ID, BUNDLE_NAME);
 
-    // Constructor
-    InfoScreen() {
+    /**
+     * Creates a new InfoScreen object
+     */
+    public InfoScreen() {
         _countryField = new LabelField();
         _popField =
                 new BasicEditField(_resources.getString(FIELD_POP), null, 20,

@@ -26,6 +26,9 @@
 
 package com.rim.samples.device.toucheventinjectordemo;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.EventInjector;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
@@ -35,12 +38,14 @@ import net.rim.device.api.ui.Screen;
 import net.rim.device.api.ui.TouchEvent;
 import net.rim.device.api.ui.TouchGesture;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.XYRect;
 import net.rim.device.api.ui.component.BasicEditField;
 import net.rim.device.api.ui.component.ButtonField;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.NumericChoiceField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * The MainScreen class for the Touch Event Injector Demo application
@@ -52,7 +57,9 @@ public final class TouchEventInjectorScreen extends MainScreen {
 
     private final StringBuffer _output;
 
-    // Constructor
+    /**
+     * Creates a new TouchEventInjectorScreen object
+     */
     public TouchEventInjectorScreen() {
         // Set the displayed title of the screen
         setTitle("Touch Event Injector Demo");
@@ -67,8 +74,8 @@ public final class TouchEventInjectorScreen extends MainScreen {
 
         // Initialize button field
         _sampleButton =
-                new ButtonField("Sample Button", ButtonField.CONSUME_CLICK
-                        | ButtonField.NEVER_DIRTY);
+                new ButtonField("Sample Button", ButtonField.NEVER_DIRTY
+                        | ButtonField.CONSUME_CLICK);
         add(_sampleButton);
         _sampleButton.setChangeListener(_listener);
 
@@ -76,248 +83,295 @@ public final class TouchEventInjectorScreen extends MainScreen {
         _outputText = new LabelField();
         add(_outputText);
 
+        /*
+         * A menu item to display a dialog that allows the user to specify where
+         * to click the screen.
+         */
+        final MenuItem clickScreen =
+                new MenuItem(new StringProvider("Click the screen"), 0x230030,
+                        3);
+        clickScreen.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                // Dialog containing input fields for x and y coordinates
+                final Dialog clickDialog =
+                        new Dialog(Dialog.D_OK_CANCEL,
+                                "Specify click location", Dialog.OK, null,
+                                Manager.BOTTOMMOST);
+
+                final BasicEditField xPos1Input =
+                        new BasicEditField("Click position x1: ", "");
+                final BasicEditField yPos1Input =
+                        new BasicEditField("Click position y1: ", "");
+                final BasicEditField xPos2Input =
+                        new BasicEditField("Click position x2: ", "");
+                final BasicEditField yPos2Input =
+                        new BasicEditField("Click position y2: ", "");
+
+                clickDialog.add(xPos1Input);
+                clickDialog.add(yPos1Input);
+                clickDialog.add(xPos2Input);
+                clickDialog.add(yPos2Input);
+
+                // Display the dialog
+                clickDialog.doModal();
+
+                // Check if the user clicked OK
+                if (clickDialog.getSelectedValue() == Dialog.OK) {
+                    // Clear the output string
+                    _output.delete(0, _output.length());
+
+                    try {
+                        // Clear the output string
+                        _output.delete(0, _output.length());
+
+                        // Check that integers were entered and that the
+                        // coordinates are valid.
+                        final int x1 = Integer.parseInt(xPos1Input.getText());
+                        final int y1 = Integer.parseInt(yPos1Input.getText());
+                        final int x2 = Integer.parseInt(xPos2Input.getText());
+                        final int y2 = Integer.parseInt(yPos2Input.getText());
+
+                        EventInjector.TouchEvent.invokeClickThrough(x1, y1, x2,
+                                y2);
+
+                        updateOutputText();
+                    } catch (final NumberFormatException nfe) {
+                        Dialog.alert("Invalid input: " + nfe.getMessage()
+                                + "\n\nPlease enter a number.");
+                    } catch (final IllegalArgumentException iae) {
+                        Dialog.alert("Invalid coordinate. \n\nPlease try again.");
+                    }
+                }
+            }
+        }));
+
+        /*
+         * A menu item to invoke a TouchEvent which clicks the button field on
+         * the screen.
+         */
+        final MenuItem clickButton =
+                new MenuItem(new StringProvider("Click the button"), 0x230010,
+                        1);
+        clickButton.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                // Calculate button position
+                final Manager manager = getMainManager();
+                final XYRect managerExtent = manager.getExtent(); // Scrollable
+                                                                  // section of
+                                                                  // the screen
+                final int titleHeight = managerExtent.y; // Top of the
+                                                         // scrollable section
+                final XYRect buttonExtent = _sampleButton.getExtent();
+                final int buttonYCoordinate =
+                        buttonExtent.y + titleHeight
+                                + _sampleButton.getHeight() / 2; // Middle of
+                                                                 // the button
+
+                // Create the four touch events needed to click the button
+                final EventInjector.TouchEvent downEvent =
+                        new EventInjector.TouchEvent(TouchEvent.DOWN, 40,
+                                buttonYCoordinate, -1, -1, -1);
+                final EventInjector.TouchEvent clickEvent =
+                        new EventInjector.TouchEvent(TouchEvent.CLICK, 40,
+                                buttonYCoordinate, -1, -1, -1);
+                final EventInjector.TouchEvent unclickEvent =
+                        new EventInjector.TouchEvent(TouchEvent.UNCLICK, 40,
+                                buttonYCoordinate, -1, -1, -1);
+                final EventInjector.TouchEvent upEvent =
+                        new EventInjector.TouchEvent(TouchEvent.UP, 40,
+                                buttonYCoordinate, -1, -1, -1);
+
+                // Clear the output string
+                _output.delete(0, _output.length());
+
+                // Invoke the touch events
+                EventInjector.invokeEvent(downEvent);
+                EventInjector.invokeEvent(clickEvent);
+                EventInjector.invokeEvent(unclickEvent);
+                EventInjector.invokeEvent(upEvent);
+
+                updateOutputText();
+            }
+        }));
+
+        // A menu item to swipe the screen
+        final MenuItem swipe =
+                new MenuItem(new StringProvider("Swipe the screen"), 0x230020,
+                        2);
+        swipe.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                /**
+                 * Create a move event array to pass into injectSwipeGesture().
+                 * This array contains move events for one touch point.
+                 */
+                final EventInjector.TouchEvent[] moveEvents =
+                        new EventInjector.TouchEvent[3];
+                moveEvents[0] =
+                        new EventInjector.TouchEvent(TouchEvent.MOVE, 60, 60,
+                                -1, -1, -1);
+                moveEvents[1] =
+                        new EventInjector.TouchEvent(TouchEvent.MOVE, 120, 120,
+                                -1, -1, -1);
+                moveEvents[2] =
+                        new EventInjector.TouchEvent(TouchEvent.MOVE, 50, 50,
+                                -1, -1, -1);
+
+                // Clear the output string
+                _output.delete(0, _output.length());
+
+                // Inject a swipe gesture with origin coordinates of (0, 0)
+                EventInjector.TouchEvent.injectSwipeGesture(0, 0, moveEvents);
+                updateOutputText();
+            }
+        }));
+
+        /*
+         * A menu item to display a dialog that allows the user to specify
+         * screen location for injecting a tap gesture.
+         */
+        final MenuItem tap =
+                new MenuItem(new StringProvider("Tap the screen"), 0x230040, 4);
+        tap.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                // Dialog containing the input fields for x and y coordinates
+                // and
+                // number of taps.
+                final Dialog tapDialog =
+                        new Dialog(Dialog.D_OK_CANCEL, "Specify tap location",
+                                Dialog.OK, null, Manager.NO_VERTICAL_SCROLL);
+
+                final BasicEditField xPosInput =
+                        new BasicEditField("Tap position x: ", "");
+                final BasicEditField yPosInput =
+                        new BasicEditField("Tap position y: ", "");
+                final BasicEditField tapCountInput =
+                        new BasicEditField("Number of taps: ", "");
+
+                tapDialog.add(xPosInput);
+                tapDialog.add(yPosInput);
+                tapDialog.add(tapCountInput);
+
+                // Display the dialog
+                tapDialog.doModal();
+
+                if (tapDialog.getSelectedValue() == Dialog.OK) {
+
+                    // Clear the output string
+                    _output.delete(0, _output.length());
+
+                    try {
+                        // Check that integers were entered and that the
+                        // coordinates
+                        // and taps are valid.
+                        final int x = Integer.parseInt(xPosInput.getText());
+                        final int y = Integer.parseInt(yPosInput.getText());
+                        final int taps =
+                                Integer.parseInt(tapCountInput.getText());
+
+                        EventInjector.TouchEvent.injectTapGesture(x, y, taps);
+
+                        updateOutputText();
+                    } catch (final NumberFormatException nfe) {
+                        Dialog.alert("Invalid input: " + nfe.getMessage()
+                                + "\n\nPlease enter a number.");
+                    } catch (final IllegalArgumentException iae) {
+                        Dialog.alert("Invalid coordinate or tap count. \n\nPlease try again.");
+                    }
+                }
+            }
+        }));
+
+        /*
+         * A menu item to display a dialog that allows the user to specify
+         * screen location for injecting a two finger tap.
+         */
+        final MenuItem twoFingerTap =
+                new MenuItem(new StringProvider("Two Finger Tap the screen"),
+                        0x230050, 5);
+        twoFingerTap.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                final Dialog tapDialog =
+                        new Dialog(Dialog.D_OK_CANCEL, "Specify tap location",
+                                Dialog.OK, null, Manager.NO_VERTICAL_SCROLL);
+
+                final BasicEditField xPos1Input =
+                        new BasicEditField("Tap position x1: ", "");
+                final BasicEditField yPos1Input =
+                        new BasicEditField("Tap position y1: ", "");
+                final BasicEditField xPos2Input =
+                        new BasicEditField("Tap position x2: ", "");
+                final BasicEditField yPos2Input =
+                        new BasicEditField("Tap position y2: ", "");
+                final NumericChoiceField touchPointInput =
+                        new NumericChoiceField("Touch point: ", 1, 2, 1);
+
+                tapDialog.add(xPos1Input);
+                tapDialog.add(yPos1Input);
+                tapDialog.add(xPos2Input);
+                tapDialog.add(yPos2Input);
+                tapDialog.add(touchPointInput);
+
+                // Display the dialog
+                tapDialog.doModal();
+
+                if (tapDialog.getSelectedValue() == Dialog.OK) {
+                    // Clear the output string
+                    _output.delete(0, _output.length());
+
+                    try {
+                        final int x1 = Integer.parseInt(xPos1Input.getText());
+                        final int y1 = Integer.parseInt(yPos1Input.getText());
+                        final int x2 = Integer.parseInt(xPos2Input.getText());
+                        final int y2 = Integer.parseInt(yPos2Input.getText());
+                        final int touchPoint =
+                                touchPointInput.getSelectedValue();
+
+                        EventInjector.TouchEvent.injectTwoFingerTap(x1, y1, x2,
+                                y2, touchPoint);
+
+                        updateOutputText();
+                    } catch (final NumberFormatException nfe) {
+                        Dialog.alert("Invalid input: " + nfe.getMessage()
+                                + "\n\nPlease enter a number.");
+                    } catch (final IllegalArgumentException iae) {
+                        Dialog.alert("Invalid coordinate or touch point. \n\nPlease try again.");
+                    }
+                }
+            }
+        }));
+
         // Add menu items
-        addMenuItem(_clickScreen);
-        addMenuItem(_clickButton);
-        addMenuItem(_swipe);
-        addMenuItem(_tap);
-        addMenuItem(_twoFingerTap);
+        addMenuItem(swipe);
+        addMenuItem(tap);
+        addMenuItem(twoFingerTap);
+        addMenuItem(clickScreen);
+        addMenuItem(clickButton);
     }
-
-    /**
-     * A menu item to invoke a TouchEvent which clicks the button field on the
-     * screen.
-     */
-    private final MenuItem _clickButton = new MenuItem("Click the button",
-            200000, 10) {
-        public void run() {
-            // Get button coordinates relative to _helpText
-            final int buttonYCoordinate = _helpText.getHeight() + 40;
-
-            // Create the four touch events needed to click the button
-            final EventInjector.TouchEvent downEvent =
-                    new EventInjector.TouchEvent(TouchEvent.DOWN, 40,
-                            buttonYCoordinate, -1, -1, -1); // Touch the screen
-            final EventInjector.TouchEvent clickEvent =
-                    new EventInjector.TouchEvent(TouchEvent.CLICK, 40,
-                            buttonYCoordinate, -1, -1, -1); // Click the screen
-            final EventInjector.TouchEvent unclickEvent =
-                    new EventInjector.TouchEvent(TouchEvent.UNCLICK, 40,
-                            buttonYCoordinate, -1, -1, -1); // Unlick the screen
-            final EventInjector.TouchEvent upEvent =
-                    new EventInjector.TouchEvent(TouchEvent.UP, 40,
-                            buttonYCoordinate, -1, -1, -1); // Lift finger from
-                                                            // the screen
-
-            // Clear the output string
-            _output.delete(0, _output.length());
-
-            // Invoke the touch events
-            EventInjector.invokeEvent(downEvent);
-            EventInjector.invokeEvent(clickEvent);
-            EventInjector.invokeEvent(unclickEvent);
-            EventInjector.invokeEvent(upEvent);
-            updateOutputText();
-        }
-    };
-
-    /**
-     * A menu item to swipe the screen
-     */
-    private final MenuItem _swipe =
-            new MenuItem("Swipe the screen", 200000, 10) {
-                public void run() {
-                    /**
-                     * Create a move event array to pass into
-                     * injectSwipeGesture(). This array contains move events for
-                     * one touch point.
-                     */
-                    final EventInjector.TouchEvent[] moveEvents =
-                            new EventInjector.TouchEvent[3];
-                    moveEvents[0] =
-                            new EventInjector.TouchEvent(TouchEvent.MOVE, 60,
-                                    60, -1, -1, -1);
-                    moveEvents[1] =
-                            new EventInjector.TouchEvent(TouchEvent.MOVE, 120,
-                                    120, -1, -1, -1);
-                    moveEvents[2] =
-                            new EventInjector.TouchEvent(TouchEvent.MOVE, 50,
-                                    50, -1, -1, -1);
-
-                    // Clear the output string
-                    _output.delete(0, _output.length());
-
-                    // Inject a swipe gesture with origin coordinates of (0, 0)
-                    EventInjector.TouchEvent.injectSwipeGesture(0, 0,
-                            moveEvents);
-                    updateOutputText();
-                }
-            };
-
-    /**
-     * A menu item to display a dialog that allows the user to specify where to
-     * click the screen.
-     */
-    private final MenuItem _clickScreen = new MenuItem("Click the screen",
-            200000, 10) {
-        public void run() {
-            // Dialog containing input fields for x and y coordinates
-            final Dialog clickDialog =
-                    new Dialog(Dialog.D_OK_CANCEL, "Specify click location",
-                            Dialog.OK, null, Manager.BOTTOMMOST);
-
-            final BasicEditField xPos1Input =
-                    new BasicEditField("Click position x1: ", "");
-            final BasicEditField yPos1Input =
-                    new BasicEditField("Click position y1: ", "");
-            final BasicEditField xPos2Input =
-                    new BasicEditField("Click position x2: ", "");
-            final BasicEditField yPos2Input =
-                    new BasicEditField("Click position y2: ", "");
-
-            clickDialog.add(xPos1Input);
-            clickDialog.add(yPos1Input);
-            clickDialog.add(xPos2Input);
-            clickDialog.add(yPos2Input);
-
-            // Display the dialog
-            clickDialog.doModal();
-
-            // Check if the user clicked OK
-            if (clickDialog.getSelectedValue() == Dialog.OK) {
-                // Clear the output string
-                _output.delete(0, _output.length());
-
-                try {
-                    // Clear the output string
-                    _output.delete(0, _output.length());
-
-                    // Check that integers were entered and that the
-                    // coordinates are valid.
-                    final int x1 = Integer.parseInt(xPos1Input.getText());
-                    final int y1 = Integer.parseInt(yPos1Input.getText());
-                    final int x2 = Integer.parseInt(xPos2Input.getText());
-                    final int y2 = Integer.parseInt(yPos2Input.getText());
-
-                    EventInjector.TouchEvent.invokeClickThrough(x1, y1, x2, y2);
-
-                    updateOutputText();
-                } catch (final NumberFormatException nfe) {
-                    Dialog.alert("Invalid input: " + nfe.getMessage()
-                            + "\n\nPlease enter a number.");
-                } catch (final IllegalArgumentException iae) {
-                    Dialog.alert("Invalid coordinate. \n\nPlease try again.");
-                }
-            }
-        }
-    };
-
-    /**
-     * A menu item to display a dialog that allows the user to specify screen
-     * location for injecting a tap gesture.
-     */
-    private final MenuItem _tap = new MenuItem("Tap the screen", 200000, 10) {
-        public void run() {
-            // Dialog containing the input fields for x and y coordinates and
-            // number of taps.
-            final Dialog tapDialog =
-                    new Dialog(Dialog.D_OK_CANCEL, "Specify tap location",
-                            Dialog.OK, null, Manager.NO_VERTICAL_SCROLL);
-
-            final BasicEditField xPosInput =
-                    new BasicEditField("Tap position x: ", "");
-            final BasicEditField yPosInput =
-                    new BasicEditField("Tap position y: ", "");
-            final BasicEditField tapCountInput =
-                    new BasicEditField("Number of taps: ", "");
-
-            tapDialog.add(xPosInput);
-            tapDialog.add(yPosInput);
-            tapDialog.add(tapCountInput);
-
-            // Display the dialog
-            tapDialog.doModal();
-
-            if (tapDialog.getSelectedValue() == Dialog.OK) {
-
-                // Clear the output string
-                _output.delete(0, _output.length());
-
-                try {
-                    // Check that integers were entered and that the coordinates
-                    // and taps are valid.
-                    final int x = Integer.parseInt(xPosInput.getText());
-                    final int y = Integer.parseInt(yPosInput.getText());
-                    final int taps = Integer.parseInt(tapCountInput.getText());
-
-                    EventInjector.TouchEvent.injectTapGesture(x, y, taps);
-
-                    updateOutputText();
-                } catch (final NumberFormatException nfe) {
-                    Dialog.alert("Invalid input: " + nfe.getMessage()
-                            + "\n\nPlease enter a number.");
-                } catch (final IllegalArgumentException iae) {
-                    Dialog.alert("Invalid coordinate or tap count. \n\nPlease try again.");
-                }
-            }
-        }
-    };
-
-    /**
-     * A menu item to display a dialog that allows the user to specify screen
-     * location for injecting a two finger tap.
-     */
-    private final MenuItem _twoFingerTap = new MenuItem(
-            "Two Finger Tap the screen", 200000, 10) {
-        public void run() {
-            final Dialog tapDialog =
-                    new Dialog(Dialog.D_OK_CANCEL, "Specify tap location",
-                            Dialog.OK, null, Manager.NO_VERTICAL_SCROLL);
-
-            final BasicEditField xPos1Input =
-                    new BasicEditField("Tap position x1: ", "");
-            final BasicEditField yPos1Input =
-                    new BasicEditField("Tap position y1: ", "");
-            final BasicEditField xPos2Input =
-                    new BasicEditField("Tap position x2: ", "");
-            final BasicEditField yPos2Input =
-                    new BasicEditField("Tap position y2: ", "");
-            final NumericChoiceField touchPointInput =
-                    new NumericChoiceField("Touch point: ", 1, 2, 1);
-
-            tapDialog.add(xPos1Input);
-            tapDialog.add(yPos1Input);
-            tapDialog.add(xPos2Input);
-            tapDialog.add(yPos2Input);
-            tapDialog.add(touchPointInput);
-
-            // Display the dialog
-            tapDialog.doModal();
-
-            if (tapDialog.getSelectedValue() == Dialog.OK) {
-                // Clear the output string
-                _output.delete(0, _output.length());
-
-                try {
-                    final int x1 = Integer.parseInt(xPos1Input.getText());
-                    final int y1 = Integer.parseInt(yPos1Input.getText());
-                    final int x2 = Integer.parseInt(xPos2Input.getText());
-                    final int y2 = Integer.parseInt(yPos2Input.getText());
-                    final int touchPoint = touchPointInput.getSelectedValue();
-
-                    EventInjector.TouchEvent.injectTwoFingerTap(x1, y1, x2, y2,
-                            touchPoint);
-
-                    updateOutputText();
-                } catch (final NumberFormatException nfe) {
-                    Dialog.alert("Invalid input: " + nfe.getMessage()
-                            + "\n\nPlease enter a number.");
-                } catch (final IllegalArgumentException iae) {
-                    Dialog.alert("Invalid coordinate or touch point. \n\nPlease try again.");
-                }
-            }
-        }
-    };
 
     // Listener for button clicks
     private final FieldChangeListener _listener = new FieldChangeListener() {

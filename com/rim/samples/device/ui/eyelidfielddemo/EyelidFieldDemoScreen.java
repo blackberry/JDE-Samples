@@ -24,7 +24,7 @@
  * Environment Development Guide associated with this release.
  */
 
-package com.rim.samples.device.eyelidfielddemo;
+package com.rim.samples.device.ui.eyelidfielddemo;
 
 import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.Field;

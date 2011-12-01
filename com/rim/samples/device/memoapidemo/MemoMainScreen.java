@@ -27,7 +27,6 @@
 package com.rim.samples.device.memoapidemo;
 
 import java.util.Enumeration;
-import java.util.Vector;
 
 import javax.microedition.pim.PIM;
 import javax.microedition.pim.PIMException;
@@ -35,88 +34,88 @@ import javax.microedition.pim.PIMException;
 import net.rim.blackberry.api.pdap.BlackBerryMemo;
 import net.rim.blackberry.api.pdap.BlackBerryMemoList;
 import net.rim.blackberry.api.pdap.BlackBerryPIM;
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.Display;
-import net.rim.device.api.ui.Graphics;
+import net.rim.device.api.ui.Color;
+import net.rim.device.api.ui.Field;
+import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.XYRect;
 import net.rim.device.api.ui.component.Dialog;
-import net.rim.device.api.ui.component.ListField;
-import net.rim.device.api.ui.component.ListFieldCallback;
+import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
+import net.rim.device.api.ui.component.table.DataTemplate;
+import net.rim.device.api.ui.component.table.TableController;
+import net.rim.device.api.ui.component.table.TableModelAdapter;
+import net.rim.device.api.ui.component.table.TableModelChangeEvent;
+import net.rim.device.api.ui.component.table.TableView;
+import net.rim.device.api.ui.component.table.TemplateColumnProperties;
+import net.rim.device.api.ui.component.table.TemplateRowProperties;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.decor.BackgroundFactory;
+import net.rim.device.api.util.StringProvider;
 
 /**
- * The main screen for the Memo API demo application.
+ * The main screen for the Memo API demo application
  */
-public final class MemoMainScreen extends MainScreen implements
-        ListFieldCallback {
-    private Vector _memos;
+public final class MemoMainScreen extends MainScreen {
     private BlackBerryMemoList _memoList;
-    private final ListField _memoListField;
-
-    private final MenuItem _addItem = new AddItem();
+    private BlackBerryMemoTableModel _model;
+    private TableView _view;
+    private MenuItem _addItem;
 
     /**
-     * Constructor. Opens the Memo PIM List and displays a list of memos on the
-     * screen in list format.
+     * Creates a new MemoMainScreen object
      */
     public MemoMainScreen() {
-        super();
+        super(Manager.NO_VERTICAL_SCROLL);
 
         try {
             _memoList =
                     (BlackBerryMemoList) PIM.getInstance().openPIMList(
                             BlackBerryPIM.MEMO_LIST, PIM.READ_WRITE);
         } catch (final PIMException pe) {
-            // Can't open the Memo PIM List. Nothing we can do...exiting the
-            // application.
-            MemoApiDemo.errorDialog("PIM#openPIMList() threw " + pe.toString());
+            // Can't open the Memo PIM List. Exit the application
             System.exit(1);
         }
 
-        _memoListField = new ListField();
-        _memoListField.setCallback(this);
-        loadMemos();
-        add(_memoListField);
-    }
+        _model = new BlackBerryMemoTableModel();
 
-    /**
-     * Loads the current list of memos into a vector for easy retrieval.
-     */
-    private void loadMemos() {
-        loadMemos(null);
-    }
+        // Create the view and the controller
+        _view = new TableView(_model);
+        final TableController controller = new TableController(_model, _view);
+        controller.setFocusPolicy(TableController.ROW_FOCUS);
+        _view.setController(controller);
 
-    /**
-     * Loads the current list of memos into a vector for easy retrieval, and
-     * sets the focus of ListField to the provided memo (if it's not null).
-     */
-    private void loadMemos(final BlackBerryMemo memo) {
-        try {
-            _memos = new Vector();
+        _view.setDataTemplateFocus(BackgroundFactory
+                .createLinearGradientBackground(Color.LIGHTBLUE,
+                        Color.LIGHTBLUE, Color.BLUE, Color.BLUE));
+        final DataTemplate dataTemplate = new DataTemplate(_view, 1, 1) {
+            public Field[] getDataFields(final int modelRowIndex) {
+                final BlackBerryMemo memo =
+                        (BlackBerryMemo) _model.getRow(modelRowIndex);
 
-            final Enumeration memoEnum = _memoList.items();
-
-            while (memoEnum.hasMoreElements()) {
-                _memos.addElement(memoEnum.nextElement());
+                final Field[] fields =
+                        { new LabelField(memo
+                                .getString(BlackBerryMemo.TITLE, 0),
+                                Field.NON_FOCUSABLE) };
+                return fields;
             }
+        };
+        dataTemplate.createRegion(new XYRect(0, 0, 1, 1));
+        dataTemplate.setColumnProperties(0, new TemplateColumnProperties(
+                Display.getWidth()));
+        dataTemplate.setRowProperties(0, new TemplateRowProperties(32));
+        _view.setDataTemplate(dataTemplate);
+        dataTemplate.useFixedHeight(true);
 
-            _memoListField.setSize(_memos.size()); // Causes the list to be
-                                                   // updated and painted.
+        add(_view);
 
-            if (memo != null) {
-                final int index = _memos.indexOf(memo);
-
-                if (index != -1) {
-                    _memoListField.setSelectedIndex(index);
-                }
-            }
-        } catch (final PIMException pe) {
-            // Had a problem retrieving the memos...
-            MemoApiDemo.errorDialog("BlackBerryMemoList#items() threw "
-                    + pe.toString());
-        }
+        _addItem = new AddItem();
     }
 
     /**
@@ -124,16 +123,16 @@ public final class MemoMainScreen extends MainScreen implements
      * highlighted.
      * 
      * @return The currently selected memo, or null if there is no currently
-     *         selected memo.
+     *         selected memo
      */
     private BlackBerryMemo getSelectedMemo() {
-        final int selectedIndex = _memoListField.getSelectedIndex();
+        final int selectedIndex = _view.getRowNumberWithFocus();
 
         if (selectedIndex == -1) {
             return null;
         }
 
-        return (BlackBerryMemo) _memos.elementAt(selectedIndex);
+        return (BlackBerryMemo) _model.getRow(selectedIndex);
     }
 
     /**
@@ -142,28 +141,28 @@ public final class MemoMainScreen extends MainScreen implements
     protected void makeMenu(final Menu menu, final int instance) {
         super.makeMenu(menu, instance);
 
-        final BlackBerryMemo memo = getSelectedMemo();
+        if (_model.getNumberOfRows() > 0) {
+            final BlackBerryMemo memo = getSelectedMemo();
 
-        if (memo != null) {
-            // There is a currently selected memo; add menu items to manipulate
-            // it.
+            // There is a currently selected memo, add menu items to manipulate
+            // it
             menu.add(new ViewItem(memo));
             menu.add(new EditItem(memo));
             menu.add(new CopyItem(memo));
             menu.add(new DeleteItem(memo));
         }
 
-        menu.add(_addItem); // "Add" item is always available.
+        // "Add" item is always available
+        menu.add(_addItem);
     }
 
     /**
-     * Override Screen.keyChar() to handle the user pressing ENTER. Opens the
-     * "add memo" screen if no memo is selected; otherwise, the currently
-     * selected memo is shown in the "view memo" screen.
-     * 
-     * @see net.rim.device.api.ui.Screen#keyChar(char,int,int)
+     * @see net.rim.device.api.ui.Screen#keyChar(char, int, int)
      */
     protected boolean keyChar(final char key, final int status, final int time) {
+
+        // Open the "add memo" screen if no memo is selected, otherwise the
+        // currently selected memo is shown in the "view memo" screen.
         if (key == Characters.ENTER) {
             final BlackBerryMemo memo = getSelectedMemo();
 
@@ -180,14 +179,10 @@ public final class MemoMainScreen extends MainScreen implements
     }
 
     /**
-     * Overrides Screen.invokeAction(). Handles a trackball click and provides
-     * identical behavior to an ENTER keypress event.
-     * 
      * @see net.rim.device.api.ui.Screen#invokeAction(int)
      */
     public boolean invokeAction(final int action) {
-        switch (action) {
-        case ACTION_INVOKE: // Trackball click.
+        if (action == ACTION_INVOKE) {
             final BlackBerryMemo memo = getSelectedMemo();
 
             if (memo == null) {
@@ -196,247 +191,250 @@ public final class MemoMainScreen extends MainScreen implements
                 new ViewItem(memo).run();
             }
 
-            return true; // We've consumed the event.
+            return true;
         }
 
         return super.invokeAction(action);
     }
 
-    // ////////////////////////////////////
-    // ListFieldCallback methods
-    // ////////////////////////////////////
-
-    /**
-     * Draws a row in the list of memos.
-     * 
-     * @param listField
-     *            The ListField whose row is being drawn.
-     * @param graphics
-     *            The graphics context to use for drawing.
-     * @param index
-     *            The index of the row being drawn.
-     * @param y
-     *            The distance from the top of the screen where the row is being
-     *            drawn.
-     * @param width
-     *            The width of the row being drawn.
-     * 
-     * @see net.rim.device.api.ui.component.ListFieldCallback#drawListRow(ListField,Graphics,int,int,int)
-     */
-    public void drawListRow(final ListField listField, final Graphics graphics,
-            final int index, final int y, final int width) {
-        final BlackBerryMemo memo = (BlackBerryMemo) get(listField, index);
-
-        graphics.drawText(memo.getString(BlackBerryMemo.TITLE, 0), 0, y, 0,
-                width);
-    }
-
-    /**
-     * Retrieves the element from the specified ListField at the specified
-     * index.
-     * 
-     * @param listField
-     *            The ListField from which to retrieve the element.
-     * @param index
-     *            The index into the ListField from which to retrieve the
-     *            element.
-     * @return The requested element.
-     * 
-     * @see net.rim.device.api.ui.component.ListFieldCallback#get(ListField ,
-     *      int)
-     */
-    public Object get(final ListField listField, final int index) {
-        return _memos.elementAt(index);
-    }
-
-    /**
-     * Returns the preferred width of the provided ListField.
-     * 
-     * @param listField
-     *            The ListField whose preferred width is being retrieved.
-     * @return The ListField's preferred width.
-     * 
-     * @see net.rim.device.api.ui.component.ListFieldCallback#getPreferredWidth(ListField)
-     */
-    public int getPreferredWidth(final ListField listField) {
-        return Display.getWidth();
-    }
-
-    /**
-     * Retrieves the first occurrence of the provided prefix in the list (not
-     * implemented).
-     * 
-     * @param listField
-     *            The ListField being searched.
-     * @param prefix
-     *            The prefix to search for.
-     * @param start
-     *            List item at which to start the search.
-     * @return -1 (not implemented).
-     * 
-     * @see net.rim.device.api.ui.component.ListFieldCallback#indexOfList(ListField,String,int)
-     */
-    public int indexOfList(final ListField listField, final String prefix,
-            final int start) {
-        return -1;
-    }
-
     // //////////////////// INNER CLASSES //////////////////////
 
     /**
-     * A menu item for adding a new memo.
+     * Adapter to display memo list in table format
      */
-    private final class AddItem extends MenuItem {
+    private class BlackBerryMemoTableModel extends TableModelAdapter {
         /**
-         * Constructor.
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfRows()
          */
-        private AddItem() {
-            super("Add Memo", 100, 100);
+        public int getNumberOfRows() {
+            return _memoList.size();
         }
 
         /**
-         * Pushes a modal edit screen to the display stack, passing it a new
-         * memo to edit. Upon popping the edit screen from the stack, the memo
-         * list is re-loaded.
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#getNumberOfColumns()
          */
-        public void run() {
-            final BlackBerryMemo newMemo = _memoList.createMemo();
+        public int getNumberOfColumns() {
+            return 1;
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doGetRow(int)
+         */
+        public Object doGetRow(final int modelRowIndex) {
+            try {
+                final Enumeration memoEnum = _memoList.items();
+                int i = 0;
+                while (memoEnum.hasMoreElements()) {
+                    final BlackBerryMemo memo =
+                            (BlackBerryMemo) memoEnum.nextElement();
+                    if (i == modelRowIndex) {
+                        return memo;
+                    }
+                    i++;
+                }
+            } catch (final javax.microedition.pim.PIMException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        /**
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doRemoveRowAt(Objecy)
+         */
+        public boolean doRemoveRowAt(final int index) {
+            try {
+                _memoList.removeMemo((BlackBerryMemo) _model.getRow(index));
+                return true;
+            } catch (final javax.microedition.pim.PIMException e) {
+                MemoApiDemo.errorDialog("PIM#doRemoveRowAt() threw "
+                        + e.toString());
+            }
+            return false;
+        }
+
+        /**
+         * Notifies the view that the table data has been updated.
+         */
+        public void refresh() {
+            notifyListeners(new TableModelChangeEvent(
+                    TableModelChangeEvent.COLUMN_UPDATED, this, -1, 0));
+        }
+
+        /**
+         * Creates and adds a new memo to the list, prompting the user for data
+         * and notifying listeners.
+         */
+        public void addNewMemo() {
+            final BlackBerryMemo memo = _memoList.createMemo();
+
+            // Launch screen for user-supplied memo information
             UiApplication.getUiApplication().pushModalScreen(
-                    new EditMemoScreen(newMemo, true));
-            MemoMainScreen.this.loadMemos(newMemo);
+                    new EditMemoScreen(memo, true));
+            try {
+                memo.commit();
+            } catch (final PIMException e) {
+                MemoApiDemo.errorDialog("addNewMemo() threw " + e.toString());
+            }
+            refresh();
         }
     }
 
     /**
-     * Menu item for making a copy of a memo.
+     * A menu item for adding a new memo
+     */
+    private final class AddItem extends MenuItem {
+        /**
+         * Creates a new AddItem object
+         */
+        private AddItem() {
+            super(new StringProvider("Add Memo"), 0x230010, 100);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    _model.addNewMemo();
+                }
+            }));
+        }
+    }
+
+    /**
+     * Menu item for making a copy of a memo
      */
     private final class CopyItem extends MenuItem {
         private final BlackBerryMemo _memo;
 
         /**
-         * Constructor.
+         * Creates a new CopyItem object
          * 
          * @param memo
-         *            The memo to copy.
+         *            The memo to copy
          */
         private CopyItem(final BlackBerryMemo memo) {
-            super("Add Copy of Memo", 200, 200);
+            super(new StringProvider("Add Copy of Memo"), 0x230020, 200);
             _memo = memo;
-        }
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final BlackBerryMemo copy =
+                            MemoMainScreen.this._memoList.importMemo(_memo);
 
-        /**
-         * Makes a copy of the memo and re-loads the memo list.
-         */
-        public void run() {
-            final BlackBerryMemo copy =
-                    MemoMainScreen.this._memoList.importMemo(_memo);
-
-            try {
-                copy.commit();
-                MemoMainScreen.this.loadMemos(copy);
-            } catch (final PIMException e) {
-                // Oh well...
-                MemoApiDemo.errorDialog("BlackBerryMemo#commit() threw "
-                        + e.toString());
-            }
+                    try {
+                        copy.commit();
+                        _model.refresh();
+                    } catch (final PIMException e) {
+                        MemoApiDemo
+                                .errorDialog("BlackBerryMemo#commit() threw "
+                                        + e.toString());
+                    }
+                }
+            }));
         }
     }
 
     /**
-     * Menu item for viewing a memo.
+     * Menu item for viewing a memo
      */
-    private final class ViewItem extends MenuItem {
+    private static final class ViewItem extends MenuItem {
         private final BlackBerryMemo _memo;
 
         /**
-         * Constructor.
+         * Creates a new ViewItem object
          * 
          * @param memo
-         *            The memo to view.
+         *            The memo to view
          */
         private ViewItem(final BlackBerryMemo memo) {
-            super("View Memo", 300, 50);
+            super(new StringProvider("View Memo"), 0x230030, 50);
             _memo = memo;
-        }
-
-        /**
-         * Pushes a view screen to the display stack, passing it the memo to
-         * view.
-         */
-        public void run() {
-            // Push a modal screen, because user may go on to edit the memo and
-            // therefore
-            // we need to know when they return.
-            UiApplication.getUiApplication().pushModalScreen(
-                    new ViewMemoScreen(_memo));
-
-            loadMemos(_memo); // User may have edited the memo; re-load the memo
-                              // list.
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    // Push a modal screen, because user may go on to edit the
+                    // memo
+                    // and therefore we need to know when they return.
+                    UiApplication.getUiApplication().pushModalScreen(
+                            new ViewMemoScreen(_memo));
+                }
+            }));
         }
     }
 
     /**
-     * Menu item for editing a memo.
+     * Menu item for editing a memo
      */
     private final class EditItem extends MenuItem {
         private final BlackBerryMemo _memo;
 
         /**
-         * Constructor.
+         * Creates a new EditItem object
          * 
          * @param memo
-         *            The memo to edit.
+         *            The memo to edit
          */
         private EditItem(final BlackBerryMemo memo) {
-            super("Edit Memo", 400, 400);
+            super(new StringProvider("Edit Memo"), 0x230040, 400);
             _memo = memo;
-        }
-
-        /**
-         * Pushes a modal edit screen to the display stack, passing it the memo
-         * to edit. Upon popping the edit screen off the display stack, the memo
-         * list is re-loaded.
-         */
-        public void run() {
-            UiApplication.getUiApplication().pushModalScreen(
-                    new EditMemoScreen(_memo, false));
-            MemoMainScreen.this.loadMemos(_memo);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    UiApplication.getUiApplication().pushModalScreen(
+                            new EditMemoScreen(_memo, false));
+                    try {
+                        _memo.commit();
+                    } catch (final PIMException e) {
+                        MemoApiDemo
+                                .errorDialog("BlackBerryMemo#commit() threw "
+                                        + e.toString());
+                    }
+                    _model.refresh();
+                }
+            }));
         }
     }
 
     /**
-     * Menu item to delete a memo.
+     * Menu item to delete a memo
      */
     private final class DeleteItem extends MenuItem {
-        private final BlackBerryMemo _memo;
 
         /**
-         * Constructor.
+         * Creates a new DeleteItem object
          * 
          * @param memo
-         *            The memo to delete.
+         *            The memo to delete
          */
         private DeleteItem(final BlackBerryMemo memo) {
-            super("Delete Memo", 500, 500);
-            _memo = memo;
-        }
-
-        /**
-         * Displays a dialog asking the user to confirm the delete. If
-         * confirmed, the memo is deleted and the memo list re-loaded.
-         */
-        public void run() {
-            try {
-                if (Dialog.ask(Dialog.D_DELETE, "Delete memo?", Dialog.CANCEL) == Dialog.DELETE) {
-                    _memoList.removeMemo(_memo);
-                    MemoMainScreen.this.loadMemos();
+            super(new StringProvider("Delete Memo"), 0x230050, 500);
+            this.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                 *      Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    if (Dialog.ask(Dialog.D_DELETE, "Delete memo?",
+                            Dialog.CANCEL) == Dialog.DELETE) {
+                        _model.removeRowAt(_view.getRowNumberWithFocus());
+                    }
                 }
-            } catch (final PIMException e) {
-                // Shouldn't happen...
-                MemoApiDemo
-                        .errorDialog("BlackBerryMemoList#removeMemo() threw "
-                                + e.toString());
-            }
+            }));
         }
     }
+
 }
