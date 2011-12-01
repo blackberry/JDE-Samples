@@ -44,16 +44,16 @@ import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.container.MainScreen;
 
 /**
- * Main screen to show the listing of all directories/files.
+ * Main screen to show the listing of all directories/files
  */
-/* package */final class FileExplorerDemoScreen extends MainScreen {
+public final class FileExplorerDemoScreen extends MainScreen {
     private final FileExplorerDemo _uiApp;
     private final FileExplorerDemoListFieldImpl _list;
     private final FileExplorerDemoJournalListener _fileListener;
     private String _parentRoot;
 
     /**
-     * Constructor
+     * Creates a new FileExplorerDemoScreen object
      */
     FileExplorerDemoScreen() {
         setTitle("File Explorer Demo");
@@ -68,7 +68,7 @@ import net.rim.device.api.ui.container.MainScreen;
     }
 
     /**
-     * Overrides super. Removes listener before closing the screen.
+     * Overrides super. Removes listener before closing the screen
      * 
      * @see net.rim.device.api.ui.Screen#close()
      */
@@ -78,7 +78,7 @@ import net.rim.device.api.ui.container.MainScreen;
     }
 
     /**
-     * Deletes the selected file or directory.
+     * Deletes the selected file or directory
      */
     private void deleteAction() {
         final int index = _list.getSelectedIndex();
@@ -97,8 +97,9 @@ import net.rim.device.api.ui.container.MainScreen;
                     fc.delete();
                     _list.remove(index);
                 } catch (final Exception ex) {
-                    Dialog.alert("Unable to delete file or directory: "
-                            + filename);
+                    FileExplorerDemo
+                            .errorDialog("Unable to delete file or directory: "
+                                    + filename);
                 } finally {
                     try {
                         if (fc != null) {
@@ -141,12 +142,12 @@ import net.rim.device.api.ui.container.MainScreen;
     }
 
     /**
-     * Creates the menu to be used in the application.
+     * Creates the menu to be used in the application
      * 
-     * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
+     * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
      */
     public void makeMenu(final Menu menu, final int instance) {
-        // Only display the menu if no actions are performed.
+        // Only display the menu if no actions are performed
         if (instance == Menu.INSTANCE_DEFAULT) {
             menu.add(_selectItem);
 
@@ -154,7 +155,15 @@ import net.rim.device.api.ui.container.MainScreen;
                 menu.add(_cameraItem);
             }
 
-            menu.add(_deleteItem);
+            // Add delete item if selected item is not a directory and is not a
+            // file in read only system partition.
+            final FileExplorerDemoFileHolder fileholder =
+                    (FileExplorerDemoFileHolder) _list.get(_list, _list
+                            .getSelectedIndex());
+            if (!fileholder.isDirectory()
+                    && !fileholder.getPath().startsWith("system/")) {
+                menu.add(_deleteItem);
+            }
 
             if (_parentRoot != null) {
                 menu.add(_backItem);
@@ -179,7 +188,7 @@ import net.rim.device.api.ui.container.MainScreen;
     }
 
     /**
-     * Reads the path that was passed in and enumerates through it.
+     * Reads the path that was passed in and enumerates through it
      * 
      * @param root
      *            Path to be read.
@@ -194,15 +203,18 @@ import net.rim.device.api.ui.container.MainScreen;
         Enumeration rootEnum = null;
 
         if (root != null) {
-            // Open the file system and get the list of directories/files.
+            // Open the file system and get the list of directories/files
             try {
-                fc = (FileConnection) Connector.open("file:///" + root);
+                fc =
+                        (FileConnection) Connector.open("file:///" + root,
+                                Connector.READ);
                 rootEnum = fc.list();
             } catch (final Exception ioex) {
+                FileExplorerDemo.errorDialog(ioex.toString());
             } finally {
 
                 if (fc != null) {
-                    // Everything is read, make sure to close the connection.
+                    // Everything is read, make sure to close the connection
                     try {
                         fc.close();
                         fc = null;
@@ -212,12 +224,12 @@ import net.rim.device.api.ui.container.MainScreen;
             }
         }
 
-        // There was no root to read, so now we are reading the system roots.
+        // There was no root to read, so now we are reading the system roots
         if (rootEnum == null) {
             rootEnum = FileSystemRegistry.listRoots();
         }
 
-        // Read through the list of directories/files.
+        // Read through the list of directories/files
         while (rootEnum.hasMoreElements()) {
             String file = (String) rootEnum.nextElement();
 
@@ -230,7 +242,7 @@ import net.rim.device.api.ui.container.MainScreen;
     }
 
     /**
-     * Reads all the directories and files from the provided path.
+     * Reads all the directories and files from the provided path
      * 
      * @param file
      *            Upper directory to be read.
@@ -239,18 +251,22 @@ import net.rim.device.api.ui.container.MainScreen;
         FileConnection fc = null;
 
         try {
-            fc = (FileConnection) Connector.open("file:///" + file);
+            fc =
+                    (FileConnection) Connector.open("file:///" + file,
+                            Connector.READ);
 
             // Create a file holder from the FileConnection so that the
-            // connection is not left open.
+            // connection is not left open
             final FileExplorerDemoFileHolder fileholder =
                     new FileExplorerDemoFileHolder(file);
             fileholder.setDirectory(fc.isDirectory());
             _list.add(fileholder);
         } catch (final Exception ioex) {
+            FileExplorerDemo.errorDialog("Connector.open() threw "
+                    + ioex.toString());
         } finally {
             if (fc != null) {
-                // Everything is read, make sure to close the connection.
+                // Everything is read, make sure to close the connection
                 try {
                     fc.close();
                     fc = null;
@@ -261,7 +277,7 @@ import net.rim.device.api.ui.container.MainScreen;
     }
 
     /**
-     * Displays information on the selected file.
+     * Displays information on the selected file
      * 
      * @return True.
      */
@@ -271,11 +287,11 @@ import net.rim.device.api.ui.container.MainScreen;
                         .getSelectedIndex());
 
         if (fileholder != null) {
-            // If it's a directory then show what's in the directory.
+            // If it's a directory then show what's in the directory
             if (fileholder.isDirectory()) {
                 readRoots(fileholder.getPath());
             } else {
-                // It's a file so display information on it.
+                // It's a file so display information on it
                 _uiApp.pushScreen(new FileExplorerDemoScreenFileInfoPopup(
                         fileholder));
             }
@@ -285,7 +301,7 @@ import net.rim.device.api.ui.container.MainScreen;
     }
 
     /**
-     * Updates the list of files.
+     * Updates the list of files
      */
     /* package */void updateList() {
         synchronized (_uiApp.getAppEventLock()) {
@@ -295,9 +311,9 @@ import net.rim.device.api.ui.container.MainScreen;
     }
 
     /**
-     * Goes back one directory in the directory hierarchy, if possible.
+     * Goes back one directory in the directory hierarchy, if possible
      * 
-     * @return True if went back a directory; false otherwise.
+     * @return True if we went back a directory; false otherwise
      */
     private boolean goBack() {
         if (_parentRoot != null) {
@@ -336,16 +352,17 @@ import net.rim.device.api.ui.container.MainScreen;
     };
 
     /**
-     * Menu item for deleting the selected file.
+     * Menu item for deleting the selected file
      */
     private final MenuItem _deleteItem = new MenuItem("Delete", 500, 500) {
         public void run() {
+
             deleteAction();
         }
     };
 
     /**
-     * Menu item for displaying information on the selected file.
+     * Menu item for displaying information on the selected file
      */
     private final MenuItem _selectItem = new MenuItem("Select", 500, 500) {
         public void run() {
@@ -354,7 +371,7 @@ import net.rim.device.api.ui.container.MainScreen;
     };
 
     /**
-     * Menu item for going back one directory in the directory hierarchy.
+     * Menu item for going back one directory in the directory hierarchy
      */
     private final MenuItem _backItem = new MenuItem("Go Back", 500, 500) {
         public void run() {

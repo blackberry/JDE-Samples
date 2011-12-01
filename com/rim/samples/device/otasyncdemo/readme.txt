@@ -1,7 +1,7 @@
 OTA Sync Demo
 -------------
 
-1. Download Sync Server SDK from http://na.blackberry.com/eng/developers/downloads/syncsdk.jsp.
+1. Download Sync Server SDK from http://na.blackberry.com/eng/developers/javaappdev/devtools.jsp.
 
 2. Install Sync Server SDK as per instructions in Synchronization Server SDK Development Guide available here: http://na.blackberry.com/eng/support/docs/subcategories/?userType=21&category=BlackBerry+Java+Application+Development&subCategory=Synchronization+Server+SDK
 

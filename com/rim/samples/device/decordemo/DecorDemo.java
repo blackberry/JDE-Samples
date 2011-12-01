@@ -28,11 +28,10 @@ package com.rim.samples.device.decordemo;
 
 import net.rim.device.api.system.Bitmap;
 import net.rim.device.api.ui.Color;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.XYEdges;
-import net.rim.device.api.ui.component.LabelField;
+import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.decor.Background;
@@ -44,36 +43,32 @@ import net.rim.device.api.ui.decor.BorderFactory;
  * This sample application shows functionality for the
  * net.rim.device.api.ui.decor package and all of its classes.
  */
-final class DecorDemo extends UiApplication {
-
+public final class DecorDemo extends UiApplication {
     /**
-     * Main method that starts the program.
+     * Entry point for application
      * 
      * @param args
+     *            Command line arguments (not used)
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final DecorDemo theApp = new DecorDemo();
         theApp.enterEventDispatcher();
     }
 
-    /**
-     * Constructor.
-     */
+    // Constructor
     public DecorDemo() {
         final DecorDemoScreen screen = new DecorDemoScreen();
         pushScreen(screen);
     }
-
 }
 
 /**
- * This class is the main screen of the application.
+ * This class is the main screen of the application
  */
 final class DecorDemoScreen extends MainScreen {
-
-    /**
-     * Constructor.
-     */
+    // Constructor
     DecorDemoScreen() {
         // XYEdge objects are used to represent different padding configurations
         // Each integer represents the amount of space between the box and
@@ -87,26 +82,26 @@ final class DecorDemoScreen extends MainScreen {
         // XYEdges verticalPadding = new XYEdges(10, 0, 10, 0);
         // XYEdges horizontalPadding = new XYEdges(0, 10, 0, 10);
 
-        // XYEdges can also be used to represent colours
-        final XYEdges multiColours =
+        // XYEdges can also be used to represent colors
+        final XYEdges multiColors =
                 new XYEdges(Color.BLUEVIOLET, Color.AZURE, Color.DARKRED,
                         Color.KHAKI);
-        final XYEdges pinkColours =
+        final XYEdges pinkColors =
                 new XYEdges(Color.HOTPINK, Color.HOTPINK, Color.HOTPINK,
                         Color.HOTPINK);
-        final XYEdges blueColours =
+        final XYEdges blueColors =
                 new XYEdges(Color.MIDNIGHTBLUE, Color.MIDNIGHTBLUE,
                         Color.MIDNIGHTBLUE, Color.MIDNIGHTBLUE);
-        final XYEdges oliveColours =
+        final XYEdges oliveColors =
                 new XYEdges(Color.OLIVE, Color.OLIVE, Color.OLIVE, Color.OLIVE);
 
-        // Setting the title of the application
-        setTitle(new LabelField("Decor Demo", DrawStyle.ELLIPSIS
-                | Field.USE_ALL_WIDTH));
+        // Set the title of the application
+        setTitle("Décor Demo");
+
         add(new RichTextField(Field.NON_FOCUSABLE));
 
         // Sample text field with a thick and solid rounded border
-        // and single solid colour background.
+        // and single solid color background.
         final RichTextField simpleField =
                 new RichTextField("Solid rounded border, solid background");
 
@@ -126,7 +121,7 @@ final class DecorDemoScreen extends MainScreen {
         add(new RichTextField(Field.NON_FOCUSABLE));
 
         // Sample text field with a thick and dotted rounded border
-        // and single colour transparent background.
+        // and single color transparent background.
         final RichTextField transparentField =
                 new RichTextField(
                         "Dotted rounded border, transparent background");
@@ -146,7 +141,7 @@ final class DecorDemoScreen extends MainScreen {
         final RichTextField gradientField =
                 new RichTextField("Dashed simple border, gradient background");
         final Border dashedBorder =
-                BorderFactory.createSimpleBorder(thickPadding, blueColours,
+                BorderFactory.createSimpleBorder(thickPadding, blueColors,
                         Border.STYLE_DASHED);
         final Background gradientBackground =
                 BackgroundFactory.createLinearGradientBackground(Color.RED,
@@ -160,7 +155,7 @@ final class DecorDemoScreen extends MainScreen {
         final RichTextField noPaddingField =
                 new RichTextField("Dotted simple border, no padding");
         final Border noPaddingBorder =
-                BorderFactory.createSimpleBorder(noPadding, oliveColours,
+                BorderFactory.createSimpleBorder(noPadding, oliveColors,
                         Border.STYLE_DOTTED);
         noPaddingField.setBorder(noPaddingBorder);
         add(noPaddingField);
@@ -170,10 +165,10 @@ final class DecorDemoScreen extends MainScreen {
         final RichTextField bevelAndBitmapField =
                 new RichTextField("Bevel border, bitmap background");
         final Border bevelBorder =
-                BorderFactory.createBevelBorder(thickPadding, multiColours,
-                        pinkColours);
+                BorderFactory.createBevelBorder(thickPadding, multiColors,
+                        pinkColors);
 
-        // Attempt to load a bitmap background, doing nothing if failed
+        // Attempt to load a bitmap background
         try {
             final Background bitmapBackground =
                     BackgroundFactory.createBitmapBackground(Bitmap
@@ -183,10 +178,13 @@ final class DecorDemoScreen extends MainScreen {
                             Background.REPEAT_BOTH);
             bevelAndBitmapField.setBackground(bitmapBackground);
         } catch (final IllegalArgumentException e) {
-            System.out.println(e.getMessage());
+            UiApplication.getUiApplication().invokeLater(new Runnable() {
+                public void run() {
+                    Dialog.alert(e.toString());
+                }
+            });
         }
         bevelAndBitmapField.setBorder(bevelBorder);
         add(bevelAndBitmapField);
-
     }
 }

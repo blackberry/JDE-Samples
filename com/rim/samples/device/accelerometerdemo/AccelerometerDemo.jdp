@@ -36,7 +36,7 @@ img\accelerometerdemo_jde.png
 [Imports
 ]
 Listing=0
-Options=-quiet
+Options=-quiet 
 OutputFileName=AccelerometerDemo
 [PackageProtection
 ]
@@ -46,4 +46,7 @@ RibbonPosition=0
 RunOnStartup=0
 StartupTier=7
 SystemModule=0
+Title=Accelerometer Demo
 Type=0
+Vendor=Research In Motion Limited
+Version=0.9

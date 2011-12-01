@@ -26,8 +26,6 @@
 
 package com.rim.samples.device.httpdemo;
 
-import net.rim.device.api.ui.DrawStyle;
-import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BasicEditField;
@@ -40,7 +38,7 @@ import net.rim.device.api.ui.container.MainScreen;
  * A screen that allows the user to specify the WAP parameters to use when
  * opening an HTTP connection.
  */
-final class WapOptionsScreen extends MainScreen {
+public final class WapOptionsScreen extends MainScreen {
     private static String WAP_PARAMETERKEY_GWAYIP = ";WapGatewayIP=";
     private static String WAP_PARAMETERKEY_GWAYPORT = ";WapGatewayPort=";
     private static String WAP_PARAMETERKEY_APN = ";WapGatewayAPN=";
@@ -61,7 +59,7 @@ final class WapOptionsScreen extends MainScreen {
     private final MenuItem _save;
 
     // Constructor
-    WapOptionsScreen(final UiApplication app) {
+    public WapOptionsScreen(final UiApplication app) {
         super();
         _this = this;
         _app = app;
@@ -73,8 +71,7 @@ final class WapOptionsScreen extends MainScreen {
             }
         };
 
-        setTitle(new LabelField("Wap Options", DrawStyle.ELLIPSIS
-                | Field.USE_ALL_WIDTH));
+        setTitle(new LabelField("Wap Options"));
 
         _gateway = new EditField("Gateway Port: ", null);
         _gatewayPort =

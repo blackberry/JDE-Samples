@@ -27,6 +27,7 @@
 package com.rim.samples.device.midletdemo;
 
 import javax.microedition.lcdui.Alert;
+import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
@@ -35,8 +36,10 @@ import javax.microedition.lcdui.Form;
 import javax.microedition.midlet.MIDlet;
 
 /**
- * An Example MIDlet. The application must extend the MIDlet class to allow the
- * application management software to control the MIDlet.
+ * An Example MIDlet. The MIDlet demonstrates how to use Commands and
+ * CommandListeners to affect the program flow. The application must extend the
+ * MIDlet class to allow the application management software to control the
+ * MIDlet.
  */
 public class MIDletDemo extends MIDlet implements CommandListener {
     private final Alert _alert;
@@ -44,6 +47,7 @@ public class MIDletDemo extends MIDlet implements CommandListener {
     private final Form _form;
     private final Display _display;
     private UpdateThread _updateThread;
+    private final Command _exit;
 
     /**
      * The thread that updates the explosion dialog box.
@@ -51,22 +55,34 @@ public class MIDletDemo extends MIDlet implements CommandListener {
     private class UpdateThread extends Thread {
         private boolean _disarmed;
 
+        /**
+         * Updates the explosion dialog box.
+         * 
+         * @see java.lang.Runnable#run
+         */
         public void run() {
+            // Keep counting down until the timer reaches 0 or the
+            // device has been disarmed
             _disarmed = false;
-            int i = _time;
-            while (i > 0 && !_disarmed) {
+            int timer = _time;
+            while (timer > 0 && !_disarmed) {
                 try {
-                    _alert.setString(Integer.toString(i));
+                    _alert.setString(Integer.toString(timer));
+
+                    // Update every second
                     synchronized (this) {
                         this.wait(1000);
                     }
 
-                    System.out.println("timeout in:" + i);
+                    System.out.println("timeout in:" + timer);
                 } catch (final InterruptedException e) {
-                    System.out.println("MyMidlet: Exception: " + e);
+                    final Alert thrownException =
+                            new Alert("UpdateThread#wait() threw exception:", e
+                                    .toString(), null, AlertType.ERROR);
+                    _display.setCurrent(thrownException, _form);
                 }
 
-                i--;
+                timer--;
             }
 
             if (!_disarmed) {
@@ -74,6 +90,9 @@ public class MIDletDemo extends MIDlet implements CommandListener {
             }
         }
 
+        /**
+         * Disarms the device and stops the countdown.
+         */
         void disarm() {
             _disarmed = true;
         }
@@ -83,10 +102,23 @@ public class MIDletDemo extends MIDlet implements CommandListener {
      * Thread that pops up the program's main dialog box.
      */
     private class GoCommand extends Command implements Runnable {
+        /**
+         * Constructs the command to pop up the main dialog box.
+         * 
+         * @param label
+         *            The label of the command
+         * @param type
+         *            The type of the command
+         * @param priority
+         *            The priority of the command
+         */
         private GoCommand(final String label, final int type, final int priority) {
             super(label, type, priority);
         }
 
+        /**
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             _alert.setString(Integer.toString(_time));
             _alert.setTimeout(_time * 1000 + 5000);
@@ -117,10 +149,18 @@ public class MIDletDemo extends MIDlet implements CommandListener {
         // Add our command.
         _form.addCommand(new GoCommand("Go", Command.SCREEN, 1));
 
+        // Create and add exit command.
+        _exit = new Command("Close", Command.EXIT, 1);
+        _form.addCommand(_exit);
+
         _form.setCommandListener(this);
         _display.setCurrent(_form);
     }
 
+    /**
+     * @see javax.microedition.lcdui.CommandListener#commandAction(Command,
+     *      Displayable)
+     */
     public void commandAction(final Command c, final Displayable s) {
         if (c instanceof Runnable) {
             ((Runnable) c).run();
@@ -129,11 +169,17 @@ public class MIDletDemo extends MIDlet implements CommandListener {
         if (c == Alert.DISMISS_COMMAND) {
             _updateThread.disarm();
         }
+
+        if (c == _exit) {
+            notifyDestroyed();
+        }
     }
 
     /**
      * <p>
      * Signals the MIDlet that it has entered the Active state.
+     * 
+     * @see javax.microedition.midlet.MIDlet#startApp()
      */
     public void startApp() {
         // Not implemented.
@@ -142,6 +188,8 @@ public class MIDletDemo extends MIDlet implements CommandListener {
     /**
      * <p>
      * Signals the MIDlet to stop and enter the Pause state.
+     * 
+     * @see javax.microedition.midlet.MIDlet#pauseApp()
      */
     public void pauseApp() {
         // Not implemented.
@@ -156,6 +204,7 @@ public class MIDletDemo extends MIDlet implements CommandListener {
      *            resources. Otherwise, the MIDlet may throw a
      *            MIDletStateChangeException to indicate it does not want to be
      *            destroyed at this time.
+     * @see javax.microedition.midlet.MIDlet#destroyApp(boolean)
      */
     public void destroyApp(final boolean unconditional) {
         // Not implemented.

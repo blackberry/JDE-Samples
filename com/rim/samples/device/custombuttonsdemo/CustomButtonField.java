@@ -37,7 +37,7 @@ import net.rim.device.api.ui.Graphics;
  * CustomButtonField - class which creates button fields of various shapes.
  * Demonstrates how to create custom ui fields.
  */
-class CustomButtonField extends Field implements DrawStyle {
+public class CustomButtonField extends Field implements DrawStyle {
     static final int RECTANGLE = 1;
     static final int TRIANGLE = 2;
     static final int OCTAGON = 3;
@@ -54,28 +54,29 @@ class CustomButtonField extends Field implements DrawStyle {
     /**
      * Constructs a button with specified label, and default style and shape.
      */
-    CustomButtonField(final String label) {
+    public CustomButtonField(final String label) {
         this(label, RECTANGLE, 0);
     }
 
     /**
      * Constructs a button with specified label and shape, and default style.
      */
-    CustomButtonField(final String label, final int shape) {
+    public CustomButtonField(final String label, final int shape) {
         this(label, shape, 0);
     }
 
     /**
      * Constructs a button with specified label and style, and default shape.
      */
-    CustomButtonField(final String label, final long style) {
+    public CustomButtonField(final String label, final long style) {
         this(label, RECTANGLE, style);
     }
 
     /**
      * Constructs a button with specified label, shape, and style.
      */
-    CustomButtonField(final String label, final int shape, final long style) {
+    public CustomButtonField(final String label, final int shape,
+            final long style) {
         super(style);
 
         _label = label;

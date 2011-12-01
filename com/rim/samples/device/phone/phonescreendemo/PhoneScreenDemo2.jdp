@@ -1,0 +1,52 @@
+## RIM Java Development Environment
+# RIM Project file
+#
+# This file is generated and managed by BlackBerry developer tools.
+# It SHOULD NOT BE modified manually.
+#
+AddOn=0
+AlwaysBuild=0
+[AlxImports
+]
+AutoRestart=0
+[ClassProtection
+]
+[CustomBuildFiles
+]
+[CustomBuildRules
+]
+[DefFiles
+]
+[DependsOn
+]
+ExcludeFromBuildAll=0
+Exported=0
+[Files
+img\logo_2.jpg
+PhoneScreenAction2.java
+PhoneScreenDemo2.java
+]
+HaveAlxImports=0
+HaveDefs=0
+HaveImports=0
+[Icons
+]
+[ImplicitRules
+]
+[Imports
+]
+Listing=0
+Options=-quiet 
+OutputFileName=PhoneScreenDemo2
+[PackageProtection
+]
+RibbonPosition=0
+[RolloverIcons
+]
+RunOnStartup=1
+StartupTier=7
+SystemModule=1
+Title=Phone Screen Demo 2
+Type=0
+Vendor=Research In Motion Limited
+Version=0.9

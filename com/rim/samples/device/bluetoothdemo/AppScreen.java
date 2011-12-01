@@ -33,14 +33,27 @@ import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.container.MainScreen;
 
-final class AppScreen extends MainScreen {
-
+/**
+ * This class is the initial loading screen for the Bluetooth Demo. It retrieves
+ * the serial port information for all of the currently paired devices and lists
+ * any possible connections which have a service name of "Hi there" (for
+ * devices) or "COM X" (for PCs) in the menu. The user may then select the
+ * device from the menu or choose to try to wait and listen for a connection
+ * from a paired device.
+ * 
+ * Note: One of the paired devices must be listening for a connection before the
+ * other device may connect.
+ */
+public final class AppScreen extends MainScreen {
     private BluetoothSerialPortInfo[] _portInfo;
 
-    AppScreen() {
+    /**
+     * Default constructor
+     */
+    public AppScreen() {
         setTitle("Bluetooth Sample");
 
-        // Determine if this BlackBerry model or simulator supports Bluetooth.
+        // Determine if this BlackBerry model or simulator supports Bluetooth
         if (BluetoothSerialPort.isSupported()) {
             // Get the BluetoothSerialPortInfo. Retrieves serial port
             // information for
@@ -57,8 +70,8 @@ final class AppScreen extends MainScreen {
                 // Add a menu item only to the service that corresponds to the
                 // "Hi there" connection,
                 // or the "COM X" connection (if we are pairing with a PC).
-                if (serviceName.indexOf("Hi") != -1
-                        || serviceName.indexOf("COM") != -1) {
+                if (serviceName.equals("Hi there")
+                        || serviceName.equals("COM X")) {
                     final DeviceMenuItem deviceMenuItem =
                             new DeviceMenuItem("Connect to: "
                                     + _portInfo[count].getDeviceName(),
@@ -69,36 +82,58 @@ final class AppScreen extends MainScreen {
 
             addMenuItem(_listenItem);
         } else {
-            add(new LabelField(
-                    "Bluetooth is not supported on this BlackBerry or simulator."));
+            add(new LabelField("Bluetooth is not supported on this device."));
         }
     }
 
     // //////////////////////////////////////////////////////////
     // Menu Items //
     // //////////////////////////////////////////////////////////
+
     private final MenuItem _listenItem = new MenuItem("Listen for connections",
             30, 30) {
+        /**
+         * Launches a connection waiting screen.
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             UiApplication.getUiApplication().pushScreen(new SPPScreen(null));
-            close(); // close the current screen
+            close(); // Close the current screen
         }
     };
 
-    // //////////////////////////////////////////////////////////
-    // Custom Item //
-    // //////////////////////////////////////////////////////////
+    /**
+     * This is a custom menu item which invokes a connection to a paired device
+     * when selected.
+     */
     private final class DeviceMenuItem extends MenuItem {
         private final BluetoothSerialPortInfo _info;
 
+        /**
+         * Constructs the device menu item to allow the user to connect to a
+         * paired device.
+         * 
+         * @param text
+         *            The label of the menu item to display
+         * @param info
+         *            The Bluetooth Serial Port information of the paired device
+         *            this menu item will invoke a connection to
+         */
         DeviceMenuItem(final String text, final BluetoothSerialPortInfo info) {
             super(text, 20, 20);
             _info = info;
         }
 
+        /**
+         * Invokes the connection to the device associated with the Bluetooth
+         * Serial Port information stored in this object.
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             UiApplication.getUiApplication().pushScreen(new SPPScreen(_info));
-            close(); // close the current screen
+            close(); // Close the current screen
         }
     };
 }

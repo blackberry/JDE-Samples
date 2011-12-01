@@ -41,52 +41,54 @@ import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 
+/**
+ * The main screen to display an image taken from the camera demo.
+ */
 public final class ImageScreen extends MainScreen {
-    /** The down-scaling ratio applied to the snapshot Bitmap. */
+    /** The down-scaling ratio applied to the snapshot Bitmap */
     private static final int IMAGE_SCALING = 7;
 
     /** The base file name used to store pictures */
-    private static final String FILE_NAME = System
-            .getProperty("fileconn.dir.photos")
+    private static String FILE_NAME = System.getProperty("fileconn.dir.photos")
             + "IMAGE";
 
     /** The extension of the pictures to be saved */
-    private static final String EXTENSION = ".bmp";
+    private static String EXTENSION = ".bmp";
 
-    /** A counter for the number of snapshots taken. */
+    /** A counter for the number of snapshots taken */
     private static int _counter;
 
-    /** A reference to the current screen for listeners. */
+    /** A reference to the current screen for listeners */
     private final ImageScreen _imageScreen;
 
     /**
-     * Constructor.
+     * Constructor
      * 
      * @param raw
-     *            A byte array representing an image.
+     *            A byte array representing an image
      */
     public ImageScreen(final byte[] raw) {
-        // A reference to this object, to be used in listeners.
+        // A reference to this object, to be used in listeners
         _imageScreen = this;
 
         setTitle("IMAGE");
 
-        // Convert the byte array to a Bitmap image.
+        // Convert the byte array to a Bitmap image
         final Bitmap image =
                 Bitmap.createBitmapFromBytes(raw, 0, -1, IMAGE_SCALING);
 
-        // Create two field managers to center the screen's contents.
+        // Create two field managers to center the screen's contents
         final HorizontalFieldManager hfm1 =
                 new HorizontalFieldManager(Field.FIELD_HCENTER);
         final HorizontalFieldManager hfm2 =
                 new HorizontalFieldManager(Field.FIELD_HCENTER);
 
-        // Create the field that contains the image.
+        // Create the field that contains the image
         final BitmapField imageField = new BitmapField(image);
         hfm1.add(imageField);
 
-        // Create the SAVE button which returns the user to the main camera.
-        // screen and saves the picture as a file
+        // Create the SAVE button which returns the user to the main camera
+        // screen and saves the picture as a file.
         final ButtonField photoButton = new ButtonField("Save");
         photoButton.setChangeListener(new SaveListener(raw));
         hfm2.add(photoButton);
@@ -97,13 +99,13 @@ public final class ImageScreen extends MainScreen {
         cancelButton.setChangeListener(new CancelListener());
         hfm2.add(cancelButton);
 
-        // Add the field managers to the screen.
+        // Add the field managers to the screen
         add(hfm1);
         add(hfm2);
     }
 
     /**
-     * Handle trackball click events.
+     * Handles trackball click events
      * 
      * @see net.rim.device.api.ui.Screen#invokeAction(int)
      */
@@ -122,24 +124,24 @@ public final class ImageScreen extends MainScreen {
     }
 
     /**
-     * A listener used for the "Save" button.
+     * A listener used for the "Save" button
      */
     private class SaveListener implements FieldChangeListener {
-        /** A byte array representing an image. */
+        /** A byte array representing an image */
         private final byte[] _raw;
 
         /**
          * Constructor.
          * 
          * @param raw
-         *            A byte array representing an image.
+         *            A byte array representing an image
          */
-        public SaveListener(final byte[] raw) {
+        SaveListener(final byte[] raw) {
             _raw = raw;
         }
 
         /**
-         * Saves the image as a file in the BlackBerry filesystem.
+         * Saves the image as a file in the BlackBerry filesystem
          */
         public void fieldChanged(final Field field, final int context) {
             try {
@@ -159,37 +161,38 @@ public final class ImageScreen extends MainScreen {
                                     + _counter + EXTENSION);
                 }
 
-                // We know the file doesn't exist yet, so create it.
+                // We know the file doesn't exist yet, so create it
                 file.create();
 
-                // Write the image to the file.
+                // Write the image to the file
                 final OutputStream out = file.openOutputStream();
                 out.write(_raw);
 
-                // Close the connections.
+                // Close the connections
                 out.close();
                 file.close();
             } catch (final Exception e) {
-                Dialog.alert("ERROR " + e.getClass() + ":  " + e.getMessage());
+                CameraDemo.errorDialog("ERROR " + e.getClass() + ":  "
+                        + e.getMessage());
             }
 
-            // Inform the user where the file has been saved.
+            // Inform the user where the file has been saved
             Dialog.inform("Saved to " + FILE_NAME + _counter + EXTENSION);
 
-            // Increment the image counter.
+            // Increment the image counter
             ++_counter;
 
-            // Return to the main camera screen.
+            // Return to the main camera screen
             UiApplication.getUiApplication().popScreen(_imageScreen);
         }
     }
 
     /**
-     * A listener used for the "Cancel" button.
+     * A listener used for the "Cancel" button
      */
     private class CancelListener implements FieldChangeListener {
         /**
-         * Return to the main camera screen.
+         * Return to the main camera screen
          */
         public void fieldChanged(final Field field, final int context) {
             UiApplication.getUiApplication().popScreen(_imageScreen);

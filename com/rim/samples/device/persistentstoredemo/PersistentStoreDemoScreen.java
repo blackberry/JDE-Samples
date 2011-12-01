@@ -42,28 +42,28 @@ import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.container.MainScreen;
 
 /**
- * This screen displays a list of Meetings.
+ * This screen displays a list of Meetings
  */
-final class PersistentStoreDemoScreen extends MainScreen {
+public final class PersistentStoreDemoScreen extends MainScreen {
     private final ListField _meetingList;
     private final PersistentStoreDemo _uiApp;
 
-    // Constructor
     /**
+     * Creates a new PersistentStoreDemoScreen object
+     * 
      * @param meetings
      *            A vector of persistable Meeting objects
      */
-    PersistentStoreDemoScreen(final Vector meetings) {
-        // _meetings = meetings;
+    public PersistentStoreDemoScreen(final Vector meetings) {
         _uiApp = (PersistentStoreDemo) UiApplication.getUiApplication();
 
-        // Initialize UI components.
+        // Initialize UI components
         setTitle(new LabelField("Persistent Store Demo", DrawStyle.ELLIPSIS
                 | Field.USE_ALL_WIDTH));
         _meetingList = new ListField();
         add(_meetingList);
 
-        // Set list field callback and update meeting list.
+        // Set list field callback and update meeting list
         _meetingList.setCallback(_uiApp);
         updateList();
         addMenuItem(newMeetingItem);
@@ -71,14 +71,18 @@ final class PersistentStoreDemoScreen extends MainScreen {
     }
 
     /**
-     * Method to refresh our meetings list field.
+     * Method to refresh our meetings list field
      */
     void updateList() {
         _meetingList.setSize(_uiApp.getMeetings().size());
     }
 
     /**
-     * Pushes a MeetingScreen to display the selected meeting.
+     * Pushes a MeetingScreen to display the selected meeting
+     * 
+     * @param editable
+     *            True if the meeting displayed should be editable, false if the
+     *            meeting should be read only
      */
     void displayMeeting(final boolean editable) {
         if (!_meetingList.isEmpty()) {
@@ -90,9 +94,6 @@ final class PersistentStoreDemoScreen extends MainScreen {
     }
 
     /**
-     * Overrides method in super class. Adds items to act on selected meeting if
-     * list is not empty.
-     * 
      * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
      */
     protected void makeMenu(final Menu menu, final int instance) {
@@ -106,12 +107,10 @@ final class PersistentStoreDemoScreen extends MainScreen {
     }
 
     /**
-     * Overrides method in super class.
-     * 
      * @see net.rim.device.api.ui.Screen#keyChar(char,int,int)
      */
     protected boolean keyChar(final char key, final int status, final int time) {
-        // Intercept the ENTER key.
+        // Intercept the ENTER key
         if (key == Characters.ENTER) {
             displayMeeting(false);
             return true;
@@ -127,16 +126,13 @@ final class PersistentStoreDemoScreen extends MainScreen {
     }
 
     /**
-     * Handles a trackball click and provides identical behavior to an ENTER
-     * keypress event.
-     * 
      * @see net.rim.device.api.ui.Screen#invokeAction(int)
      */
     protected boolean invokeAction(final int action) {
         switch (action) {
-        case ACTION_INVOKE: // Trackball click.
+        case ACTION_INVOKE: // Trackball click
             displayMeeting(false);
-            return true; // We've consumed the event.
+            return true; // We've consumed the event
         }
         return super.invokeAction(action);
     }
@@ -157,7 +153,7 @@ final class PersistentStoreDemoScreen extends MainScreen {
 
     private final MenuItem viewItem = new MenuItem("View", 65636, 1) {
         /**
-         * Displays the selected meeting for viewing.
+         * Displays the selected meeting for viewing
          */
         public void run() {
             displayMeeting(false);
@@ -166,7 +162,7 @@ final class PersistentStoreDemoScreen extends MainScreen {
 
     private final MenuItem editItem = new MenuItem("Edit", 65636, 2) {
         /**
-         * Displays the selected meeting for editing.
+         * Displays the selected meeting for editing
          */
         public void run() {
             displayMeeting(true);
@@ -175,7 +171,7 @@ final class PersistentStoreDemoScreen extends MainScreen {
 
     private final MenuItem deleteItem = new MenuItem("Delete", 65636, 3) {
         /**
-         * Retrieves the highlighted Meeting object and removes it from our
+         * Retrieves the highlighted Meeting object and removes it from the
          * vector, then updates the list field to reflect the change.
          */
         public void run() {
@@ -210,7 +206,13 @@ final class PersistentStoreDemoScreen extends MainScreen {
                         Dialog.alert("Successfully accessed controlled object");
                     }
                 } catch (final SecurityException se) {
-                    Dialog.alert("Unauthorized module attempted to access controlled object.");
+                    UiApplication.getUiApplication().invokeLater(
+                            new Runnable() {
+                                public void run() {
+                                    Dialog.alert("PersistentObject#getContents() threw "
+                                            + se.toString());
+                                }
+                            });
                 }
             }
         }

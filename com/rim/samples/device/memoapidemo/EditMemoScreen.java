@@ -39,7 +39,7 @@ import net.rim.device.api.ui.container.MainScreen;
 /**
  * Screen that allows a memo to be edited. Used for both new and existing memos.
  */
-/* package */final class EditMemoScreen extends MainScreen {
+public final class EditMemoScreen extends MainScreen {
     private final MemoController _controller;
     private final SaveItem _saveMenuItem = new SaveItem();
 
@@ -54,7 +54,7 @@ import net.rim.device.api.ui.container.MainScreen;
      *            True if a new memo is being created; false if an existing memo
      *            is being edited.
      */
-    /* package */EditMemoScreen(final BlackBerryMemo memo, final boolean newMemo) {
+    public EditMemoScreen(final BlackBerryMemo memo, final boolean newMemo) {
         super();
 
         _controller = new MemoController(memo);
@@ -67,7 +67,7 @@ import net.rim.device.api.ui.container.MainScreen;
             title = "Edit Memo";
         }
 
-        setTitle(new LabelField(title));
+        setTitle(title);
 
         final Field[] fields =
                 (Field[]) _controller.render(newMemo ? MemoController.FOR_ADD
@@ -107,7 +107,8 @@ import net.rim.device.api.ui.container.MainScreen;
      * persistent storage.
      * 
      * @throws IOException
-     *             if a problem was encountered while committing the memo.
+     *             Thrown if a problem was encountered while committing the
+     *             memo.
      */
     public void save() throws IOException {
         _controller.updateMemo();

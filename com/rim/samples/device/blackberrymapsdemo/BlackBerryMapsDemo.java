@@ -39,19 +39,22 @@ import net.rim.device.api.ui.container.MainScreen;
  * Maps application in some manner. See the GPS and BlackBerry Maps Development
  * Guide for more information.
  */
-class BlackBerryMapsDemo extends UiApplication {
+public final class BlackBerryMapsDemo extends UiApplication {
     /**
-     * Entry point for the application.
+     * Entry point for application
+     * 
+     * @param args
+     *            Command line arguments (not used)
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final BlackBerryMapsDemo app = new BlackBerryMapsDemo();
         app.enterEventDispatcher();
     }
 
-    /**
-     * Constructor
-     */
-    private BlackBerryMapsDemo() {
+    // Constructor
+    public BlackBerryMapsDemo() {
         final BlackBerryMapsDemoScreen screen = new BlackBerryMapsDemoScreen();
         pushScreen(screen);
     }
@@ -62,9 +65,9 @@ class BlackBerryMapsDemo extends UiApplication {
  * menu items.
  */
 final class BlackBerryMapsDemoScreen extends MainScreen {
-
     BlackBerryMapsDemo _app;
 
+    // Constructor
     BlackBerryMapsDemoScreen() {
         setTitle("BlackBerry Maps Demo");
 
@@ -86,7 +89,7 @@ final class BlackBerryMapsDemoScreen extends MainScreen {
     // ///////////////////////
 
     /**
-     * Displays an InvokeContactScreen.
+     * Displays an InvokeContactScreen
      */
     private final MenuItem invokeContactItem = new MenuItem("Invoke Contact",
             0, 0) {
@@ -98,7 +101,7 @@ final class BlackBerryMapsDemoScreen extends MainScreen {
     };
 
     /**
-     * Displays an InvokeDefaultScreen.
+     * Displays an InvokeDefaultScreen
      */
     private final MenuItem invokeDefaultItem = new MenuItem("Invoke Default",
             0, 0) {
@@ -110,7 +113,7 @@ final class BlackBerryMapsDemoScreen extends MainScreen {
     };
 
     /**
-     * Displays an InvokeLocationDocumentScreen.
+     * Displays an InvokeLocationDocumentScreen
      */
     private final MenuItem invokeLocationDocumentItem = new MenuItem(
             "Invoke Location Document", 0, 0) {
@@ -122,7 +125,7 @@ final class BlackBerryMapsDemoScreen extends MainScreen {
     };
 
     /**
-     * Displays an InvokeMapViewScreen.
+     * Displays an InvokeMapViewScreen
      */
     private final MenuItem invokeMapViewItem = new MenuItem("Invoke Map View",
             0, 0) {

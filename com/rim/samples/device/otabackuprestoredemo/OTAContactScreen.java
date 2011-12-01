@@ -31,27 +31,36 @@ import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BasicEditField;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.EditField;
-import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.MainScreen;
 
-final class OTAContactScreen extends MainScreen {
-    // Members
-    // ------------------------------------------------------------------
+/**
+ * This screen allows the user to view and edit contact information
+ */
+public final class OTAContactScreen extends MainScreen {
     private final EditField _first, _last, _email;
     private int _uid = -1;
     private final SaveMenuItem _saveMenuItem;
     private BackMenuItem _backMenuItem;
     private OTAContactData _contact;
 
-    // Inner Classes
-    // ------------------------------------------------------------
+    /**
+     * A MenuItem class to saves the current contact
+     */
     private class SaveMenuItem extends MenuItem {
+        /**
+         * Creates a new SaveMenuItem object
+         */
         private SaveMenuItem() {
             super("Save", 100000, 5);
         }
 
+        /**
+         * Saves the contact and closes this screen
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             // If successful, return to contact list.
             if (onSave()) {
@@ -61,22 +70,35 @@ final class OTAContactScreen extends MainScreen {
         }
     }
 
+    /**
+     * Closes this screen and goes back one screen
+     */
     private static class BackMenuItem extends MenuItem {
+        /**
+         * Creates a new BackMenuItem object
+         */
         private BackMenuItem() {
             super("Back", 100000, 5);
         }
 
+        /**
+         * Closes this screen
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             final UiApplication uiapp = UiApplication.getUiApplication();
             uiapp.popScreen(uiapp.getActiveScreen());
         }
     }
 
-    // Constructor
-    OTAContactScreen() {
+    /**
+     * Creates a new OTAContactScreen object
+     */
+    public OTAContactScreen() {
         _saveMenuItem = new SaveMenuItem();
 
-        setTitle(new LabelField("Contact"));
+        setTitle("Contact");
 
         _first = new EditField("First: ", "");
         add(_first);
@@ -90,7 +112,16 @@ final class OTAContactScreen extends MainScreen {
         add(_email);
     }
 
-    OTAContactScreen(final OTAContactData contact, final boolean editable) {
+    /**
+     * Creates a new OTAContactScreen object, specifying an existing contact to
+     * view/edit
+     * 
+     * @param contact
+     *            The contact to display
+     * @param editable
+     *            True if the contact information is editable, otherwise false
+     */
+    public OTAContactScreen(final OTAContactData contact, final boolean editable) {
         this();
 
         _backMenuItem = new BackMenuItem();
@@ -105,6 +136,11 @@ final class OTAContactScreen extends MainScreen {
         _uid = contact.getUID();
     }
 
+    /**
+     * Retrieves the contact being displayed on this screen
+     * 
+     * @return The contact being displayed on this screen
+     */
     OTAContactData getContact() {
         return _contact;
     }
@@ -117,7 +153,7 @@ final class OTAContactScreen extends MainScreen {
         final String lastName = _last.getText().trim();
         final String email = _email.getText().trim();
 
-        // Check that first or last name and email has been entered.
+        // Check that first or last name and email has been entered
         if (firstName.length() == 0 && lastName.length() == 0
                 || email.length() == 0) {
             Dialog.inform("Please enter a first or last name and an email address.");
@@ -137,8 +173,6 @@ final class OTAContactScreen extends MainScreen {
         }
     }
 
-    // Menu handling
-    // ------------------------------------------------------------
     /**
      * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
      */

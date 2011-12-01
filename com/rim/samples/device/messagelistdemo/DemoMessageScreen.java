@@ -28,16 +28,24 @@ package com.rim.samples.device.messagelistdemo;
 
 import java.util.Date;
 
-import net.rim.blackberry.api.messagelist.ApplicationMessage;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.container.MainScreen;
 
-final class DemoMessageScreen extends MainScreen {
-    DemoMessageScreen(final ApplicationMessage applicationMessage) {
+/**
+ * This class displays DemoMessages.
+ */
+public final class DemoMessageScreen extends MainScreen {
+    /**
+     * Constucts a screen to view DemoMessages.
+     * 
+     * @param demoMessage
+     *            The message to display
+     */
+    public DemoMessageScreen(final DemoMessage demoMessage) {
         final LabelField title = new LabelField("Demo Message Screen");
         setTitle(title);
-        final DemoMessage demoMessage = (DemoMessage) applicationMessage;
+
         add(new LabelField("From: " + demoMessage.getContact()));
         add(new LabelField("Subject: " + demoMessage.getSubject()));
         add(new LabelField("Received: " + new Date(demoMessage.getTimestamp())));

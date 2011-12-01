@@ -37,7 +37,7 @@ import net.rim.device.api.ui.UiApplication;
 /**
  * This class represents the client in our client/server configuration.
  */
-final class UdpClient extends Thread {
+public final class UdpClient extends Thread {
     private final String _msg;
     private final UdpDemoScreen _screen;
     private final UdpDemo _app;
@@ -50,7 +50,7 @@ final class UdpClient extends Thread {
      * @param msg
      *            The message sent to the server.
      */
-    UdpClient(final String msg) {
+    public UdpClient(final String msg) {
         _msg = msg;
         _app = (UdpDemo) UiApplication.getUiApplication();
         _screen = _app.getScreen();
@@ -83,11 +83,11 @@ final class UdpClient extends Thread {
             _conn.receive(inDatagram);
             final String response = new String(inDatagram.getData());
 
-            if (response.equals("RECIEVED")) {
+            if (response.equals("RECEIVED")) {
                 // Display the status message on the event thread.
                 _app.invokeLater(new Runnable() {
                     public void run() {
-                        _screen.updateStatus("Message recieved by server");
+                        _screen.updateStatus("Message received by server");
                     }
                 });
             }
@@ -105,7 +105,6 @@ final class UdpClient extends Thread {
                 // Close the connection
                 _conn.close();
             } catch (final IOException ioe) {
-                System.out.println(ioe.toString());
             }
         }
     }

@@ -36,8 +36,7 @@ import net.rim.blackberry.api.pdap.PIMListListener;
  * Simple listener that prints status message to standard output when PIMList
  * events occur.
  */
-/* package */final class MemoListListener implements PIMListListener {
-
+public final class MemoListListener implements PIMListListener {
     /**
      * Called when a memo is added to the memo list.
      * 

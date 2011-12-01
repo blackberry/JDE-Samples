@@ -42,34 +42,45 @@ import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
-import net.rim.device.api.ui.component.TextField;
+import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.container.MainScreen;
 
 /**
  * This sample demonstrates the JSR 211 Content Handler API. This application is
- * acting as both the invoking application and the handler application. You will
- * need to configure the 'Data' folder of this project as the location of the
- * csv file for which this application will be invoked as a handler. Under
- * Edit/Preferences/Simulator/Memory select the 'Use PC filesystem for SD Card
- * files' checkbox and browse for the 'Data' folder (e.g. C:\Program
+ * acting as both the invoking application and the handler application.
+ * <p>
+ * You will need to configure the 'Data' folder of this project as the location
+ * of the csv file for which this application will be invoked as a handler. This
+ * can be done as follows:
+ * <p>
+ * Under Edit/Preferences/Simulator, select a simulator profile other than
+ * 'Default'. On the Memory tab, select the 'Use PC filesystem for SD Card
+ * files' checkbox. Then browse for the 'Data' folder (e.g., C:\Program
  * Files\Research In Motion\BlackBerry JDE
- * 4.5.0\samples\com\rim\samples\device\chapidemo\Data).
+ * 5.0.0\samples\com\rim\samples\device\chapidemo\Data).
  */
-class CHAPIDemo extends UiApplication implements RequestListener {
+public class CHAPIDemo extends UiApplication implements RequestListener {
     // The Content Handler ID
-    private static final String ID = "com.rim.samples.device.chapidemo";
+    private static String ID = "com.rim.samples.device.chapidemo";
 
     // The content handler class name
-    private static final String CLASSNAME = ID + ".CHAPIDemo";
+    private static String CLASSNAME = ID + ".CHAPIDemo";
 
     // The URL pointing to the location of the file we want to open
-    private static final String URL = "file:///SDCard/rim.csv";
+    private static String URL = "file:///SDCard/rim.csv";
 
-    // Entry point for application
+    /**
+     * Entry point for application
+     * 
+     * @param args
+     *            Command line arguments
+     */
     public static void main(final String[] args) {
         if (args != null && args.length > 0 && args[0].equals("startup")) {
             registerApp(); // Register this app as a content handler on startup
         } else {
+            // Create a new instance of the application and make the currently
+            // running thread the application's event dispatch thread.
             final CHAPIDemo app = new CHAPIDemo();
             app.enterEventDispatcher();
         }
@@ -93,14 +104,14 @@ class CHAPIDemo extends UiApplication implements RequestListener {
                     null);
 
         } catch (final ContentHandlerException che) {
-            System.out.print(che.toString());
+            errorDialog("Registry#register() threw " + che.toString());
         } catch (final ClassNotFoundException cnfe) {
-            System.out.print(cnfe.toString());
+            errorDialog("Registry#register() threw " + cnfe.toString());
         }
     }
 
-    // Constructor for GUI app
-    private CHAPIDemo() {
+    // Constructor
+    public CHAPIDemo() {
         try {
             // Get access to the ContentHandlerServer for this application and
             // register as a listener.
@@ -108,8 +119,6 @@ class CHAPIDemo extends UiApplication implements RequestListener {
                     Registry.getServer(CLASSNAME);
             contentHandlerServer.setListener(this);
         } catch (final ContentHandlerException che) {
-            System.out.print(che.toString());
-
             UiApplication.getUiApplication().invokeLater(new Runnable() {
                 public void run() {
                     Dialog.alert("Could not access Content Handler Server");
@@ -140,18 +149,25 @@ class CHAPIDemo extends UiApplication implements RequestListener {
             final Registry registry = Registry.getRegistry(CLASSNAME);
             registry.invoke(invoc);
         } catch (final IOException ioe) {
-            System.out.print(ioe.toString());
+            errorDialog("Registry#invoke() threw " + ioe.toString());
         }
     }
 
-    // Reads text from the file pointed to by the URL contained
-    // in the Invocation.
+    /**
+     * Reads text from the file pointed to by the URL contained in the
+     * Invocation.
+     * 
+     * @param invoc
+     *            The invocation holding the url
+     * @return The text from the file pointed to by the URL contained in the
+     *         Invocation
+     */
     private static String getViaStreamConnection(final Invocation invoc) {
         // Create a StreamConnection and use it to open an
         // InputStream for reading.
         StreamConnection streamConnection = null;
         InputStream inputStream = null;
-        String text = "";
+        final StringBuffer buf = new StringBuffer();
         try {
             streamConnection = (StreamConnection) invoc.open(false);
             inputStream = streamConnection.openInputStream();
@@ -159,27 +175,25 @@ class CHAPIDemo extends UiApplication implements RequestListener {
 
             // Read from the InputStream and build text string
             while ((ch = inputStream.read()) != -1) {
-                text = text.concat(String.valueOf((char) ch));
+                buf.append((char) ch);
             }
         } catch (final IOException ioe) {
-            System.out.print(ioe.toString());
+            errorDialog(ioe.toString());
         } finally {
             if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (final IOException ioe) {
-                    System.out.print(ioe.toString());
                 }
             }
             if (streamConnection != null) {
                 try {
                     streamConnection.close();
                 } catch (final IOException ioe) {
-                    System.out.print(ioe.toString());
                 }
             }
         }
-        return text;
+        return buf.toString();
     }
 
     /**
@@ -196,7 +210,7 @@ class CHAPIDemo extends UiApplication implements RequestListener {
             Dialog.alert("Handler has been invoked for: " + invoc.getURL());
             final String content = getViaStreamConnection(invoc);
 
-            if (!"".equals(content)) {
+            if (content != null && content.length() > 0) {
                 // Display the content
                 final DisplayContentScreen displayContentScreen =
                         new DisplayContentScreen();
@@ -209,8 +223,25 @@ class CHAPIDemo extends UiApplication implements RequestListener {
         }
     }
 
-    // Simple GUI screen from which to create an Invocation
+    /**
+     * Presents a dialog to the user with a given message
+     * 
+     * @param message
+     *            The text to display
+     */
+    public static void errorDialog(final String message) {
+        UiApplication.getUiApplication().invokeLater(new Runnable() {
+            public void run() {
+                Dialog.alert(message);
+            }
+        });
+    }
+
+    /**
+     * Simple GUI screen from which to create an Invocation
+     */
     private final class CHAPIDemoScreen extends MainScreen {
+        // Constructor
         private CHAPIDemoScreen() {
             // Initialize UI components
             setTitle(new LabelField("CHAPI Demo Screen", Field.FIELD_HCENTER));
@@ -221,6 +252,19 @@ class CHAPIDemo extends UiApplication implements RequestListener {
                 }
             });
         }
+
+        public void close() {
+            try {
+                // Deregister ourselves as a listener
+                final ContentHandlerServer contentHandlerServer =
+                        Registry.getServer(CLASSNAME);
+                contentHandlerServer.setListener(null);
+            } catch (final ContentHandlerException che) {
+                errorDialog("Registry.getServer() threw " + che.toString());
+            }
+
+            super.close();
+        }
     }
 
     /**
@@ -228,7 +272,7 @@ class CHAPIDemo extends UiApplication implements RequestListener {
      */
     private static class DisplayContentScreen extends MainScreen {
         // A field to display content
-        private final TextField _contentField = new TextField(
+        private final RichTextField _contentField = new RichTextField(
                 Field.NON_FOCUSABLE);
 
         // Constructor
@@ -238,32 +282,16 @@ class CHAPIDemo extends UiApplication implements RequestListener {
             add(_contentField);
         }
 
-        // Parses the comma separated values in the content string
-        // and displays the text.
+        /**
+         * Displays the comma-separated values on the screen.
+         * 
+         * @param content
+         *            The content holding the comma separated values
+         */
         private void displayContent(final String content) {
-            // Count the number of commas in the content string
-            int commaCount = 0;
-            for (int i = 0; i < content.length(); i++) {
-                if (content.charAt(i) == ',') {
-                    commaCount++;
-                }
-            }
-
-            // Extract the text values from the string and build a new
-            // string to display in the text field.
-            int begin = 0;
-            int end = content.indexOf(',');
-            String text = content.substring(begin, end);
-            for (int i = 0; i < commaCount - 1; i++) {
-                begin = end + 1;
-                end = content.indexOf(',', begin);
-                text = text + "\n" + content.substring(begin, end);
-            }
-            begin = end + 1;
-            text = text + "\n" + content.substring(begin, content.length());
-
-            // Display the content
-            _contentField.setText(text);
+            // Assume that the content is of the form
+            // "<value1>,<value2>,...,<valueN>."
+            _contentField.setText(content.replace(',', '\n'));
         }
     }
 }

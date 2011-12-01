@@ -1,5 +1,5 @@
 /**
- * Accelerometer.java
+ * AccelerometerDemo.java
  * 
  * Copyright © 1998-2011 Research In Motion Limited
  * 
@@ -24,7 +24,7 @@
  * Environment Development Guide associated with this release.
  */
 
-package com.rim.samples.device.accelerometer;
+package com.rim.samples.device.accelerometerdemo;
 
 import java.util.Random;
 
@@ -47,7 +47,7 @@ import net.rim.device.api.ui.container.MainScreen;
  * The data is then used to apply corresponding force to a ball drawn on the
  * screen.
  */
-public class AccelerometerDemo extends UiApplication {
+public final class AccelerometerDemo extends UiApplication {
     private AccelerometerDemoScreen _screen;
     private DrawThread _thread;
 
@@ -66,7 +66,8 @@ public class AccelerometerDemo extends UiApplication {
     private Channel _accChannel;
     private final short[] _xyz = new short[3];
 
-    private static final float G_NORM = 9.8066f / 1000;
+    private static final float G_NORM =
+            9.8066f / AccelerometerSensor.G_FORCE_VALUE;
     private static final float TABLE_FRICTION = 0.98f;
     private static final float BOUNCE_SLOWDOWN = 0.6f;
 
@@ -78,15 +79,17 @@ public class AccelerometerDemo extends UiApplication {
      * Entry point for application.
      * 
      * @param args
-     *            <description>
+     *            Command line arguments (not used)
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final AccelerometerDemo app = new AccelerometerDemo();
         app.enterEventDispatcher();
     }
 
     // Constructor
-    private AccelerometerDemo() {
+    public AccelerometerDemo() {
         if (AccelerometerSensor.isSupported()) {
             // Initialize UI
             _screen = new AccelerometerDemoScreen();
@@ -185,7 +188,12 @@ public class AccelerometerDemo extends UiApplication {
                         wait(50);
                     }
                 } catch (final InterruptedException e) {
-                    System.out.println(e.toString());
+                    UiApplication.getUiApplication().invokeLater(
+                            new Runnable() {
+                                public void run() {
+                                    Dialog.alert("wait(long) threw InterruptedException");
+                                }
+                            });
                 }
 
                 if (!_running) {

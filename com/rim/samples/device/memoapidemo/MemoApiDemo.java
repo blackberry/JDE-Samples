@@ -32,19 +32,19 @@ import javax.microedition.pim.PIMException;
 import net.rim.blackberry.api.pdap.BlackBerryPIM;
 import net.rim.blackberry.api.pdap.BlackBerryPIMList;
 import net.rim.device.api.ui.UiApplication;
-import net.rim.device.api.ui.component.LabelField;
+import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.container.MainScreen;
 
 /**
  * Demo application that shows how to use BlackBerry's memo extension of the PIM
  * API.
  */
-final class MemoApiDemo extends UiApplication {
+public final class MemoApiDemo extends UiApplication {
 
     /**
      * Application entry point. Determines if the application is being run
      * automatically as a system module at startup, or as a GUI from desktop. In
-     * the case of the former, it registers a PIMListListener; otherwise, it
+     * the case of the former, it registers a PIMListListener. Otherwise, it
      * launches the GUI.
      * 
      * @param args
@@ -52,7 +52,7 @@ final class MemoApiDemo extends UiApplication {
      */
     public static void main(final String[] args) {
         if (args != null && args.length > 0 && args[0].equals("init")) {
-            // Running as a system module automatically at startup; register
+            // Running as a system module automatically at startup. Register
             // a PIMListListener.
             final PIM p = PIM.getInstance();
 
@@ -62,10 +62,12 @@ final class MemoApiDemo extends UiApplication {
                                 BlackBerryPIM.MEMO_LIST, PIM.READ_WRITE);
                 memoList.addListener(new MemoListListener());
             } catch (final PIMException e) {
-                // Can't add listener.
+                // Can't add listener
+                errorDialog("PIM#openPIMList() threw " + e.toString());
             }
         } else {
-            // Running normally; start the GUI.
+            // Running normally. Start the GUI and make the currently
+            // running thread the application's event dispatch thread.
             new MemoApiDemo().enterEventDispatcher();
         }
     }
@@ -73,10 +75,24 @@ final class MemoApiDemo extends UiApplication {
     /**
      * Constructor. Creates and displays the application's main screen.
      */
-    private MemoApiDemo() {
+    public MemoApiDemo() {
         final MainScreen mainScreen = new MemoMainScreen();
 
-        mainScreen.setTitle(new LabelField("Memo API Demo"));
+        mainScreen.setTitle("Memo API Demo");
         pushScreen(mainScreen);
+    }
+
+    /**
+     * Presents a dialog to the user with a given message
+     * 
+     * @param message
+     *            The text to display
+     */
+    public static void errorDialog(final String message) {
+        UiApplication.getUiApplication().invokeLater(new Runnable() {
+            public void run() {
+                Dialog.alert(message);
+            }
+        });
     }
 }

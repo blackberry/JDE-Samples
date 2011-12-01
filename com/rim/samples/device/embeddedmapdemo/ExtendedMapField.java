@@ -34,12 +34,17 @@ import net.rim.device.api.system.Characters;
 import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
+import net.rim.device.api.ui.Keypad;
 import net.rim.device.api.ui.XYEdges;
 import net.rim.device.api.ui.XYPoint;
 import net.rim.device.api.ui.decor.Border;
 import net.rim.device.api.ui.decor.BorderFactory;
 
-final class ExtendedMapField extends MapField {
+/**
+ * A custom MapField to display a map and handle the user's input to control the
+ * map.
+ */
+public final class ExtendedMapField extends MapField {
     private static final int INITIAL_ZOOM = 2;
     private static final double MARGIN_OF_ERROR = 0.00001;
 
@@ -54,7 +59,7 @@ final class ExtendedMapField extends MapField {
     private boolean _clicked;
 
     // Constructor
-    ExtendedMapField(final MapLocation initialLocation,
+    public ExtendedMapField(final MapLocation initialLocation,
             final Vector mapLocations) {
         super(Field.FOCUSABLE | Field.FIELD_HCENTER);
 
@@ -82,16 +87,15 @@ final class ExtendedMapField extends MapField {
     }
 
     /**
-     * Moves the map to the default location.
+     * Moves the map to the default location
      */
-
     void resetMap() {
         moveTo(_initialLocation);
         setZoom(INITIAL_ZOOM);
     }
 
     /**
-     * Toggles the map on or off and changes the border to match.
+     * Toggles the map on or off and changes the border to match
      */
     private void toggleMap() {
         _clicked = !_clicked;
@@ -104,16 +108,16 @@ final class ExtendedMapField extends MapField {
     }
 
     /**
-     * Returns activated status of the map.
+     * Returns activated status of the map
      * 
-     * @return True if map is activated, otherwise flase.
+     * @return True if map is activated, otherwise false
      */
     boolean isClicked() {
         return _clicked;
     }
 
     /**
-     * Sets the maps's status to activated and forces a re-paint.
+     * Sets the maps's status to activated and forces a re-paint
      */
     void activatePan() {
         _clicked = true;
@@ -121,27 +125,32 @@ final class ExtendedMapField extends MapField {
     }
 
     /**
-     * @see net.rim.device.api.ui.Field#keyChar(char, int, int)
+     * @see net.rim.device.api.ui.Field#keyDown(int, int)
      */
-    protected boolean keyChar(final char character, final int status,
-            final int time) {
-        // 'i'(qwerty), 'g'(multitap) or 'u'(suretype) will zoom in.
-        if (character == 'i' || character == 'u' || character == 'g') {
+    protected boolean keyDown(final int keycode, final int time) {
+        final StringBuffer sb = new StringBuffer();
+
+        // Retrieve the characters mapped to the keycode for the current
+        // keyboard layout
+        Keypad.getKeyChars(keycode, sb);
+
+        // Zoom in
+        if (sb.toString().indexOf('i') != -1) {
             setZoom(Math.max(getZoom() - 1, getMinZoom()));
             return true;
-        } else if (character == 'o' || character == 'm') { // 'o'(qwerty,
-                                                           // suretype) or
-                                                           // 'm'(multitap) will
-                                                           // zoom out
+        }
+        // Zoom out
+        else if (sb.toString().indexOf('o') != -1) {
             setZoom(Math.min(getZoom() + 1, getMaxZoom()));
             return true;
-        } else if (character == Characters.ENTER) {
-            // Toggle activation.
+        }
+        // Toggle activation
+        else if (sb.charAt(0) == Characters.ENTER && sb.length() == 1) {
             toggleMap();
             return true;
         }
 
-        return super.keyChar(character, status, time);
+        return super.keyDown(keycode, time);
     }
 
     /**
@@ -149,7 +158,7 @@ final class ExtendedMapField extends MapField {
      */
     protected boolean navigationMovement(final int dx, final int dy,
             final int status, final int time) {
-        // Shift only if map was clicked (panning activated).
+        // Shift only if map was clicked (panning activated)
         if (_clicked) {
             move(dx << 3, dy << 3);
 
@@ -161,7 +170,7 @@ final class ExtendedMapField extends MapField {
 
     /**
      * Override the onUnfocus() method to get rid of the border when losing
-     * focus.
+     * focus
      * 
      * @see net.rim.device.api.ui.Field#onUnfocus()
      */
@@ -172,7 +181,7 @@ final class ExtendedMapField extends MapField {
     }
 
     /**
-     * Override the onFocus() method to add the border upon getting focus.
+     * Override the onFocus() method to add the border upon getting focus
      * 
      * @see net.rim.device.api.ui.Field#onFocus(int)
      */
@@ -188,14 +197,14 @@ final class ExtendedMapField extends MapField {
     public void paint(final Graphics g) {
         super.paint(g);
 
-        // DRAWING THE POINTER.
+        // DRAWING THE POINTER
         // Place the cursor permanently at the center of the map.
-        // Logical right shift ">> 1" is equivalent to division by 2.
+        // Logical right shift ">> 1" is equivalent to division by 2
         final int width = getWidth();
         final int height = getHeight();
         g.drawBitmap(width >> 1, height >> 1, width, height, _cursor, 0, 0);
 
-        // DRAWING RED MARKER & TEXT.
+        // DRAWING RED MARKER & TEXT
         if (_mapLocations != null) {
 
             for (int i = _mapLocations.size() - 1; i >= 0; --i) {
@@ -224,26 +233,26 @@ final class ExtendedMapField extends MapField {
     }
 
     /**
-     * Handles a trackball click.
+     * Handles a trackball click
      * 
-     * @see net.rim.device.api.ui.Screen#invokeAction(int)
+     * @see net.rim.device.api.ui.Field#invokeAction(int)
      */
     public boolean invokeAction(final int action) {
         switch (action) {
-        case ACTION_INVOKE: // Trackball click.
+        case ACTION_INVOKE: // Trackball click
             toggleMap();
-            return true; // We've consumed the event.
+            return true; // We've consumed the event
         }
 
         return super.invokeAction(action);
     }
 
     /**
-     * Moves the map to a specified location.
+     * Moves the map to a specified location
      * 
      * @param index
      *            The index in the map locations vector of the location to
-     *            display.
+     *            display
      */
     void displayLocation(final int index) {
         MapLocation mapLocation;
@@ -266,8 +275,8 @@ final class ExtendedMapField extends MapField {
      * longitude.
      * 
      * @param location
-     *            - the location we want to search for.
-     * @return - the index of the location if found, -1 if not.
+     *            The location we want to search for
+     * @return The index of the location if found, -1 if not
      */
     int checkForLocation(final MapLocation location) {
         final double locLatitude = location.getLatitude();

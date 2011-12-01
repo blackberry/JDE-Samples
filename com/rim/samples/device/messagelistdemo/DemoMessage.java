@@ -31,7 +31,12 @@ import java.util.Date;
 import net.rim.blackberry.api.messagelist.ApplicationMessage;
 import net.rim.device.api.system.EncodedImage;
 
-final class DemoMessage implements ApplicationMessage {
+/**
+ * This class provides a sample implementation of the ApplicationMessage
+ * interface. It demonstrates how a 3rd party application can define their own
+ * message formats for use with the message store.
+ */
+public final class DemoMessage implements ApplicationMessage {
     static final int DEMO_MESSAGE_TYPE = 0x01;
 
     private String _sender;
@@ -44,10 +49,25 @@ final class DemoMessage implements ApplicationMessage {
     private long _replyTime;
     private EncodedImage _previewPicture;
 
-    DemoMessage() {
+    /**
+     * Default constructor.
+     */
+    public DemoMessage() {
         _isNew = true;
     }
 
+    /**
+     * Constructs a DemoMessage with specified properties.
+     * 
+     * @param sender
+     *            The name of the sender
+     * @param subject
+     *            The subject of the message
+     * @param message
+     *            The body of the message
+     * @param receivedTime
+     *            The timestamp of when the message was received
+     */
     DemoMessage(final String sender, final String subject,
             final String message, final long receivedTime) {
         _sender = sender;
@@ -57,61 +77,121 @@ final class DemoMessage implements ApplicationMessage {
         _isNew = true;
     }
 
+    /**
+     * Stores the reply message and sets the reply time.
+     * 
+     * @param message
+     *            The reply message
+     */
     void reply(final String message) {
         markRead();
         _replyMessage = message;
         _replyTime = System.currentTimeMillis();
     }
 
+    /**
+     * Marks this message as deleted.
+     */
     void messageDeleted() {
         _isNew = false;
         _deleted = true;
     }
 
+    /**
+     * Marks this message as new.
+     */
     void markAsNew() {
         _isNew = true;
         _replyMessage = null;
     }
 
+    /**
+     * Marks this message as read.
+     */
     void markRead() {
         _isNew = false;
     }
 
+    /**
+     * Returns whether this message is new or not.
+     * 
+     * @return True if the message is new, false otherwise
+     */
     boolean isNew() {
         return _isNew;
     }
 
+    /**
+     * Returns whether this message has been replied to or not.
+     * 
+     * @return True if the message has been replied to, false otherwise
+     */
     boolean hasReplied() {
         return _replyMessage != null;
     }
 
+    /**
+     * Sets the name of the sender who sent this message.
+     * 
+     * @param sender
+     *            The name of the sender
+     */
     void setSender(final String sender) {
         _sender = sender;
     }
 
+    /**
+     * Sets the subject of this message.
+     * 
+     * @param subject
+     *            The subject of this message
+     */
     void setSubject(final String subject) {
         _subject = subject;
     }
 
+    /**
+     * Sets the time this message was received.
+     * 
+     * @param receivedTime
+     *            The time this message was received
+     */
     void setReceivedTime(final long receivedTime) {
         _receivedTime = receivedTime;
     }
 
+    /**
+     * Sets the message body.
+     * 
+     * @param message
+     *            The message body
+     */
     void setMessage(final String message) {
         _message = message;
     }
 
+    /**
+     * Gets the message body.
+     * 
+     * @return The message body
+     */
     String getMessage() {
         return _message;
     }
 
+    /**
+     * Sets the preview picture of this message.
+     * 
+     * @param image
+     *            The desired preview picture of this message
+     */
     void setPreviewPicture(final EncodedImage image) {
         _previewPicture = image;
     }
 
     // Implementation of ApplicationMessage ------------------------------------
     /**
-     * @return Contact
+     * @return The sender of this message.
      * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getContact()
      */
@@ -120,7 +200,7 @@ final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * @return Message status
+     * @return This message's status.
      * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getStatus()
      */
@@ -139,7 +219,7 @@ final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * @return Subject
+     * @return The subject of this message.
      * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getSubject()
      */
@@ -152,7 +232,7 @@ final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * @return Non-zero timestamp
+     * @return The timestamp of when this message was received.
      * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getTimestamp()
      */
@@ -161,7 +241,7 @@ final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * @return Message type
+     * @return DemoMessage.DEMO_MESSAGE_TYPE
      * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getType()
      */
@@ -171,7 +251,7 @@ final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * @return Preview text if defined, null otherwise.
+     * @return The preview text if defined, null otherwise.
      * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getPreviewText()
      */
@@ -192,7 +272,7 @@ final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * @return Cookie value if provided by the message, null otherwise.
+     * @return The cookie value if provided by the message, null otherwise.
      * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getCookie()
      */
@@ -201,7 +281,7 @@ final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * @return Preview picture if provided by the message, null otherwise.
+     * @return The preview picture if provided by the message, null otherwise.
      * 
      * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getPreviewPicture()
      */

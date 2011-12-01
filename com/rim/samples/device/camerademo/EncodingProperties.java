@@ -31,28 +31,29 @@ package com.rim.samples.device.camerademo;
  * VideoControl.getSnapshot() method.
  */
 public final class EncodingProperties {
-    /** The file format of the picture. */
+    /** The file format of the picture */
     private String _format;
 
-    /** The width of the picture. */
+    /** The width of the picture */
     private String _width;
 
-    /** The height of the picture. */
+    /** The height of the picture */
     private String _height;
 
-    /** The quality of the picture. */
+    /** The quality of the picture */
     private String _quality;
 
-    /** Booleans that indicate whether the values have been set. */
+    /** Booleans that indicate whether the values have been set */
     private boolean _formatSet;
     private boolean _widthSet;
     private boolean _heightSet;
     private boolean _qualitySet;
 
     /**
-     * Set the file format to be used in snapshots.
+     * Set the file format to be used in snapshots
      * 
      * @param format
+     *            The file format to be used in snapshots
      */
     public void setFormat(final String format) {
         _format = format;
@@ -60,37 +61,42 @@ public final class EncodingProperties {
     }
 
     /**
-     * Set the width to be used in snapshots.
+     * Set the width to be used in snapshots
      * 
      * @param width
+     *            The width to be used in snapshots
      */
-    public void setWidth(final String width) {
+    void setWidth(final String width) {
         _width = width;
         _widthSet = true;
     }
 
     /**
-     * Set the height to be used in snapshots.
+     * Set the height to be used in snapshots
      * 
      * @param height
+     *            The height to be used in snapshots
      */
-    public void setHeight(final String height) {
+    void setHeight(final String height) {
         _height = height;
         _heightSet = true;
     }
 
     /**
-     * Set the quality to be used in snapshots.
+     * Set the quality to be used in snapshots
      * 
      * @param quality
+     *            The quality to be used in snapshots
      */
-    public void setQuality(final String quality) {
+    void setQuality(final String quality) {
         _quality = quality;
         _qualitySet = true;
     }
 
     /**
-     * Return the encoding as a coherent String to be used in menus.
+     * Return the encoding as a coherent String to be used in menus
+     * 
+     * @see Object#toString()
      */
     public String toString() {
         final StringBuffer display = new StringBuffer();
@@ -113,7 +119,7 @@ public final class EncodingProperties {
      * 
      * @return The encoding expressed as a formatted string.
      */
-    public String getFullEncoding() {
+    String getFullEncoding() {
         final StringBuffer fullEncoding = new StringBuffer();
 
         fullEncoding.append("encoding=");
@@ -132,11 +138,11 @@ public final class EncodingProperties {
     }
 
     /**
-     * Have all the fields been set?
+     * Checks whether all the fields been set
      * 
      * @return true if all fields have been set.
      */
-    public boolean isComplete() {
+    boolean isComplete() {
         return _formatSet && _widthSet && _heightSet && _qualitySet;
     }
 }

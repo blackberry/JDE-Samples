@@ -34,17 +34,16 @@ import net.rim.device.api.ui.container.PopupScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
 
 /**
- * PopupScreen that displays information about a file.
+ * PopupScreen that displays information about a file
  */
-/* package */final class FileExplorerDemoScreenFileInfoPopup extends
-        PopupScreen {
+public final class FileExplorerDemoScreenFileInfoPopup extends PopupScreen {
     /**
-     * Constructor.
+     * Creates a new FileExplorerDemoScreenFileInfoPopup object
      * 
      * @param fileholder
-     *            Used to retrieve the file information.
+     *            Used to retrieve the file information
      */
-    FileExplorerDemoScreenFileInfoPopup(
+    public FileExplorerDemoScreenFileInfoPopup(
             final FileExplorerDemoFileHolder fileholder) {
         super(new VerticalFieldManager());
         add(new LabelField("File Information"));
@@ -53,14 +52,14 @@ import net.rim.device.api.ui.container.VerticalFieldManager;
         add(new LabelField(""));
 
         // Use the MIMETypeAssociations class to determine information about the
-        // file.
+        // file
         add(new LabelField("MIME Type: "
                 + MIMETypeAssociations.getMIMEType(fileholder.getFileName())));
     }
 
     /**
-     * Overrides the default. Closes the popup screen when the Escape key is
-     * pressed.
+     * Overrides the default implementation. Closes the popup screen when the
+     * Escape key is pressed.
      * 
      * @see net.rim.device.api.ui.Screen#keyChar(char,int,int)
      */

@@ -36,25 +36,24 @@ import net.rim.device.api.ui.component.ListField;
 import net.rim.device.api.ui.component.ListFieldCallback;
 
 /**
- * ListField that contains file holder information.
+ * ListField that contains file holder information
  */
-/* package */final class FileExplorerDemoListFieldImpl extends ListField
-        implements ListFieldCallback {
-
+public final class FileExplorerDemoListFieldImpl extends ListField implements
+        ListFieldCallback {
     private final Vector _elements = new Vector();
 
     /**
-     * Constructor. Sets itself as the callback.
+     * Creates a new FileExplorerDemoListFieldImpl object
      */
-    FileExplorerDemoListFieldImpl() {
+    public FileExplorerDemoListFieldImpl() {
         setCallback(this);
     }
 
     /**
-     * Adds the provided element to this list field.
+     * Adds the provided element to this list field
      * 
      * @param element
-     *            The element to be added.
+     *            The element to be added
      */
     void add(final Object element) {
         _elements.addElement(element);
@@ -112,9 +111,9 @@ import net.rim.device.api.ui.component.ListFieldCallback;
     }
 
     /**
-     * Allows space bar to page down.
+     * Allows space bar to page down
      * 
-     * @see net.rim.device.api.ui.Screen#keyChar(char , int , int)
+     * @see net.rim.device.api.ui.component.ListField#keyChar(char, int, int)
      */
     public boolean keyChar(final char key, final int status, final int time) {
         if (getSize() > 0 && key == Characters.SPACE) {
@@ -126,19 +125,19 @@ import net.rim.device.api.ui.component.ListFieldCallback;
     }
 
     /**
-     * Retrieves the number of elements in list field.
+     * Retrieves the number of elements in list field
      * 
-     * @return The number of elements in this list field.
+     * @return The number of elements in this list field
      */
     public int getSize() {
         return _elements != null ? _elements.size() : 0;
     }
 
     /**
-     * Removes the element at the provided index from this list field.
+     * Removes the element at the provided index from this list field
      * 
      * @param index
-     *            The index of the element to remove.
+     *            The index of the element to remove
      */
     void remove(final int index) {
         _elements.removeElementAt(index);
@@ -146,7 +145,7 @@ import net.rim.device.api.ui.component.ListFieldCallback;
     }
 
     /**
-     * Removes all elements from this list field.
+     * Removes all elements from this list field
      */
     void removeAll() {
         _elements.removeAllElements();

@@ -33,15 +33,15 @@ import net.rim.device.api.util.Persistable;
  * code. It is a persistent object and is intended to showcase how grouping
  * would be applied to this object.
  */
-class AddressBookRecord implements Persistable {
-    private String _title; // The title of the address book record.
-    private String _firstName; // The first name of the address book record.
-    private String _lastName; // The last name of the address book record.
+public class AddressBookRecord implements Persistable {
+    private String _title; // The title of the address book record
+    private String _firstName; // The first name of the address book record
+    private String _lastName; // The last name of the address book record
 
     /**
-     * Create an empty version of the AddressBookRecord.
+     * Create an empty version of the AddressBookRecord
      */
-    AddressBookRecord() {
+    public AddressBookRecord() {
         _title = "";
         _firstName = "";
         _lastName = "";
@@ -49,16 +49,16 @@ class AddressBookRecord implements Persistable {
 
     /**
      * Create a new AddressBookRecord with the specified title, first name and
-     * last name.
+     * last name
      * 
      * @param title
-     *            the title of the AddressBookRecord. It cannot be null.
+     *            The title of the AddressBookRecord
      * @param firstName
-     *            the first name of the AddressBookRecord. It cannot be null.
+     *            The first name of the AddressBookRecord
      * @param lastName
-     *            the last name of the AddressBookRecord. It cannot be null.
+     *            The last name of the AddressBookRecord
      * @throws IllegalArgumentException
-     *             if any of the parameters are null.
+     *             if any of the parameters are null
      */
     AddressBookRecord(final String title, final String firstName,
             final String lastName) {
@@ -71,67 +71,70 @@ class AddressBookRecord implements Persistable {
     }
 
     /**
-     * Returns the title of the AddressBookRecord.
+     * Returns the title of the AddressBookRecord
      * 
-     * @return the titel of the AddressBookRecord.
+     * @return The title of the AddressBookRecord
      */
     String getTitle() {
         return _title;
     }
 
     /**
-     * Returns the first name of the AddressBookRecord.
+     * Returns the first name of the AddressBookRecord
      * 
-     * @return the first name of the AddressBookRecord.
+     * @return The first name of the AddressBookRecord
      */
     String getFirstName() {
         return _firstName;
     }
 
     /**
-     * Returns the last name of the AddressBookRecord.
+     * Returns the last name of the AddressBookRecord
      * 
-     * @return returns the last name of the AddressBookRecord.
+     * @return The last name of the AddressBookRecord
      */
     String getLastName() {
         return _lastName;
     }
 
     /**
-     * Sets the title of the AddressBookRecord.
+     * Sets the title of the AddressBookRecord
      * 
      * @param title
-     *            the new title of the AddressBookRecord.
+     *            The new title of the AddressBookRecord
      */
     void setTitle(final String title) {
         _title = title;
     }
 
     /**
-     * Sets the first name of the AddressBookRecord.
+     * Sets the first name of the AddressBookRecord
      * 
      * @param firstName
-     *            the new first name of the AddressBookRecord.
+     *            The new first name of the AddressBookRecord
      */
     void setFirstName(final String firstName) {
         _firstName = firstName;
     }
 
     /**
-     * Sets the last name of the AddressBookRecord.
+     * Sets the last name of the AddressBookRecord
      * 
      * @param lastName
-     *            the new last name of the AddressBookRecord.
+     *            The new last name of the AddressBookRecord
      */
     void setLastName(final String lastName) {
         _lastName = lastName;
     }
 
-    // Javadocs copied from super class.
+    /**
+     * @see java.lang.Object#equals(Object)
+     */
     public boolean equals(final Object obj) {
         if (obj == this) {
             return true;
         }
+
         if (obj instanceof AddressBookRecord) {
             final AddressBookRecord other = (AddressBookRecord) obj;
             if (!other._title.equals(_title)) {

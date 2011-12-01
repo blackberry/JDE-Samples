@@ -37,21 +37,23 @@ import net.rim.device.api.ui.component.Dialog;
  * on the screen. Menu items allow a user to erase the canvas or change the
  * color and width of the lines being drawn.
  */
-public class TouchDemo extends UiApplication {
+public final class TouchDemo extends UiApplication {
     /**
      * Entry point for this application.
      * 
      * @param args
-     *            Command line arguments
+     *            Command line arguments (not used)
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         new TouchDemo().enterEventDispatcher();
     }
 
     /**
      * Constructor
      */
-    private TouchDemo() {
+    public TouchDemo() {
         if (Touchscreen.isSupported()) {
             final TouchDemoScreen screen = new TouchDemoScreen();
             pushScreen(screen);

@@ -26,20 +26,28 @@
 
 package com.rim.samples.device.objectgroupingdemo;
 
-import net.rim.device.api.system.Application;
 import net.rim.device.api.system.ObjectGroup;
 import net.rim.device.api.system.ObjectGroupReadOnlyException;
 
 /**
- * The application class contains the starting point for this demo and shows how
- * grouping and ungrouping should work. As well, it shows how an exception is
- * thrown if the object is grouped and the application attempts to modify it.
+ * This class contains the starting point for this demo and shows how grouping
+ * and ungrouping should work. As well, it shows how an exception is thrown if
+ * an object is grouped and the application attempts to modify it.
  */
-class ObjectGroupingDemo extends Application {
+public class ObjectGroupingDemo {
+    /**
+     * Entry point for application.
+     * 
+     * @param args
+     *            Command-line arguments (not used)
+     */
     public static void main(final String[] args) {
         final AddressBook addressBook = AddressBook.getInstance();
 
-        // Create some sample address book entries.
+        // Ensure we are starting with an empty address book
+        addressBook.removeAll();
+
+        // Create some sample address book entries
         final AddressBookRecord record1 =
                 new AddressBookRecord("Mr.", "Clyde", "Warren");
         final AddressBookRecord record2 = new AddressBookRecord();
@@ -53,23 +61,20 @@ class ObjectGroupingDemo extends Application {
         addressBook.remove(record2);
         addressBook.update(record1, record2);
 
-        // Ensure that the size of the address book is correct.
+        // Ensure that the size of the address book is correct
         if (addressBook.size() != 1) {
-            throw new RuntimeException(); // We should only have one record
-                                          // left.
+            throw new RuntimeException(); // We should only have one record left
         }
 
         // Now, try to update a record entry from the address book directly
-        // without ungrouping.
+        // without ungrouping
         final AddressBookRecord myRecord = addressBook.getRecord(0);
 
-        // Show that myRecord is currently in a group.
+        // Show that myRecord is currently in a group
         final boolean isGrouped = ObjectGroup.isInGroup(myRecord);
         System.out.println("Object is grouped? " + isGrouped);
 
         // Try to update the record and catch the resulting exception.
-        // Note that this is a runtime exception so we need to explicitly catch
-        // it.
         try {
             myRecord.setFirstName("");
         } catch (final ObjectGroupReadOnlyException e) {
@@ -78,7 +83,7 @@ class ObjectGroupingDemo extends Application {
                             + e);
         }
 
-        // Clear up the address book to remove remaining entries.
+        // Clear up the address book to remove remaining entries
         addressBook.remove(myRecord);
     }
 }

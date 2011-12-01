@@ -36,7 +36,7 @@ import net.rim.device.api.ui.Graphics;
 /**
  * Custom button field that shows how to use images as button backgrounds.
  */
-class PictureBackgroundButtonField extends Field {
+public class PictureBackgroundButtonField extends Field {
     private final String _label;
     private final int _labelHeight;
     private final int _labelWidth;
@@ -52,12 +52,11 @@ class PictureBackgroundButtonField extends Field {
      * Constructor.
      * 
      * @param text
-     *            - the text to be displayed on the button
+     *            The text to be displayed on the button
      * @param style
-     *            - combination of field style bits to specify display
-     *            attributes
+     *            Combination of field style bits to specify display attributes
      */
-    PictureBackgroundButtonField(final String text, final long style) {
+    public PictureBackgroundButtonField(final String text, final long style) {
         super(style);
 
         _font = getFont();

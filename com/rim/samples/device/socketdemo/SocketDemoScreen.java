@@ -44,7 +44,7 @@ import net.rim.device.api.ui.container.MainScreen;
 /**
  * A MainScreen class to allow for user interaction.
  */
-class SocketDemoScreen extends MainScreen {
+public class SocketDemoScreen extends MainScreen {
     private final EditField _hostField;
     private final CheckboxField _useDirectTcpField;
     private final RichTextField _statusField;
@@ -52,13 +52,13 @@ class SocketDemoScreen extends MainScreen {
     private boolean _threadRunning = false;
 
     // Constructor
-    SocketDemoScreen() {
+    public SocketDemoScreen() {
         setTitle(new LabelField("Socket Demo"));
 
         add(new RichTextField(
                 "Enter local host name in the field below and select 'Go' from the menu.",
                 Field.NON_FOCUSABLE));
-        add(new SeparatorField(SeparatorField.LINE_HORIZONTAL));
+        add(new SeparatorField());
 
         // Need to get the local host name from the user because access to
         // 'localhost' and 127.0.0.1 is restricted.
@@ -121,7 +121,7 @@ class SocketDemoScreen extends MainScreen {
     }
 
     /**
-     * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
+     * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
      */
     protected void makeMenu(final Menu menu, final int instance) {
         // If a ConnectThread is running we won't add our menu item

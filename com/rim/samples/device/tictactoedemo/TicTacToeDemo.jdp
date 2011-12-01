@@ -24,6 +24,7 @@ AutoRestart=0
 [DependsOn
 ]
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 img\blanksquare.png
 img\o.png

@@ -29,13 +29,22 @@ package com.rim.samples.device.keywordfilterdemo;
 /**
  * A class to encapsulate data related to a given country of the world.
  */
-class Country {
+public class Country {
     private final String _countryName;
     private final String _population;
     private final String _capitalCity;
 
-    // Constructor
-    Country(final String countryName, final String population,
+    /**
+     * Constructs a Country
+     * 
+     * @param countryName
+     *            The country's name
+     * @param population
+     *            The country's population
+     * @param capitalCity
+     *            The country's capital city
+     */
+    public Country(final String countryName, final String population,
             final String capitalCity) {
         _countryName = countryName;
         _population = population;
@@ -43,15 +52,29 @@ class Country {
     }
 
     // Accessor methods---------------------------------------------------------
-
+    /**
+     * Gets the country's population
+     * 
+     * @return The country's population
+     */
     String getPopulation() {
         return _population;
     }
 
+    /**
+     * Gets the country's capital city
+     * 
+     * @return The country's capital city
+     */
     String getCapitalCity() {
         return _capitalCity;
     }
 
+    /**
+     * Gets the country's name
+     * 
+     * @see Object#toString()
+     */
     public String toString() {
         return _countryName;
     }

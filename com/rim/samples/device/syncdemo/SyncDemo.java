@@ -43,19 +43,24 @@ import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.ListField;
 import net.rim.device.api.ui.component.ListFieldCallback;
+import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.util.DataBuffer;
 
 /**
- * Application stores contact information in a PersistantObject which can then
+ * This application stores contact information in a PersistantObject which can
  * be synchronized with BlackBerry Desktop Manager using Backup and Restore.
+ * 
+ * Note: This class always retrieves the most recent contact list by loading the
+ * contacts from the persistant store so any instance of the SyncDemo class may
+ * be used for synchronization.
  */
-
-class SyncDemo extends UiApplication implements SyncConverter, SyncCollection,
-        ListFieldCallback {
+public final class SyncDemo extends UiApplication implements SyncConverter,
+        SyncCollection, ListFieldCallback {
     // Members
     // ------------------------------------------------------------------
     private final ListField _listField;
@@ -72,15 +77,19 @@ class SyncDemo extends UiApplication implements SyncConverter, SyncCollection,
 
     private static PersistentObject _persist;
     private static Vector _contacts;
-    private static SyncDemo _syncDemo;
 
+    /**
+     * Entry point for application.
+     * 
+     * @param args
+     *            Command line arguments.
+     */
     public static void main(final String[] args) {
 
         _persist = PersistentStore.getPersistentObject(KEY);
         _contacts = (Vector) _persist.getContents();
 
         if (args != null && args.length > 0 && args[0].equals("init")) {
-
             // Initialize persistent store on startup.
             if (_contacts == null) {
                 _contacts = new Vector();
@@ -89,17 +98,23 @@ class SyncDemo extends UiApplication implements SyncConverter, SyncCollection,
             }
 
             // Enable app for synchronization
-            SyncManager.getInstance().enableSynchronization(
-                    SyncDemo.getInstance());
+            SyncManager.getInstance().enableSynchronization(new SyncDemo());
         } else {
+            // Create a new instance of the application and make the currently
+            // running thread the application's event dispatch thread.
             final SyncDemo app = new SyncDemo();
             app.enterEventDispatcher();
         }
     }
 
-    // Inner classes
-    // ------------------------------------------------------------
+    // Inner classes -----------------------------------------------------------
+    /**
+     * Adds a contact to the persistent store.
+     */
     private class AddContactAction extends MenuItem {
+        /**
+         * Default constructor
+         */
         private AddContactAction() {
             super("Add", 100000, 10);
         }
@@ -120,9 +135,13 @@ class SyncDemo extends UiApplication implements SyncConverter, SyncCollection,
         }
     }
 
+    /**
+     * Views the selected contact's information.
+     */
     private class ViewContactAction extends MenuItem {
-        private int _index;
-
+        /**
+         * Default constructor
+         */
         public ViewContactAction() {
             super("View", 100001, 10);
         }
@@ -130,22 +149,125 @@ class SyncDemo extends UiApplication implements SyncConverter, SyncCollection,
         public void run() {
             final ContactScreen screen =
                     new ContactScreen((ContactData) _contacts
-                            .elementAt(_listField.getSelectedIndex()));
-            UiApplication.getUiApplication().pushModalScreen(screen);
+                            .elementAt(_listField.getSelectedIndex()), false);
+            UiApplication.getUiApplication().pushScreen(screen);
         }
     }
 
+    /**
+     * Edits a contact.
+     */
+    private class EditContactAction extends MenuItem {
+        private final int _index;
+
+        /**
+         * Constructs a menu item to edit a specific contact from the contact
+         * list.
+         * 
+         * @param index
+         *            The index of the contact in the contact list to edit
+         */
+        private EditContactAction(final int index) {
+            super("Edit", 100000, 6);
+            _index = index;
+        }
+
+        public void run() {
+            final ContactData oldContactData =
+                    (ContactData) _contacts.elementAt(_index);
+            final ContactScreen screen =
+                    new ContactScreen(oldContactData, true);
+            UiApplication.getUiApplication().pushModalScreen(screen);
+
+            final ContactData newContactData = screen.getContact();
+
+            if (newContactData != null) {
+                if (_contacts.contains(oldContactData)) {
+                    _contacts.setElementAt(newContactData, _contacts
+                            .indexOf(oldContactData));
+                    PersistentObject.commit(_contacts);
+                }
+            }
+
+            reloadContactList();
+        }
+    }
+
+    /**
+     * Deletes a contact.
+     */
+    private class DeleteContactAction extends MenuItem {
+        private final int _deleteIndex;
+
+        /**
+         * Constructs a menu item to delete a specific contact when invoked.
+         * 
+         * @param deleteIndex
+         *            The index of the contact to delete.
+         */
+        private DeleteContactAction(final int deleteIndex) {
+            super("Delete", 100000, 7);
+            _deleteIndex = deleteIndex;
+        }
+
+        public void run() {
+            final ContactData contactData =
+                    (ContactData) _contacts.elementAt(_deleteIndex);
+
+            final int result =
+                    Dialog.ask(Dialog.DELETE, "Delete "
+                            + contactData.getFirst() + " "
+                            + contactData.getLast() + "?");
+            if (result == Dialog.YES) {
+                _contacts.removeElementAt(_deleteIndex);
+                reloadContactList();
+            }
+        }
+    }
+
+    /**
+     * This screen acts as the main screen which allows the user to add and view
+     * synchronized contacts.
+     */
     private final class SyncDemoScreen extends MainScreen {
+        /**
+         * Default constructor
+         */
         private SyncDemoScreen() {
             setTitle(new LabelField("Contacts", DrawStyle.ELLIPSIS
                     | Field.USE_ALL_WIDTH));
-            addMenuItem(_addContactAction);
-            addMenuItem(_viewContactAction);
+        }
+
+        /**
+         * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
+         */
+        protected void makeMenu(final Menu menu, final int instance) {
+            menu.add(_addContactAction);
+            menu.addSeparator();
+
+            if (_contacts.size() > 0) {
+
+                final EditContactAction _editContactAction =
+                        new EditContactAction(_listField.getSelectedIndex());
+                menu.add(_editContactAction);
+
+                final DeleteContactAction _deleteContactAction =
+                        new DeleteContactAction(_listField.getSelectedIndex());
+                menu.add(_deleteContactAction);
+
+                menu.add(_viewContactAction);
+            }
+
+            menu.addSeparator();
+
+            super.makeMenu(menu, instance);
         }
     }
 
-    // Constructor
-    private SyncDemo() {
+    /**
+     * Default constructor
+     */
+    public SyncDemo() {
 
         _listField = new ListField();
         _listField.setCallback(this);
@@ -164,19 +286,13 @@ class SyncDemo extends UiApplication implements SyncConverter, SyncCollection,
         reloadContactList();
     }
 
-    private boolean reloadContactList() {
-        // Refreshes contact list on screen
+    /**
+     * Refreshes contact list on screen.
+     * 
+     * @return True
+     */
+    private void reloadContactList() {
         _listField.setSize(_contacts.size());
-
-        return true;
-    }
-
-    private static SyncDemo getInstance() {
-        if (_syncDemo == null) {
-            _syncDemo = new SyncDemo();
-        }
-
-        return _syncDemo;
     }
 
     // SyncConverter methods
@@ -309,10 +425,16 @@ class SyncDemo extends UiApplication implements SyncConverter, SyncCollection,
         return false; // NA
     }
 
+    /**
+     * @see net.rim.device.api.synchronization.SyncCollection#setSyncObjectDirty(SyncObject)
+     */
     public void setSyncObjectDirty(final SyncObject object) {
         // NA
     }
 
+    /**
+     * @see net.rim.device.api.synchronization.SyncCollection#clearSyncObjectDirty(SyncObject)
+     */
     public void clearSyncObjectDirty(final SyncObject object) {
         // NA
     }

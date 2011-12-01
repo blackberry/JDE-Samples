@@ -39,12 +39,9 @@ import net.rim.device.api.ui.container.MainScreen;
  * is being run for the first time.
  */
 
-final class InvokeDefaultScreen extends MainScreen {
-
-    /**
-     * Constructor
-     */
-    InvokeDefaultScreen() {
+public final class InvokeDefaultScreen extends MainScreen {
+    // Constructor
+    public InvokeDefaultScreen() {
         setTitle("Invoke Default");
 
         final LabelField instructions =
@@ -56,10 +53,10 @@ final class InvokeDefaultScreen extends MainScreen {
     }
 
     /**
-     * Displays the default map.
+     * Displays the default map
      */
     private final MenuItem viewMapItem = new MenuItem("View Map", 1000, 10) {
-        // Invoke maps application with default map.
+        // Invoke maps application with default map
         public void run() {
             Invoke.invokeApplication(Invoke.APP_TYPE_MAPS, new MapsArguments());
         }

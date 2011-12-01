@@ -48,7 +48,7 @@ import net.rim.device.api.ui.container.MainScreen;
  * items to add messages to the inbox or start a thread to add, delete and and
  * change properties of messages.
  */
-final class MessageListDemo extends UiApplication {
+public final class MessageListDemo extends UiApplication {
     /* com.rim.samples.device.messagelistdemo */
     static final long KEY = 0x39d90c5bc6899541L; // Base folder key
 
@@ -88,11 +88,16 @@ final class MessageListDemo extends UiApplication {
 
     /**
      * Entry point for application.
+     * 
+     * @param args
+     *            Command line arguments
      */
     public static void main(final String[] args) {
         if (args != null && args.length > 0) {
             // Perform initialization on device startup.
             if (args.length == 1 && args[0].equals("startup")) {
+                final MessageListDemoDaemon daemon =
+                        new MessageListDemoDaemon();
 
                 // Register application indicator.
                 final EncodedImage indicatorIcon =
@@ -103,12 +108,9 @@ final class MessageListDemo extends UiApplication {
                 ApplicationIndicatorRegistry.getInstance().register(
                         applicationIcon, false, false);
 
-                final MessageListDemoDaemon daemon =
-                        new MessageListDemoDaemon();
+                // Check if this application registered folders already.
                 final ApplicationMessageFolderRegistry reg =
                         ApplicationMessageFolderRegistry.getInstance();
-
-                // Check if this application registered folders already.
                 if (reg.getApplicationFolder(INBOX_FOLDER_ID) == null) {
                     // Register folders & message types and initialize folders
                     // with data. Normally the data would come from from a mail
@@ -139,7 +141,7 @@ final class MessageListDemo extends UiApplication {
     }
 
     // Constructor
-    MessageListDemo(final boolean isMainGui) {
+    public MessageListDemo(final boolean isMainGui) {
         if (isMainGui) {
             final MainScreen mainScreen = new MainScreen();
             mainScreen.setTitle("Message List Demo");
@@ -152,6 +154,13 @@ final class MessageListDemo extends UiApplication {
         }
     }
 
+    /**
+     * Adds a menu which allows the user to perform various message store
+     * actions.
+     * 
+     * @param mainScreen
+     *            The screen to add the menu to
+     */
     void addApplicationMenu(final MainScreen mainScreen) {
         final MenuItem appendUnreadMenuItem =
                 new MenuItem("Append Unread Message", 1, 1) {

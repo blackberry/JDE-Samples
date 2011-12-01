@@ -35,7 +35,7 @@ import net.rim.device.api.ui.UiApplication;
  * connection is opened using the BlackBerry MDS Connection Service. The server
  * application can be found in com/rim/samples/server/socketdemo.
  */
-class SocketDemo extends UiApplication {
+public class SocketDemo extends UiApplication {
     SocketDemoScreen _screen;
 
     /**
@@ -45,12 +45,14 @@ class SocketDemo extends UiApplication {
      *            line arguments.
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final SocketDemo app = new SocketDemo();
         app.enterEventDispatcher();
     }
 
     // Constructor
-    private SocketDemo() {
+    public SocketDemo() {
         // Create a new screen for the application.
         _screen = new SocketDemoScreen();
 

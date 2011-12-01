@@ -38,12 +38,12 @@ import net.rim.device.api.ui.container.PopupScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
 
 /**
- * Implementation of AbstractSpellCheckUIListener. A listener for events on the
- * SpellCheckUI. The listener can be used for as little as determining when each
- * field is spell checked and as much as determining corrections to misspelled
- * words.
+ * Implementation of AbstractSpellCheckUIListener which overrides a selection of
+ * the empty SpellCheckUIListener methods. Developers may use subclass the
+ * AbstractSpellCheckUIListener, such as in this class, to only override the
+ * SpellCheckUIListener methods which are nessesary to their application.
  */
-class SpellCheckListener extends AbstractSpellCheckUIListener {
+public class SpellCheckListener extends AbstractSpellCheckUIListener {
     /**
      * @see net.rim.blackberry.api.spellcheck.AbstractSpellCheckUIListener#wordLearned(SpellCheckUI
      *      ui, StringBuffer word)
@@ -111,6 +111,12 @@ class SpellCheckListener extends AbstractSpellCheckUIListener {
         StatusScreen _popUp;
         RichTextField _rtf;
 
+        /**
+         * Creates a runnable object to display a StatusScreen.
+         * 
+         * @param msg
+         *            The message to display on the StatusScreen
+         */
         private popUpRunner(final String msg) {
             final VerticalFieldManager vfm = new VerticalFieldManager();
             _popUp = new StatusScreen(vfm);
@@ -119,6 +125,12 @@ class SpellCheckListener extends AbstractSpellCheckUIListener {
                             | Field.NON_FOCUSABLE);
         }
 
+        /**
+         * Adds the message to the StatusScreen and invokes the popup to display
+         * after a short delay.
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             _popUp.add(_rtf);
             _popUp.show(1500); // Display for 1.5 seconds.
@@ -132,12 +144,24 @@ class SpellCheckListener extends AbstractSpellCheckUIListener {
     private static final class StatusScreen extends PopupScreen {
         private final StatusScreenPopper _popupPopper;
 
+        /**
+         * Displays a popup to show the status.
+         * 
+         * @param manager
+         *            The manager in which to pop up this screen from.
+         */
         private StatusScreen(final Manager manager) {
             // super(manager,Field.FIELD_HCENTER);
             super(manager);
             _popupPopper = new StatusScreenPopper(this);
         }
 
+        /**
+         * Shows the screen after a specified amount of time.
+         * 
+         * @param time
+         *            The time (in millisecons) delay before showing this screen
+         */
         public void show(final int time) {
             final UiApplication app = UiApplication.getUiApplication();
             app.invokeLater(_popupPopper, time, false);
@@ -151,10 +175,21 @@ class SpellCheckListener extends AbstractSpellCheckUIListener {
     private static final class StatusScreenPopper implements Runnable {
         private final PopupScreen _popup;
 
+        /**
+         * Associates the popup screen to remove to this class.
+         * 
+         * @param popup
+         *            The popup screen to remove
+         */
         private StatusScreenPopper(final PopupScreen popup) {
             _popup = popup;
         }
 
+        /**
+         * Removes the popup from the screen.
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             Ui.getUiEngine().popScreen(_popup);
         }

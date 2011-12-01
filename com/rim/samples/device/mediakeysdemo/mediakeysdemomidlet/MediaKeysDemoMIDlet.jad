@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+RIM-COD-Module-Name: MediaKeysDemoMIDlet
+RIM-COD-Module-Dependencies: net_rim_cldc
+MIDlet-Jar-Size: 7756
+MIDlet-1: ,,
+RIM-COD-Creation-Time: 1251136365
+MIDlet-Jar-URL: MediaKeysDemoMIDlet.jar
+RIM-COD-URL: MediaKeysDemoMIDlet.cod
+RIM-COD-SHA1: 22 45 b5 2f cd 77 87 d4 05 29 cb 1b 7e c2 e3 5d 79 1a 7e f0
+RIM-MIDlet-MediaPlayerModeEnabled: 1
+RIM-COD-Size: 6052
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-Version: 0.9
+MIDlet-Name: MediaKeysDemoMIDlet
+MIDlet-Vendor: Research In Motion Limited
+MicroEdition-Profile: MIDP-2.0
+RIM-MIDlet-Flags-1: 0

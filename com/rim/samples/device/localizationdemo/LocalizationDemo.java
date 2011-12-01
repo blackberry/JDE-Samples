@@ -50,17 +50,29 @@ import net.rim.device.api.ui.container.MainScreen;
  * for a particular locale are stored within a ResourceBundle onject.
  * 
  */
-class LocalizationDemo extends UiApplication {
+public class LocalizationDemo extends UiApplication {
+    /**
+     * Entry point for application.
+     * 
+     * @param args
+     *            Command line arguments (not used)
+     */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final LocalizationDemo theApp = new LocalizationDemo();
         theApp.enterEventDispatcher();
     }
 
-    private LocalizationDemo() {
+    // Constructor
+    public LocalizationDemo() {
         pushScreen(new LocalizationDemoScreen());
     }
 }
 
+/**
+ * This class displays a country's information in its native format.
+ */
 final class LocalizationDemoScreen extends MainScreen implements
         LocalizationDemoResource, FieldChangeListener {
     private final InfoScreen _infoScreen;
@@ -70,6 +82,7 @@ final class LocalizationDemoScreen extends MainScreen implements
     private static ResourceBundle _resources = ResourceBundle.getBundle(
             BUNDLE_ID, BUNDLE_NAME);
 
+    // Constructor
     LocalizationDemoScreen() {
         final LabelField title =
                 new LabelField(_resources.getString(APPLICATION_TITLE));
@@ -94,6 +107,9 @@ final class LocalizationDemoScreen extends MainScreen implements
         _choiceField.setFocus();
     }
 
+    /**
+     * Views the country's information
+     */
     private final MenuItem _viewItem = new MenuItem(_resources, MENUITEM_VIEW,
             110, 10) {
         public void run() {
@@ -114,6 +130,9 @@ final class LocalizationDemoScreen extends MainScreen implements
         }
     }
 
+    /**
+     * Displays the selected country's information.
+     */
     private void pushInfoScreen() {
         final int selectedIndex = _choiceField.getSelectedIndex();
         _infoScreen.updateScreen(selectedIndex);
@@ -130,6 +149,10 @@ final class LocalizationDemoScreen extends MainScreen implements
     }
 }
 
+/**
+ * This class handles displaying a country's information, formatted using the
+ * appropriate locale.
+ */
 class InfoScreen extends MainScreen implements LocalizationDemoResource {
     private final LabelField _countryField;
     private final BasicEditField _popField;
@@ -143,6 +166,7 @@ class InfoScreen extends MainScreen implements LocalizationDemoResource {
     private static ResourceBundle _resources = ResourceBundle.getBundle(
             BUNDLE_ID, BUNDLE_NAME);
 
+    // Constructor
     InfoScreen() {
         _countryField = new LabelField();
         _popField =
@@ -162,6 +186,12 @@ class InfoScreen extends MainScreen implements LocalizationDemoResource {
         add(_citiesField);
     }
 
+    /**
+     * Display the currently selected country's information.
+     * 
+     * @param index
+     *            The index of the selected country
+     */
     void updateScreen(final int index) {
         switch (index) {
         case US:

@@ -40,8 +40,7 @@ import net.rim.device.api.ui.component.LabelField;
 /**
  * Displays a map and all the sites added to it.
  */
-class DemoMapField extends MapField {
-
+public class DemoMapField extends MapField {
     // Vector of sites
     private final Vector _allSites = new Vector();
     private MapFieldDemoSite _highlightedSite;
@@ -51,7 +50,6 @@ class DemoMapField extends MapField {
 
     // For preferred height
     private LabelField _sampleLabel;
-    private int _preferredMapHeight;
 
     // Instructive text
     private final int _textHeight;
@@ -60,7 +58,7 @@ class DemoMapField extends MapField {
     /**
      * Initializes map.
      */
-    DemoMapField() {
+    public DemoMapField() {
         // Sample label is only used to determine the instructive text height
         // and is declared null right after use.
         _sampleLabel = new LabelField();
@@ -146,7 +144,7 @@ class DemoMapField extends MapField {
     }
 
     /**
-     * @see net.rim.device.api.ui.Field#paint(Graphics)
+     * @see net.rim.device.api.lbs.MapField#paint(Graphics)
      */
     protected void paint(final Graphics g) {
         // Smooths out all the polygons.

@@ -28,33 +28,78 @@ package com.rim.samples.device.embeddedmapdemo;
 
 import javax.microedition.location.Coordinates;
 
-final class MapLocation extends Coordinates {
+/**
+ * This class represents a location containing information including position,
+ * name and visibility.
+ */
+public final class MapLocation extends Coordinates {
     private String _name;
     private boolean _isVisible;
 
-    MapLocation(final double latitude, final double longitude, final String name) {
+    /**
+     * Creates a map location
+     * 
+     * @param latitude
+     *            The latitude of the location
+     * @param longitude
+     *            The longitude of the location
+     * @param name
+     *            The name of the location
+     */
+    public MapLocation(final double latitude, final double longitude,
+            final String name) {
         super(latitude, longitude, 0);
 
         _name = name;
     }
 
-    String getName() {
+    /**
+     * Gets the name of this location
+     * 
+     * @return The name of this location
+     */
+    public String getName() {
         return _name;
     }
 
-    void setName(final String name) {
+    /**
+     * Sets the name of this location
+     * 
+     * @param name
+     *            The name of this location
+     */
+    public void setName(final String name) {
         _name = name;
     }
 
-    boolean isVisible() {
+    /**
+     * Returns the visibility status of the location
+     * 
+     * @return True if this location should be marked on the map, false
+     *         otherwise
+     */
+    public boolean isVisible() {
         return _isVisible;
     }
 
-    // Add a marker at location.
-    void setVisible(final boolean isVisible) {
+    /**
+     * Sets the visibility status of the location
+     * 
+     * @param isVisible
+     *            True if this location should be marked, false otherwise
+     */
+    public void setVisible(final boolean isVisible) {
         _isVisible = isVisible;
     }
 
+    /**
+     * Gets the string representation of this object by returning the name of
+     * this location.
+     * 
+     * @return The name of this location
+     * 
+     * @see Object#toString()
+     */
     public String toString() {
         return _name;
     }

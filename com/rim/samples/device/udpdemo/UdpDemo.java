@@ -45,21 +45,24 @@ import net.rim.device.api.ui.container.VerticalFieldManager;
  * application after executing run.bat in the com.rim.samples.server.udpdemo
  * directory.
  */
-class UdpDemo extends UiApplication {
+public final class UdpDemo extends UiApplication {
     private final UdpDemoScreen _screen;
 
     /**
      * Entry point for application.
+     * 
+     * @param args
+     *            Command line arguments (not used)
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final UdpDemo theApp = new UdpDemo();
-
-        // Start the application’s event thread.
         theApp.enterEventDispatcher();
     }
 
     // Constructor
-    private UdpDemo() {
+    public UdpDemo() {
         // Create our main screen and push it onto the UI stack.
         _screen = new UdpDemoScreen();
         pushScreen(_screen);
@@ -119,9 +122,9 @@ final class UdpDemoScreen extends MainScreen implements FieldChangeListener {
     /**
      * A customized VerticalFieldManager.
      */
-    static class UdpDemoVFM extends VerticalFieldManager {
+    private static class UdpDemoVFM extends VerticalFieldManager {
         // Constructor
-        private UdpDemoVFM() {
+        UdpDemoVFM() {
             super(Manager.VERTICAL_SCROLL | Manager.VERTICAL_SCROLLBAR);
         }
 
@@ -150,12 +153,9 @@ final class UdpDemoScreen extends MainScreen implements FieldChangeListener {
     }
 
     /**
-     * We override this method to prevent save dialog from being displayed.
-     * 
-     * @see net.rim.device.api.ui.Screen#onClose()
+     * @see net.rim.device.api.ui.MainScreen#onSavePrompt()
      */
-    public boolean onClose() {
-        close();
+    protected boolean onSavePrompt() {
         return true;
     }
 
@@ -221,5 +221,23 @@ final class UdpDemoScreen extends MainScreen implements FieldChangeListener {
     void updateStatus(final String text) {
         _status.append(text + '\n');
         _statusField.setText(_status.toString());
+    }
+
+    /**
+     * @see net.rim.device.api.ui.Screen#invokeAction(int)
+     */
+    protected boolean invokeAction(final int action) {
+        final boolean handled = super.invokeAction(action);
+
+        if (!handled) {
+            switch (action) {
+            case ACTION_INVOKE: // Trackball click.
+            {
+                // Suppress the menu
+                return true;
+            }
+            }
+        }
+        return handled;
     }
 }

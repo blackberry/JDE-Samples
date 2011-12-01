@@ -30,13 +30,10 @@ import net.rim.device.api.synchronization.SyncManager;
 import net.rim.device.api.synchronization.SyncObject;
 import net.rim.device.api.synchronization.UIDGenerator;
 import net.rim.device.api.system.Display;
-import net.rim.device.api.ui.DrawStyle;
-import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
-import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.ListField;
 import net.rim.device.api.ui.component.ListFieldCallback;
 import net.rim.device.api.ui.component.Menu;
@@ -45,13 +42,12 @@ import net.rim.device.api.ui.container.MainScreen;
 /**
  * Sample to demonstrate synchronization of contact data with a simulated BES
  * environment. This sample requires the BlackBerry Sync Server SDK and the
- * BlackBerry Email and MDS Services Simulators, available from
- * www.blackberry.com/developers. For more information on how to use this sample
- * see the Synchronization Server SDK Development Guide bundled with the
- * BlackBerry Sync Server SDK.
+ * BlackBerry Email simulator. For more information on how to use this sample
+ * see the Synchronization Server SDK Development Guide and the readme.txt file
+ * included in this project.
  */
 
-class OTASyncDemo extends UiApplication implements ListFieldCallback {
+public class OTASyncDemo extends UiApplication implements ListFieldCallback {
     // Members
     // ------------------------------------------------------------------
     private final ListField _listField;
@@ -65,10 +61,18 @@ class OTASyncDemo extends UiApplication implements ListFieldCallback {
     // Inner Classes
     // ------------------------------------------------------------
     private class AddContactAction extends MenuItem {
+        /**
+         * Default constructor
+         */
         private AddContactAction() {
             super("Add", 100000, 5);
         }
 
+        /**
+         * Adds a new contact to the contact collection
+         * 
+         * @see java.lang.Runnable@run()
+         */
         public void run() {
             final OTAContactScreen screen = new OTAContactScreen();
             UiApplication.getUiApplication().pushModalScreen(screen);
@@ -87,11 +91,22 @@ class OTASyncDemo extends UiApplication implements ListFieldCallback {
     private class EditContactAction extends MenuItem {
         private final int _contactIndex;
 
+        /**
+         * Constructs a menu item to edit a specific contact when invoked
+         * 
+         * @param contactIndex
+         *            The index of the contact to edit
+         */
         private EditContactAction(final int contactIndex) {
             super("Edit", 100000, 6);
             _contactIndex = contactIndex;
         }
 
+        /**
+         * Display a screen to allow the user to edit the contact
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             final OTAContactData oldContactData =
                     (OTAContactData) _otaContactCollection.getAt(_contactIndex);
@@ -113,11 +128,22 @@ class OTASyncDemo extends UiApplication implements ListFieldCallback {
     private class DeleteContactAction extends MenuItem {
         private final int _deleteIndex;
 
+        /**
+         * Constructs a menu item to delete a specific contact when invoked
+         * 
+         * @param contactIndex
+         *            The index of the contact to delete
+         */
         private DeleteContactAction(final int deleteIndex) {
             super("Delete", 100000, 7);
             _deleteIndex = deleteIndex;
         }
 
+        /**
+         * Delete the contact
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             final OTAContactData contactData =
                     (OTAContactData) _otaContactCollection.getAt(_deleteIndex);
@@ -135,16 +161,30 @@ class OTASyncDemo extends UiApplication implements ListFieldCallback {
         }
     }
 
+    /**
+     * An action to refresh the screen's contact list
+     */
     private class RefreshAction extends MenuItem {
+        /**
+         * Default constructor
+         */
         private RefreshAction() {
             super("Refresh", 100000, 8);
         }
 
+        /**
+         * Refreshes the contact list
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             reloadContactList();
         }
     }
 
+    /**
+     * The main screen to display the menu and contact list
+     */
     private class OTASyncDemoScreen extends MainScreen {
 
         /**
@@ -170,16 +210,17 @@ class OTASyncDemo extends UiApplication implements ListFieldCallback {
         }
     }
 
-    // Constructor
-    private OTASyncDemo() {
-        // Create a new screen for the application.
+    /**
+     * Default constructor.
+     */
+    public OTASyncDemo() {
+        // Create a new screen for the application
         final OTASyncDemoScreen screen = new OTASyncDemoScreen();
 
         _addContactAction = new AddContactAction();
         _refreshAction = new RefreshAction();
 
-        screen.setTitle(new LabelField("OTA Sync Demo Contacts",
-                DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH));
+        screen.setTitle("OTA Sync Demo Contacts");
 
         _listField = new ListField();
         _listField.setCallback(this);
@@ -191,6 +232,11 @@ class OTASyncDemo extends UiApplication implements ListFieldCallback {
         reloadContactList();
     }
 
+    /**
+     * Refreshes the contact list displayed on the screen
+     * 
+     * @return True
+     */
     private boolean reloadContactList() {
         // Refreshes contact list on screen.
         _listField.setSize(_otaContactCollection.getSyncObjectCount());
@@ -243,9 +289,15 @@ class OTASyncDemo extends UiApplication implements ListFieldCallback {
      */
     public int indexOfList(final ListField listField, final String prefix,
             final int start) {
-        return -1; // Not implemented.
+        return -1; // Not implemented
     }
 
+    /**
+     * Entry point of the application
+     * 
+     * @param args
+     *            Command line arguments
+     */
     public static void main(final String[] args) {
         boolean startup = false;
 
@@ -258,10 +310,12 @@ class OTASyncDemo extends UiApplication implements ListFieldCallback {
         _otaContactCollection = OTAContactCollection.getInstance();
 
         if (startup) {
-            // Enable app for synchronization.
+            // Enable app for synchronization
             SyncManager.getInstance().enableSynchronization(
                     _otaContactCollection);
         } else {
+            // Create a new instance of the application and make the currently
+            // running thread the application's event dispatch thread.
             final OTASyncDemo app = new OTASyncDemo();
             app.enterEventDispatcher();
         }

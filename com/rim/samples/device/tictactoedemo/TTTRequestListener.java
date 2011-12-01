@@ -35,13 +35,21 @@ import net.rim.device.api.system.Application;
  * 
  * @see net.rim.blackberry.api.blackberrymessenger.SessionRequestListener
  */
-class TTTRequestListener implements SessionRequestListener {
+public final class TTTRequestListener implements SessionRequestListener {
     private static TTTRequestListener _instance;
 
+    /**
+     * Hidden default constructor
+     */
     private TTTRequestListener() {
     }
 
-    static TTTRequestListener getInstance() {
+    /**
+     * Gets the singleton instance of the TTRequestListener class.
+     * 
+     * @return The singleton instance of the TTRequestListener class.
+     */
+    public synchronized static TTTRequestListener getInstance() {
         if (_instance == null) {
             _instance = new TTTRequestListener();
         }

@@ -1,5 +1,9 @@
 ## RIM Java Development Environment
 # RIM Project file
+#
+# This file is generated and managed by BlackBerry developer tools.
+# It SHOULD NOT BE modified manually.
+#
 AddOn=0
 AlwaysBuild=0
 [AlxImports
@@ -16,9 +20,9 @@ AutoRestart=0
 [DependsOn
 ]
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 ApplicationPermissionsDemo.java
-ApplicationPermissionsScreen.java
 DemoReasonProvider.java
 img\apppermissions_jde.png
 ]

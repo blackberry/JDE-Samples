@@ -30,18 +30,18 @@ package com.rim.samples.device.fileexplorerdemo;
  * Helper class to store information about directories and files that are being
  * read from the system.
  */
-/* package */final class FileExplorerDemoFileHolder {
+public final class FileExplorerDemoFileHolder {
     private final String _filename;
     private final String _path;
     private boolean _isDir;
 
     /**
-     * Constructor. Pulls the path and file name from the provided string.
+     * Creates a new FileExplorerDemoFileHolder object
      * 
      * @param fileinfo
      *            The path and file name provided from the FileConnection.
      */
-    FileExplorerDemoFileHolder(final String fileinfo) {
+    public FileExplorerDemoFileHolder(final String fileinfo) {
         // Pull the information from the URI provided from the original
         // FileConnection.
         int slash = fileinfo.lastIndexOf('/');
@@ -55,37 +55,37 @@ package com.rim.samples.device.fileexplorerdemo;
     }
 
     /**
-     * Retrieves the file name.
+     * Retrieves the file name
      * 
-     * @return Name of the file, or null if it's a directory.
+     * @return Name of the file, or null if it's a directory
      */
     String getFileName() {
         return _filename;
     }
 
     /**
-     * Retrieves the path of the directory or file.
+     * Retrieves the path of the directory or file
      * 
-     * @return Fully qualified path.
+     * @return Fully qualified path of the file
      */
     String getPath() {
         return _path;
     }
 
     /**
-     * Determins if the FileHolder is a directory.
+     * Determins if the FileHolder is a directory
      * 
-     * @return true if FileHolder is directory, otherwise false.
+     * @return true if FileHolder is directory, otherwise false
      */
     boolean isDirectory() {
         return _isDir;
     }
 
     /**
-     * Enables setting of directory for FileHolder.
+     * Enables setting of directory for FileHolder
      * 
      * @param isDir
-     *            true if FileHolder should be a directory.
+     *            true if FileHolder should be a directory
      */
     void setDirectory(final boolean isDir) {
         _isDir = isDir;

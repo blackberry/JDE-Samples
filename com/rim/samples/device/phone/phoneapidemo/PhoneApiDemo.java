@@ -59,7 +59,7 @@ import net.rim.device.api.util.Persistable;
 /**
  * The main class for the Phone API demo app.
  */
-final class PhoneApiDemo extends UiApplication {
+public final class PhoneApiDemo extends UiApplication {
     // Members
     // -------------------------------------------------------------------------------------
     private final PhoneApiDemoMainScreen _mainScreen;
@@ -88,7 +88,7 @@ final class PhoneApiDemo extends UiApplication {
      * PhoneApiDemo Constructor. Creates the main screen for the app and pushes
      * it onto the display stack.
      */
-    private PhoneApiDemo() {
+    public PhoneApiDemo() {
         _mainScreen = new PhoneApiDemoMainScreen();
         /* parent. */pushScreen(_mainScreen);
     }
@@ -133,10 +133,18 @@ final class PhoneApiDemo extends UiApplication {
             try {
                 Phone.addPhoneListener(new ConcretePhoneListener());
             } catch (final ControlledAccessException e) {
-                Dialog.alert("Access to Phone API restricted by system administrator.");
+                UiApplication.getUiApplication().invokeLater(new Runnable() {
+                    public void run() {
+                        Dialog.alert("Access to Phone API restricted by system administrator: "
+                                + e.toString());
+                    }
+                });
+
                 System.exit(1);
             }
         } else {
+            // Create a new instance of the application and make the currently
+            // running thread the application's event dispatch thread.
             new PhoneApiDemo().enterEventDispatcher();
         }
     }
@@ -162,7 +170,7 @@ final class PhoneApiDemo extends UiApplication {
         private PhoneApiDemoMainScreen() {
             super();
 
-            /* parent. */setTitle(new LabelField("Phone API Demo"));
+            /* parent. */setTitle("Phone API Demo");
 
             _phoneNumberListField = new ListField(_phoneNumberList.size());
             _phoneNumberListField.setCallback(this);
@@ -196,7 +204,7 @@ final class PhoneApiDemo extends UiApplication {
         /**
          * Creates the menu for this screen.
          * 
-         * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
+         * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
          */
         protected void makeMenu(final Menu menu, final int instance) {
             super.makeMenu(menu, instance);
@@ -264,11 +272,22 @@ final class PhoneApiDemo extends UiApplication {
             // Members ----------------------------------------------
             private final PhoneNumberRecord _record;
 
+            /**
+             * Constructs a menu item to view a record when invoked.
+             * 
+             * @param record
+             *            The record to view
+             */
             private View(final PhoneNumberRecord record) {
                 super("View", 200000, 100);
                 _record = record;
             }
 
+            /**
+             * Shows the phone number record.
+             * 
+             * @see java.lang.Runnable#run()
+             */
             public void run() {
                 final MainScreen screen = new MainScreen();
 
@@ -297,11 +316,22 @@ final class PhoneApiDemo extends UiApplication {
             // Members ----------------------------------------------
             private final PhoneNumberRecord _record;
 
+            /**
+             * Constructs a menu item to delete a phone record when invoked.
+             * 
+             * @param record
+             *            The phone record to delete
+             */
             private Delete(final PhoneNumberRecord record) {
                 super("Delete", 300000, 110);
                 _record = record;
             }
 
+            /**
+             * Deletes the phone record.
+             * 
+             * @see java.lang.Runnable#run()
+             */
             public void run() {
                 if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
                     _phoneNumberList.removeElement(_record);
@@ -326,6 +356,12 @@ final class PhoneApiDemo extends UiApplication {
         private static final int PHONE_NUMBER = 0;
         private static final int TALK_TIME = 1;
 
+        /**
+         * Constructs a PhoneNumberRecord from a phone number.
+         * 
+         * @param phoneNumber
+         *            The phone number of the record to be created
+         */
         private PhoneNumberRecord(final String phoneNumber) {
             _fields = new Vector();
             _fields.addElement(phoneNumber);
@@ -430,6 +466,13 @@ final class PhoneApiDemo extends UiApplication {
         private final BasicEditField _phoneNumber;
         private final BasicEditField _talkTime;
 
+        /**
+         * Constructs a collection of fields to display the phone number
+         * record's information.
+         * 
+         * @param phoneNumberRecord
+         *            The phone number record to display
+         */
         private PhoneNumberRecordDisplayer(
                 final PhoneNumberRecord phoneNumberRecord) {
             final String phoneNumber =
@@ -496,13 +539,20 @@ final class PhoneApiDemo extends UiApplication {
     private static final class ConcretePhoneListener extends
             AbstractPhoneListener {
         // Members ----------------------------------------------
+
+        // Helper object for searching the list of records.
         private final PhoneNumberRecord _searchRecord = new PhoneNumberRecord(
-                ""); // Helper object for searching the list of records.
-        private final Hashtable _phoneNumberTable = new Hashtable(); // Maps
-                                                                     // call IDs
-                                                                     // to their
-                                                                     // phone
-                                                                     // numbers.
+                "");
+
+        // Maps call IDs to their phone numbers.
+        private final Hashtable _phoneNumberTable = new Hashtable();
+
+        /**
+         * Default constructor
+         */
+        ConcretePhoneListener() {
+            // Not implemented
+        }
 
         /**
          * Called when a phone call is connected. Finds the record with the
@@ -637,6 +687,12 @@ final class PhoneApiDemo extends UiApplication {
     private static final class PhoneApiDemoKeyListener implements KeyListener {
         private final Screen _screen;
 
+        /**
+         * Constructor
+         * 
+         * @param screen
+         *            The screen with to display the menu on
+         */
         public PhoneApiDemoKeyListener(final Screen screen) {
             _screen = screen;
         }

@@ -37,8 +37,7 @@ import net.rim.device.api.ui.Graphics;
  * portrait and landscape orientations, the field is re-drawn to span the new
  * width of the screen.
  */
-class CustomSpanField extends Field {
-
+public final class CustomSpanField extends Field {
     /**
      * Overriding the paint method to draw four equally sized and differently
      * coloured rectangles.

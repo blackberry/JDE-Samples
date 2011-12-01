@@ -27,6 +27,7 @@
 package com.rim.samples.device.mapfielddemo;
 
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.component.Dialog;
 
 /**
  * This sample application provides an example how to leverage the capabilities
@@ -35,21 +36,35 @@ import net.rim.device.api.ui.UiApplication;
  * MapFieldDemoSite objects corresponding to RIM locations around the world. A
  * given site is drawn as a polygon super-imposed on the currently rendered map.
  */
-class MapFieldDemo extends UiApplication {
+public class MapFieldDemo extends UiApplication {
     /**
-     * Sets up an instance of this class as the event dispatching thread.
+     * Entry point for application
      * 
      * @param args
-     *            Not used.
+     *            Command line arguments (not used)
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         new MapFieldDemo().enterEventDispatcher();
     }
 
-    /**
-     * Loads the application screen.
-     */
-    private MapFieldDemo() {
+    // Constructor
+    public MapFieldDemo() {
         pushScreen(new MapFieldDemoScreen());
+    }
+
+    /**
+     * Presents a dialog to the user with a given message
+     * 
+     * @param message
+     *            The text to display
+     */
+    public static void errorDialog(final String message) {
+        UiApplication.getUiApplication().invokeLater(new Runnable() {
+            public void run() {
+                Dialog.alert(message);
+            }
+        });
     }
 }

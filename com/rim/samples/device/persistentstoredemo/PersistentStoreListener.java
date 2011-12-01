@@ -38,7 +38,7 @@ import net.rim.device.api.system.PersistentStore;
  * changes to the device's Content Protection/Compression security settings and
  * re-encodes data accordingly. Changes to the device's state are ignored.
  */
-final class PersistentStoreListener implements PersistentContentListener {
+public final class PersistentStoreListener implements PersistentContentListener {
     /**
      * Called when the state of the device changes (unlocked/locking/locked
      * insecure/locked secure). This app doesn't care about these state changes

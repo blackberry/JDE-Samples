@@ -32,14 +32,14 @@ import javax.microedition.location.Coordinates;
 
 import net.rim.device.api.io.LineReader;
 import net.rim.device.api.ui.Color;
+import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.XYPoint;
 
 /**
  * Site defines what a site is and how it is displayed.
  */
-class MapFieldDemoSite {
-
+public class MapFieldDemoSite {
     // Colors
     private static final int DEFAULT_COLOR = 0x00666666;
     private static final int HIGHLIGHT_COLOR = 0x00FF6666;
@@ -82,7 +82,7 @@ class MapFieldDemoSite {
      * @param map
      *            The map associated with the instance of this class.
      */
-    MapFieldDemoSite(final String filePath, final String siteName,
+    public MapFieldDemoSite(final String filePath, final String siteName,
             final DemoMapField map) {
         _siteName = siteName;
         _map = map;
@@ -246,6 +246,7 @@ class MapFieldDemoSite {
                 }
             }
         } catch (final IOException e) {
+            MapFieldDemo.errorDialog(e.toString());
         }
     }
 
@@ -254,6 +255,7 @@ class MapFieldDemoSite {
      * 
      * @param g
      *            A Graphics obeject.
+     * @see Field#paint(Graphics)
      */
     void drawSite(final Graphics g) {
         if (_map != null) {
@@ -388,6 +390,11 @@ class MapFieldDemoSite {
         return _campus;
     }
 
+    /**
+     * Returns whether the site is a stand alone site or not
+     * 
+     * @return True if the site is a stand alone site, false otherwise
+     */
     boolean isStandAloneSite() {
         return _standAloneSite;
     }

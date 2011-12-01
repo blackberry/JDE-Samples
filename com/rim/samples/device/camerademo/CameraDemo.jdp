@@ -20,9 +20,11 @@ AutoRestart=0
 [DependsOn
 ]
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 CameraDemo.java
 EncodingProperties.java
+EncodingPropertiesScreen.java
 ImageScreen.java
 img\camerademo_jde.png
 ]

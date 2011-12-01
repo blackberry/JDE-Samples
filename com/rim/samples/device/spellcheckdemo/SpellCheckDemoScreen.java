@@ -43,21 +43,24 @@ import net.rim.device.api.ui.container.PopupScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
 
 /**
- * The MainScreen class for our application.
+ * The MainScreen class for our application. It displays a TestField instance to
+ * allow the user to input words. The words can either be added to the
+ * dictionary by 'learning' the word or the user may choose to spell check the
+ * word.
  */
-final class SpellCheckDemoScreen extends MainScreen {
+public class SpellCheckDemoScreen extends MainScreen {
     private final TestField _testField;
     private EditField _correction;
     private PopupScreen _popUp;
     private final SpellCheckDemo _app;
 
     /**
-     * Constructor
+     * Creates a SpellCheckDemoScreen based on a SpellCheckDemo application.
      * 
      * @param app
      *            Reference to the SpellCheckDemo UiApplication.
      */
-    SpellCheckDemoScreen(final SpellCheckDemo app) {
+    public SpellCheckDemoScreen(final SpellCheckDemo app) {
         _app = app;
 
         // Add UI components to the screen.
@@ -83,14 +86,18 @@ final class SpellCheckDemoScreen extends MainScreen {
         return true;
     }
 
-    // Menu item classes
-    // ------------------------------------------------------------------------------------------------
+    // Menu item classes -------------------------------------------------------
 
     /**
-     * Menu item to invoke the spellCheck() method of the SpellCheckDemo
-     * application, passing in our test field as the field to be spell checked.
+     * Menu item to invoke the spellCheck() method of the SpellCheckDemo.
+     * application, passing in our TestField as the field to be spell checked.
      */
     private final MenuItem _spellCheckItem = new MenuItem("Spell check", 0, 0) {
+        /**
+         * Checks the spelling in the TestField.
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             if (_testField.getText().length() == 0) {
                 Dialog.alert("Test field cannot be empty");
@@ -102,10 +109,15 @@ final class SpellCheckDemoScreen extends MainScreen {
 
     /**
      * The run() method of this menu item calls the learnWord() method of the
-     * SpellCheckDemo application, passing in the word specified in the test
-     * field.
+     * SpellCheckDemo application, passing in the word specified in the
+     * TestField.
      */
     private final MenuItem _learnWordItem = new MenuItem("Learn word", 0, 0) {
+        /**
+         * Learns the word in the TestField.
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             if (_testField.getText().length() == 0) {
                 Dialog.alert("Test field cannot be empty");
@@ -117,10 +129,16 @@ final class SpellCheckDemoScreen extends MainScreen {
 
     /**
      * This menu item displays a PopupScreen containing an EditField in which to
-     * enter a correction for the word specified in the test field.
+     * enter a correction for the word specified in the TestField.
      */
     private final MenuItem _learnCorrectionItem = new MenuItem(
             "Learn correction", 0, 0) {
+        /**
+         * Shows the user a list of possible corrections for the word in the
+         * TestField.
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             if (_testField.getText().length() == 0) {
                 Dialog.alert("Test field cannot be empty");
@@ -146,13 +164,18 @@ final class SpellCheckDemoScreen extends MainScreen {
     /**
      * This inner class represents the OK button in our 'Learn correction'
      * PopupScreen.
-     * 
      */
     private final class OkButton extends ButtonField {
+        /**
+         * Default constructor.
+         */
         private OkButton() {
             super("OK", ButtonField.CONSUME_CLICK);
         }
 
+        /**
+         * @see Field#fieldChangeNotify(int)
+         */
         protected void fieldChangeNotify(final int context) {
             if ((context & FieldChangeListener.PROGRAMMATIC) == 0) {
                 if (_correction.getText().length() == 0) {
@@ -171,10 +194,16 @@ final class SpellCheckDemoScreen extends MainScreen {
      * This inner class simply closes our 'Learn correction' PopupScreen.
      */
     private final class CancelButton extends ButtonField {
+        /**
+         * Default constructor.
+         */
         private CancelButton() {
             super("Cancel", ButtonField.CONSUME_CLICK);
         }
 
+        /**
+         * @see Field#fieldChangeNotify(int)
+         */
         protected void fieldChangeNotify(final int context) {
             if ((context & FieldChangeListener.PROGRAMMATIC) == 0) {
                 _popUp.close();
@@ -187,6 +216,14 @@ final class SpellCheckDemoScreen extends MainScreen {
      * context menu.
      */
     private final class TestField extends EditField {
+        /**
+         * Construct a custom EditField.
+         * 
+         * @param label
+         *            The TestField's label
+         * @param initialValue
+         *            The initial contents of the TestField
+         */
         private TestField(final String label, final String initialValue) {
             super(label, initialValue);
         }

@@ -45,8 +45,8 @@ import net.rim.device.api.ui.container.MainScreen;
  * the service routing API to leverage the serial bypass mechanism that was
  * implemented with 4.0 BES and 4.0 handhelds.
  */
-class ServiceRoutingDemo extends UiApplication implements TreeFieldCallback,
-        ServiceRoutingListener {
+public class ServiceRoutingDemo extends UiApplication implements
+        TreeFieldCallback, ServiceRoutingListener {
     private final MainScreen _screen; // Screen shown to the user.
     private final RichTextField _statusField; // Field containing connected or
                                               // disconnected string.
@@ -54,12 +54,23 @@ class ServiceRoutingDemo extends UiApplication implements TreeFieldCallback,
     private String _desktopUID; // UID representing the Desktop service record.
     private final UiApplication _app; // Application instance.
 
+    /**
+     * Entry point for application.
+     * 
+     * @param args
+     *            Command line arguments (not used)
+     */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final ServiceRoutingDemo demo = new ServiceRoutingDemo();
         demo.enterEventDispatcher();
     }
 
-    private ServiceRoutingDemo() {
+    /**
+     * Default constructor.
+     */
+    public ServiceRoutingDemo() {
         // Save the current application instance for later use.
         _app = UiApplication.getUiApplication();
 
@@ -210,15 +221,33 @@ class ServiceRoutingDemo extends UiApplication implements TreeFieldCallback,
     // / UpdateRunnable Implementation ///
     // ////////////////////////////////////////////////////////////////
 
+    /**
+     * This class is responsible for displaying the result of a service change.
+     */
     private class UpdateRunnable implements Runnable {
         private final String _service;
         private final boolean _serviceState;
 
+        /**
+         * Associates the service changed and its new state with this object.
+         * 
+         * @param service
+         *            The service that was changed
+         * @param serviceState
+         *            The new service state
+         */
         private UpdateRunnable(final String service, final boolean serviceState) {
             _service = service;
             _serviceState = serviceState;
         }
 
+        /**
+         * This displays whether or not serial bypass is still active and
+         * whether the desktop serial bypass is still available if the desktop
+         * service had changed state.
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             _statusField.setText(ServiceRouting.getInstance()
                     .isSerialBypassActive() ? "Serial Bypass: Connected"

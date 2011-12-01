@@ -33,8 +33,10 @@ import java.util.Vector;
 import javax.microedition.location.Coordinates;
 
 import net.rim.device.api.io.LineReader;
+import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
+import net.rim.device.api.ui.Keypad;
 import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.TouchEvent;
 import net.rim.device.api.ui.TouchGesture;
@@ -47,8 +49,7 @@ import net.rim.device.api.ui.container.VerticalFieldManager;
 /**
  * Handles the display of MapFieldDemo's UI elements.
  */
-class MapFieldDemoScreen extends MainScreen {
-
+public class MapFieldDemoScreen extends MainScreen {
     // For display
     private final DemoMapField _map;
     private LabelField _addressBar1;
@@ -71,7 +72,7 @@ class MapFieldDemoScreen extends MainScreen {
     /**
      * Sets up screen elements and initializes the map.
      */
-    MapFieldDemoScreen() {
+    public MapFieldDemoScreen() {
         super(Manager.NO_VERTICAL_SCROLL);
         Coordinates defaultLocation;
 
@@ -124,8 +125,10 @@ class MapFieldDemoScreen extends MainScreen {
             add(_map);
 
             // Create label fields to display address of highlighted site.
-            _addressBar1 = new LabelField("");
-            _addressBar2 = new LabelField("");
+            _addressBar1 =
+                    new LabelField("", DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH);
+            _addressBar2 =
+                    new LabelField("", DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH);
 
             // Add the address label fields to the screen's status section.
             final VerticalFieldManager statusVFM = new VerticalFieldManager();
@@ -136,6 +139,7 @@ class MapFieldDemoScreen extends MainScreen {
             createMenuItems();
 
         } catch (final IOException e) {
+            MapFieldDemo.errorDialog(e.toString());
         }
     }
 
@@ -177,7 +181,8 @@ class MapFieldDemoScreen extends MainScreen {
                 // We've reached the end of the file.
                 break;
             } catch (final IOException ioe) {
-                System.out.println("Error reading data from file");
+                MapFieldDemo.errorDialog("Error reading data from file: "
+                        + ioe.toString());
                 break;
             }
         }
@@ -226,7 +231,8 @@ class MapFieldDemoScreen extends MainScreen {
                 // We've reached the end of the file.
                 break;
             } catch (final IOException ioe) {
-                System.out.println("Error reading data from file");
+                MapFieldDemo.errorDialog("Error reading data from file: "
+                        + ioe.toString());
                 break;
             }
         }
@@ -266,7 +272,7 @@ class MapFieldDemoScreen extends MainScreen {
     }
 
     /**
-     * @see net.rim.device.api.ui.Screen#makeMenu(Menu, int)
+     * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu, int)
      */
     protected void makeMenu(final Menu menu, final int instance) {
         for (int count = 0; count < _campusMenuItems.size(); count++) {
@@ -292,7 +298,7 @@ class MapFieldDemoScreen extends MainScreen {
      *            Name of the campus.
      */
     private void displayTitle(final String campus) {
-        setTitle(new LabelField("Welcome to " + campus));
+        setTitle("Welcome to " + campus);
     }
 
     /**
@@ -324,7 +330,7 @@ class MapFieldDemoScreen extends MainScreen {
     }
 
     /**
-     * @see net.rim.device.api.ui.Field#paint(Graphics)
+     * @see net.rim.device.api.ui.Screen#paint(Graphics)
      */
     protected void paint(final Graphics g) {
         super.paint(g);
@@ -333,27 +339,31 @@ class MapFieldDemoScreen extends MainScreen {
     }
 
     /**
-     * @see net.rim.device.api.ui.Field#keyChar(char, int, int)
+     * @see net.rim.device.api.ui.Screen#keyDown(int, int)
      */
-    protected boolean keyChar(final char character, final int status,
-            final int time) {
-        // 'i'(qwerty), 'g'(multitap) or 'u'(suretype) will zoom in.
-        if (character == 'i' || character == 'u' || character == 'g') {
+    protected boolean keyDown(final int keycode, final int time) {
+        final StringBuffer sb = new StringBuffer();
+
+        // Retrieve the characters mapped to the keycode for the current
+        // keyboard layout
+        Keypad.getKeyChars(keycode, sb);
+
+        // Zoom in
+        if (sb.toString().indexOf('i') != -1) {
             _map.setZoom(Math.max(_map.getZoom() - 1, _map.getMinZoom()));
             return true;
-        } else if (character == 'o' || character == 'm') { // 'o'(qwerty,
-                                                           // suretype) or
-                                                           // 'm'(multitap) will
-                                                           // zoom out
+        }
+        // Zoom out
+        else if (sb.toString().indexOf('o') != -1) {
             _map.setZoom(Math.min(_map.getZoom() + 1, _map.getMaxZoom()));
             return true;
         }
 
-        return super.keyChar(character, status, time);
+        return super.keyDown(keycode, time);
     }
 
     /**
-     * @see Field#touchEvent(TouchEvent)
+     * @see Screen#touchEvent(TouchEvent)
      */
     protected boolean touchEvent(final TouchEvent message) {
         boolean isConsumed = false;
@@ -389,7 +399,7 @@ class MapFieldDemoScreen extends MainScreen {
     }
 
     /**
-     * @see net.rim.device.api.ui.Field#navigationMovement(int, int, int, int)
+     * @see net.rim.device.api.ui.Screen#navigationMovement(int, int, int, int)
      */
     protected boolean navigationMovement(final int dx, final int dy,
             final int status, final int time) {

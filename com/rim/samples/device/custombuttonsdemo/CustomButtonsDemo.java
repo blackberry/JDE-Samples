@@ -26,12 +26,10 @@
 
 package com.rim.samples.device.custombuttonsdemo;
 
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
-import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
@@ -39,21 +37,27 @@ import net.rim.device.api.ui.container.VerticalFieldManager;
 /**
  * The CustomButtonsDemo sample demonstrates custom UI fields.
  */
-class CustomButtonsDemo extends UiApplication implements FieldChangeListener {
+public class CustomButtonsDemo extends UiApplication implements
+        FieldChangeListener {
 
     /**
-     * Entry point.
+     * Entry point for application
+     * 
+     * @param args
+     *            Command line arguments (not used)
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final CustomButtonsDemo theApp = new CustomButtonsDemo();
         theApp.enterEventDispatcher();
     }
 
     /**
-     * The default constructor. Creates all the RIM UI components and pushes the
+     * Constructor. Creates all the RIM UI components and pushes the
      * application's root screen onto the UI stack.
      */
-    CustomButtonsDemo() {
+    public CustomButtonsDemo() {
         CustomButtonField rectangle;
         CustomButtonField triangle;
         CustomButtonField octagon;
@@ -66,13 +70,8 @@ class CustomButtonsDemo extends UiApplication implements FieldChangeListener {
         // MainScreen is the basic screen or frame class of the RIM UI.
         final MainScreen mainScreen = new MainScreen();
 
-        // Add a field to the title region of the MainScreen. We use a simple
-        // LabelField
-        // here. The ELLIPSIS option truncates the label text with "..." if the
-        // text was
-        // too long for the space available.
-        mainScreen.setTitle(new LabelField("Custom Buttons Demo",
-                DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH));
+        // Set the displayed title of the screen.
+        mainScreen.setTitle("Custom Buttons Demo");
 
         // Add a vertical field manager containing sample custom button fields.
         final VerticalFieldManager vfm = new VerticalFieldManager();
@@ -154,7 +153,6 @@ class CustomButtonsDemo extends UiApplication implements FieldChangeListener {
      * @see net.rim.device.api.ui.FieldChangeListener#fieldChanged(Field, int)
      */
     public void fieldChanged(final Field field, final int context) {
-
         String text = "Button";
 
         if (field instanceof CustomButtonField) {
@@ -166,6 +164,5 @@ class CustomButtonsDemo extends UiApplication implements FieldChangeListener {
         }
 
         Dialog.inform(text + " was clicked.");
-
     }
 }

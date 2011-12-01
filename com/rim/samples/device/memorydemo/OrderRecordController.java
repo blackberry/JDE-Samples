@@ -36,7 +36,7 @@ import net.rim.device.api.ui.component.DateField;
  * A controller for an order record. Used to display an order record's
  * information on the screen using fields.
  */
-/* package */final class OrderRecordController {
+public final class OrderRecordController {
     // Members
     // -------------------------------------------------------------------------------------
     private boolean _editable;
@@ -46,7 +46,16 @@ import net.rim.device.api.ui.component.DateField;
     private final BasicEditField _product;
     private final BasicEditField _numOrdered;
 
-    OrderRecordController(OrderRecord orderRecord, final boolean editable) {
+    /**
+     * Constructor
+     * 
+     * @param orderRecord
+     *            The OrderRecord to control
+     * @param editable
+     *            Whether or not the record should be editable
+     */
+
+    public OrderRecordController(OrderRecord orderRecord, final boolean editable) {
         _editable = editable;
 
         if (editable) {

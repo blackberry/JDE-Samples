@@ -40,6 +40,8 @@ import net.rim.device.api.synchronization.SyncObject;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
 import net.rim.device.api.system.RuntimeStore;
+import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.util.CloneableVector;
 import net.rim.device.api.util.DataBuffer;
 import net.rim.device.api.util.ListenerUtilities;
@@ -48,21 +50,17 @@ import net.rim.device.api.util.ListenerUtilities;
  * A collection enabled for OTA backup/restore. Basically a serially syncable
  * collection with few added interfaces.
  */
-class OTABackupRestoreContactCollection implements SyncConverter,
+public class OTABackupRestoreContactCollection implements SyncConverter,
         SyncCollection, OTASyncCapable, CollectionEventSource {
 
-    // Members
-    // ------------------------------------------------------------------
     private PersistentObject _persist; // The persistable object for the
-                                       // contacts.
-    private Vector _contacts; // The actual contacts.
+                                       // contacts
+    private Vector _contacts; // The actual contacts
     private Vector _listeners; // Listeners to generate events when contacts are
-                               // added.
+                               // added
     private final SyncCollectionSchema _schema; // Lets us know about the data
-                                                // we are backing up.
+                                                // we are backing up
 
-    // Statics
-    // ------------------------------------------------------------------
     private static final long PERSISTENT_KEY = 0x266babf899b20b56L; // com.rim.samples.device.otabackuprestoredemo.OTABackupRestoreContactCollection._persist
     private static final long AR_KEY = 0xef780e08b3a7cf07L; // com.rim.samples.device.otabackuprestoredemo.OTABackupRestoreContactCollection
 
@@ -72,12 +70,13 @@ class OTABackupRestoreContactCollection implements SyncConverter,
 
     private static final int DEFAULT_RECORD_TYPE = 1; // The id for the default
                                                       // (and the only) record
-                                                      // type.
+                                                      // type
 
-    // Key fields - lets the server know which fields uniquely define a record.
+    // Key fields - lets the server know which fields uniquely define a record
     private static final int[] KEY_FIELD_IDS = new int[] { FIELDTAG_FIRST_NAME,
             FIELDTAG_LAST_NAME };
 
+    // Creates a new OTABackupRestoreContactCollection object
     private OTABackupRestoreContactCollection() {
         _persist = PersistentStore.getPersistentObject(PERSISTENT_KEY);
         _contacts = (Vector) _persist.getContents();
@@ -90,12 +89,18 @@ class OTABackupRestoreContactCollection implements SyncConverter,
 
         _listeners = new CloneableVector();
 
-        // Set up the schema for the collection.
+        // Set up the schema for the collection
         _schema = new SyncCollectionSchema();
         _schema.setDefaultRecordType(DEFAULT_RECORD_TYPE);
         _schema.setKeyFieldIds(DEFAULT_RECORD_TYPE, KEY_FIELD_IDS);
     }
 
+    /**
+     * Get the singleton instance of the OTABackupRestoreContactCollection class
+     * 
+     * @return The singleton instance of the OTABackupRestoreContactCollection
+     *         class
+     */
     static OTABackupRestoreContactCollection getInstance() {
         final RuntimeStore rs = RuntimeStore.getRuntimeStore();
 
@@ -125,7 +130,7 @@ class OTABackupRestoreContactCollection implements SyncConverter,
                 final String last = ((OTAContactData) object).getLast();
                 final String email = ((OTAContactData) object).getEmail();
 
-                // In compliance with desktop sync format.
+                // In compliance with desktop sync format
                 buffer.writeShort(first.length() + 1);
                 buffer.writeByte(FIELDTAG_FIRST_NAME);
                 buffer.write(first.getBytes());
@@ -185,7 +190,11 @@ class OTABackupRestoreContactCollection implements SyncConverter,
 
             return contact;
         } catch (final EOFException e) {
-            System.err.println(e.toString());
+            UiApplication.getUiApplication().invokeLater(new Runnable() {
+                public void run() {
+                    Dialog.alert(e.toString());
+                }
+            });
         }
 
         return null;
@@ -197,12 +206,12 @@ class OTABackupRestoreContactCollection implements SyncConverter,
      * @see net.rim.device.api.synchronization.SyncCollection#addSyncObject(SyncObject)
      */
     public boolean addSyncObject(final SyncObject object) {
-        // Add a contact to the persistent store.
+        // Add a contact to the persistent store
         _contacts.addElement(object);
         PersistentObject.commit(_contacts);
 
         // Use the CollectionListeners to let the server know the add was
-        // successful.
+        // successful
         for (int i = 0; i < _listeners.size(); i++) {
             final CollectionListener cl =
                     (CollectionListener) _listeners.elementAt(i);
@@ -213,19 +222,19 @@ class OTABackupRestoreContactCollection implements SyncConverter,
     }
 
     /**
-     * @see net.rim.device.api.synchronization.SyncCollection#updateSyncObject(SyncObject
-     *      , SyncObject)
+     * @see net.rim.device.api.synchronization.SyncCollection#updateSyncObject(SyncObject,
+     *      SyncObject)
      */
     public boolean updateSyncObject(final SyncObject oldObject,
             final SyncObject newObject) {
-        // Update a contact in the store.
+        // Update a contact in the store
         if (_contacts.contains(oldObject)) {
             _contacts.setElementAt(newObject, _contacts.indexOf(oldObject));
             PersistentObject.commit(_contacts);
         }
 
         // Use the CollectionListeners to let the server know the update was
-        // successful.
+        // successful
         for (int i = 0; i < _listeners.size(); i++) {
             final CollectionListener cl =
                     (CollectionListener) _listeners.elementAt(i);
@@ -240,7 +249,7 @@ class OTABackupRestoreContactCollection implements SyncConverter,
      */
     public boolean removeSyncObject(final SyncObject object) {
         return false; // NA - This method would look much the same as
-                      // addSyncObject.
+                      // addSyncObject
     }
 
     public boolean removeAllSyncObjects() {
@@ -275,14 +284,23 @@ class OTABackupRestoreContactCollection implements SyncConverter,
         return null;
     }
 
+    /**
+     * @see net.rim.device.api.synchronization.SyncCollection#isSyncObjectDirty(SyncObject)
+     */
     public boolean isSyncObjectDirty(final SyncObject object) {
         return false; // NA
     }
 
+    /**
+     * @see net.rim.device.api.synchronization.SyncCollection#setSyncObjectDirty(SyncObject)
+     */
     public void setSyncObjectDirty(final SyncObject object) {
         // NA
     }
 
+    /**
+     * @see net.rim.device.api.synchronization.SyncCollection#clearSyncObjectDirty(SyncObject)
+     */
     public void clearSyncObjectDirty(final SyncObject object) {
         // NA
     }
@@ -367,10 +385,22 @@ class OTABackupRestoreContactCollection implements SyncConverter,
         _listeners = ListenerUtilities.removeListener(_listeners, listener);
     }
 
+    /**
+     * Gets the size of the contact list.
+     * 
+     * @return The size of the contact list
+     */
     int size() {
         return _contacts.size();
     }
 
+    /**
+     * Retrieves a contact from the list.
+     * 
+     * @param index
+     *            The index of the contact to retrieve
+     * @return The contact at the specified index
+     */
     OTAContactData contactAt(final int index) {
         return (OTAContactData) _contacts.elementAt(index);
     }

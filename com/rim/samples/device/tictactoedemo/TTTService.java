@@ -38,13 +38,21 @@ import net.rim.device.api.system.Application;
  * 
  * @see net.rim.blackberry.api.blackberrymessenger.Service
  */
-class TTTService implements Service {
+public final class TTTService implements Service {
     private static TTTService _instance;
 
+    /**
+     * Hidden default constructor
+     */
     private TTTService() {
     }
 
-    static TTTService getInstance() {
+    /**
+     * Gets the singleton instance of the TTTService class.
+     * 
+     * @return The singleton instance of the TTTService class.
+     */
+    public synchronized static TTTService getInstance() {
         if (_instance == null) {
             _instance = new TTTService();
         }

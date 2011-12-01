@@ -42,17 +42,16 @@ import net.rim.device.api.io.FilterBaseInterface;
  * A custom Connection protocol. This class implements a simple pass through
  * mechanism that writes out the http response headers to System.out. The
  * PackageManager class in this sample project registers a filter to filter URLs
- * containing a fully qualified domain name of www.google.com for use with this
+ * containing a fully qualified domain name of www.rim.com for use with this
  * protocol. The class name must be "Protocol", as this name is appended to the
  * package name registered in PackageManager so as to create an instance of this
  * class.
  */
-
 public final class Protocol implements FilterBaseInterface, HttpConnection {
     private HttpConnection _subConnection;
 
     /**
-     * This method will open a filtered Http Connection.
+     * This method will open a filtered Http Connection
      * 
      * @see net.rim.device.api.io.FilterBaseInterface#openFilter(String, int,
      *      boolean)
@@ -66,7 +65,7 @@ public final class Protocol implements FilterBaseInterface, HttpConnection {
             return this;
         }
 
-        // Failed to open the sub connection; so let us fail too.
+        // Failed to open the sub connection
         return null;
     }
 
@@ -282,5 +281,4 @@ public final class Protocol implements FilterBaseInterface, HttpConnection {
     public void close() throws IOException {
         _subConnection.close();
     }
-
 }

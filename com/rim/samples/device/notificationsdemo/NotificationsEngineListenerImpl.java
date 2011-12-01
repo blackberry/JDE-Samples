@@ -52,7 +52,8 @@ import net.rim.device.api.ui.component.Dialog;
  * <dd>* Our event is being overridden by a higher priority item <br>
  * 
  */
-class NotificationsEngineListenerImpl implements NotificationsEngineListener {
+public class NotificationsEngineListenerImpl implements
+        NotificationsEngineListener {
     // We need a reference to the UiApplication so that we can display dialogs.
     private final UiApplication _app;
 
@@ -61,7 +62,7 @@ class NotificationsEngineListenerImpl implements NotificationsEngineListener {
     private boolean _dialogShowing;
 
     // Constructor
-    NotificationsEngineListenerImpl(final UiApplication app) {
+    public NotificationsEngineListenerImpl(final UiApplication app) {
         _app = app;
         _dialogShowing = false;
     }

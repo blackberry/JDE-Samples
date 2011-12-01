@@ -27,17 +27,34 @@
 package com.rim.samples.device.httpfilterdemo;
 
 import net.rim.device.api.io.http.HttpFilterRegistry;
+import net.rim.device.api.system.ControlledAccessException;
 
 /**
- * An example of the HttpFilterRegistry apis.
+ * The HTTP Filter Demo demonstrates implementation of custom protocols which
+ * are registered with HttpFilterRegistry and associated with specific URLs.
  * 
- * This class runs on device startup and registers the necessary http filters.
+ * The PackageManager class runs on device startup and registers the necessary
+ * http filters.
  */
-final class PackageManager {
-    public static void libMain(final String[] args) {
-        HttpFilterRegistry.registerFilter("na.blackberry.com",
-                "com.rim.samples.device.httpfilterdemo.precanned", true);
-        HttpFilterRegistry.registerFilter("www.rim.com",
-                "com.rim.samples.device.httpfilterdemo.filter");
+public final class PackageManager {
+    /**
+     * Entry point for this application
+     * 
+     * @param args
+     *            Command line arguments (not used)
+     */
+    public static void main(final String[] args) {
+        try {
+            HttpFilterRegistry.registerFilter("na.blackberry.com",
+                    "com.rim.samples.device.httpfilterdemo.precanned", true);
+            HttpFilterRegistry.registerFilter("www.rim.com",
+                    "com.rim.samples.device.httpfilterdemo.filter");
+        } catch (final ControlledAccessException cae) {
+            // Re-throw exception with explicit message
+            throw new ControlledAccessException(
+                    cae
+                            + " Http Filter Demo attempted to access API governed by Interactions/Browser Filtering "
+                            + "application permission.  Please set this permission to 'allow' under Options/Security Options/Application Permissions");
+        }
     }
 }

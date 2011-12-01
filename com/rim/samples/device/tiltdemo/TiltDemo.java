@@ -48,18 +48,21 @@ import net.rim.device.api.ui.container.MainScreen;
  * demonstrates manually displaying or hiding the virtual keyboard. The sample
  * also contains an example of how to trap virtual keyboard input.
  */
-final class TiltDemo extends UiApplication {
+public final class TiltDemo extends UiApplication {
     /**
-     * Entry point
+     * Entry point for application
+     * 
+     * @param args
+     *            Command line arguments (not used)
      */
     public static void main(final String args[]) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final TiltDemo theApp = new TiltDemo();
         theApp.enterEventDispatcher();
     }
 
-    /**
-     * Default constructor
-     */
+    // Constructor
     public TiltDemo() {
         final TiltDemoScreen screen = new TiltDemoScreen();
         pushScreen(screen);
@@ -70,19 +73,17 @@ final class TiltDemo extends UiApplication {
  * Main screen for the Tilt Demo.
  */
 final class TiltDemoScreen extends MainScreen implements FieldChangeListener {
-    CheckboxField _northCheckbox;
-    CheckboxField _eastCheckbox;
-    CheckboxField _westCheckbox;
+    private CheckboxField _northCheckbox;
+    private CheckboxField _eastCheckbox;
+    private CheckboxField _westCheckbox;
 
-    ButtonField _keyboardButton;
+    private ButtonField _keyboardButton;
 
-    BasicEditField _editField;
+    private BasicEditField _editField;
 
-    CustomSpanField _customSpanField;
+    private CustomSpanField _customSpanField;
 
-    /**
-     * Default constructor.
-     */
+    // Constructor
     TiltDemoScreen() {
         // If this is not a touchscreen device, exit the application.
         if (!Touchscreen.isSupported()) {
@@ -198,7 +199,7 @@ final class TiltDemoScreen extends MainScreen implements FieldChangeListener {
      * 
      * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
      */
-    public boolean onSavePrompt() {
+    protected boolean onSavePrompt() {
         return true;
     }
 

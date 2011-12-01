@@ -41,7 +41,7 @@ import net.rim.device.api.ui.UiApplication;
  * provided that cause the same methods to execute as would the Low Memory
  * Manager. The menu items are Simulate LMM {Low|Medium|High}.
  */
-final class MemoryDemo extends UiApplication {
+public final class MemoryDemo extends UiApplication {
     // Statics
     // -------------------------------------------------------------------------------------
     private static Random _random; // For generating random numbers for dates
@@ -63,7 +63,7 @@ final class MemoryDemo extends UiApplication {
     /**
      * This constructor simply pushes the main screen onto the display stack.
      */
-    private MemoryDemo() {
+    public MemoryDemo() {
         pushScreen(new MemoryDemoMainScreen());
     }
 
@@ -71,9 +71,11 @@ final class MemoryDemo extends UiApplication {
      * Entry point for the application.
      * 
      * @param args
-     *            Command-line parameters (unused).
+     *            Command-line parameters (not used).
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         new MemoryDemo().enterEventDispatcher();
     }
 

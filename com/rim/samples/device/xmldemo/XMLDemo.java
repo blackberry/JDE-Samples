@@ -33,11 +33,11 @@ import net.rim.device.api.ui.UiApplication;
 /**
  * The main class for the application.
  */
-final class XMLDemo extends UiApplication {
+public final class XMLDemo extends UiApplication {
     /**
      * This constructor simply pushes the main screen onto the display stack.
      */
-    private XMLDemo() {
+    public XMLDemo() {
         pushScreen(new XMLDemoScreen());
     }
 
@@ -48,6 +48,8 @@ final class XMLDemo extends UiApplication {
      *            Command-line arguments (not used).
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         new XMLDemo().enterEventDispatcher();
     }
 }

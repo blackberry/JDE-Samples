@@ -35,7 +35,7 @@ import net.rim.device.api.ui.container.MainScreen;
 /**
  * Screen for viewing a memo.
  */
-/* package */final class ViewMemoScreen extends MainScreen {
+public final class ViewMemoScreen extends MainScreen {
     private final MemoController _controller;
 
     private final MenuItem _editItem = new EditItem();
@@ -46,7 +46,7 @@ import net.rim.device.api.ui.container.MainScreen;
      * @param memo
      *            The memo to view.
      */
-    /* package */ViewMemoScreen(final BlackBerryMemo memo) {
+    public ViewMemoScreen(final BlackBerryMemo memo) {
         super();
 
         _controller = new MemoController(memo);

@@ -36,6 +36,7 @@ import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
+import net.rim.device.api.ui.Screen;
 import net.rim.device.api.ui.TouchEvent;
 import net.rim.device.api.ui.TouchGesture;
 import net.rim.device.api.ui.UiApplication;
@@ -52,10 +53,10 @@ import net.rim.device.api.ui.container.VerticalFieldManager;
  * application. The LocatorScreen class shows how to use the Locator API to
  * search for locations and display them on the map.
  */
-final class EmbeddedMapDemo extends UiApplication {
-    static final String INITIAL_NAME = "RIM Mississauga";
-    static final double INITIAL_LATITUDE = 43.66455;
-    static final double INITIAL_LONGITUDE = -79.59473;
+public final class EmbeddedMapDemo extends UiApplication {
+    private static String INITIAL_NAME = "RIM Mississauga";
+    private static final double INITIAL_LATITUDE = 43.66455;
+    private static final double INITIAL_LONGITUDE = -79.59473;
     static final int MAX_NUM_OF_CHARS = 255;
 
     private final Vector _mapLocations; // Stored locations.
@@ -63,18 +64,20 @@ final class EmbeddedMapDemo extends UiApplication {
     private final EmbeddedMapDemoScreen _mainScreen;
 
     /**
-     * Entry point for the application.
+     * Entry point for application
      * 
      * @param args
-     *            - N/A
+     *            Command line arguments (not used)
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final EmbeddedMapDemo app = new EmbeddedMapDemo();
         app.enterEventDispatcher();
     }
 
     // Constructor
-    EmbeddedMapDemo() {
+    public EmbeddedMapDemo() {
         _mapLocations = new Vector();
         _initialLocation =
                 new MapLocation(INITIAL_LATITUDE, INITIAL_LONGITUDE,
@@ -99,7 +102,7 @@ final class EmbeddedMapDemo extends UiApplication {
         private final SaveButtonField _saveField;
 
         // Constructor
-        private EmbeddedMapDemoScreen() {
+        EmbeddedMapDemoScreen() {
             // Initialize UI components
             setTitle("Embedded Map Demo");
 
@@ -138,6 +141,9 @@ final class EmbeddedMapDemo extends UiApplication {
          */
         private final MenuItem _favouriteLocationsItem = new MenuItem(
                 "Favourite Locations", 110, 10) {
+            /**
+             * @see java.lang.Runnable#run()
+             */
             public void run() {
                 if (_mapLocations.size() == 0) {
                     Dialog.inform("No saved locations");
@@ -155,6 +161,9 @@ final class EmbeddedMapDemo extends UiApplication {
          */
         private final MenuItem _locatorItem = new MenuItem("Location Search",
                 110, 11) {
+            /**
+             * @see java.lang.Runnable#run()
+             */
             public void run() {
                 final LocatorScreen locatorScreen =
                         new LocatorScreen(_mainScreen);
@@ -167,6 +176,9 @@ final class EmbeddedMapDemo extends UiApplication {
          */
         private final MenuItem _saveLocationItem = new MenuItem(
                 "Save Location", 110, 12) {
+            /**
+             * @see java.lang.Runnable#run()
+             */
             public void run() {
                 saveOrUpdateLocation();
             }
@@ -177,6 +189,9 @@ final class EmbeddedMapDemo extends UiApplication {
          */
         private final MenuItem _resetMapItem = new MenuItem("Reset Map", 110,
                 13) {
+            /**
+             * @see java.lang.Runnable#run()
+             */
             public void run() {
                 _mapField.resetMap();
                 _mapLocations.removeAllElements();
@@ -196,7 +211,7 @@ final class EmbeddedMapDemo extends UiApplication {
          * Update the name field to reflect the newly updated map location.
          * 
          * @param index
-         *            - the index of the map location
+         *            The index of the map location
          */
         void displayLocation(final int index) {
             final MapLocation mapLocation =
@@ -209,6 +224,12 @@ final class EmbeddedMapDemo extends UiApplication {
             _mapField.activatePan();
         }
 
+        /**
+         * Displays the specified location
+         * 
+         * @param mapLocation
+         *            The location to display
+         */
         void displayLocation(final MapLocation mapLocation) {
             final int index = _mapLocations.indexOf(mapLocation, 0);
             displayLocation(index);
@@ -219,7 +240,7 @@ final class EmbeddedMapDemo extends UiApplication {
          * described by the given landmark.
          * 
          * @param landmark
-         *            - object describing the location to add and display
+         *            The object describing the location to add and display
          */
         void addAndDisplayLocation(final Landmark landmark) {
             final QualifiedCoordinates cords =
@@ -280,7 +301,7 @@ final class EmbeddedMapDemo extends UiApplication {
         }
 
         /**
-         * @see Field#touchEvent(TouchEvent)
+         * @see Screen#touchEvent(TouchEvent)
          */
         protected boolean touchEvent(final TouchEvent message) {
             boolean isConsumed = false;
@@ -319,7 +340,7 @@ final class EmbeddedMapDemo extends UiApplication {
         }
 
         /**
-         * @see net.rim.device.api.ui.Field#navigationMovement(int, int, int,
+         * @see net.rim.device.api.ui.Screen#navigationMovement(int, int, int,
          *      int)
          */
         protected boolean navigationMovement(final int dx, final int dy,
@@ -343,16 +364,20 @@ final class EmbeddedMapDemo extends UiApplication {
          * 
          * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
          */
-        public boolean onSavePrompt() {
+        protected boolean onSavePrompt() {
             return true;
         }
 
+        /**
+         * This class implements a save button field to save or update the
+         * current location.
+         */
         private class SaveButtonField extends ButtonField implements
                 FieldChangeListener {
             /**
              * Constructor.
              */
-            private SaveButtonField(final String label, final long style) {
+            SaveButtonField(final String label, final long style) {
                 super(label, style);
                 setChangeListener(this);
             }

@@ -82,13 +82,12 @@ public final class Protocol implements FilterBaseInterface, HttpConnection {
         _responseHeaders.setProperty(HttpProtocolConstants.HEADER_CONTENT_TYPE,
                 "text/html");
 
-        // Attempt to parse for the file name.
+        // Attempt to parse for the file name
         final int slashIndex = name.indexOf('/', 2);
         if (slashIndex != -1) {
 
-            // There is a slash; now get the path and file name and match
-            // against predefined
-            // strings.
+            // There is a slash - now get the path and file name and match
+            // against predefined strings.
             final String file = name.substring(slashIndex + 1);
             if (StringUtilities.startsWithIgnoreCase(file, "italic.html")) {
                 _resultData = ITALIC_PAGE_DATA;
@@ -97,8 +96,8 @@ public final class Protocol implements FilterBaseInterface, HttpConnection {
             }
         }
 
-        // If we haven't found a match; return default page.
         if (_resultData == null) {
+            // We haven't found a match, return default page
             _resultData = PAGE_DATA;
         }
 
@@ -360,5 +359,4 @@ public final class Protocol implements FilterBaseInterface, HttpConnection {
      */
     public void close() throws IOException {
     }
-
 }

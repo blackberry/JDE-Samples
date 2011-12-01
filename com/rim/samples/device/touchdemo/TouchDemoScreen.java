@@ -50,7 +50,7 @@ import org.w3c.dom.svg.SVGSVGElement;
  * A screen which listens for touch events and draws lines that follow the drawn
  * path.
  */
-public class TouchDemoScreen extends MainScreen {
+public final class TouchDemoScreen extends MainScreen {
     /** The namespace for SVG. */
     private static final String SVG_NAMESPACE_URI =
             "http://www.w3.org/2000/svg";
@@ -86,25 +86,25 @@ public class TouchDemoScreen extends MainScreen {
     private int _titleHeight;
 
     // SVG constants
-    private static final String SVG_LINE = "line";
-    private static final String X1 = "x1";
-    private static final String X2 = "x2";
-    private static final String Y1 = "y1";
-    private static final String Y2 = "y2";
-    private static final String STROKE = "stroke";
-    private static final String STROKE_WIDTH = "stroke-width";
+    private static String SVG_LINE = "line";
+    private static String X1 = "x1";
+    private static String X2 = "x2";
+    private static String Y1 = "y1";
+    private static String Y2 = "y2";
+    private static String STROKE = "stroke";
+    private static String STROKE_WIDTH = "stroke-width";
 
     // Color constants
-    private static final String COLOR_BLACK = "Black";
-    private static final String COLOR_RED = "Red";
-    private static final String COLOR_BLUE = "Blue";
-    private static final String COLOR_GREEN = "Green";
-    private static final String COLOR_YELLOW = "Yellow";
+    private static String COLOR_BLACK = "Black";
+    private static String COLOR_RED = "Red";
+    private static String COLOR_BLUE = "Blue";
+    private static String COLOR_GREEN = "Green";
+    private static String COLOR_YELLOW = "Yellow";
 
     /**
      * Constructor.
      */
-    TouchDemoScreen() {
+    public TouchDemoScreen() {
         setTitle("Touch Demo");
 
         // Initialize SVG.
@@ -123,7 +123,7 @@ public class TouchDemoScreen extends MainScreen {
     }
 
     /**
-     * @see Field#touchEvent(TouchEvent)
+     * @see Screen#touchEvent(TouchEvent)
      */
     protected boolean touchEvent(final TouchEvent message) {
         // Retrieve the new x and y touch positions.
@@ -242,9 +242,9 @@ public class TouchDemoScreen extends MainScreen {
     };
 
     /**
-     * @see Screen#sublayout
+     * @see Manager#sublayout(int, int)
      */
-    public void sublayout(final int height, final int width) {
+    protected void sublayout(final int height, final int width) {
         super.sublayout(height, width);
 
         // Calculate the title height.
@@ -259,9 +259,9 @@ public class TouchDemoScreen extends MainScreen {
     }
 
     /**
-     * @see Field#paint
+     * @see Field#paint(Graphics)
      */
-    public void paint(final Graphics graphics) {
+    protected void paint(final Graphics graphics) {
         super.paint(graphics);
 
         // Make sure image is non-null.
@@ -284,8 +284,8 @@ public class TouchDemoScreen extends MainScreen {
      */
     private static class ColorChangeDialog extends Dialog {
         /** An array of pre-defined color names. */
-        private static final String[] _colors = { COLOR_BLACK, COLOR_RED,
-                COLOR_BLUE, COLOR_GREEN, COLOR_YELLOW };
+        private static String[] _colors = { COLOR_BLACK, COLOR_RED, COLOR_BLUE,
+                COLOR_GREEN, COLOR_YELLOW };
 
         /** A field used to choose a color. */
         private final ObjectChoiceField _colorChooser;
@@ -306,7 +306,7 @@ public class TouchDemoScreen extends MainScreen {
          * 
          * @return The selected line color.
          */
-        public int getColorIndex() {
+        int getColorIndex() {
             return _colorChooser.getSelectedIndex();
         }
 
@@ -317,7 +317,7 @@ public class TouchDemoScreen extends MainScreen {
          *            The color array index for the selected color.
          * @return The selected line color.
          */
-        public String getColor(final int index) {
+        String getColor(final int index) {
             return _colors[index].toLowerCase();
         }
     }
@@ -331,6 +331,9 @@ public class TouchDemoScreen extends MainScreen {
 
         /**
          * Constructor.
+         * 
+         * @param previousWidth
+         *            The previous line width
          */
         public WidthChangeDialog(final int previousWidth) {
             super(Dialog.D_OK_CANCEL, "Choose Width", Dialog.OK, null,
@@ -345,7 +348,7 @@ public class TouchDemoScreen extends MainScreen {
          * 
          * @return The selected line width.
          */
-        public int getLineWidth() {
+        int getLineWidth() {
             return _widthChooser.getSelectedValue();
         }
     }

@@ -41,7 +41,6 @@ import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.system.KeyListener;
 import net.rim.device.api.ui.ContextMenu;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.MenuItem;
@@ -68,7 +67,8 @@ public final class PhoneLogsDemo extends UiApplication {
     private final PhoneCallListField _normalCallList;
     private final PhoneCallListField _missedCallList;
 
-    private PhoneLogsDemo() {
+    // Constructor
+    public PhoneLogsDemo() {
         _phoneLogs = PhoneLogs.getInstance();
         _normalCallList = new PhoneCallListField(PhoneLogs.FOLDER_NORMAL_CALLS);
         _missedCallList = new PhoneCallListField(PhoneLogs.FOLDER_MISSED_CALLS);
@@ -84,6 +84,8 @@ public final class PhoneLogsDemo extends UiApplication {
      *            Command-line arguments (not used).
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         new PhoneLogsDemo().enterEventDispatcher();
     }
 
@@ -241,8 +243,7 @@ public final class PhoneLogsDemo extends UiApplication {
         public PhoneLogsDemoScreen() {
             super();
 
-            /* parent. */setTitle(new LabelField("PhoneLogs API Demo",
-                    DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH));
+            /* parent. */setTitle("PhoneLogs API Demo");
 
             /* parent. */add(new RichTextField("Normal Calls",
                     RichTextField.TEXT_ALIGN_HCENTER | Field.NON_FOCUSABLE));
@@ -319,11 +320,11 @@ public final class PhoneLogsDemo extends UiApplication {
         // ---------------------------------------------------------------------------------
         PhoneCallLogController _controller;
 
+        // Constructor
         public AddPhoneCallLogScreen() {
             super();
 
-            /* parent. */setTitle(new LabelField("Add Phone Call Log",
-                    DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH));
+            /* parent. */setTitle(new LabelField("Add Phone Call Log"));
 
             _controller = new PhoneCallLogController();
             final Vector fields = _controller.getFields(CallLogController.ADD);
@@ -400,9 +401,7 @@ public final class PhoneLogsDemo extends UiApplication {
         public AddConferencePhoneCallLogScreen() {
             super();
 
-            /* parent. */setTitle(new LabelField(
-                    "Add Conference Phone Call Log", DrawStyle.ELLIPSIS
-                            | Field.USE_ALL_WIDTH));
+            /* parent. */setTitle("Add Conference Phone Call Log");
             _controller = new ConferencePhoneCallLogController();
             final Vector fields = _controller.getFields(CallLogController.ADD);
             final int numFields = fields.size();
@@ -440,7 +439,7 @@ public final class PhoneLogsDemo extends UiApplication {
          * Make a menu with options to add/remove participants from the
          * conference phone call log.
          * 
-         * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
+         * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
          */
         protected void makeMenu(final Menu menu, final int instance) {
             super.makeMenu(menu, instance);
@@ -547,8 +546,7 @@ public final class PhoneLogsDemo extends UiApplication {
             _index = index;
             _folder = folder;
 
-            /* parent. */setTitle(new LabelField("View Call Log",
-                    DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH));
+            /* parent. */setTitle(new LabelField("View Call Log"));
 
             if (callLog instanceof PhoneCallLog) {
                 final PhoneCallLog phoneCallLog = (PhoneCallLog) callLog;
@@ -614,8 +612,7 @@ public final class PhoneLogsDemo extends UiApplication {
             _index = index;
             _folder = folder;
 
-            /* parent. */setTitle(new LabelField("Edit Call Log",
-                    DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH));
+            /* parent. */setTitle(new LabelField("Edit Call Log"));
 
             if (callLog instanceof PhoneCallLog) {
                 final PhoneCallLog phoneCallLog = (PhoneCallLog) callLog;
@@ -666,7 +663,7 @@ public final class PhoneLogsDemo extends UiApplication {
          * menu items to add and delete participants if this screen is editing a
          * conference phone call log.
          * 
-         * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
+         * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
          */
         protected void makeMenu(final Menu menu, final int instance) {
             super.makeMenu(menu, instance);
@@ -1111,6 +1108,12 @@ public final class PhoneLogsDemo extends UiApplication {
             _oldType = -1;
         }
 
+        /**
+         * Constructs a PhoneCallLogController
+         * 
+         * @param phoneCallLog
+         *            The phoneCallLog to control
+         */
         public PhoneCallLogController(final PhoneCallLog phoneCallLog) {
             super(phoneCallLog);
 
@@ -1220,6 +1223,12 @@ public final class PhoneLogsDemo extends UiApplication {
     private static final class PhoneLogsDemoKeyListener implements KeyListener {
         private final Screen _screen;
 
+        /**
+         * Constructor
+         * 
+         * @param screen
+         *            The screen in which to display the menu on
+         */
         public PhoneLogsDemoKeyListener(final Screen screen) {
             _screen = screen;
         }

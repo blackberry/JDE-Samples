@@ -33,7 +33,7 @@ import net.rim.plazmic.mediaengine.io.LoadingStatus;
 /**
  * The MediaListener implementation.
  */
-final class MediaListenerImpl implements MediaListener {
+public final class MediaListenerImpl implements MediaListener {
     /**
      * @see net.rim.plazmic.mediaengine.MediaListener#mediaEvent(Object, int,
      *      int, Object)

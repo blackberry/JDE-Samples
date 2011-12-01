@@ -40,6 +40,7 @@ import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
+import net.rim.device.api.ui.Screen;
 import net.rim.device.api.ui.TouchEvent;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BitmapField;
@@ -56,76 +57,77 @@ import net.rim.device.api.ui.container.MainScreen;
  * The TicTacToe sample implements a tic tac toe game where the computer plays
  * "O". You can also play a two-player game via BlackBerry Messenger.
  */
-class TicTacToeDemo extends UiApplication implements DialogClosedListener {
+public final class TicTacToeDemo extends UiApplication implements
+        DialogClosedListener {
     // Members
     // ------------------------------------------------------------------
-    private int _difficulty = _EASY;
+    private int _difficulty = EASY;
     private final MainScreen _mainScreen;
-    private static final String[] _levels = { "Easy", "Medium", "Hard" };
     private boolean _firstTurnFlag;
     private boolean _middleStartFlag;
     private boolean _gameOverFlag;
     private boolean _twoPlayerFlag;
     private boolean _yourTurnFlag;
 
-    private final SquareField[] _squareFields = { new SquareField(_TOP_LEFT),
-            new SquareField(_TOP_CENTER), new SquareField(_TOP_RIGHT),
-            new SquareField(_LEFT), new SquareField(_CENTER),
-            new SquareField(_RIGHT), new SquareField(_BOTTOM_LEFT),
-            new SquareField(_BOTTOM_CENTER), new SquareField(_BOTTOM_RIGHT) };
+    private final SquareField[] _squareFields = { new SquareField(TOP_LEFT),
+            new SquareField(TOP_CENTER), new SquareField(TOP_RIGHT),
+            new SquareField(LEFT), new SquareField(CENTER),
+            new SquareField(RIGHT), new SquareField(BOTTOM_LEFT),
+            new SquareField(BOTTOM_CENTER), new SquareField(BOTTOM_RIGHT) };
 
     private int[][] _winLineOccurrences;
     private int[] _winLineCount;
 
     // Statics
     // ------------------------------------------------------------------
-    private static final Bitmap _xBitmap = Bitmap.getBitmapResource("x.png");
-    private static final Bitmap _oBitmap = Bitmap.getBitmapResource("o.png");
-    private static final Bitmap _blankBitmap;
+    private static String[] LEVELS = { "Easy", "Medium", "Hard" };
+    private static final Bitmap X_BITMAP = Bitmap.getBitmapResource("x.png");
+    private static final Bitmap O_BITMAP = Bitmap.getBitmapResource("o.png");
+    private static final Bitmap BLANK_BITMAP;
 
-    private static final int _NONE = 0;
-    private static final int _X = 1;
-    private static final int _O = 2;
-    private static final int _QUIT = -1;
+    private static final int NONE = 0;
+    private static final int X = 1;
+    private static final int O = 2;
+    private static final int QUIT = -1;
 
-    private static final int _TOP_LEFT = 0;
-    private static final int _TOP_CENTER = 1;
-    private static final int _TOP_RIGHT = 2;
-    private static final int _LEFT = 3;
-    private static final int _CENTER = 4;
-    private static final int _RIGHT = 5;
-    private static final int _BOTTOM_LEFT = 6;
-    private static final int _BOTTOM_CENTER = 7;
-    private static final int _BOTTOM_RIGHT = 8;
+    private static final int TOP_LEFT = 0;
+    private static final int TOP_CENTER = 1;
+    private static final int TOP_RIGHT = 2;
+    private static final int LEFT = 3;
+    private static final int CENTER = 4;
+    private static final int RIGHT = 5;
+    private static final int BOTTOM_LEFT = 6;
+    private static final int BOTTOM_CENTER = 7;
+    private static final int BOTTOM_RIGHT = 8;
 
-    private static final int _ONE_X = 1;
-    private static final int _TWO_X = 2;
-    private static final int _THREE_X = 3;
-    private static final int _TWO_O = 8;
-    private static final int _THREE_O = 12;
+    private static final int ONE_X = 1;
+    private static final int TWO_X = 2;
+    private static final int THREE_X = 3;
+    private static final int TWO_O = 8;
+    private static final int THREE_O = 12;
 
-    private static final int _TIE = 8;
+    private static final int TIE = 8;
 
-    private static final int _EASY = 0;
-    private static final int _MEDIUM = 1;
-    private static final int _HARD = 2;
+    private static final int EASY = 0;
+    private static final int MEDIUM = 1;
+    private static final int HARD = 2;
 
     private static final int[][] winLines = {
-            { _TOP_LEFT, _TOP_CENTER, _TOP_RIGHT }, // Horizontal top line
-            { _LEFT, _CENTER, _RIGHT }, // Horizontal center line
-            { _BOTTOM_LEFT, _BOTTOM_CENTER, _BOTTOM_RIGHT }, // Horizontal
-                                                             // bottom line
-            { _TOP_LEFT, _LEFT, _BOTTOM_LEFT }, // Vertical left line
-            { _TOP_CENTER, _CENTER, _BOTTOM_CENTER }, // Vertical center line
-            { _TOP_RIGHT, _RIGHT, _BOTTOM_RIGHT }, // Vertical right line
-            { _TOP_LEFT, _CENTER, _BOTTOM_RIGHT }, // Diagonal line
-            { _TOP_RIGHT, _CENTER, _BOTTOM_LEFT } // Diagonal line
+            { TOP_LEFT, TOP_CENTER, TOP_RIGHT }, // Horizontal top line
+            { LEFT, CENTER, RIGHT }, // Horizontal center line
+            { BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT }, // Horizontal bottom
+                                                          // line
+            { TOP_LEFT, LEFT, BOTTOM_LEFT }, // Vertical left line
+            { TOP_CENTER, CENTER, BOTTOM_CENTER }, // Vertical center line
+            { TOP_RIGHT, RIGHT, BOTTOM_RIGHT }, // Vertical right line
+            { TOP_LEFT, CENTER, BOTTOM_RIGHT }, // Diagonal line
+            { TOP_RIGHT, CENTER, BOTTOM_LEFT } // Diagonal line
             };
 
     private static Session _twoPlayerSession; // Used for communication with a
                                               // BlackBerry Messenger Contact
 
-    private static final Dialog _twoPlayerRequestDialog = new Dialog(
+    private final Dialog _twoPlayerRequestDialog = new Dialog(
             "Requesting two player game...", new Object[] { "Cancel" },
             new int[] { Dialog.CANCEL }, 0, null);
     private final StatusField _statusField;
@@ -134,11 +136,14 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
     private int _theirMark;
 
     static {
-        _blankBitmap = Bitmap.getBitmapResource("blanksquare.png");
+        BLANK_BITMAP = Bitmap.getBitmapResource("blanksquare.png");
     }
 
     /**
-     * Entry point for the application
+     * Entry point for the application.
+     * 
+     * @param args
+     *            Command line arguments
      */
     public static void main(final String[] args) {
         if (args != null && args.length > 0 && args[0].equals("init")) {
@@ -156,11 +161,9 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
                         "Tic Tac Toe Sample", tictactoedemo);
             }
         } else {
+            // Create a new instance of the application and make the currently
+            // running thread the application's event dispatch thread.
             _theGame = new TicTacToeDemo();
-
-            // To make the application enter the event thread and start
-            // processing
-            // messages, we invoke the enterEventDispatcher method.
             _theGame.enterEventDispatcher();
         }
     }
@@ -169,7 +172,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
      * The TicTacToe constructor. Creates all the RIM UI components and pushes
      * the application's screen onto the UI stack.
      */
-    private TicTacToeDemo() {
+    public TicTacToeDemo() {
         // MainScreen is the basic screen of the RIM UI
         _mainScreen =
                 new TicTacToeScreen(Field.USE_ALL_HEIGHT | Field.FIELD_LEFT);
@@ -189,19 +192,19 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
                 new HorizontalFieldManager(Field.FIELD_HCENTER);
 
         // Add square fields to first row
-        hfmRow1.add(_squareFields[_TOP_LEFT]);
-        hfmRow1.add(_squareFields[_TOP_CENTER]);
-        hfmRow1.add(_squareFields[_TOP_RIGHT]);
+        hfmRow1.add(_squareFields[TOP_LEFT]);
+        hfmRow1.add(_squareFields[TOP_CENTER]);
+        hfmRow1.add(_squareFields[TOP_RIGHT]);
 
         // Add square fields to second row
-        hfmRow2.add(_squareFields[_LEFT]);
-        hfmRow2.add(_squareFields[_CENTER]);
-        hfmRow2.add(_squareFields[_RIGHT]);
+        hfmRow2.add(_squareFields[LEFT]);
+        hfmRow2.add(_squareFields[CENTER]);
+        hfmRow2.add(_squareFields[RIGHT]);
 
         // Add square fields to third row
-        hfmRow3.add(_squareFields[_BOTTOM_LEFT]);
-        hfmRow3.add(_squareFields[_BOTTOM_CENTER]);
-        hfmRow3.add(_squareFields[_BOTTOM_RIGHT]);
+        hfmRow3.add(_squareFields[BOTTOM_LEFT]);
+        hfmRow3.add(_squareFields[BOTTOM_CENTER]);
+        hfmRow3.add(_squareFields[BOTTOM_RIGHT]);
 
         // Add the horizontal field managers to the screen
         _mainScreen.add(hfmRow1);
@@ -224,7 +227,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
             public void run() {
                 if (!_twoPlayerFlag) {
                     // Update the status field
-                    _statusField.setDifficulty(_levels[_difficulty]);
+                    _statusField.setDifficulty(LEVELS[_difficulty]);
                 }
             }
         });
@@ -238,7 +241,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
     }
 
     /**
-     * Returns a reference to the application
+     * Returns a reference to this application.
      * 
      * @return The application instance
      */
@@ -251,16 +254,18 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
      * the main screen).
      */
     private void newGame() {
-        for (int i = _TOP_LEFT; i <= _BOTTOM_RIGHT; ++i) {
-            _squareFields[i].setSquare(_NONE);
+        _statusField.setDifficulty(LEVELS[_difficulty]);
+
+        for (int i = TOP_LEFT; i <= BOTTOM_RIGHT; ++i) {
+            _squareFields[i].setSquare(NONE);
         }
 
         _firstTurnFlag = true;
         _middleStartFlag = false;
         _gameOverFlag = false;
         _twoPlayerFlag = false;
-        _yourMark = _X;
-        _theirMark = _O;
+        _yourMark = X;
+        _theirMark = O;
 
         // Win lines going through each square
         _winLineOccurrences = new int[][] { { 0, 3, 6 }, // Square 0 - top left
@@ -278,10 +283,11 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
     }
 
     /**
-     * Initializes a two player game
+     * Initializes a two player game with another device.
      * 
      * @param firstTurn
-     *            <description>
+     *            True if the first turn belongs to this device, false if the
+     *            first turn belongs to the other device.
      * @param session
      *            A BlackBerry Messenger session
      */
@@ -293,12 +299,12 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
 
         if (firstTurn) {
             _statusField.yourTurn();
-            _yourMark = _X;
-            _theirMark = _O;
+            _yourMark = X;
+            _theirMark = O;
         } else {
             _statusField.theirTurn();
-            _yourMark = _O;
-            _theirMark = _X;
+            _yourMark = O;
+            _theirMark = X;
         }
 
         _twoPlayerSession = session;
@@ -347,8 +353,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
 
                             if (bbm != null) {
                                 final MessengerContact player =
-                                        BlackBerryMessenger.getInstance()
-                                                .chooseContact();
+                                        bbm.chooseContact();
 
                                 // Request two player game only when a contact
                                 // has been selected ,
@@ -375,7 +380,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
                                 if (newLevel != _difficulty) {
                                     _difficulty = newLevel;
                                     _statusField
-                                            .setDifficulty(_levels[_difficulty]);
+                                            .setDifficulty(LEVELS[_difficulty]);
                                     newGame();
                                 }
                             }
@@ -384,7 +389,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
         }
 
         /**
-         * @see Field#touchEvent(TouchEvent)
+         * @see Screen#touchEvent(TouchEvent)
          */
         protected boolean touchEvent(final TouchEvent message) {
             final int eventCode = message.getEvent();
@@ -475,12 +480,17 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
          * Creates this screen's menu, which consists of the default main screen
          * menu as well as the new game menu items.
          * 
-         * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
+         * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
          */
         protected void makeMenu(final Menu menu, final int instance) {
             super.makeMenu(menu, instance);
             menu.add(_newGameItem);
-            menu.add(_newTwoPlayerGame);
+
+            // Make sure BlackBerry Messenger is installed before providing
+            // option to play a two player game.
+            if (BlackBerryMessenger.getInstance() != null) {
+                menu.add(_newTwoPlayerGame);
+            }
 
             // Menu item to change difficulty level is available when playing
             // against the coumputer
@@ -540,7 +550,9 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
      * status when the game is finished.
      */
     private static final class StatusField extends RichTextField {
-        // Constructor
+        /**
+         * Default constructor
+         */
         private StatusField() {
             super(Field.NON_FOCUSABLE | Field.FIELD_HCENTER
                     | Field.USE_ALL_WIDTH);
@@ -548,21 +560,21 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
         }
 
         /**
-         * Sets the field's text to indicate it is the user's turn
+         * Sets the field's text to indicate it is the user's turn.
          */
         private void yourTurn() {
             setText("Your turn...");
         }
 
         /**
-         * Sets the field's text to indicate it is the opponent's turn
+         * Sets the field's text to indicate it is the opponent's turn.
          */
         private void theirTurn() {
             setText("Their Turn...");
         }
 
         /**
-         * Sets the field's text to indicate it is the opponent's turn
+         * Sets the field's text to indicate the AI difficulty.
          */
         private void setDifficulty(final String difficulty) {
             setText("Difficulty: " + difficulty);
@@ -570,25 +582,28 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
     }
 
     /**
-     * A dialog window used to change difficulty level
+     * A dialog window used to change difficulty level.
      */
     private static class DifficultyLevelChangeDialog extends Dialog {
         private final ObjectChoiceField _levelChooser;
 
         /**
-         * Constructor
+         * Constructs a dialog to choose difficulty level.
+         * 
+         * @param index
+         *            The index of the current difficulty
          */
         public DifficultyLevelChangeDialog(final int index) {
             super(Dialog.D_OK_CANCEL, "Choose Difficulty", Dialog.OK, null,
                     Dialog.GLOBAL_STATUS);
             _levelChooser =
-                    new ObjectChoiceField("Difficulty Level: ", _levels, 0);
+                    new ObjectChoiceField("Difficulty Level: ", LEVELS, 0);
             _levelChooser.setSelectedIndex(index);
             add(_levelChooser);
         }
 
         /**
-         * Retrieve the level selection
+         * Retrieve the level selection.
          * 
          * @return The selected level
          */
@@ -605,7 +620,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
      */
     private class SquareField extends BitmapField {
         private final int _squareIndex;
-        private int _state = _NONE;
+        private int _state = NONE;
         private Bitmap _overlay;
 
         /**
@@ -615,7 +630,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
          *            Reference to square on the board
          */
         private SquareField(final int squareIndex) {
-            super(_blankBitmap);
+            super(BLANK_BITMAP);
             _squareIndex = squareIndex;
         }
 
@@ -637,16 +652,24 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
             return _squareIndex;
         }
 
+        /**
+         * Sets a square to a certain value.
+         * 
+         * @param value
+         *            The value to set the square to (NONE, X or O)
+         * @return True if a 'X' or an 'O' is placed in the square, false
+         *         otherwise
+         */
         private boolean setSquare(final int value) {
 
-            if (value == _NONE) {
-                setBitmap(_blankBitmap);
+            if (value == NONE) {
+                setBitmap(BLANK_BITMAP);
                 _overlay = null;
                 _state = value;
                 return false;
             }
 
-            if (_state == _NONE) {
+            if (_state == NONE) {
                 final int[] wlo = _winLineOccurrences[_squareIndex];
 
                 // Add 4 to the count in each win line going through this square
@@ -654,14 +677,14 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
                 // determine
                 // how many X's and O's are in each win line (i.e. a count of
                 // 6 means there's two X's and one O in a line).
-                if (value == _O) {
-                    _overlay = _oBitmap;
+                if (value == O) {
+                    _overlay = O_BITMAP;
 
                     for (int i = wlo.length - 1; i >= 0; --i) {
                         _winLineCount[wlo[i]] += 4;
                     }
-                } else if (value == _X) {
-                    _overlay = _xBitmap;
+                } else if (value == X) {
+                    _overlay = X_BITMAP;
 
                     for (int i = wlo.length - 1; i >= 0; --i) {
                         ++_winLineCount[wlo[i]];
@@ -693,14 +716,14 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
         }
 
         /**
-         * Squares that have been played in cannot receive focus
+         * Allow only unplayed squares to be able to receive focus.
          * 
          * @see net.rim.device.api.ui.Field#isFocusable()
          */
         public boolean isFocusable() {
             if (_gameOverFlag) {
                 return false;
-            } else if (_state == _NONE) {
+            } else if (_state == NONE) {
                 return true;
             } else {
                 return false;
@@ -714,11 +737,11 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
      * 
      * @param line
      *            One of the 8 possible winning lines
-     * @return Index of the the first empty square in a given line
+     * @return The index of the the first empty square in a given line
      */
     private int getLastSquareInLine(final int line) {
         for (int i = 0; i < 3; ++i) {
-            if (_squareFields[winLines[line][i]].getGameState() == _NONE) {
+            if (_squareFields[winLines[line][i]].getGameState() == NONE) {
                 return winLines[line][i];
             }
         }
@@ -743,16 +766,16 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
      * center.
      */
     private void computerMoves() {
-        if (_difficulty == _HARD) {
+        if (_difficulty == HARD) {
             // First turn
             if (_firstTurnFlag) {
-                if (_squareFields[_CENTER].getGameState() == _NONE) {
+                if (_squareFields[CENTER].getGameState() == NONE) {
                     // Play in the center square
-                    _squareFields[_CENTER].setSquare(_O);
+                    _squareFields[CENTER].setSquare(O);
                 } else {
                     // X played in the center square. Play in the top left
                     // corner
-                    _squareFields[_TOP_LEFT].setSquare(_O);
+                    _squareFields[TOP_LEFT].setSquare(O);
                     _middleStartFlag = true;
                 }
 
@@ -764,7 +787,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
                 // Set the flag to false since this check only needs to be done
                 // on the second turn
                 _middleStartFlag = false;
-                if (_squareFields[_BOTTOM_RIGHT].getGameState() == _X) {
+                if (_squareFields[BOTTOM_RIGHT].getGameState() == X) {
                     // O| |
                     // -+-+-
                     // |X|
@@ -774,7 +797,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
                     // (this check is done here to simplify the logic in the
                     // fork checking
                     // done below).
-                    _squareFields[_TOP_RIGHT].setSquare(_O);
+                    _squareFields[TOP_RIGHT].setSquare(O);
                     return;
                 }
             }
@@ -782,29 +805,29 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
 
         // Check to see if computer can win this turn
         for (int i = 0; i < 8; ++i) {
-            if (_winLineCount[i] == _TWO_O) {
-                _squareFields[getLastSquareInLine(i)].setSquare(_O);
-                endGame(_O);
+            if (_winLineCount[i] == TWO_O) {
+                _squareFields[getLastSquareInLine(i)].setSquare(O);
+                endGame(O);
                 return;
             }
         }
 
-        if (_difficulty >= _MEDIUM) {
+        if (_difficulty >= MEDIUM) {
             // Check to block opponent's possible win
             for (int i = 0; i < 8; ++i) {
-                if (_winLineCount[i] == _TWO_X) {
-                    _squareFields[getLastSquareInLine(i)].setSquare(_O);
+                if (_winLineCount[i] == TWO_X) {
+                    _squareFields[getLastSquareInLine(i)].setSquare(O);
                     return;
                 }
             }
 
-            if (_difficulty == _HARD) {
+            if (_difficulty == HARD) {
                 // Check if opponent can form a fork on next turn (two lines of
                 // 2).
                 // (Leave this out for medium level difficulty).
                 int _squareMakes2 = -1;
 
-                for (int i = _TOP_LEFT; i <= _BOTTOM_RIGHT; ++i) {
+                for (int i = TOP_LEFT; i <= BOTTOM_RIGHT; ++i) {
                     int count = 0;
                     final int wlo[] = _winLineOccurrences[i];
 
@@ -814,7 +837,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
                         // Count the win lines going through this square
                         // containing just one X
                         // (and two blanks).
-                        if (_winLineCount[wlo[j]] == _ONE_X) {
+                        if (_winLineCount[wlo[j]] == ONE_X) {
                             ++count;
                         }
                     }
@@ -834,10 +857,10 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
                             // go in any of the other available squares on the
                             // board (besides the
                             // two forking square).
-                            for (int k = _TOP_LEFT; k <= _BOTTOM_RIGHT; ++k) {
+                            for (int k = TOP_LEFT; k <= BOTTOM_RIGHT; ++k) {
                                 if (k != _squareMakes2 && k != i) {
-                                    if (_squareFields[k].getGameState() == _NONE) {
-                                        _squareFields[k].setSquare(_O);
+                                    if (_squareFields[k].getGameState() == NONE) {
+                                        _squareFields[k].setSquare(O);
                                         return;
                                     }
                                 }
@@ -849,7 +872,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
                 // There was only one forking square. Move in that square to
                 // block it.
                 if (_squareMakes2 != -1) {
-                    _squareFields[_squareMakes2].setSquare(_O);
+                    _squareFields[_squareMakes2].setSquare(O);
                     return;
                 }
             }
@@ -857,14 +880,14 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
 
         // Just choose the next available square.
         // (For easy level difficulty jump right to here).
-        for (int i = _TOP_LEFT; i <= _BOTTOM_RIGHT; ++i) {
-            if (_squareFields[i].getGameState() == _NONE) {
-                _squareFields[i].setSquare(_O);
+        for (int i = TOP_LEFT; i <= BOTTOM_RIGHT; ++i) {
+            if (_squareFields[i].getGameState() == NONE) {
+                _squareFields[i].setSquare(O);
                 return;
             }
         }
 
-        endGame(_NONE);
+        endGame(NONE);
         return;
     }
 
@@ -887,18 +910,43 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
             } else {
                 Dialog.alert("BlackBerry Wins!!!");
             }
-        } else if (winner == _QUIT) {
+        } else if (winner == QUIT) {
             Dialog.alert("Opponent Quit!");
         } else {
             Dialog.alert("Tie Game!");
         }
 
-        if (_twoPlayerFlag && _yourTurnFlag && _twoPlayerSession != null
-                && _twoPlayerSession.isOpen()) {
-            _twoPlayerSession.close();
-        }
-
         _statusField.setText("Game Over!");
+
+        // Check whether the game was two players and if the session is still
+        // open
+        if (_twoPlayerFlag && _twoPlayerSession != null
+                && _twoPlayerSession.isOpen()) {
+            // Prompt to start a new game
+            final int cont = Dialog.ask(Dialog.D_YES_NO, "Start new game?");
+            if (cont == Dialog.NO) {
+                _twoPlayerSession.close();
+                return;
+            }
+
+            // Check if the session is still open
+            if (_twoPlayerSession.isOpen()) {
+                // Start a new game using the existing session. Allows for the
+                // losing player to make the first move, and if it was a tie
+                // game, the player who went second is allowed to make the first
+                // move.
+                newTwoPlayerGame(_yourTurnFlag, _twoPlayerSession);
+
+                // Check who is supposed to go first, and display the
+                // appropriate message in the statusField.
+                if (_yourTurnFlag) {
+                    _statusField.yourTurn();
+                } else {
+                    _statusField.theirTurn();
+                }
+
+            }
+        }
     }
 
     /**
@@ -916,13 +964,13 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
                     int numMoves = 0;
 
                     for (int i = 0; i < 8; i++) {
-                        if (_yourMark == _X && _winLineCount[i] == _THREE_X
-                                || _yourMark == _O
-                                && _winLineCount[i] == _THREE_O) {
+                        if (_yourMark == X && _winLineCount[i] == THREE_X
+                                || _yourMark == O
+                                && _winLineCount[i] == THREE_O) {
                             youWin = true;
                         }
 
-                        if (_squareFields[i].getGameState() != _NONE) {
+                        if (_squareFields[i].getGameState() != NONE) {
                             numMoves++;
                         }
                     }
@@ -940,8 +988,8 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
 
                         if (youWin) {
                             endGame(_yourMark);
-                        } else if (numMoves == _TIE) {
-                            endGame(_NONE);
+                        } else if (numMoves == TIE) {
+                            endGame(NONE);
                         }
                     } else {
                         if (youWin) {
@@ -958,7 +1006,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
     }
 
     /**
-     * Handles a two player game request
+     * Handles a two player game request.
      * 
      * @param player
      *            The BlackBerry Messenger contact who will be the opponent
@@ -983,15 +1031,26 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
     }
 
     /**
-     * Thread to set up a two player game
+     * Thread to set up a two player game.
      */
     private final class SetupTwoPlayerGameThread extends Thread {
         private final MessengerContact _player;
 
+        /**
+         * Constructs a thread to set up the two player game with.
+         * 
+         * @param player
+         *            The other player to set up the game with
+         */
         SetupTwoPlayerGameThread(final MessengerContact player) {
             _player = player;
         }
 
+        /**
+         * Connects to the other player.
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             _twoPlayerSession = _player.getSession();
 
@@ -1036,7 +1095,9 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
      * request
      */
     private final class TTTSetupListener implements SessionSetupListener {
-
+        /**
+         * Default constructor
+         */
         public TTTSetupListener() {
         }
 
@@ -1090,15 +1151,24 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
      */
     private final class TTTSessionListener implements SessionListener {
 
+        /**
+         * Default constructor
+         */
         public TTTSessionListener() {
             // Not implemented
         }
 
+        /**
+         * @see SessionListener#messageDelivered(Session, Message)
+         */
         public void messageDelivered(final Session session,
                 final Message message) {
             // Not implemented
         }
 
+        /**
+         * @see SessionListener#messageQueuedForSend(Session, Message)
+         */
         public void messageQueuedForSend(final Session session,
                 final Message message) {
             // Not implemented
@@ -1118,22 +1188,25 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
                 int numMoves = 0;
 
                 for (int i = 0; i < 8; i++) {
-                    if (_theirMark == _X && _winLineCount[i] == _THREE_X
-                            || _theirMark == _O && _winLineCount[i] == _THREE_O) {
+                    if (_theirMark == X && _winLineCount[i] == THREE_X
+                            || _theirMark == O && _winLineCount[i] == THREE_O) {
                         endGame(_theirMark);
                     }
 
-                    if (_squareFields[i].getGameState() != _NONE) {
+                    if (_squareFields[i].getGameState() != NONE) {
                         numMoves++;
                     }
                 }
 
-                if (numMoves == _TIE) {
-                    endGame(_NONE);
+                if (numMoves == TIE) {
+                    endGame(NONE);
                 }
             }
         }
 
+        /**
+         * @see SessionListener#messageSent(Session, Message)
+         */
         public void messageSent(final Session session, final Message message) {
             // Not implemented
         }
@@ -1143,7 +1216,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
          */
         public void sessionClosed(final Session session) {
             if (session == _twoPlayerSession && !_gameOverFlag) {
-                endGame(_QUIT);
+                endGame(QUIT);
             }
         }
     }

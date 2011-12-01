@@ -28,7 +28,6 @@ package com.rim.samples.device.xmldemo;
 
 import java.io.InputStream;
 
-import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.xml.parsers.DocumentBuilder;
@@ -43,7 +42,7 @@ import org.w3c.dom.NodeList;
  * The main screen for the application. Displays the results of parsing the XML
  * file.
  */
-/* package */final class XMLDemoScreen extends MainScreen {
+public final class XMLDemoScreen extends MainScreen {
     // Statics
     // -------------------------------------------------------------------------------------
     private static String _xmlFileName = "/xml/bookstore.xml";
@@ -60,8 +59,8 @@ import org.w3c.dom.NodeList;
      * @see DocumentBuilder
      * @see DocumentBuilderFactory
      */
-    XMLDemoScreen() {
-        setTitle(new LabelField("XML Demo"));
+    public XMLDemoScreen() {
+        setTitle("XML Demo");
 
         try {
             // Build a document based on the XML file.

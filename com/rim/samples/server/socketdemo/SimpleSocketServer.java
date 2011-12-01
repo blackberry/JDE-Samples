@@ -160,7 +160,7 @@ class Worker extends Thread
 public class SimpleSocketServer implements Runnable {
 
     //constants ---------------------------------------------------------------
-    private static final int PORT = 4444;
+    private static final int PORT = 44444;
     //statics -----------------------------------------------------------------
     private static final String RESOURCE_PATH = "com/rim/samples/server/socketdemo/resources";
     private static ResourceBundle _resources = java.util.ResourceBundle.getBundle(RESOURCE_PATH);

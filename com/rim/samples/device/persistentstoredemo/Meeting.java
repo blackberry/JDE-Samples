@@ -39,16 +39,15 @@ import net.rim.device.api.util.Persistable;
  * implement interface Persistable and can only can contain members which
  * themselves implement Persistable or are inherently persistable.
  */
-
-final class Meeting implements Persistable {
+public final class Meeting implements Persistable {
     static final int MEETING_NAME = 0;
     static final int DESC = 1;
     static final int DATE = 2;
     static final int TIME = 3;
     static final int NOTES = 4;
 
-    // Change this value if any fields are added to or removed from this class.
-    static final int NUM_FIELDS = 5;
+    // Change this value if any fields are added to or removed from this class
+    private static final int NUM_FIELDS = 5;
 
     private final Vector _fields;
     private final Vector _attendees;
@@ -56,17 +55,19 @@ final class Meeting implements Persistable {
     // Primitive data types can be persisted. The following class members are
     // included for demonstration purposes only, they have no functional use in
     // this class.
-    int demoInt;
-    boolean demoBool;
-    byte demoByte;
-    short demoShort;
-    long demoLong;
-    float demoFloat;
-    double demoDouble;
-    char demoChar;
+    private int demoInt;
+    private boolean demoBool;
+    private byte demoByte;
+    private short demoShort;
+    private long demoLong;
+    private float demoFloat;
+    private double demoDouble;
+    private char demoChar;
 
-    // Constructor
-    Meeting() {
+    /**
+     * Creates a new Meeting object
+     */
+    public Meeting() {
         _attendees = new Vector();
         _fields = new Vector(NUM_FIELDS);
         for (int i = 0; i < NUM_FIELDS; ++i) {
@@ -79,14 +80,14 @@ final class Meeting implements Persistable {
      * 
      * @param id
      *            The ID of the field from which the encoding should be
-     *            retrieved.
-     * @return The plaintext string.
+     *            retrieved
+     * @return A plaintext string
      */
     String getField(final int id) {
         final Object encoding = _fields.elementAt(id);
 
         // Acquiring a reference to a ticket guarantees access to encrypted data
-        // even if the device locks during our operation.
+        // even if the device locks during the decoding operation.
         final Object ticket = PersistentContent.getTicket();
 
         if (ticket != null) {
@@ -101,9 +102,9 @@ final class Meeting implements Persistable {
      * protection/compression settings.
      * 
      * @param id
-     *            The ID of the field where the encoding is to be stored.
+     *            The ID of the field where the encoding is to be stored
      * @param value
-     *            The plaintext string to be encoded and stored.
+     *            The plaintext string to be encoded and stored
      */
     void setField(final int id, final String value) {
         final Object encoding = PersistentContent.encode(value);
@@ -111,10 +112,10 @@ final class Meeting implements Persistable {
     }
 
     /**
-     * Method to encode string and add to attendees vector.
+     * Encodes a string and adds it to the attendees vector
      * 
      * @param attendee
-     *            String to be added to vector
+     *            String to be added to the attendees vector
      */
     void addAttendee(final String attendee) {
         final Object encoding = PersistentContent.encode(attendee);
@@ -131,7 +132,7 @@ final class Meeting implements Persistable {
         final Vector decodedAttendees = new Vector();
 
         // Acquiring a reference to a ticket guarantees access to encrypted data
-        // even if the device locks during our operation.
+        // even if the device locks during the decoding operation operation.
         final Object ticket = PersistentContent.getTicket();
 
         if (ticket != null) {
@@ -145,15 +146,19 @@ final class Meeting implements Persistable {
 
     /**
      * Forces a re-encoding of the information stored in this Meeting object.
-     * This method is called by the modeChanged() method in our
-     * PersistentStoreListener.
      */
     void reEncode() {
-        for (int i = 0; i < NUM_FIELDS; ++i) {
-            Object encoding = _fields.elementAt(i);
-            if (!PersistentContent.checkEncoding(encoding)) {
-                encoding = PersistentContent.reEncode(encoding);
-                _fields.setElementAt(encoding, i);
+        // Acquiring a reference to a ticket guarantees access to encrypted data
+        // even if the device locks during the re-encoding operation.
+        final Object ticket = PersistentContent.getTicket();
+
+        if (ticket != null) {
+            for (int i = 0; i < NUM_FIELDS; ++i) {
+                Object encoding = _fields.elementAt(i);
+                if (!PersistentContent.checkEncoding(encoding)) {
+                    encoding = PersistentContent.reEncode(encoding);
+                    _fields.setElementAt(encoding, i);
+                }
             }
         }
     }

@@ -62,8 +62,7 @@ import net.rim.device.api.util.Persistable;
  * plots will be saved as JPEG files in the 'samples' directory of the JDE
  * installation.
  */
-class GPSDemo extends UiApplication {
-
+public class GPSDemo extends UiApplication {
     // Constants
     // -----------------------------------------------------------------------------------------------------------------
     private static final int GRADE_INTERVAL = 5; // Seconds - represents the
@@ -119,17 +118,19 @@ class GPSDemo extends UiApplication {
     private ServerConnectThread _serverConnectThread;
 
     /**
-     * Instantiate the new application object and enter the event loop.
+     * Entry point for application
      * 
      * @param args
-     *            No args are supported for this application.
+     *            Command line arguments (not used)
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         new GPSDemo().enterEventDispatcher();
     }
 
     // Constructor
-    private GPSDemo() {
+    public GPSDemo() {
         // Used by waypoints, represents the time since the last waypoint.
         _startTime = System.currentTimeMillis();
         _altitudes = new float[GRADE_INTERVAL];
@@ -155,6 +156,9 @@ class GPSDemo extends UiApplication {
 
     /**
      * Update the GUI with the data just received.
+     * 
+     * @param msg
+     *            The message to display
      */
     private void updateLocationScreen(final String msg) {
         invokeLater(new Runnable() {
@@ -166,7 +170,9 @@ class GPSDemo extends UiApplication {
 
     // Menu items
     // --------------------------------------------------------------------------------------------
-
+    /**
+     * Mark the current point as a waypoint
+     */
     private final MenuItem _markWayPoint = new MenuItem("Mark waypoint", 110,
             10) {
         public void run() {
@@ -174,6 +180,9 @@ class GPSDemo extends UiApplication {
         }
     };
 
+    /**
+     * View the marked waypoints
+     */
     private final MenuItem _viewWayPoints = new MenuItem("View waypoints", 110,
             11) {
         public void run() {
@@ -181,6 +190,9 @@ class GPSDemo extends UiApplication {
         }
     };
 
+    /**
+     * Display the options
+     */
     private final MenuItem _options = new MenuItem("Options", 110, 10) {
         public void run() {
             GPSDemo.this.viewOptions();
@@ -287,7 +299,7 @@ class GPSDemo extends UiApplication {
      * @param p
      *            The point to add.
      */
-    /* package */private synchronized static void addWayPoint(final WayPoint p) {
+    private synchronized static void addWayPoint(final WayPoint p) {
         _previousPoints.addElement(p);
         commit();
     }
@@ -299,7 +311,7 @@ class GPSDemo extends UiApplication {
      * @param p
      *            The point to remove.
      */
-    /* package */synchronized static void removeWayPoint(final WayPoint p) {
+    synchronized static void removeWayPoint(final WayPoint p) {
         _previousPoints.removeElement(p);
         commit();
     }
@@ -471,6 +483,9 @@ class GPSDemo extends UiApplication {
         }
     }
 
+    /**
+     * The main screen to display the current GPS information
+     */
     private final class GPSDemoScreen extends MainScreen {
 
         // Constructor
@@ -536,8 +551,6 @@ class GPSDemo extends UiApplication {
     /**
      * WayPoint describes a way point, a marker on a journey or point of
      * interest. WayPoints are persistable.
-     * 
-     * package
      */
     static class WayPoint implements Persistable {
         long _startTime;
@@ -570,11 +583,18 @@ class GPSDemo extends UiApplication {
         private boolean _go;
         private final Vector _data;
         private int _delay;
-        static private final int DEFAULT = 5000; // Retry delay for
+        private static final int DEFAULT = 5000; // Retry delay for
                                                  // communication with the
                                                  // server after a failed
                                                  // attempt.
+        private static final int TWENTY_FOUR_HOURS = 24 * 3600 * 1000;
 
+        /**
+         * Creates a thread to connect to a server
+         * 
+         * @param host
+         *            The server host to connect to
+         */
         ServerConnectThread(final String host) {
             setHost(host);
             _go = true;
@@ -582,36 +602,70 @@ class GPSDemo extends UiApplication {
             _delay = DEFAULT; // 5 second backoff to start.
         }
 
+        /**
+         * Sets the url pointing to the server to connect to based on the
+         * server's hostname.
+         * 
+         * @param host
+         *            The hostname of the server to connect to
+         */
         private synchronized void setHost(final String host) {
-            _url = "socket://" + host; // + ";deviceside=false"; // Don't use
-                                       // direct TCP.
-            this.notify(); // Notify the thread method so that any pending data
-                           // can be resent.
+            // Don't use direct TCP.
+            _url = "socket://" + host; // + ";deviceside=false";
+
+            // Wake up this thread in case it was sleeping so pending data can
+            // be resent.
+            this.notify();
         }
 
+        /**
+         * Stops the connection
+         */
         private synchronized void stop() {
             _go = false;
         }
 
+        /**
+         * Queues the updated information to send to the server
+         * 
+         * @param data
+         *            The updated information to send
+         */
         private synchronized void sendUpdate(final String data) {
             _data.addElement(data);
             this.notify();
         }
 
+        /**
+         * Increase the time interval in which the server is updated with the
+         * current data.
+         * 
+         * @param delay
+         *            The current update delay (in milliseconds) to increase
+         * @return The new delay which is equal to double the old delay with an
+         *         upper bound of twenty-four hours (in milliseconds)
+         */
         private int increaseDelay(final int delay) {
-            if (delay >= 24 * 3600 * 1000) {
-                return 24 * 3600 * 1000; // 24 hr max backoff.
+            if (delay >= TWENTY_FOUR_HOURS) {
+                return TWENTY_FOUR_HOURS; // 24 hr max backoff.
             } else {
                 return delay << 1; // Otherwise just double the current delay.
             }
         }
 
+        /**
+         * Periodically send data to the server
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             boolean error = false;
 
             while (_go) {
                 String data = null;
                 synchronized (this) {
+                    // If there is nothing to send or there is an error then
+                    // delay the upload.
                     if (_data.size() == 0 || error) {
                         try {
                             this.wait(_delay);
@@ -632,8 +686,8 @@ class GPSDemo extends UiApplication {
                     _data.removeElement(data);
                 }
 
+                // Try to connect and write data to the server
                 StreamConnection connection = null;
-
                 try {
                     connection =
                             (StreamConnection) Connector.open(_url,

@@ -55,11 +55,14 @@ import net.rim.device.api.ui.container.MainScreen;
  * The application will run in the background as a system module, without
  * displaying an icon on the BlackBerry device home screen.
  */
-final class MapsMenuItemDemo extends UiApplication {
+public final class MapsMenuItemDemo extends UiApplication {
     private static MapView _mv = new MapView();
 
     /**
-     * Entry point for application
+     * Entry point for application.
+     * 
+     * @param args
+     *            Command line arguments
      */
     public static void main(final String[] args) {
         if (args != null && args.length > 0) {
@@ -76,14 +79,19 @@ final class MapsMenuItemDemo extends UiApplication {
                         new MapsMenuItem(), ad_gui);
             } else if (args[0].equals("gui")) {
                 // App was invoked by our ApplicationMenuItem. Call default
-                // constructor for GUI version of the application and enter
-                // the main event thread.
+                // constructor for GUI version of the application.
                 final MapsMenuItemDemo app = new MapsMenuItemDemo();
+
+                // Make the currently running thread the application's event
+                // dispatch thread and begin processing events.
                 app.enterEventDispatcher();
             }
         }
     }
 
+    /**
+     * Shows a MapsMenuItemScreen when invoked.
+     */
     private static class MapsMenuItem extends ApplicationMenuItem {
         // Constructor
         private MapsMenuItem() {
@@ -103,11 +111,9 @@ final class MapsMenuItemDemo extends UiApplication {
         }
 
         /**
-         * Code to be executed when this menu item is invoked.
+         * Views the map in a MapMenuItemScreen.
          * 
-         * @param context
-         *            A MapView object.
-         * @return null
+         * @see ApplicationMenuItem#run(Object)
          */
         public Object run(final Object context) {
             if (context instanceof MapView) {
@@ -120,7 +126,6 @@ final class MapsMenuItemDemo extends UiApplication {
             }
 
             return null;
-
         }
     }
 }
@@ -134,26 +139,27 @@ final class MapsMenuItemScreen extends MainScreen {
     private final BasicEditField _logitudeField;
     private final NumericChoiceField _zoomField;
 
-    // Constructor
     /**
-     * @param _mv
+     * Constructor
+     * 
+     * @param mapView
      *            The MapView context object.
      */
-    MapsMenuItemScreen(final MapView _mv) {
-        _mapview = _mv;
+    MapsMenuItemScreen(final MapView mapView) {
+        _mapview = mapView;
 
         // The int values returned by getLatitude() and getLongitude() are
         // 100,000 times
         // the values specified by WGS84.
         _latitudeField =
-                new BasicEditField("Latitude:      ", _mv.getLatitude()
+                new BasicEditField("Latitude:      ", _mapview.getLatitude()
                         / 100000.0 + "", 9, BasicEditField.FILTER_REAL_NUMERIC);
         _logitudeField =
-                new BasicEditField("Longitude:   ", _mv.getLongitude()
+                new BasicEditField("Longitude:   ", _mapview.getLongitude()
                         / 100000.0 + "", 10, BasicEditField.FILTER_REAL_NUMERIC);
         _zoomField =
-                new NumericChoiceField("Zoom: ", 0, MapView.MAX_ZOOM, 1, _mv
-                        .getZoom());
+                new NumericChoiceField("Zoom: ", 0, MapView.MAX_ZOOM, 1,
+                        _mapview.getZoom());
 
         // Add GUI components.
         add(_latitudeField);
@@ -163,12 +169,15 @@ final class MapsMenuItemScreen extends MainScreen {
         add(new RichTextField(
                 "Edit latitude, longitude and zoom level settings and select View Map from the menu.",
                 Field.NON_FOCUSABLE));
-        addMenuItem(viewMapItem);
+        addMenuItem(_viewMapItem);
 
         setTitle("Location Details Screen");
     }
 
-    private final MenuItem viewMapItem = new MenuItem("View Map", 1000, 10) {
+    /**
+     * Displays a map of a specified locaton.
+     */
+    private final MenuItem _viewMapItem = new MenuItem("View Map", 1000, 10) {
         public void run() {
             // Change the zoom level.
             _mapview.setZoom(_zoomField.getSelectedValue());
@@ -207,7 +216,7 @@ final class MapsMenuItemScreen extends MainScreen {
     };
 
     /**
-     * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
+     * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
      */
     protected void makeMenu(final Menu menu, final int instance) {
         super.makeMenu(menu, instance);

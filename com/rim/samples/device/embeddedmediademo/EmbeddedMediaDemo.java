@@ -41,6 +41,7 @@ import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.ButtonField;
+import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.container.HorizontalFieldManager;
@@ -53,16 +54,37 @@ import net.rim.device.api.ui.container.MainScreen;
  * bottom of the screen indicate current volume level, total playing time of the
  * media, and elapsed time when media is paused.
  */
-class EmbeddedMediaDemo extends UiApplication {
-    // Entry point for this application.
+public class EmbeddedMediaDemo extends UiApplication {
+    /**
+     * Entry point for application
+     * 
+     * @param args
+     *            Command line arguments (not used)
+     */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         new EmbeddedMediaDemo().enterEventDispatcher();
     }
 
     // Constructor
-    private EmbeddedMediaDemo() {
+    public EmbeddedMediaDemo() {
         final EmbeddedMediaScreen screen = new EmbeddedMediaScreen();
         pushScreen(screen);
+    }
+
+    /**
+     * Presents a dialog to the user with a given message
+     * 
+     * @param message
+     *            The text to display
+     */
+    public static void errorDialog(final String message) {
+        UiApplication.getUiApplication().invokeLater(new Runnable() {
+            public void run() {
+                Dialog.alert(message);
+            }
+        });
     }
 }
 
@@ -86,7 +108,7 @@ final class EmbeddedMediaScreen extends MainScreen implements
     private TimerUpdateThread _timerUpdateThread;
 
     // Constructor
-    public EmbeddedMediaScreen() {
+    EmbeddedMediaScreen() {
         setTitle("Embedded Media Demo");
 
         _statusField = new RichTextField("Loading media, please wait...");
@@ -127,7 +149,8 @@ final class EmbeddedMediaScreen extends MainScreen implements
                 _timerUpdateThread = new TimerUpdateThread();
                 _timerUpdateThread.start();
             } catch (final MediaException pe) {
-                System.out.println(pe.toString());
+                EmbeddedMediaDemo.errorDialog("Player#start() threw "
+                        + pe.toString());
             }
         } else {
             try {
@@ -136,7 +159,8 @@ final class EmbeddedMediaScreen extends MainScreen implements
 
                 _timerUpdateThread.stop();
             } catch (final MediaException pe) {
-                System.out.println(pe.toString());
+                EmbeddedMediaDemo.errorDialog("Player#stop() threw "
+                        + pe.toString());
             }
         }
     }
@@ -146,7 +170,7 @@ final class EmbeddedMediaScreen extends MainScreen implements
      * @param width
      *            Width available for this screen.
      * @param height
-     *            Width available for this screen.
+     *            Height available for this screen.
      */
     protected void sublayout(final int width, final int height) {
         super.sublayout(width, height);
@@ -160,7 +184,7 @@ final class EmbeddedMediaScreen extends MainScreen implements
         delete(_statusField);
 
         _hfm1 = new HorizontalFieldManager(Field.FIELD_HCENTER);
-        _controlButton = new ButtonField("Start");
+        _controlButton = new ButtonField("Start", ButtonField.NEVER_DIRTY);
         _controlButton.setChangeListener(this);
         _hfm1.add(_controlButton);
 
@@ -219,9 +243,10 @@ final class EmbeddedMediaScreen extends MainScreen implements
                     (VolumeControl) _player.getControl("VolumeControl");
 
         } catch (final MediaException pe) {
-            System.out.println(pe.toString());
+            EmbeddedMediaDemo.errorDialog(pe.toString());
         } catch (final IOException ioe) {
-            System.out.println(ioe.toString());
+            EmbeddedMediaDemo.errorDialog("Manager.createPlayer() threw "
+                    + ioe.toString());
         }
     }
 
@@ -231,22 +256,27 @@ final class EmbeddedMediaScreen extends MainScreen implements
      * @param screenWidth
      *            The screen's width.
      * @param screenHeight
-     *            The screens's height.
+     *            The screen's height.
      */
     private void updateVideoSize() {
-        try {
-            final VideoControl vc =
-                    (VideoControl) _player.getControl("VideoControl");
-            if (vc != null) {
-                final net.rim.device.api.ui.Manager manager = getMainManager();
-                final int videoHeight =
-                        manager.getHeight() - _hfm1.getHeight()
-                                - _hfm2.getHeight();
-                final int videoWidth = manager.getWidth();
-                vc.setDisplaySize(videoWidth, videoHeight);
+        if (_player != null) {
+            try {
+                final VideoControl vc =
+                        (VideoControl) _player.getControl("VideoControl");
+                if (vc != null) {
+                    final net.rim.device.api.ui.Manager manager =
+                            getMainManager();
+                    final int videoHeight =
+                            manager.getHeight() - _hfm1.getHeight()
+                                    - _hfm2.getHeight();
+                    final int videoWidth = manager.getWidth();
+                    vc.setDisplaySize(videoWidth, videoHeight);
+                }
+            } catch (final Exception e) {
+                EmbeddedMediaDemo
+                        .errorDialog("VideoControl#setDisplayDize() threw "
+                                + e.toString());
             }
-        } catch (final Exception e) {
-            System.out.println(e.toString());
         }
     }
 
@@ -304,6 +334,7 @@ final class EmbeddedMediaScreen extends MainScreen implements
             switch (action) {
             case ACTION_INVOKE: // Trackball click.
             {
+                // Suppress the menu
                 return true;
             }
             }
@@ -312,17 +343,14 @@ final class EmbeddedMediaScreen extends MainScreen implements
     }
 
     /**
-     * We override this method to prevent Save dialog from being displayed.
-     * 
-     * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
+     * A thread which acts as a timer to update the screen
      */
-    protected boolean onSavePrompt() {
-        return true;
-    }
-
     private class TimerUpdateThread extends Thread {
         private boolean _threadCanRun;
 
+        /**
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             _threadCanRun = true;
             while (_threadCanRun) {
@@ -336,10 +364,15 @@ final class EmbeddedMediaScreen extends MainScreen implements
                 try {
                     Thread.sleep(500L);
                 } catch (final InterruptedException e) {
+                    EmbeddedMediaDemo.errorDialog("Thread.sleep(long) threw "
+                            + e.toString());
                 }
             }
         }
 
+        /**
+         * @see java.lang.Thread#stop()
+         */
         public void stop() {
             _threadCanRun = false;
         }

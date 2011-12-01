@@ -42,20 +42,20 @@ import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.ButtonField;
 import net.rim.device.api.ui.component.Dialog;
+import net.rim.device.api.ui.container.MainScreen;
 
 /**
- * This sample demonstrates the ApplicationPermissions API available in
- * BlackBery v4.2.1 handheld software and higher. If the required permissions
- * for this application have been denied by the user, the application will
- * prompt for access to these resources. The ability to test these capabilities
- * is provided as part of the sample.This sample needs to be run on a secure
- * device or simulator. If using a simulator go to
+ * This sample demonstrates the ApplicationPermissions API. If the required
+ * permissions for this application have been denied by the user, the
+ * application will prompt for access to these resources. The ability to test
+ * these capabilities is provided as part of the sample. This sample needs to be
+ * run on a secure device or simulator. If using a simulator go to
  * Edit/Preferences/Simulator/General in the JDE and select
  * "Enable Device Security". You will also need to have the cod file generated
  * by this project signed with the Signature Tool. For more information on code
  * signing please refer to the BlackBerry Signature Tool Development Guide.
  */
-class ApplicationPermissionsDemo extends UiApplication implements
+public final class ApplicationPermissionsDemo extends UiApplication implements
         FieldChangeListener {
     private ButtonField _eventInjectorButton;
     private ButtonField _phoneButton;
@@ -63,18 +63,24 @@ class ApplicationPermissionsDemo extends UiApplication implements
     private ButtonField _emailButton;
 
     /**
-     * Entry point for the application.
+     * Entry point for the application
+     * 
+     * @param args
+     *            Command line arguments (not used)
      */
     public static void main(final String[] args) {
         final ApplicationPermissionsDemo sample =
                 new ApplicationPermissionsDemo();
+
+        // Make the currently running thread the application's event
+        // dispatch thread and begin processing events.
         sample.enterEventDispatcher();
     }
 
     /**
-     * Constructor.
+     * Creates a new ApplicationPermissionsDemo object
      */
-    private ApplicationPermissionsDemo() {
+    public ApplicationPermissionsDemo() {
         checkPermissions();
         showTestScreen();
     }
@@ -103,7 +109,7 @@ class ApplicationPermissionsDemo extends UiApplication implements
         // May 13, 2008: updated permissions by replacing deprecated constants.
 
         // Capture the current state of permissions and check against the
-        // requirements.
+        // requirements
         final ApplicationPermissionsManager apm =
                 ApplicationPermissionsManager.getInstance();
         final ApplicationPermissions original = apm.getApplicationPermissions();
@@ -121,7 +127,7 @@ class ApplicationPermissionsDemo extends UiApplication implements
                         .getPermission(ApplicationPermissions.PERMISSION_DEVICE_SETTINGS) == ApplicationPermissions.VALUE_ALLOW
                 && original
                         .getPermission(ApplicationPermissions.PERMISSION_EMAIL) == ApplicationPermissions.VALUE_ALLOW) {
-            // All of the necessary permissions are currently available.
+            // All of the necessary permissions are currently available
             return;
         }
 
@@ -145,7 +151,7 @@ class ApplicationPermissionsDemo extends UiApplication implements
                         .invokePermissionsRequest(permRequest);
 
         if (acceptance) {
-            // User has accepted all of the permissions.
+            // User has accepted all of the permissions
             return;
         } else {
             // The user has only accepted some or none of the permissions
@@ -163,30 +169,34 @@ class ApplicationPermissionsDemo extends UiApplication implements
      * permissions capabilities.
      */
     private void showTestScreen() {
-        final ApplicationPermissionsScreen screen =
-                new ApplicationPermissionsScreen();
-        screen.setTitle("Application Permissions Sample");
+        final MainScreen screen = new MainScreen();
+        screen.setTitle("Application Permissions Demo");
 
         if (_eventInjectorButton == null) {
             _eventInjectorButton =
-                    new ButtonField("Event Injector", ButtonField.CONSUME_CLICK);
+                    new ButtonField("Event Injector", ButtonField.CONSUME_CLICK
+                            | ButtonField.NEVER_DIRTY);
             _eventInjectorButton.setChangeListener(this);
         }
 
         if (_phoneButton == null) {
-            _phoneButton = new ButtonField("Phone", ButtonField.CONSUME_CLICK);
+            _phoneButton =
+                    new ButtonField("Phone", ButtonField.CONSUME_CLICK
+                            | ButtonField.NEVER_DIRTY);
             _phoneButton.setChangeListener(this);
         }
 
         if (_deviceSettingsButton == null) {
             _deviceSettingsButton =
                     new ButtonField("Device Settings",
-                            ButtonField.CONSUME_CLICK);
+                            ButtonField.CONSUME_CLICK | ButtonField.NEVER_DIRTY);
             _deviceSettingsButton.setChangeListener(this);
         }
 
         if (_emailButton == null) {
-            _emailButton = new ButtonField("Email", ButtonField.CONSUME_CLICK);
+            _emailButton =
+                    new ButtonField("Email", ButtonField.CONSUME_CLICK
+                            | ButtonField.NEVER_DIRTY);
             _emailButton.setChangeListener(this);
         }
 
@@ -199,7 +209,7 @@ class ApplicationPermissionsDemo extends UiApplication implements
     }
 
     /**
-     * Test the EventInjector API.
+     * Tests the EventInjector API
      */
     private void testEventInjector() {
         EventInjector.invokeEvent(new EventInjector.TrackwheelEvent(
@@ -209,7 +219,7 @@ class ApplicationPermissionsDemo extends UiApplication implements
     }
 
     /**
-     * Test the Phone API.
+     * Tests the Phone API
      */
     private void testPhone() {
         Invoke.invokeApplication(Invoke.APP_TYPE_PHONE, new PhoneArguments(
@@ -217,20 +227,20 @@ class ApplicationPermissionsDemo extends UiApplication implements
     }
 
     /**
-     * Test the device settings.
+     * Tests the device settings
      */
     private void testDeviceSettings() {
         Device.setDateTime(System.currentTimeMillis());
     }
 
     /**
-     * Test the email API.
+     * Tests the email API
      */
     private void testEmail() {
         try {
             Transport.send(new Message());
         } catch (final MessagingException e) {
-            System.out.println(e.toString());
+            errorDialog("Transport.send(Message) threw " + e.toString());
         }
 
     }
@@ -253,10 +263,24 @@ class ApplicationPermissionsDemo extends UiApplication implements
                 testEmail();
             }
 
-            Dialog.inform("Test successful.");
+            Dialog.inform("Test successful");
         } catch (final ControlledAccessException e) {
             // Do not have access to the API. Indicate as such.
-            Dialog.inform("Test failed!");
+            errorDialog(e.toString());
         }
+    }
+
+    /**
+     * Presents a dialog to the user with a given message
+     * 
+     * @param message
+     *            The text to display
+     */
+    public static void errorDialog(final String message) {
+        UiApplication.getUiApplication().invokeLater(new Runnable() {
+            public void run() {
+                Dialog.alert(message);
+            }
+        });
     }
 }

@@ -56,7 +56,7 @@ import net.rim.device.api.util.Arrays;
  * to exist per SmartCardReader, and subsequent openSession requests will block
  * until the current session is closed.
  */
-class MyCryptoSmartCardSession extends CryptoSmartCardSession {
+public class MyCryptoSmartCardSession extends CryptoSmartCardSession {
     // We assume that the smart card has 3 certificates identified by: ID_PKI,
     // SIGNING_PKI and ENCRYPION_PKI. Your particular smart card may have a
     // different number of certificates or be identified differently. These 3
@@ -65,11 +65,11 @@ class MyCryptoSmartCardSession extends CryptoSmartCardSession {
     private static final byte SIGNING_PKI = (byte) 0x01;
     private static final byte ENCRYPTION_PKI = (byte) 0x02;
 
-    private static final String WAITING_MSG = "Please Wait";
-    private static final String ID_STRING = "John H. Smith";
-    private static final String ID_CERT = "ID Certificate";
-    private static final String SIGNING_CERT = "Signing Certificate";
-    private static final String ENCRYPTION_CERT = "Encryption Certificate";
+    private static String WAITING_MSG = "Please Wait";
+    private static String ID_STRING = "John H. Smith";
+    private static String ID_CERT = "ID Certificate";
+    private static String SIGNING_CERT = "Signing Certificate";
+    private static String ENCRYPTION_CERT = "Encryption Certificate";
 
     /**
      * Constructs a <code>MyCryptoSmartCardSession</code> object.
@@ -79,7 +79,7 @@ class MyCryptoSmartCardSession extends CryptoSmartCardSession {
      * @param readerSession
      *            the reader session which will be used to send the commands to.
      */
-    protected MyCryptoSmartCardSession(final SmartCard smartCard,
+    public MyCryptoSmartCardSession(final SmartCard smartCard,
             final SmartCardReaderSession readerSession) {
         super(smartCard, readerSession);
     }

@@ -33,25 +33,25 @@ import net.rim.device.api.system.Application;
 import net.rim.device.api.ui.component.Dialog;
 
 /**
- * Listener to determine when files have been added to the file system.
+ * Listener to determine when files have been added to the file system
  */
-/* package */final class FileExplorerDemoJournalListener implements
+public final class FileExplorerDemoJournalListener implements
         FileSystemJournalListener {
     private final FileExplorerDemoScreen _screen;
     private long _lastUSN; // = 0;
 
     /**
-     * Constructor.
+     * Constructor
      * 
      * @param screen
      *            The screen to update when events occur.
      */
-    FileExplorerDemoJournalListener(final FileExplorerDemoScreen screen) {
+    public FileExplorerDemoJournalListener(final FileExplorerDemoScreen screen) {
         _screen = screen;
     }
 
     /**
-     * Notified when FileSystem event occurs.
+     * Notified when FileSystem event occurs
      */
     public void fileJournalChanged() {
         final long nextUSN = FileSystemJournal.getNextUSN();
@@ -61,12 +61,12 @@ import net.rim.device.api.ui.component.Dialog;
             final FileSystemJournalEntry entry =
                     FileSystemJournal.getEntry(lookUSN);
 
-            // We didn't find an entry.
+            // We didn't find an entry
             if (entry == null) {
                 break;
             }
 
-            // Check if this entry was added or deleted.
+            // Check if this entry was added or deleted
             final String path = entry.getPath();
 
             if (path != null) {
@@ -104,10 +104,10 @@ import net.rim.device.api.ui.component.Dialog;
     }
 
     /**
-     * Displays the provided message in a dialog box.
+     * Displays the provided message in a dialog box
      * 
      * @param msg
-     *            The message to display.
+     *            The message to display
      */
     private void showMessage(final String msg) {
         synchronized (Application.getApplication().getAppEventLock()) {

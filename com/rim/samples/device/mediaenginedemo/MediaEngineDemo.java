@@ -43,20 +43,27 @@ import net.rim.plazmic.mediaengine.MediaManager;
 import net.rim.plazmic.mediaengine.MediaPlayer;
 
 /**
- * A simple example of the MediaEngine API's. PME files in this sample are
- * version 1.2. In Plazmic Composer version 3.0.0.21 export content as SVG. Open
- * SVG file in a text editor and change height and width attributes within the
- * svg tag to pixel values. Finally, use the command line utility to transcode
- * the SVG to PME format (eg. C:\projectDir>svgc -pme 12 filename.svg).
+ * A simple example of the Media Engine API's. The demo uses a
+ * net.rim.plazmic.mediaengine.MediaManager object to create a media object from
+ * a pme file embedded in this project. The media object is then rendered using
+ * a net.rim.plazmic.mediaengine.MediaPlayer object. The MediaListenerImpl class
+ * implements the MediaListener interface so the application can recieve media
+ * event notifications. For information on creating PME content, please refer to
+ * the Plazmic Composer User Guide, available at www.plazmic.com.
  */
-final class MediaEngineDemo extends UiApplication {
+public final class MediaEngineDemo extends UiApplication {
     private RichTextField _statusField;
     private final MediaDisplayScreen _display;
 
     /**
-     * Entry point for application.
+     * Entry point for application
+     * 
+     * @param args
+     *            Command line arguments (not used)
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final MediaEngineDemo app = new MediaEngineDemo();
         app.enterEventDispatcher();
     }
@@ -64,9 +71,23 @@ final class MediaEngineDemo extends UiApplication {
     /**
      * Constructor
      */
-    private MediaEngineDemo() {
+    public MediaEngineDemo() {
         _display = new MediaDisplayScreen();
         pushScreen(new MediaSampleScreen());
+    }
+
+    /**
+     * Presents a dialog to the user with a given message
+     * 
+     * @param message
+     *            The text to display
+     */
+    public static void errorDialog(final String message) {
+        UiApplication.getUiApplication().invokeLater(new Runnable() {
+            public void run() {
+                Dialog.alert(message);
+            }
+        });
     }
 
     /**
@@ -86,15 +107,15 @@ final class MediaEngineDemo extends UiApplication {
         }
 
         /**
-         * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
+         * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
          */
         public void makeMenu(final Menu menu, final int instance) {
             // Invoke some content using the jar://url
             menu.add(new MenuItem("PME 1", 0, 0) {
                 public void run() {
                     // Check for optimal screen dimensions.
-                    if (Display.getHeight() != 480 || Display.getWidth() != 360) {
-                        Dialog.alert("Sample has been optimized for a 360 x 480 display. "
+                    if (Display.getHeight() != 320 || Display.getWidth() != 480) {
+                        Dialog.alert("Sample has been optimized for a 480 x 320 display. "
                                 + "This device has a "
                                 + Display.getWidth()
                                 + " x " + Display.getHeight() + " display.");
@@ -117,8 +138,8 @@ final class MediaEngineDemo extends UiApplication {
             menu.add(new MenuItem("PME 2", 1, 0) {
                 public void run() {
                     // Check for optimal screen dimensions.
-                    if (Display.getHeight() != 480 || Display.getWidth() != 360) {
-                        Dialog.alert("Sample has been optimized for a 360 x 480 display. "
+                    if (Display.getHeight() != 320 || Display.getWidth() != 480) {
+                        Dialog.alert("Sample has been optimized for a 480 x 320 display. "
                                 + "This device has a "
                                 + Display.getWidth()
                                 + " x " + Display.getHeight() + " display.");
@@ -156,17 +177,18 @@ final class MediaEngineDemo extends UiApplication {
                 player.setMedia(media);
 
             } catch (final IOException ioe) {
-                System.out.print(ioe.toString());
+                errorDialog("MediaManager#createMedia() threw "
+                        + ioe.toString());
             } catch (final MediaException me) {
                 final String msg =
                         "Error during media loading: " + me.getCode()
                                 + me.getMessage();
-                System.out.println(msg);
                 _statusField.setText(_statusField.getText() + msg);
+                errorDialog(msg);
             }
 
-            /* parent. */_display.init((Field) player.getUI(), player);
-            pushScreen(/* parent. */_display);
+            _display.init((Field) player.getUI(), player);
+            pushScreen(_display);
         }
     }
 
@@ -177,9 +199,18 @@ final class MediaEngineDemo extends UiApplication {
         private Field _current;
         private MediaPlayer _player;
 
+        // Constructor
         MediaDisplayScreen() {
         }
 
+        /**
+         * Initializes the player
+         * 
+         * @param f
+         *            The field to display the player with
+         * @param player
+         *            The media player to play the media with
+         */
         private void init(final Field f, final MediaPlayer player) {
             if (_player != null) {
                 _player.close();
@@ -206,10 +237,7 @@ final class MediaEngineDemo extends UiApplication {
             try {
                 _player.start();
             } catch (final MediaException me) {
-                final String msg =
-                        "Error during media playback: " + me.getCode()
-                                + me.getMessage();
-                System.out.println(msg);
+                errorDialog("MediaPlayer#start() threw " + me.toString());
             }
         }
 

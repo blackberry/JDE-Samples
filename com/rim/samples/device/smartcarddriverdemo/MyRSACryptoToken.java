@@ -48,17 +48,12 @@ import net.rim.device.api.util.Persistable;
  * The RIM Crypto API will call this interface when a private key RSA operation
  * is to be performed. The operation should be delegated to the smart card.
  */
-final class MyRSACryptoToken extends RSACryptoToken implements Persistable {
-    private static final String DECRYPT_DESC =
+public final class MyRSACryptoToken extends RSACryptoToken implements
+        Persistable {
+    private static String DECRYPT_DESC =
             "The private key will be used to decrypt encrypted data.";
-    private static final String SIGN_DESC =
+    private static String SIGN_DESC =
             "The private key will be used to generate a digital signature.";
-
-    /**
-     * Constructs a <code>MyRSACryptoToken</code> object.
-     */
-    MyRSACryptoToken() {
-    }
 
     /**
      * Determine if this token does the user authentication for the system. If

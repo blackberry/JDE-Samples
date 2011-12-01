@@ -31,7 +31,7 @@ import net.rim.device.api.ui.MenuItem;
 /**
  * MapFieldDemoMenuItem defines the type of menu items used in MapFieldDemo.
  */
-abstract class MapFieldDemoMenuItem extends MenuItem {
+public abstract class MapFieldDemoMenuItem extends MenuItem {
     private final String _campus;
 
     /**
@@ -48,7 +48,7 @@ abstract class MapFieldDemoMenuItem extends MenuItem {
      *            Determines the priority of a menu item, with lower values
      *            representing a higher priority.
      */
-    MapFieldDemoMenuItem(final String text, final String campus,
+    public MapFieldDemoMenuItem(final String text, final String campus,
             final int ordinal, final int priority) {
         super(text, ordinal, priority);
 

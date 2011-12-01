@@ -39,7 +39,7 @@ import net.rim.device.api.ui.component.EditField;
  * word to be treated as spelled correctly while another menu item allows for a
  * correction to be added to the list of corrections for the specified word.
  */
-class SpellCheckDemo extends UiApplication {
+public class SpellCheckDemo extends UiApplication {
     private final SpellCheckEngine _spellCheckEngine;
     private final SpellCheckUI _spellCheckUI;
 
@@ -50,12 +50,14 @@ class SpellCheckDemo extends UiApplication {
      *            Command line arguments.
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final SpellCheckDemo app = new SpellCheckDemo();
         app.enterEventDispatcher();
     }
 
     // Contructor
-    private SpellCheckDemo() {
+    public SpellCheckDemo() {
         // Create our spell check objects.
         _spellCheckUI = SpellCheckEngineFactory.createSpellCheckUI();
         _spellCheckUI.addSpellCheckUIListener(new SpellCheckListener());

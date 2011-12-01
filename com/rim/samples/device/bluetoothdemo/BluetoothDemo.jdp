@@ -29,7 +29,7 @@ AppScreen.java
 BluetoothDemo.java
 img\bluetooth_jde.png
 readme.txt
-SSPScreen.java
+SPPScreen.java
 ]
 HaveAlxImports=0
 HaveDefs=0

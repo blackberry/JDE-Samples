@@ -38,9 +38,14 @@ import net.rim.device.api.util.StringUtilities;
  * derived from a vector of Country objects passed into the constructor. The
  * class is also a KeywordProvider implementation.
  */
-class CountryList extends SortedReadableList implements KeywordProvider {
-    // Constructor
-    CountryList(final Vector countries) {
+public class CountryList extends SortedReadableList implements KeywordProvider {
+    /**
+     * Creates a country list based on a Vector of countries.
+     * 
+     * @param countries
+     *            The vector of countries to add to this list.
+     */
+    public CountryList(final Vector countries) {
         super(new CountryListComparator());
 
         loadFrom(countries.elements());
@@ -71,17 +76,19 @@ class CountryList extends SortedReadableList implements KeywordProvider {
      * A Comparator class used for sorting our Country objects by name.
      */
     final static class CountryListComparator implements Comparator {
-
+        /**
+         * Compares two countries by comparing their names' in alphabetical
+         * order.
+         * 
+         * @see net.rim.device.api.util.Comparator#compare(Object, Object)
+         */
         public int compare(final Object o1, final Object o2) {
-            if (o1.toString().compareTo(o2.toString()) < 0) {
-                return -1;
-            }
-            if (o1.toString().compareTo(o2.toString()) > 0) {
-                return 1;
-            } else {
-                return 0;
+            if (o1 == null || o2 == null) {
+                throw new IllegalArgumentException(
+                        "Cannot compare null countries");
             }
 
+            return o1.toString().compareTo(o2.toString());
         }
     }
 }

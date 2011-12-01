@@ -1,5 +1,5 @@
 /*
- * LimitedRateStreaminSource.java
+ * LimitedRateStreamingSource.java
  *
  * Copyright © 1998-2011 Research In Motion Limited
  * 
@@ -46,13 +46,13 @@ import net.rim.device.api.ui.component.TextField;
  * The data source used by the BufferedPlayback's media player.
  */
 public final class LimitedRateStreamingSource extends DataSource {
-    /** The max size to be read from the stream at one time. */
+    /** The max size to be read from the stream at one time */
     private static final int READ_CHUNK = 512; // bytes
 
-    /** A reference to the field which displays the load status. */
+    /** A reference to the field which displays the load status */
     private TextField _loadStatusField;
 
-    /** A reference to the field which displays the player status. */
+    /** A reference to the field which displays the player status */
     private TextField _playStatusField;
 
     /**
@@ -61,7 +61,7 @@ public final class LimitedRateStreamingSource extends DataSource {
      */
     private int _startBuffer = 200000;
 
-    /** The maximum size (in bytes) of a single read. */
+    /** The maximum size (in bytes) of a single read */
     private int _readLimit = 32000;
 
     /**
@@ -77,16 +77,16 @@ public final class LimitedRateStreamingSource extends DataSource {
      */
     private int _resumeBytes = 128000;
 
-    /** The stream connection over which media content is passed. */
+    /** The stream connection over which media content is passed */
     private ContentConnection _contentConnection;
 
-    /** An input stream shared between several readers. */
+    /** An input stream shared between several readers */
     private SharedInputStream _readAhead;
 
-    /** A stream to the buffered resource. */
+    /** A stream to the buffered resource */
     private LimitedRateSourceStream _feedToPlayer;
 
-    /** The MIME type of the remote media file. */
+    /** The MIME type of the remote media file */
     private String _forcedContentType;
 
     /** A counter for the total number of buffered bytes */
@@ -102,20 +102,20 @@ public final class LimitedRateStreamingSource extends DataSource {
      */
     private volatile boolean _bufferingComplete;
 
-    /** A flag used to indicate that the remote file download is complete. */
+    /** A flag used to indicate that the remote file download is complete */
     private volatile boolean _downloadComplete;
 
-    /** The thread which retrieves the remote media file. */
+    /** The thread which retrieves the remote media file */
     private ConnectionThread _loaderThread;
 
-    /** The local save file into which the remote file is written. */
+    /** The local save file into which the remote file is written */
     private FileConnection _saveFile;
 
-    /** A stream for the local save file. */
+    /** A stream for the local save file */
     private OutputStream _saveStream;
 
     /**
-     * Constructor.
+     * Constructor
      * 
      * @param locator
      *            The locator that describes the DataSource.
@@ -125,50 +125,52 @@ public final class LimitedRateStreamingSource extends DataSource {
     }
 
     /**
-     * Open a connection to the locator.
+     * Open a connection to the locator
      * 
      * @throws IOException
+     *             Thrown if the firewall disallows a connection that is not
+     *             btspp or comm or if save file could not be created
      */
     public void connect() throws IOException {
-        // Open the connection to the remote file.
+        // Open the connection to the remote file
         _contentConnection =
                 (ContentConnection) Connector
                         .open(getLocator(), Connector.READ);
 
-        // Cache a reference to the locator.
+        // Cache a reference to the locator
         final String locator = getLocator();
 
-        // Report status.
+        // Report status
         System.out.println("Loading: " + locator);
         System.out.println("Size: " + _contentConnection.getLength());
 
-        // The name of the remote file begins after the last forward slash.
+        // The name of the remote file begins after the last forward slash
         final int filenameStart = locator.lastIndexOf('/');
 
-        // The file name ends at the first instance of a semicolon.
+        // The file name ends at the first instance of a semicolon
         int paramStart = locator.indexOf(';');
 
-        // If there is no semicolon, the file name ends at the end of the line.
+        // If there is no semicolon, the file name ends at the end of the line
         if (paramStart < 0) {
             paramStart = locator.length();
         }
 
-        // Extract the file name.
+        // Extract the file name
         final String filename = locator.substring(filenameStart, paramStart);
         System.out.println("Filename: " + filename);
 
-        // Open a local save file with the same name as the remote file.
+        // Open a local save file with the same name as the remote file
         _saveFile =
                 (FileConnection) Connector.open(
                         "file:///SDCard/blackberry/music" + filename,
                         Connector.READ_WRITE);
 
-        // If the file doesn't already exist, create it.
+        // If the file doesn't already exist, create it
         if (!_saveFile.exists()) {
             _saveFile.create();
         }
 
-        // Open the file for writing.
+        // Open the file for writing
         _saveFile.setReadable(true);
 
         // Open a shared input stream to the local save file to
@@ -177,39 +179,39 @@ public final class LimitedRateStreamingSource extends DataSource {
                 SharedInputStream.getSharedInputStream(_saveFile
                         .openInputStream());
 
-        // Begin reading at the beginning of the file.
+        // Begin reading at the beginning of the file
         fileStream.setCurrentPosition(0);
 
         // If the local file is smaller than the remote file...
         if (_saveFile.fileSize() < _contentConnection.getLength()) {
-            // Did not get the entire file, set the system to try again.
+            // Did not get the entire file, set the system to try again
             _saveFile.setWritable(true);
 
             // A non-null save stream is used as a flag later to indicate that
             // the file download was incomplete.
             _saveStream = _saveFile.openOutputStream();
 
-            // Use a new shared input stream for buffered reading.
+            // Use a new shared input stream for buffered reading
             _readAhead =
                     SharedInputStream.getSharedInputStream(_contentConnection
                             .openInputStream());
         } else {
-            // The download is complete.
+            // The download is complete
             _downloadComplete = true;
 
-            // We can use the initial input stream to read the buffered media.
+            // We can use the initial input stream to read the buffered media
             _readAhead = fileStream;
 
-            // We can close the remote connection.
+            // We can close the remote connection
             _contentConnection.close();
         }
 
         if (_forcedContentType != null) {
-            // Use the user-defined content type if it is set.
+            // Use the user-defined content type if it is set
             _feedToPlayer =
                     new LimitedRateSourceStream(_readAhead, _forcedContentType);
         } else {
-            // Otherwise, use the MIME types of the remote file.
+            // Otherwise, use the MIME types of the remote file
             _feedToPlayer =
                     new LimitedRateSourceStream(_readAhead, _contentConnection
                             .getType());
@@ -217,71 +219,71 @@ public final class LimitedRateStreamingSource extends DataSource {
     }
 
     /**
-     * Destroy and close all existing connections.
+     * Destroy and close all existing connections
      */
     public void disconnect() {
         try {
             if (_saveStream != null) {
-                // Destroy the stream to the local save file.
+                // Destroy the stream to the local save file
                 _saveStream.close();
                 _saveStream = null;
             }
 
-            // Close the local save file.
+            // Close the local save file
             _saveFile.close();
 
             if (_readAhead != null) {
-                // Close the reader stream.
+                // Close the reader stream
                 _readAhead.close();
                 _readAhead = null;
             }
 
-            // Close the remote file connection.
+            // Close the remote file connection
             _contentConnection.close();
 
-            // Close the stream to the player.
+            // Close the stream to the player
             _feedToPlayer.close();
         } catch (final Exception e) {
-            System.err.println(e.getMessage());
+            BufferedPlayback.errorDialog(e.toString());
         }
     }
 
     /**
-     * Returns the content type of the remote file.
+     * Returns the content type of the remote file
      * 
-     * @return The content type of the remote file.
+     * @return The content type of the remote file
      */
     public String getContentType() {
         return _feedToPlayer.getContentDescriptor().getContentType();
     }
 
     /**
-     * Returns a stream to the buffered resource.
+     * Returns a stream to the buffered resource
      * 
-     * @return A stream to the buffered resource.
+     * @return A stream to the buffered resource
      */
     public SourceStream[] getStreams() {
         return new SourceStream[] { _feedToPlayer };
     }
 
     /**
-     * Starts the connection thread used to download the remote file.
+     * Starts the connection thread used to download the remote file
      */
     public void start() throws IOException {
         // If the save stream is null, we have already completely downloaded
         // the file.
         if (_saveStream != null) {
-            // Open the connection thread to finish downloading the file.
+            // Open the connection thread to finish downloading the file
             _loaderThread = new ConnectionThread();
             _loaderThread.start();
         }
     }
 
     /**
-     * Stop the connection thread.
+     * Stop the connection thread
      */
     public void stop() throws IOException {
-        // Set the boolean flag to stop the thread.
+        // Set the boolean flag to stop the thread
         _stop = true;
     }
 
@@ -289,7 +291,7 @@ public final class LimitedRateStreamingSource extends DataSource {
      * @see javax.microedition.media.Controllable#getControl(String)
      */
     public Control getControl(final String controlType) {
-        // No implemented Controls.
+        // No implemented Controls
         return null;
     }
 
@@ -297,7 +299,7 @@ public final class LimitedRateStreamingSource extends DataSource {
      * @see javax.microedition.media.Controllable#getControls()
      */
     public Control[] getControls() {
-        // No implemented Controls.
+        // No implemented Controls
         return null;
     }
 
@@ -313,13 +315,13 @@ public final class LimitedRateStreamingSource extends DataSource {
     }
 
     /**
-     * A stream to the buffered media resource.
+     * A stream to the buffered media resource
      */
     private final class LimitedRateSourceStream implements SourceStream {
-        /** A stream to the local copy of the remote resource. */
+        /** A stream to the local copy of the remote resource */
         private final SharedInputStream _baseSharedStream;
 
-        /** Describes the content type of the media file. */
+        /** Describes the content type of the media file */
         private final ContentDescriptor _contentDescriptor;
 
         /**
@@ -339,62 +341,63 @@ public final class LimitedRateStreamingSource extends DataSource {
         }
 
         /**
-         * Returns the content descriptor for this stream.
+         * Returns the content descriptor for this stream
          * 
-         * @return The content descriptor for this stream.
+         * @return The content descriptor for this stream
          */
         public ContentDescriptor getContentDescriptor() {
             return _contentDescriptor;
         }
 
         /**
-         * Returns the length provided by the connection.
+         * Returns the length provided by the connection
          * 
-         * @return long The length provided by the connection.
+         * @return long The length provided by the connection
          */
         public long getContentLength() {
             return _contentConnection.getLength();
         }
 
         /**
-         * Returns the seek type of the stream.
+         * Returns the seek type of the stream
          */
         public int getSeekType() {
             return SEEKABLE_TO_START;
         }
 
         /**
-         * Returns the maximum size (in bytes) of a single read.
+         * Returns the maximum size (in bytes) of a single read
          */
         public int getTransferSize() {
             return _readLimit;
         }
 
         /**
-         * Writes bytes from the buffer into a byte array for playback.
+         * Writes bytes from the buffer into a byte array for playback
          * 
          * @param bytes
-         *            The buffer into which the data is read.
+         *            The buffer into which the data is read
          * @param off
-         *            The start offset in array b at which the data is written.
+         *            The start offset in array b at which the data is written
          * @param len
-         *            The maximum number of bytes to read.
+         *            The maximum number of bytes to read
          * @return the total number of bytes read into the buffer, or -1 if
          *         there is no more data because the end of the stream has been
          *         reached.
          * @throws IOException
+         *             Thrown if a read error occurs
          */
         public int read(final byte[] bytes, final int off, final int len)
                 throws IOException {
             System.out.println("Read Request for: " + len + " bytes");
 
-            // Limit bytes read to our readLimit.
+            // Limit bytes read to the readLimit
             int readLength = len;
             if (readLength > getReadLimit()) {
                 readLength = getReadLimit();
             }
 
-            // The number of available byes in the buffer.
+            // The number of available byes in the buffer
             int available;
 
             // A boolean flag indicating that the thread should pause
@@ -405,7 +408,7 @@ public final class LimitedRateStreamingSource extends DataSource {
                 available = _baseSharedStream.available();
 
                 if (_downloadComplete) {
-                    // Ignore all restrictions if downloading is complete.
+                    // Ignore all restrictions if downloading is complete
                     System.out.println("Complete, Reading: " + len
                             + " - Available: " + available);
                     return _baseSharedStream.read(bytes, off, len);
@@ -421,7 +424,7 @@ public final class LimitedRateStreamingSource extends DataSource {
                         return _baseSharedStream.read(bytes, off, readLength);
                     } else if (!paused
                             && (available > getPauseBytes() || available > readLength)) {
-                        // We have enough information for this media playback.
+                        // We have enough information for this media playback
 
                         if (available < getPauseBytes()) {
                             // If the buffer is now insufficient, set the
@@ -434,7 +437,7 @@ public final class LimitedRateStreamingSource extends DataSource {
                                 + " - Available: " + available);
                         return _baseSharedStream.read(bytes, off, readLength);
                     } else if (!paused) {
-                        // Set pause until loaded enough to resume.
+                        // Set pause until loaded enough to resume
                         paused = true;
                         updatePlayStatus("Pausing " + available + " Bytes");
                     }
@@ -444,7 +447,9 @@ public final class LimitedRateStreamingSource extends DataSource {
                     try {
                         Thread.sleep(500);
                     } catch (final Exception e) {
-                        System.err.println(e.getMessage());
+                        BufferedPlayback
+                                .errorDialog("Thread.sleep(long) threw "
+                                        + e.toString());
                     }
                 }
             }
@@ -466,9 +471,10 @@ public final class LimitedRateStreamingSource extends DataSource {
         }
 
         /**
-         * Close the stream.
+         * Close the stream
          * 
          * @throws IOException
+         *             Thrown if the stream could not be closed
          */
         void close() throws IOException {
             _baseSharedStream.close();
@@ -478,7 +484,7 @@ public final class LimitedRateStreamingSource extends DataSource {
          * @see javax.microedition.media.Controllable#getControl(String)
          */
         public Control getControl(final String controlType) {
-            // No implemented controls.
+            // No implemented controls
             return null;
         }
 
@@ -486,13 +492,13 @@ public final class LimitedRateStreamingSource extends DataSource {
          * @see javax.microedition.media.Controllable#getControls()
          */
         public Control[] getControls() {
-            // No implemented controls.
+            // No implemented controls
             return null;
         }
     }
 
     /**
-     * A thread which downloads the remote file and writes it to the local file.
+     * A thread which downloads the remote file and writes it to the local file
      */
     private final class ConnectionThread extends Thread {
         /**
@@ -506,21 +512,21 @@ public final class LimitedRateStreamingSource extends DataSource {
                 int len = 0;
                 updateLoadStatus("Buffering");
 
-                // Until we reach the end of the file.
+                // Until we reach the end of the file
                 while (-1 != (len = _readAhead.read(data))) {
                     _totalRead += len;
 
                     updateLoadStatus(_totalRead + " Bytes");
 
                     if (!_bufferingComplete && _totalRead > getStartBuffer()) {
-                        // We have enough of a buffer to begin playback.
+                        // We have enough of a buffer to begin playback
                         _bufferingComplete = true;
                         System.out.println("Initial Buffering Complete");
                         updateLoadStatus("Buffering Complete");
                     }
 
                     if (_stop) {
-                        // Stop reading.
+                        // Stop reading
                         return;
                     }
 
@@ -539,13 +545,13 @@ public final class LimitedRateStreamingSource extends DataSource {
                 _downloadComplete = true;
                 _readAhead.setCurrentPosition(0);
 
-                // Write downloaded data to the local file.
+                // Write downloaded data to the local file
                 while (-1 != (len = _readAhead.read(data))) {
                     _saveStream.write(data);
                 }
 
             } catch (final Exception e) {
-                System.err.println(e.toString());
+                BufferedPlayback.errorDialog(e.toString());
             }
         }
     }
@@ -565,26 +571,26 @@ public final class LimitedRateStreamingSource extends DataSource {
      * video to keep playing.
      * 
      * @param pauseBytes
-     *            The new pause byte buffer.
+     *            The new pause byte buffer
      */
     void setPauseBytes(final int pauseBytes) {
         _pauseBytes = pauseBytes;
     }
 
     /**
-     * Gets the maximum size (in bytes) of a single read.
+     * Gets the maximum size (in bytes) of a single read
      * 
-     * @return The maximum size (in bytes) of a single read.
+     * @return The maximum size (in bytes) of a single read
      */
     int getReadLimit() {
         return _readLimit;
     }
 
     /**
-     * Sets the maximum size (in bytes) of a single read.
+     * Sets the maximum size (in bytes) of a single read
      * 
      * @param readLimit
-     *            The new maximum size (in bytes) of a single read.
+     *            The new maximum size (in bytes) of a single read
      */
     void setReadLimit(final int readLimit) {
         _readLimit = readLimit;
@@ -594,7 +600,7 @@ public final class LimitedRateStreamingSource extends DataSource {
      * Gets the minimum forward byte buffer required to resume playback after a
      * pause.
      * 
-     * @return The resume byte buffer.
+     * @return The resume byte buffer
      */
     int getResumeBytes() {
         return _resumeBytes;
@@ -605,7 +611,7 @@ public final class LimitedRateStreamingSource extends DataSource {
      * pause.
      * 
      * @param resumeBytes
-     *            The new resume byte buffer.
+     *            The new resume byte buffer
      */
     void setResumeBytes(final int resumeBytes) {
         _resumeBytes = resumeBytes;
@@ -615,7 +621,7 @@ public final class LimitedRateStreamingSource extends DataSource {
      * Gets the minimum number of bytes that must be buffered before the media
      * file will begin playing.
      * 
-     * @return The start byte buffer.
+     * @return The start byte buffer
      */
     int getStartBuffer() {
         return _startBuffer;
@@ -626,7 +632,7 @@ public final class LimitedRateStreamingSource extends DataSource {
      * file will begin playing.
      * 
      * @param startBuffer
-     *            The new start byte buffer.
+     *            The new start byte buffer
      */
     void setStartBuffer(final int startBuffer) {
         _startBuffer = startBuffer;
@@ -635,7 +641,7 @@ public final class LimitedRateStreamingSource extends DataSource {
     /**
      * Gets a reference to the text field where load status updates are written.
      * 
-     * @return The load status text field.
+     * @return The load status text field
      */
     TextField getLoadStatus() {
         return _loadStatusField;
@@ -645,7 +651,7 @@ public final class LimitedRateStreamingSource extends DataSource {
      * Sets a reference to the text field where load status updates are written.
      * 
      * @param loadStatus
-     *            The new load status text field.
+     *            The new load status text field
      */
     void setLoadStatus(final TextField loadStatus) {
         _loadStatusField = loadStatus;
@@ -655,7 +661,7 @@ public final class LimitedRateStreamingSource extends DataSource {
      * Gets a reference to the text field where player status updates are
      * written.
      * 
-     * @return The player status text field.
+     * @return The player status text field
      */
     TextField getPlayStatus() {
         return _playStatusField;
@@ -666,39 +672,39 @@ public final class LimitedRateStreamingSource extends DataSource {
      * written.
      * 
      * @param playStatus
-     *            The new player status text field.
+     *            The new player status text field
      */
     void setPlayStatus(final TextField playStatus) {
         _playStatusField = playStatus;
     }
 
     /**
-     * Update the player status field.
+     * Update the player status field
      * 
      * @param text
-     *            The new message to be displayed.
+     *            The new message to be displayed
      */
     void updatePlayStatus(final String text) {
         updateStatus(getPlayStatus(), text);
     }
 
     /**
-     * Update the load status field.
+     * Update the load status field
      * 
      * @param text
-     *            The new message to be displayed.
+     *            The new message to be displayed
      */
     void updateLoadStatus(final String text) {
         updateStatus(getLoadStatus(), text);
     }
 
     /**
-     * Update a given status field.
+     * Update a given status field
      * 
      * @param field
-     *            The field to be updated.
+     *            The field to be updated
      * @param text
-     *            The message to be displayed in the field.
+     *            The message to be displayed in the field
      */
     void updateStatus(final TextField field, final String text) {
         synchronized (Application.getEventLock()) {

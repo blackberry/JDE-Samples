@@ -39,19 +39,25 @@ import net.rim.device.api.ui.container.MainScreen;
 /**
  * Screen used for displaying and/or editing an order record.
  */
-/* package */final class MemoryDemoOrderScreen extends MainScreen {
+public final class MemoryDemoOrderScreen extends MainScreen {
     // Members
     // -------------------------------------------------------------------------------------
     private boolean _editable;
     private final OrderRecordController _controller;
     private OrderRecord _updatedOrderRecord;
 
+    /**
+     * Allow the user to make this screen editable
+     */
     private final MenuItem _editItem = new MenuItem("Edit", 0, 100) {
         public void run() {
             /* outer. */makeEditScreen();
         }
     };
 
+    /**
+     * Save the order record and removes this screen
+     */
     private final MenuItem _saveItem = new MenuItem("Save", 0, 200) {
         public void run() {
             if ( /* outer. */onSave()) {
@@ -69,7 +75,8 @@ import net.rim.device.api.ui.container.MainScreen;
      * @param editable
      *            Whether or not this screen is editable.
      */
-    MemoryDemoOrderScreen(final OrderRecord orderRecord, final boolean editable) {
+    public MemoryDemoOrderScreen(final OrderRecord orderRecord,
+            final boolean editable) {
         super();
 
         _editable = editable;

@@ -27,27 +27,42 @@
 package com.rim.samples.device.fileexplorerdemo;
 
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.component.Dialog;
 
 /**
- * A sample application demonstrating the use of the File Explorer.
+ * A sample application demonstrating the use of the File Explorer API
  */
-final class FileExplorerDemo extends UiApplication {
-
+public final class FileExplorerDemo extends UiApplication {
     /**
-     * Application entry point. Simply creates a new FileExplorerDemo object and
-     * enters its event dispatcher so it begins processing messages.
+     * Application entry point
      * 
      * @param args
-     *            Command-line arguments (unused).
+     *            Command-line arguments (unused)
      */
     public static void main(final String args[]) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         new FileExplorerDemo().enterEventDispatcher();
     }
 
     /**
-     * Constructor. Pushes the application's main screen onto the display stack.
+     * Creates a new FileExplorerDemo object
      */
-    private FileExplorerDemo() {
+    public FileExplorerDemo() {
         pushScreen(new FileExplorerDemoScreen());
+    }
+
+    /**
+     * Presents a dialog to the user with a given message
+     * 
+     * @param message
+     *            The text to display
+     */
+    public static void errorDialog(final String message) {
+        UiApplication.getUiApplication().invokeLater(new Runnable() {
+            public void run() {
+                Dialog.alert(message);
+            }
+        });
     }
 }

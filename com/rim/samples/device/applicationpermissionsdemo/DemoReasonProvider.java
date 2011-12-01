@@ -39,20 +39,11 @@ import net.rim.device.api.applicationcontrol.ReasonProvider;
  * your messages. The messages will only appear when access is being requested.
  * 
  */
-class DemoReasonProvider implements ReasonProvider {
-
+public final class DemoReasonProvider implements ReasonProvider {
     /**
-     * Gets the message of this listener according to the type of permission.
-     * Must be implemented for this interface.
-     * 
-     * @param permissionID
-     *            : the ID of the permission requested. Must be in the class
-     *            net.rim.device.api.applicationcontrol.ApplicationPermissions
-     * @return The string to be displayed.
      * @see net.rim.device.api.applicationcontrol.ReasonProvider#getMessage(int)
      */
     public String getMessage(final int permissionID) {
-
         // General message for other permissions
         String message =
                 "ReasonProviderDemo recieved permissionID: " + permissionID;
@@ -79,5 +70,4 @@ class DemoReasonProvider implements ReasonProvider {
 
         return message;
     }
-
 }

@@ -39,7 +39,7 @@ import net.rim.device.api.util.SimpleSortingVector;
 /**
  * Represents a list of order records for a fictional business.
  */
-/* package */final class OrderList {
+public final class OrderList {
     // Members
     // -------------------------------------------------------------------------------------
     private final PersistentObject _persist;
@@ -58,7 +58,7 @@ import net.rim.device.api.util.SimpleSortingVector;
      * This constructor ensures that a persistent object is in place to store
      * order records.
      */
-    private OrderList() {
+    public OrderList() {
         _persist = PersistentStore.getPersistentObject(PERSIST);
         _orderRecords = (Vector) _persist.getContents();
 
@@ -277,7 +277,11 @@ import net.rim.device.api.util.SimpleSortingVector;
         _orderRecords.addElement(orderRecord);
     }
 
+    /**
+     * Implements a sortable vector which sorts based on chronological order.
+     */
     final static class SortableVector extends SimpleSortingVector {
+        // Constructor
         SortableVector() {
             setSortComparator(new Comparator() {
                 public int compare(final Object o1, final Object o2) {

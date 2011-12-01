@@ -50,7 +50,8 @@ import net.rim.device.api.ui.container.VerticalFieldManager;
  * This screen allows the user to update the meeting information stored in an
  * associated Meeting object.
  */
-final class MeetingScreen extends MainScreen implements ListFieldCallback {
+public final class MeetingScreen extends MainScreen implements
+        ListFieldCallback {
     private final EditField _nameField;
     private final EditField _descField;
     private final EditField _dateField;
@@ -64,25 +65,27 @@ final class MeetingScreen extends MainScreen implements ListFieldCallback {
     private final Meeting _meeting;
     private final int _index;
 
-    // Constructor
     /**
+     * Creates a new MeetingScreen object
+     * 
      * @param meeting
-     *            The Meeting object associated with this screen.
+     *            The Meeting object associated with this screen
      * @param index
      *            The position of the meeting in the list. A value of -1
      *            represents a new meeting.
      * @param editable
-     *            Indicates whether the screens fields are editable.
+     *            Indicates whether the screens fields are editable
      */
-    MeetingScreen(final Meeting meeting, final int index, final boolean editable) {
+    public MeetingScreen(final Meeting meeting, final int index,
+            final boolean editable) {
         _meeting = meeting;
         _index = index;
 
-        // We need references to our application and this screen.
+        // We need references to our application and this screen
         _uiApp = (PersistentStoreDemo) UiApplication.getUiApplication();
         _screen = this;
 
-        // Initialize UI components.
+        // Initialize UI components
         _nameField =
                 new EditField("Meeting Name: ", _meeting
                         .getField(Meeting.MEETING_NAME));
@@ -98,9 +101,9 @@ final class MeetingScreen extends MainScreen implements ListFieldCallback {
         add(_timeField);
         add(_notesField);
 
-        // Customize screen based on our editable state.
+        // Customize screen based on our editable state
         if (editable) {
-            setTitle(new LabelField("Edit Screen"));
+            setTitle("Edit Screen");
             addMenuItem(saveItem);
             addMenuItem(addAttendeeItem);
         } else {
@@ -112,25 +115,25 @@ final class MeetingScreen extends MainScreen implements ListFieldCallback {
             _notesField.setEditable(false);
         }
 
-        // Initialize the attendees list field.
+        // Initialize the attendees list field
         _attendeesList = new ListField();
         add(new RichTextField("Attendees:", Field.NON_FOCUSABLE));
         add(_attendeesList);
 
-        // Set callback and update list of attendees.
+        // Set callback and update list of attendees
         _attendeesList.setCallback(this);
         updateList();
     }
 
     /**
-     * Method to refresh our attendees list field.
+     * Refreshes the attendees list field
      */
     private void updateList() {
         _attendeesList.setSize(_meeting.getAttendees().size());
     }
 
     /**
-     * Saves the current field contents in the associated Meeting object.
+     * Saves the current field contents in the associated Meeting object
      * 
      * @see net.rim.device.api.ui.Screen#onSave()
      */
@@ -186,20 +189,20 @@ final class MeetingScreen extends MainScreen implements ListFieldCallback {
      * Represents Add button in Add Attendee pop up. Adds attendee name to the
      * new Meeting object.
      */
-    class AddButton extends ButtonField {
-        // Constructor
+    private final class AddButton extends ButtonField {
+        /**
+         * Creates a new AddButton object
+         */
         public AddButton() {
             super("Add", ButtonField.CONSUME_CLICK);
         }
 
         /**
-         * Overrides super.
-         * 
          * @see net.rim.device.api.ui.Field#fieldChangeNotify(int)
          */
         protected void fieldChangeNotify(final int context) {
             if ((context & FieldChangeListener.PROGRAMMATIC) == 0) {
-                // Add attendee name and refresh list.
+                // Add attendee name and refresh list
                 _meeting.addAttendee(_addAttendeeField.getText());
                 _screen.updateList();
 
@@ -218,15 +221,15 @@ final class MeetingScreen extends MainScreen implements ListFieldCallback {
      * Represents Cancel button in Add Attendee pop up. Closes the pop up
      * screen.
      */
-    class CancelButton extends ButtonField {
-        // Constructor
+    private final class CancelButton extends ButtonField {
+        /**
+         * Creates a new CancelButton object
+         */
         public CancelButton() {
             super("Cancel", ButtonField.CONSUME_CLICK);
         }
 
         /**
-         * Overrides super.
-         * 
          * @see net.rim.device.api.ui.Field#fieldChangeNotify(int)
          */
         protected void fieldChangeNotify(final int context) {

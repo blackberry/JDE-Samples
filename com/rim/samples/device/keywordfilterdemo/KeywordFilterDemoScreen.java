@@ -38,18 +38,17 @@ import net.rim.device.api.ui.container.MainScreen;
 /**
  * This class represents the main screen for the KeywordFilterDemo application.
  */
-final class KeywordFilterDemoScreen extends MainScreen {
+public final class KeywordFilterDemoScreen extends MainScreen {
     private final KeywordFilterDemo _app;
     private final KeywordFilterField _keywordFilterField;
 
-    // Constructor
     /**
      * Creates a new KeywordFilterDemoScreen.
      * 
      * @param app
      *            The UiApplication creating an instance of this class.
      */
-    KeywordFilterDemoScreen(final KeywordFilterDemo app) {
+    public KeywordFilterDemoScreen(final KeywordFilterDemo app) {
         // A reference to the UiApplication instance for use in this class.
         _app = app;
 
@@ -111,8 +110,11 @@ final class KeywordFilterDemoScreen extends MainScreen {
     }
 
     // Inner classes------------------------------------------------------------
-
+    /**
+     * Adds a country to the list
+     */
     private final MenuItem addElementItem = new MenuItem("Add country", 0, 0) {
+
         public void run() {
             // Clear the search field.
             _keywordFilterField.setKeyword("");
@@ -134,10 +136,17 @@ final class KeywordFilterDemoScreen extends MainScreen {
         }
     };
 
-    // A MainScreen class to display secondary information for a
-    // selected country.
+    /**
+     * A MainScreen class to display secondary information for a selected
+     * country.
+     */
     private final static class InfoScreen extends MainScreen {
-        // Constructor
+        /**
+         * Constructs a screen to display
+         * 
+         * @param country
+         *            The country to display secondary information about
+         */
         InfoScreen(final Country country) {
             // Set up and display UI elements.
             setTitle(country.toString());

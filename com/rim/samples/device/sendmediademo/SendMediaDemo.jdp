@@ -20,6 +20,7 @@ AutoRestart=0
 [DependsOn
 ]
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 SendMediaDemo.java
 ]
@@ -33,17 +34,18 @@ HaveImports=1
 [Imports
 ]
 Listing=0
+MidletClass=startup
 Options=-quiet 
-OutputFileName=SendImageDemo
+OutputFileName=SendMediaDemo
 [PackageProtection
 ]
 RibbonPosition=0
 [RolloverIcons
 ]
-RunOnStartup=0
+RunOnStartup=1
 StartupTier=7
 SystemModule=1
-Title=Send Image Demo
+Title=Send Media Demo
 Type=0
 Vendor=Research In Motion Limited
 Version=0.9

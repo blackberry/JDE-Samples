@@ -34,7 +34,8 @@ import net.rim.device.api.util.Persistable;
  * Stores the location of the private key file on the smart card, as well as
  * which smart card the private key is stored on.
  */
-final class MyCryptoTokenData implements CryptoTokenPrivateKeyData, Persistable {
+public final class MyCryptoTokenData implements CryptoTokenPrivateKeyData,
+        Persistable {
     /**
      * The smart card the private key is stored on.
      */
@@ -53,7 +54,7 @@ final class MyCryptoTokenData implements CryptoTokenPrivateKeyData, Persistable 
      * @param file
      *            which file on the smart card contains the private key
      */
-    MyCryptoTokenData(final SmartCardID id, final byte file) {
+    public MyCryptoTokenData(final SmartCardID id, final byte file) {
         _id = id;
         _file = file;
     }

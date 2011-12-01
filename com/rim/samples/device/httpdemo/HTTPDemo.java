@@ -33,15 +33,13 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.StreamConnection;
 
+import net.rim.device.api.io.IOCancelledException;
 import net.rim.device.api.system.Characters;
-import net.rim.device.api.ui.DrawStyle;
-import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BasicEditField;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.EditField;
-import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.component.SeparatorField;
@@ -51,11 +49,11 @@ import net.rim.device.api.ui.container.MainScreen;
  * This sample makes a an http or https connection to a specified URL and
  * retrieves and displays html content.
  */
-class HTTPDemo extends UiApplication {
+public class HTTPDemo extends UiApplication {
     private static String SAMPLE_HTTPS_PAGE =
             "https://www.blackberry.com/go/mobile/samplehttps.shtml";
-    private static final String[] HTTP_PROTOCOL = { "http://", "http:\\",
-            "https://", "https:\\" };
+    private static String[] HTTP_PROTOCOL = { "http://", "http:\\", "https://",
+            "https:\\" };
     private static final char HTML_TAG_OPEN = '<';
     private static final char HTML_TAG_CLOSE = '>';
     private static String HEADER_CONTENTTYPE = "content-type";
@@ -78,8 +76,8 @@ class HTTPDemo extends UiApplication {
     private boolean _useWapStack;
     private final WapOptionsScreen _wapOptionsScreen;
 
-    private final StatusThread _statusThread = new StatusThread();
-    private final ConnectionThread _connectionThread = new ConnectionThread();
+    private StatusThread _statusThread = new StatusThread();
+    private ConnectionThread _connectionThread = new ConnectionThread();
 
     /**
      * Entry point for application.
@@ -88,15 +86,17 @@ class HTTPDemo extends UiApplication {
      *            Command line arguments.
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final HTTPDemo theApp = new HTTPDemo();
         theApp.enterEventDispatcher();
     }
 
-    private HTTPDemo() {
+    // Constructor
+    public HTTPDemo() {
         _wapOptionsScreen = new WapOptionsScreen(this);
         _mainScreen = new HTTPDemoScreen();
-        _mainScreen.setTitle(new LabelField("HTTP Demo", DrawStyle.ELLIPSIS
-                | Field.USE_ALL_WIDTH));
+        _mainScreen.setTitle("HTTP Demo");
 
         _url =
                 new EditField("URL: ", "http://", Integer.MAX_VALUE,
@@ -126,7 +126,7 @@ class HTTPDemo extends UiApplication {
                 if (!_connectionThread.isStarted()) {
                     fetchPage(_url.getText());
                 } else {
-                    Dialog.alert("An outstanding fetch request hasn't yet completed!");
+                    createNewFetch(_url.getText());
                 }
             }
         }
@@ -155,7 +155,7 @@ class HTTPDemo extends UiApplication {
                 _url.setText(SAMPLE_HTTPS_PAGE);
                 fetchPage(SAMPLE_HTTPS_PAGE);
             } else {
-                Dialog.alert("An outstanding fetch request hasn't yet completed!");
+                createNewFetch(_url.getText());
             }
         }
     };
@@ -180,6 +180,35 @@ class HTTPDemo extends UiApplication {
         }
     };
 
+    /**
+     * Stops current fetch and initiates a new fetch.
+     * 
+     * @param url
+     *            The url of the content to fetch
+     */
+    private void createNewFetch(final String url) {
+        // Stop the current helper threads
+        _statusThread.stop();
+        _connectionThread.stop();
+
+        // Reinitialize the helper threads
+        _statusThread = new StatusThread();
+        _connectionThread = new ConnectionThread();
+
+        // Restart the helper threads
+        _statusThread.start();
+        _connectionThread.start();
+
+        // Fetch the url
+        fetchPage(url);
+    }
+
+    /**
+     * Fetches the content on the speicifed url.
+     * 
+     * @param url
+     *            The url of the content to fetch
+     */
     private void fetchPage(String url) {
         // Normalize the url.
         final String lcase = url.toLowerCase();
@@ -335,10 +364,9 @@ class HTTPDemo extends UiApplication {
     }
 
     /**
-     * The ConnectionThread class manages the HTTP connection. Fetch operations
-     * are not queued. However, if a fetch call is made and another request is
-     * made while the first is still active, the second request will stall until
-     * the previous request completes.
+     * The ConnectionThread class manages the HTTP connection. If a fetch call
+     * is made and another request is made while the first is still active, the
+     * first fetch will be terminated and the second one will start processing.
      */
     private class ConnectionThread extends Thread {
         private static final int TIMEOUT = 500; // ms
@@ -348,29 +376,48 @@ class HTTPDemo extends UiApplication {
         private volatile boolean _fetchStarted = false;
         private volatile boolean _stop = false;
 
-        // Retrieve the URL.
-        private synchronized String getUrl() {
+        /**
+         * Retrieves the url this thread is trying to connect to.
+         * 
+         * @return The url that this thread is trying to connect to
+         */
+        private String getUrl() {
             return _theUrl;
         }
 
+        /**
+         * Tells whether the thread has started fetching yet.
+         * 
+         * @return True if the fetching has started, false otherwise
+         */
         private boolean isStarted() {
             return _fetchStarted;
         }
 
-        // Fetch a page.
-        // Synchronized so that we don't miss requests.
+        /**
+         * Fetch a page.
+         * 
+         * @param url
+         *            The url of the page to fetch
+         */
         private void fetch(final String url) {
-            synchronized (this) {
-                _fetchStarted = true;
-                _theUrl = url;
-            }
+            _fetchStarted = true;
+            _theUrl = url;
         }
 
-        // Shutdown the thread.
+        /**
+         * Stop the thread.
+         */
         private void stop() {
             _stop = true;
         }
 
+        /**
+         * This method is where the thread retrieves the content from the page
+         * whose url is associated with this thread.
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             for (;;) {
                 // Thread control
@@ -379,7 +426,7 @@ class HTTPDemo extends UiApplication {
                     try {
                         sleep(TIMEOUT);
                     } catch (final InterruptedException e) {
-                        System.err.println(e.toString());
+                        errorDialog("Thread#sleep(long) threw " + e.toString());
                     }
                 }
 
@@ -388,70 +435,79 @@ class HTTPDemo extends UiApplication {
                     return;
                 }
 
-                // This entire block is synchronized. This ensures we won't miss
-                // fetch requests
-                // made while we process a page.
-                synchronized (this) {
-                    String content = "";
+                String content = "";
 
-                    // Open the connection and extract the data.
-                    try {
-                        StreamConnection s = null;
-                        s = (StreamConnection) Connector.open(getUrl());
-                        final HttpConnection httpConn = (HttpConnection) s;
+                // Open the connection and extract the data.
+                try {
+                    StreamConnection s = null;
+                    s = (StreamConnection) Connector.open(getUrl());
+                    final HttpConnection httpConn = (HttpConnection) s;
 
-                        final int status = httpConn.getResponseCode();
+                    final int status = httpConn.getResponseCode();
 
-                        if (status == HttpConnection.HTTP_OK) {
-                            // Is this html?
-                            final String contentType =
-                                    httpConn.getHeaderField(HEADER_CONTENTTYPE);
-                            final boolean htmlContent =
-                                    contentType != null
-                                            && contentType
-                                                    .startsWith(CONTENTTYPE_TEXTHTML);
+                    if (status == HttpConnection.HTTP_OK) {
+                        // Is this html?
+                        final String contentType =
+                                httpConn.getHeaderField(HEADER_CONTENTTYPE);
+                        final boolean htmlContent =
+                                contentType != null
+                                        && contentType
+                                                .startsWith(CONTENTTYPE_TEXTHTML);
 
-                            final InputStream input = s.openInputStream();
+                        final InputStream input = s.openInputStream();
 
-                            final byte[] data = new byte[256];
-                            int len = 0;
-                            int size = 0;
-                            final StringBuffer raw = new StringBuffer();
+                        final byte[] data = new byte[256];
+                        int len = 0;
+                        int size = 0;
+                        final StringBuffer raw = new StringBuffer();
 
-                            while (-1 != (len = input.read(data))) {
-                                raw.append(new String(data, 0, len));
-                                size += len;
+                        while (-1 != (len = input.read(data))) {
+                            // Exit condition for the thread. An IOException is
+                            // thrown because of the call to httpConn.close(),
+                            // causing the thread to terminate.
+                            if (_stop) {
+                                httpConn.close();
+                                s.close();
+                                input.close();
                             }
-
-                            raw.insert(0, "bytes received]\n");
-                            raw.insert(0, size);
-                            raw.insert(0, '[');
-                            content = raw.toString();
-
-                            if (htmlContent) {
-                                content = prepareData(raw.toString());
-                            }
-                            input.close();
-                        } else {
-                            content = "response code = " + status;
+                            raw.append(new String(data, 0, len));
+                            size += len;
                         }
-                        s.close();
-                    } catch (final IOException e) {
-                        content = e.toString();
-                    } finally {
-                        // Make sure status thread doesn't overwrite our
-                        // content.
-                        stopStatusThread();
-                        updateContent(content);
-                    }
 
-                    // We're finished with the operation so reset
-                    // the start state.
-                    _fetchStarted = false;
+                        raw.insert(0, "bytes received]\n");
+                        raw.insert(0, size);
+                        raw.insert(0, '[');
+                        content = raw.toString();
+
+                        if (htmlContent) {
+                            content = prepareData(raw.toString());
+                        }
+                        input.close();
+                    } else {
+                        content = "response code = " + status;
+                    }
+                    s.close();
+                } catch (final IOCancelledException e) {
+                    System.out.println(e.toString());
+                    return;
+                } catch (final IOException e) {
+                    errorDialog(e.toString());
+                    return;
                 }
+
+                // Make sure status thread doesn't overwrite our content
+                stopStatusThread();
+                updateContent(content);
+
+                // We're finished with the operation so reset
+                // the start state.
+                _fetchStarted = false;
             }
         }
 
+        /**
+         * Stops the status thread
+         */
         private void stopStatusThread() {
             _statusThread.pause();
             try {
@@ -467,7 +523,7 @@ class HTTPDemo extends UiApplication {
                     }
                 }
             } catch (final InterruptedException e) {
-                System.out.println(e.toString());
+                errorDialog("StatusThread#wait() threw " + e.toString());
             }
         }
     }
@@ -478,33 +534,53 @@ class HTTPDemo extends UiApplication {
      */
     private class StatusThread extends Thread {
         private static final int TIMEOUT = 500; // ms
-        private static final int THREAD_TIMEOUT = 500; // ??? needed ???
+        private static final int THREAD_TIMEOUT = 500;
 
         private volatile boolean _stop = false;
         private volatile boolean _running = false;
         private volatile boolean _isPaused = false;
 
-        // Resume the thread.
+        /**
+         * Resumes this thread
+         * 
+         * @see #pause()
+         */
         private void go() {
             _running = true;
             _isPaused = false;
         }
 
-        // Pause the thread.
+        /**
+         * Pauses this thread
+         * 
+         * @see #go()
+         */
         private void pause() {
             _running = false;
         }
 
-        // Query the paused status.
+        /**
+         * Queries the paused status
+         * 
+         * @return True if the thread is paused, false otherwise
+         */
         private boolean isPaused() {
             return _isPaused;
         }
 
-        // Shut down the thread.
+        /**
+         * Stops the thread
+         */
         private void stop() {
             _stop = true;
         }
 
+        /**
+         * This method is where the thread updates the status message while
+         * HTTP/HTML operations are taking place.
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             int i = 0;
 
@@ -523,7 +599,7 @@ class HTTPDemo extends UiApplication {
                     try {
                         sleep(THREAD_TIMEOUT);
                     } catch (final InterruptedException e) {
-                        System.out.println(e.toString());
+                        errorDialog("Thread#sleep(long) threw " + e.toString());
                     }
                 }
 
@@ -558,16 +634,20 @@ class HTTPDemo extends UiApplication {
                     try {
                         Thread.sleep(TIMEOUT); // Wait for a bit.
                     } catch (final InterruptedException e) {
-                        System.err.println(e.toString());
+                        errorDialog("Thread.sleep(long) threw " + e.toString());
                     }
                 }
             }
         }
     }
 
+    /**
+     * This is the main screen that displays the content fetched by the
+     * ConnectionThread.
+     */
     private class HTTPDemoScreen extends MainScreen {
         /**
-         * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
+         * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
          */
         protected void makeMenu(final Menu menu, final int instance) {
             menu.add(_fetchMenuItem);
@@ -614,7 +694,6 @@ class HTTPDemo extends UiApplication {
          */
         protected boolean keyChar(final char key, final int status,
                 final int time) {
-            // UiApplication.getUiApplication().getActiveScreen().
             if (getLeafFieldWithFocus() == _url && key == Characters.ENTER) {
                 _fetchMenuItem.run();
                 return true; // I've absorbed this event, so return true.
@@ -622,5 +701,19 @@ class HTTPDemo extends UiApplication {
                 return super.keyChar(key, status, time);
             }
         }
+    }
+
+    /**
+     * Presents a dialog to the user with a given message
+     * 
+     * @param message
+     *            The text to display
+     */
+    public static void errorDialog(final String message) {
+        UiApplication.getUiApplication().invokeLater(new Runnable() {
+            public void run() {
+                Dialog.alert(message);
+            }
+        });
     }
 }

@@ -33,6 +33,8 @@ import net.rim.device.api.synchronization.SyncConverter;
 import net.rim.device.api.synchronization.SyncObject;
 import net.rim.device.api.system.Alert;
 import net.rim.device.api.system.LED;
+import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.util.DataBuffer;
 import net.rim.device.api.util.Persistable;
 
@@ -41,7 +43,7 @@ import net.rim.device.api.util.Persistable;
  * SyncConverter. A Consequence can be used to flash the LED, play a sound, and
  * vibrate the device when it is triggered.
  */
-class ConsequenceImpl implements Consequence, SyncConverter {
+public class ConsequenceImpl implements Consequence, SyncConverter {
     // net.rim.samples.device.notificationsdemo.NotificationsDemo.ConsequenceImpl
     static final long ID = 0xbd2350c0dfda2a51L;
     private static final int TYPE = 'n' << 24 | 'o' << 16 | 't' << 8 | 'd';
@@ -172,8 +174,13 @@ class ConsequenceImpl implements Consequence, SyncConverter {
         }
         // We've prematurely reached the end of the DataBuffer.
         catch (final EOFException e) {
-            System.err.println(e);
+            UiApplication.getUiApplication().invokeLater(new Runnable() {
+                public void run() {
+                    Dialog.alert(e.toString());
+                }
+            });
         }
+
         return null;
     }
 

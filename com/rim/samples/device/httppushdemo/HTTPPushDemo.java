@@ -49,10 +49,10 @@ import net.rim.device.api.util.DataBuffer;
  * The client side of a simple HTTP Push system. This application will listen
  * for data on the specified port and render the data when it arrives.
  */
-class HTTPPushDemo extends UiApplication {
+public class HTTPPushDemo extends UiApplication {
     // Constants
     // ----------------------------------------------------------------
-    private static final String URL = "http://:100"; // PORT 100.
+    private static String URL = "http://:100"; // PORT 100.
     private static final int CHUNK_SIZE = 256;
 
     // Members
@@ -62,14 +62,23 @@ class HTTPPushDemo extends UiApplication {
     private final RichTextField _infoField;
     private final RichTextField _imageField;
 
+    /**
+     * Entry point for application.
+     * 
+     * @param args
+     *            Command line arguments.
+     */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final HTTPPushDemo theApp = new HTTPPushDemo();
         theApp.enterEventDispatcher();
     }
 
-    // Constructor
-    // --------------------------------------------------------------
-    private HTTPPushDemo() {
+    /**
+     * Default constructor.
+     */
+    public HTTPPushDemo() {
         _mainScreen = new HTTPPushDemoScreen();
         _mainScreen.setTitle(new LabelField("HTTP Push Demo",
                 Field.USE_ALL_WIDTH));
@@ -82,7 +91,7 @@ class HTTPPushDemo extends UiApplication {
         _imageField = new RichTextField();
         _mainScreen.add(_imageField);
 
-        // Spin off the listening thread.
+        // Start the listening thread.
         _listeningThread = new ListeningThread();
         _listeningThread.start();
 
@@ -93,23 +102,32 @@ class HTTPPushDemo extends UiApplication {
 
     // Inner Classes
     // ------------------------------------------------------------
+    /**
+     * This class implements a Thread object which trys to connect to a HTTP url
+     * and retreive the url's contents to render to the screen.
+     */
     private class ListeningThread extends Thread {
         private boolean _stop = false;
         private StreamConnectionNotifier _notify;
 
+        /**
+         * Stops the thread from listening.
+         */
         private synchronized void stop() {
             _stop = true;
             try {
                 // Close the connection so the thread will return.
                 _notify.close();
-            } catch (final IOException e) {
-                System.err.println(e.toString());
-            } catch (final NullPointerException e) {
-                // The notify object likely failed to open, due to an
-                // IOException.
+            } catch (final Exception e) {
             }
         }
 
+        /**
+         * Listen for data from the HTTP url. After the data has been read,
+         * render the data onto the screen.
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
 
             StreamConnection stream = null;
@@ -162,17 +180,13 @@ class HTTPPushDemo extends UiApplication {
                             // This method is called to accept the push.
                             pushInputStream.accept();
 
-                            input.close();
-                            stream.close();
-
                             data = db.getArray();
-
                         } catch (final IOException e1) {
                             // A problem occurred with the input stream ,
                             // however, the original
                             // StreamConnectionNotifier is still valid.
-                            System.err.println(e1.toString());
-
+                            errorDialog(e1.toString());
+                        } finally {
                             if (input != null) {
                                 try {
                                     input.close();
@@ -188,15 +202,12 @@ class HTTPPushDemo extends UiApplication {
                             }
                         }
                     }
-
-                    _notify.close();
-                    _notify = null;
-
                 } catch (final IOException ioe) {
                     // Likely the stream was closed. Catches the exception
                     // thrown by
                     // _notify.acceptAndOpen() when this program exits.
-
+                    errorDialog(ioe.toString());
+                } finally {
                     if (_notify != null) {
                         try {
                             _notify.close();
@@ -209,6 +220,12 @@ class HTTPPushDemo extends UiApplication {
         }
     }
 
+    /**
+     * Updates the message currently displayed with new data.
+     * 
+     * @param data
+     *            The data to display
+     */
     private void updateMessage(final byte[] data) {
         Application.getApplication().invokeLater(new Runnable() {
             public void run() {
@@ -226,25 +243,48 @@ class HTTPPushDemo extends UiApplication {
                 try {
                     _imageField.setText(new String(data));
                 } catch (final Exception e) {
-                    Dialog.inform(e.toString());
-                    System.err.println(e.toString());
+                    errorDialog("RichTextField#setText(String) threw "
+                            + e.toString());
                 }
             }
         });
     }
 
+    /**
+     * Clean up the connections when exiting.
+     * 
+     * @see UiApplication#onExit()
+     */
     protected void onExit() {
-        // Kill the listening thread.
+        // Stop the listening thread.
         _listeningThread.stop();
 
         try {
             _listeningThread.join();
         } catch (final InterruptedException e) {
-            System.err.println(e.toString());
+            errorDialog("ListeningThread#join() threw " + e.toString());
         }
 
     }
 
+    /**
+     * Presents a dialog to the user with a given message
+     * 
+     * @param message
+     *            The text to display
+     */
+    public static void errorDialog(final String message) {
+        UiApplication.getUiApplication().invokeLater(new Runnable() {
+            public void run() {
+                Dialog.alert(message);
+            }
+        });
+    }
+
+    /**
+     * This class acts as the MainScreen and calls the HTTPPushDemo.onExit()
+     * when closing.
+     */
     private class HTTPPushDemoScreen extends MainScreen {
 
         /**

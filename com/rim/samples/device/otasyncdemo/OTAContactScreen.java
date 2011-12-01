@@ -37,7 +37,11 @@ import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.MainScreen;
 
-final class OTAContactScreen extends MainScreen {
+/**
+ * This screen displays information about a contact, allowing the user to edit
+ * the contact's information. It also allows the user to create new contacts.
+ */
+public final class OTAContactScreen extends MainScreen {
     // Members
     // ------------------------------------------------------------------
     private final EditField _first, _last, _email, _phone;
@@ -48,10 +52,18 @@ final class OTAContactScreen extends MainScreen {
     // Inner Classes
     // ------------------------------------------------------------
     private class SaveMenuItem extends MenuItem {
+        /**
+         * Default constructor.
+         */
         private SaveMenuItem() {
             super("Save", 100000, 5);
         }
 
+        /**
+         * Saves the contact's information.
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             // If successful, return to contact list.
             if (onSave()) {
@@ -61,8 +73,10 @@ final class OTAContactScreen extends MainScreen {
         }
     }
 
-    // Constructor
-    OTAContactScreen() {
+    /**
+     * Default constructor.
+     */
+    public OTAContactScreen() {
         _saveMenuItem = new SaveMenuItem();
 
         setTitle(new LabelField("Edit Contact", DrawStyle.ELLIPSIS
@@ -87,7 +101,13 @@ final class OTAContactScreen extends MainScreen {
         addMenuItem(_saveMenuItem);
     }
 
-    OTAContactScreen(final OTAContactData contact) {
+    /**
+     * Constructs a screen to view and edit a contact's information.
+     * 
+     * @param contact
+     *            The contact to view/edit
+     */
+    public OTAContactScreen(final OTAContactData contact) {
         this();
 
         _uid = contact.getUID();
@@ -97,6 +117,11 @@ final class OTAContactScreen extends MainScreen {
         _phone.setText(contact.getPhone());
     }
 
+    /**
+     * Retrieve the current contact being displayed.
+     * 
+     * @return The contact being displayed on this screen
+     */
     OTAContactData getContact() {
         return _contact;
     }

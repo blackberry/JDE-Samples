@@ -29,54 +29,125 @@ package com.rim.samples.device.syncdemo;
 import net.rim.device.api.synchronization.SyncObject;
 import net.rim.device.api.util.Persistable;
 
-class ContactData implements SyncObject, Persistable {
+/**
+ * This class represents a contact, encapsulating the contact's information.
+ */
+public final class ContactData implements SyncObject, Persistable {
     private int _uid;
     private String _first, _last, _email;
 
-    ContactData() {
+    /**
+     * Default constructor.
+     */
+    public ContactData() {
         _first = "";
         _last = "";
         _email = "";
     }
 
-    ContactData(final int uid) {
+    /**
+     * Constructs a contact with a UID.
+     * 
+     * @param uid
+     *            The UID of the contact
+     */
+    public ContactData(final int uid) {
         _uid = uid;
     }
 
+    /**
+     * Gets the UID of this contact.
+     * 
+     * @return The UID of this contact
+     */
     public int getUID() {
         return _uid;
     }
 
+    /**
+     * Sets the first name of this contact.
+     * 
+     * @param first
+     *            The first name of this contact
+     */
     void setFirst(final String first) {
         _first = first;
     }
 
+    /**
+     * Gets the first name of this contact.
+     * 
+     * @return The first name of this contact
+     */
     String getFirst() {
         return _first;
     }
 
+    /**
+     * Sets the last name of this contact.
+     * 
+     * @param last
+     *            The last name of this contact
+     */
     void setLast(final String last) {
         _last = last;
     }
 
+    /**
+     * Gets the last name of this contact.
+     * 
+     * @return The last name of this contact
+     */
     String getLast() {
         return _last;
     }
 
+    /**
+     * Sets the email address of this contact.
+     * 
+     * @param email
+     *            The email address of this contact
+     */
     void setEmail(final String email) {
         _email = email;
     }
 
+    /**
+     * Gets the email address of this contact.
+     * 
+     * @return The email address of this contact
+     */
     String getEmail() {
         return _email;
     }
 
+    /**
+     * Determines equality by matching the first and last names.
+     * 
+     * @see java.lang.Object#equals(Object)
+     */
     public boolean equals(final Object o) {
         if (o instanceof ContactData) {
-            if (getFirst().equals(((ContactData) o).getFirst())
-                    && getLast().equals(((ContactData) o).getLast())) {
-                return true;
+            final ContactData otherContact = (ContactData) o;
+
+            if (getFirst() == null) {
+                if (otherContact.getFirst() == null) {
+                    if (getLast() != null) {
+                        return getLast().equals(otherContact.getLast());
+                    } else {
+                        return otherContact.getLast() == null;
+                    }
+                }
+
+                return false;
+            } else if (getFirst().equals(otherContact.getFirst())) {
+                if (getLast() != null) {
+                    return getLast().equals(otherContact.getLast());
+                } else {
+                    return otherContact.getLast() == null;
+                }
             }
+
         }
 
         return false;

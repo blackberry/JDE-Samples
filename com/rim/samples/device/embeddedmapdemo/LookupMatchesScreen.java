@@ -42,8 +42,7 @@ import net.rim.device.api.ui.container.MainScreen;
  * search. The user can cancel or choose one of the options to display a
  * location on the map.
  */
-class LookupMatchesScreen extends MainScreen {
-
+public final class LookupMatchesScreen extends MainScreen {
     private final Landmark[] _landmarks;
     private final MatchesListField _listField;
     private final EmbeddedMapDemo.EmbeddedMapDemoScreen _mainScreen;
@@ -52,11 +51,11 @@ class LookupMatchesScreen extends MainScreen {
      * Constructor
      * 
      * @param landmarks
-     *            - An array of landmarks representing all matches
+     *            An array of landmarks representing all matches
      * @param mainScreen
-     *            - A pointer to the screen where the map is
+     *            A pointer to the screen where the map is
      */
-    LookupMatchesScreen(final Landmark[] landmarks,
+    public LookupMatchesScreen(final Landmark[] landmarks,
             final EmbeddedMapDemo.EmbeddedMapDemoScreen mainScreen) {
         setTitle("Multiple matches!  Please choose one.");
         _mainScreen = mainScreen;
@@ -76,6 +75,9 @@ class LookupMatchesScreen extends MainScreen {
      * screen.
      */
     private final MenuItem _displayItem = new MenuItem("Display", 110, 10) {
+        /**
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             _mainScreen.addAndDisplayLocation(_landmarks[_listField
                     .getSelectedIndex()]);
@@ -87,6 +89,9 @@ class LookupMatchesScreen extends MainScreen {
      * Closes this screen without changing the map or any fields.
      */
     private final MenuItem _cancel = new MenuItem("Cancel Lookup", 110, 11) {
+        /**
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             close();
         }
@@ -97,7 +102,6 @@ class LookupMatchesScreen extends MainScreen {
      */
     private final class MatchesListField extends ListField implements
             ListFieldCallback {
-
         /**
          * Constructor
          */

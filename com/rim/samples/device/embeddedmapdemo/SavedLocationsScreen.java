@@ -39,12 +39,25 @@ import net.rim.device.api.ui.component.ListFieldCallback;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.container.MainScreen;
 
-final class SavedLocationsScreen extends MainScreen {
+/**
+ * A screen to display the saved locations by name. It allows the user to select
+ * a saved location for quick navigation on the map.
+ */
+public final class SavedLocationsScreen extends MainScreen {
     private final Vector _mapLocations;
     private final EmbeddedMapDemo.EmbeddedMapDemoScreen _mainScreen;
     private final LocationsListField _mapLocationsList;
 
-    SavedLocationsScreen(final Vector mapLocations,
+    /**
+     * Constructs the screen.
+     * 
+     * @param mapLocations
+     *            The list of saved locations
+     * @param mainScreen
+     *            The screen containing the map to display the selected location
+     *            on
+     */
+    public SavedLocationsScreen(final Vector mapLocations,
             final EmbeddedMapDemo.EmbeddedMapDemoScreen mainScreen) {
         setTitle("Select a location to display");
 
@@ -57,6 +70,9 @@ final class SavedLocationsScreen extends MainScreen {
         _mapLocationsList.reloadList();
     }
 
+    /**
+     * Displays the selected location
+     */
     private final MenuItem _displayItem = new MenuItem("Display", 110, 10) {
         public void run() {
             _mainScreen.displayLocation(_mapLocationsList.getSelectedIndex());
@@ -64,6 +80,9 @@ final class SavedLocationsScreen extends MainScreen {
         }
     };
 
+    /**
+     * Deletes the selected saved location
+     */
     private final MenuItem _deleteItem = new MenuItem("Delete", 110, 10) {
         public void run() {
             final MapLocation mapLocation =
@@ -81,6 +100,9 @@ final class SavedLocationsScreen extends MainScreen {
         }
     };
 
+    /**
+     * Deletes all the saved locations
+     */
     private final MenuItem _deleteAllItem =
             new MenuItem("Delete All", 110, 10) {
                 public void run() {
@@ -95,7 +117,7 @@ final class SavedLocationsScreen extends MainScreen {
             };
 
     /**
-     * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
+     * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
      */
     protected void makeMenu(final Menu menu, final int instance) {
         super.makeMenu(menu, instance);
@@ -113,12 +135,21 @@ final class SavedLocationsScreen extends MainScreen {
     /************************************************************************************
      **************************** LocationsListField Class ****************************
      ************************************************************************************/
+
+    /**
+     * The LocationsListField class implements a custom ListField to display
+     * locations by name.
+     */
     private final class LocationsListField extends ListField implements
             ListFieldCallback {
+        // Constructor
         private LocationsListField() {
             setCallback(this);
         }
 
+        /**
+         * Refreshes this list to match the size of the saved locations Vector
+         */
         private void reloadList() {
             setSize(_mapLocations.size());
         }
@@ -137,9 +168,18 @@ final class SavedLocationsScreen extends MainScreen {
             graphics.drawText(text, 0, y, DrawStyle.ELLIPSIS, w);
         }
 
+        /**
+         * @see net.rim.device.api.ui.component.ListFieldCallback#get(ListField,
+         *      int)
+         */
         public Object get(final ListField list, final int index) {
             return ""; // Not implemented.
         }
+
+        /**
+         * @see net.rim.device.api.ui.component.ListFieldCallback#indexOfList(ListField,
+         *      String, int)
+         */
 
         public int
                 indexOfList(final ListField list, final String p, final int s) {
@@ -176,6 +216,12 @@ final class SavedLocationsScreen extends MainScreen {
             return requestDisplay();
         }
 
+        /**
+         * Attempts to display a saved location.
+         * 
+         * @return True if the location was displayed, false if there are no
+         *         locations to display
+         */
         private boolean requestDisplay() {
             if (!isEmpty()) {
                 _mainScreen.displayLocation(_mapLocationsList

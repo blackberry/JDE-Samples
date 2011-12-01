@@ -38,16 +38,16 @@ import net.rim.device.api.ui.component.LabelField;
  * Provides access to a memo's data via fields that can be displayed on a
  * screen.
  */
-/* package */final class MemoController {
-    /* package */static final int FOR_VIEW = 0;
-    /* package */static final int FOR_EDIT = 1;
-    /* package */static final int FOR_TITLE = 2;
-    /* package */static final int FOR_ADD = 3;
+public final class MemoController {
+    static final int FOR_VIEW = 0;
+    static final int FOR_EDIT = 1;
+    static final int FOR_TITLE = 2;
+    static final int FOR_ADD = 3;
 
-    /* package */private final BlackBerryMemo _memo;
-    /* package */private final BasicEditField _titleField;
-    /* package */private final BasicEditField _uidField;
-    /* package */private final BasicEditField _notesField;
+    private final BlackBerryMemo _memo;
+    private final BasicEditField _titleField;
+    private final BasicEditField _uidField;
+    private final BasicEditField _notesField;
 
     /**
      * Constructor. Creates the displayable fields and populates them with all
@@ -56,7 +56,7 @@ import net.rim.device.api.ui.component.LabelField;
      * @param memo
      *            The memo being "controlled".
      */
-    /* package */MemoController(final BlackBerryMemo memo) {
+    public MemoController(final BlackBerryMemo memo) {
         _memo = memo;
 
         final PIMList list = memo.getPIMList();
@@ -129,7 +129,7 @@ import net.rim.device.api.ui.component.LabelField;
     /**
      * Updates the memos with the data contained in the fields.
      */
-    /* package */void updateMemo() {
+    void updateMemo() {
         String s;
 
         if (_uidField.isEditable()) {
@@ -165,12 +165,14 @@ import net.rim.device.api.ui.component.LabelField;
      * 
      * @return True if the commit was successful; otherwise false.
      */
-    /* package */boolean commitMemo() {
+    boolean commitMemo() {
         try {
             _memo.commit();
 
             return true;
         } catch (final PIMException e) {
+            MemoApiDemo.errorDialog("BlackBerryMemo#commit() threw "
+                    + e.toString());
             return false;
         }
     }
@@ -180,7 +182,7 @@ import net.rim.device.api.ui.component.LabelField;
      * 
      * @return This controller's memo.
      */
-    /* package */BlackBerryMemo getMemo() {
+    BlackBerryMemo getMemo() {
         return _memo;
     }
 

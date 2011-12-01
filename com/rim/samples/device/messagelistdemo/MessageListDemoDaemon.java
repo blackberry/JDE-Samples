@@ -30,6 +30,8 @@ import java.util.Date;
 
 import net.rim.blackberry.api.menuitem.ApplicationMenuItem;
 import net.rim.blackberry.api.messagelist.ApplicationIcon;
+import net.rim.blackberry.api.messagelist.ApplicationIndicator;
+import net.rim.blackberry.api.messagelist.ApplicationIndicatorRegistry;
 import net.rim.blackberry.api.messagelist.ApplicationMessage;
 import net.rim.blackberry.api.messagelist.ApplicationMessageFolder;
 import net.rim.blackberry.api.messagelist.ApplicationMessageFolderListener;
@@ -44,8 +46,13 @@ import net.rim.device.api.ui.UiApplication;
  * message operations such as message deletion, marking messages as read/unread
  * and synchronization with server.
  */
-final class MessageListDemoDaemon extends Application implements
+public final class MessageListDemoDaemon extends Application implements
         ApplicationMessageFolderListener {
+    // Initialize the notification indicator
+    public static ApplicationIndicator _indicator =
+            ApplicationIndicatorRegistry.getInstance()
+                    .getApplicationIndicator();
+
     /**
      * Called during device startup.
      */
@@ -89,7 +96,7 @@ final class MessageListDemoDaemon extends Application implements
         messages.setFolders(inbox, deleted);
 
         // We've registered two folders, let's specify root folder name for the
-        // [View Folder] screen
+        // [View Folder] screen.
         reg.setRootFolderName("Message List Demo");
 
         // 2. Register message icons -------------------------------------------
@@ -166,14 +173,45 @@ final class MessageListDemoDaemon extends Application implements
     }
 
     /**
+     * Change the indicator value by the specified amount
+     * 
+     * @param value
+     *            The value that the indicator must change
+     */
+    public static void changeIndicator(final int value) {
+        // Update indicator.
+        _indicator.setValue(_indicator.getValue() + value);
+
+        // Check if there are any new messages and show indicator accordingly
+        if (_indicator.getValue() <= 0) {
+            _indicator.setVisible(false);
+        } else {
+            _indicator.setVisible(true);
+        }
+    }
+
+    /**
      * Normally the reply command would have GUI interaction, but we just
      * perform the replying logic in this sample.
      */
     private static class ReplyContextMenu extends ApplicationMenuItem {
+        /**
+         * Creates a new ApplicationMenuItem instance with provided menu
+         * position.
+         * 
+         * @param order
+         *            Display order of this item, lower numbers corresopnd to
+         *            higher placement in the menu
+         */
         public ReplyContextMenu(final int order) {
             super(order);
         }
 
+        /**
+         * Replies to the context message.
+         * 
+         * @see ApplicationMenuItem#run(Object)
+         */
         public Object run(final Object context) {
             if (context instanceof DemoMessage) {
                 final DemoMessage message = (DemoMessage) context;
@@ -187,20 +225,36 @@ final class MessageListDemoDaemon extends Application implements
             return context;
         }
 
+        /**
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return "Reply to Demo Message";
         }
     }
 
     /**
-     * Mark Opened menu item. Modifies message attributes and fires update
-     * event.
+     * Mark Opened menu item. After the method marks the message read, it fires
+     * update event.
      */
     private static class MarkOpenedContextMenu extends ApplicationMenuItem {
+        /**
+         * Creates a new ApplicationMenuItem instance with provided menu
+         * position.
+         * 
+         * @param order
+         *            Display order of this item, lower numbers corresopnd to
+         *            higher placement in the menu
+         */
         MarkOpenedContextMenu(final int order) {
             super(order);
         }
 
+        /**
+         * Marks the context message opened.
+         * 
+         * @see ApplicationMenuItem#run(Object)
+         */
         public Object run(final Object context) {
             if (context instanceof DemoMessage) {
                 final DemoMessage message = (DemoMessage) context;
@@ -210,20 +264,41 @@ final class MessageListDemoDaemon extends Application implements
                 final ApplicationMessageFolder folder =
                         reg.getApplicationFolder(MessageListDemo.INBOX_FOLDER_ID);
                 folder.fireElementUpdated(message, message);
+                changeIndicator(-1);
             }
             return context;
         }
 
+        /**
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return "Mark Demo Message Read";
         }
     }
 
+    /**
+     * Mark unread menu item. After the method marks the message unread, it
+     * fires and update event.
+     */
     private static class MarkUnreadContextMenu extends ApplicationMenuItem {
+        /**
+         * Creates a new ApplicationMenuItem instance with provided menu
+         * position.
+         * 
+         * @param order
+         *            Display order of this item, lower numbers corresopnd to
+         *            higher placement in the menu
+         */
         MarkUnreadContextMenu(final int order) {
             super(order);
         }
 
+        /**
+         * Marks the context message unread.
+         * 
+         * @see ApplicationMenuItem#run(Object)
+         */
         public Object run(final Object context) {
             if (context instanceof DemoMessage) {
                 final DemoMessage message = (DemoMessage) context;
@@ -233,20 +308,41 @@ final class MessageListDemoDaemon extends Application implements
                 final ApplicationMessageFolder folder =
                         reg.getApplicationFolder(MessageListDemo.INBOX_FOLDER_ID);
                 folder.fireElementUpdated(message, message);
+                changeIndicator(1);
             }
             return context;
         }
 
+        /**
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return "Mark Demo Message Unread";
         }
     }
 
+    /**
+     * Open Context menu item. Marks read and opens the selected message for
+     * viewing.
+     */
     static class OpenContextMenu extends ApplicationMenuItem {
+        /**
+         * Creates a new ApplicationMenuItem instance with provided menu
+         * position.
+         * 
+         * @param order
+         *            Display order of this item, lower numbers corresopnd to
+         *            higher placement in the menu
+         */
         public OpenContextMenu(final int order) {
             super(order);
         }
 
+        /**
+         * Marks the message as read if it was new and shows the message.
+         * 
+         * @see ApplicationMenuItem#run(Object)
+         */
         public Object run(final Object context) {
             if (context instanceof DemoMessage) {
                 final DemoMessage message = (DemoMessage) context;
@@ -259,6 +355,7 @@ final class MessageListDemoDaemon extends Application implements
                     final ApplicationMessageFolder folder =
                             reg.getApplicationFolder(MessageListDemo.INBOX_FOLDER_ID);
                     folder.fireElementUpdated(message, message);
+                    changeIndicator(-1);
                 }
 
                 // Show message.
@@ -272,6 +369,9 @@ final class MessageListDemoDaemon extends Application implements
             return context;
         }
 
+        /**
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return "View Demo Message";
         }
@@ -361,10 +461,6 @@ final class MessageListDemoDaemon extends Application implements
                     switch (action) {
                     case ApplicationMessageFolderListener.MESSAGE_DELETED:
                         if (folder.getId() == MessageListDemo.INBOX_FOLDER_ID) {
-                            // Message from Inbox was deleted,
-                            // mark it as deleted.
-                            message.messageDeleted();
-
                             // Update storage, the message will go
                             // into Deleted folder.
                             messageStore.deleteInboxMessage(message);
@@ -376,6 +472,9 @@ final class MessageListDemoDaemon extends Application implements
                         break;
                     case ApplicationMessageFolderListener.MESSAGE_MARKED_OPENED:
 
+                        if (message.isNew()) {
+                            changeIndicator(-1);
+                        }
                         // Update message.
                         message.markRead();
 
@@ -386,6 +485,10 @@ final class MessageListDemoDaemon extends Application implements
                         folder.fireElementUpdated(message, message);
                         break;
                     case ApplicationMessageFolderListener.MESSAGE_MARKED_UNOPENED:
+
+                        if (!message.isNew()) {
+                            changeIndicator(1);
+                        }
 
                         // Update message.
                         message.markAsNew();

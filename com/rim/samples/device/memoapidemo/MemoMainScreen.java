@@ -49,7 +49,7 @@ import net.rim.device.api.ui.container.MainScreen;
 /**
  * The main screen for the Memo API demo application.
  */
-/* package */final class MemoMainScreen extends MainScreen implements
+public final class MemoMainScreen extends MainScreen implements
         ListFieldCallback {
     private Vector _memos;
     private BlackBerryMemoList _memoList;
@@ -61,7 +61,7 @@ import net.rim.device.api.ui.container.MainScreen;
      * Constructor. Opens the Memo PIM List and displays a list of memos on the
      * screen in list format.
      */
-    /* package */MemoMainScreen() {
+    public MemoMainScreen() {
         super();
 
         try {
@@ -71,6 +71,7 @@ import net.rim.device.api.ui.container.MainScreen;
         } catch (final PIMException pe) {
             // Can't open the Memo PIM List. Nothing we can do...exiting the
             // application.
+            MemoApiDemo.errorDialog("PIM#openPIMList() threw " + pe.toString());
             System.exit(1);
         }
 
@@ -113,6 +114,8 @@ import net.rim.device.api.ui.container.MainScreen;
             }
         } catch (final PIMException pe) {
             // Had a problem retrieving the memos...
+            MemoApiDemo.errorDialog("BlackBerryMemoList#items() threw "
+                    + pe.toString());
         }
     }
 
@@ -134,7 +137,7 @@ import net.rim.device.api.ui.container.MainScreen;
     }
 
     /**
-     * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
+     * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
      */
     protected void makeMenu(final Menu menu, final int instance) {
         super.makeMenu(menu, instance);
@@ -180,7 +183,7 @@ import net.rim.device.api.ui.container.MainScreen;
      * Overrides Screen.invokeAction(). Handles a trackball click and provides
      * identical behavior to an ENTER keypress event.
      * 
-     * @see net.rim.device.api.ui#invokeAction(int)
+     * @see net.rim.device.api.ui.Screen#invokeAction(int)
      */
     public boolean invokeAction(final int action) {
         switch (action) {
@@ -333,6 +336,8 @@ import net.rim.device.api.ui.container.MainScreen;
                 MemoMainScreen.this.loadMemos(copy);
             } catch (final PIMException e) {
                 // Oh well...
+                MemoApiDemo.errorDialog("BlackBerryMemo#commit() threw "
+                        + e.toString());
             }
         }
     }
@@ -428,6 +433,9 @@ import net.rim.device.api.ui.container.MainScreen;
                 }
             } catch (final PIMException e) {
                 // Shouldn't happen...
+                MemoApiDemo
+                        .errorDialog("BlackBerryMemoList#removeMemo() threw "
+                                + e.toString());
             }
         }
     }

@@ -38,14 +38,15 @@ import net.rim.device.api.system.RuntimeStore;
  * remove, update and traverse the different address book records stored in the
  * address book.
  */
-class AddressBook {
+public class AddressBook {
     private static final long PERSIST = 0x72ea07b090aac4a0L; // com.rim.samples.device.objectgroupingdemo
     private static final long ADDRESS_BOOK = 0xdc33b15c18be898fL; // com.rim.samples.device.objectgroupingdemo.AddressBook.ADDRESS_BOOK
 
-    private final PersistentObject _persist; // Refeence to the PersistentObject
-                                             // for our address book.
+    private final PersistentObject _persist; // Reference to the
+                                             // PersistentObject for our address
+                                             // book
     private Vector _records; // The Vector of address book records that make up
-                             // the address book.
+                             // the address book
 
     /**
      * Simple constructor for the class that will initialize the _records Vector
@@ -53,7 +54,7 @@ class AddressBook {
      * private because no other class should be able to instantiate the
      * AddressBook.
      */
-    private AddressBook() {
+    public AddressBook() {
         _persist = PersistentStore.getPersistentObject(PERSIST);
         _records = (Vector) _persist.getContents();
 
@@ -64,9 +65,9 @@ class AddressBook {
     }
 
     /**
-     * Returns the singleton instance of the AddressBook.
+     * Returns the singleton instance of the AddressBook
      * 
-     * @return the singleton instance of the AddressBook.
+     * @return The singleton instance of the AddressBook
      */
     static AddressBook getInstance() {
         final RuntimeStore rs = RuntimeStore.getRuntimeStore();
@@ -84,10 +85,10 @@ class AddressBook {
     }
 
     /**
-     * Adds the address book record.
+     * Adds the address book record
      * 
      * @param record
-     *            the address book record to add. Note: This method does not
+     *            The address book record to add Note: This method does not
      *            perform any duplicate detection.
      */
     void add(final AddressBookRecord record) {
@@ -95,20 +96,20 @@ class AddressBook {
             throw new IllegalArgumentException();
         }
 
-        // Be sure to group the record before adding it to the address book.
+        // Be sure to group the record before adding it to the address book
         ObjectGroup.createGroup(record);
         _records.addElement(record);
         _persist.commit();
     }
 
     /**
-     * Updates the oldRecord in the address book with the contents specified in
-     * the newRecord.
+     * Updates the old record in the address book with the contents specified in
+     * the new record
      * 
      * @param oldRecord
-     *            the record to update in the address book.
+     *            The record to update in the address book
      * @param newRecord
-     *            the record to use for the data to update the oldRecord.
+     *            The record to use for the data to update the oldRecord
      */
     void update(final AddressBookRecord oldRecord,
             final AddressBookRecord newRecord) {
@@ -116,14 +117,14 @@ class AddressBook {
             throw new IllegalArgumentException();
         }
 
-        // Ensure that the oldRecord is actually contained in our address book.
+        // Ensure that the oldRecord is actually contained in our address book
         final int index = _records.indexOf(oldRecord);
         if (index == -1) {
-            // Item not found.
+            // Item not found
             throw new IllegalArgumentException();
         }
 
-        // Ungroup the old record.
+        // Ungroup the old record
         final AddressBookRecord ungroupedRecord =
                 (AddressBookRecord) ObjectGroup.expandGroup(_records
                         .elementAt(index));
@@ -138,10 +139,10 @@ class AddressBook {
     }
 
     /**
-     * Removes the address book reecord from the address book.
+     * Removes the address book record from the address book
      * 
      * @param record
-     *            the record to remove.
+     *            The record to remove
      */
     void remove(final AddressBookRecord record) {
         if (record == null) {
@@ -153,14 +154,22 @@ class AddressBook {
     }
 
     /**
-     * Returns the address book record specified by the index.
+     * Removes all records from the address book
+     */
+    void removeAll() {
+        _records.removeAllElements();
+        _persist.commit();
+    }
+
+    /**
+     * Returns the address book record specified by the index
      * 
      * @param index
-     *            the index into the list of address book records.
-     * @return the address book record specified by the index if that
-     *         corresponds to a valid index.
+     *            The index into the list of address book records
+     * @return The address book record specified by the index if that
+     *         corresponds to a valid index
      * @throws IllegalArgumentException
-     *             if the index is invalid.
+     *             Thrown if the index is invalid
      */
     AddressBookRecord getRecord(final int index) {
         if (index < 0 || index >= _records.size()) {
@@ -171,9 +180,9 @@ class AddressBook {
     }
 
     /**
-     * Returns the size of the address book.
+     * Returns the size of the address book
      * 
-     * @return the number of records currently stored in the address book.
+     * @return The number of records currently stored in the address book
      */
     int size() {
         return _records.size();

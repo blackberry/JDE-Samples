@@ -36,6 +36,8 @@ import javax.microedition.pim.PIMException;
 import net.rim.blackberry.api.invoke.Invoke;
 import net.rim.blackberry.api.invoke.MapsArguments;
 import net.rim.device.api.ui.MenuItem;
+import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.container.MainScreen;
 
@@ -47,11 +49,9 @@ import net.rim.device.api.ui.container.MainScreen;
  * exception cases when retrieving a Contact. For more information on retrieving
  * and manipulating Contact information see the BlackBerry Development Guide.
  */
-final class InvokeContactScreen extends MainScreen {
-    /**
-     * Constructor
-     */
-    InvokeContactScreen() {
+public final class InvokeContactScreen extends MainScreen {
+    // Constructor
+    public InvokeContactScreen() {
         setTitle("Invoke Contact");
 
         final LabelField instructions =
@@ -63,25 +63,25 @@ final class InvokeContactScreen extends MainScreen {
     }
 
     /**
-     * Displays a map based on an address from the address book.
+     * Displays a map based on an address from the address book
      */
     private final MenuItem viewMapItem = new MenuItem("View Map", 1000, 10) {
         /**
-         * Run() method creates a list of Contacts from the address book and
-         * searches list for first occurrence of a valid address.
+         * Creates a list of Contacts from the address book and searches list
+         * for first occurrence of a valid address.
          */
         public void run() {
             Contact c = null;
             boolean foundAddress = false;
 
             try {
-                // Create list of Contacts.
+                // Create list of Contacts
                 final ContactList contactList =
                         (ContactList) PIM.getInstance().openPIMList(
                                 PIM.CONTACT_LIST, PIM.READ_WRITE);
                 final Enumeration enumContact = contactList.items();
 
-                // Search for a valid address.
+                // Search for a valid address
                 while (enumContact.hasMoreElements() && !foundAddress) {
                     c = (Contact) enumContact.nextElement();
 
@@ -91,7 +91,7 @@ final class InvokeContactScreen extends MainScreen {
 
                         if (address[Contact.ADDR_LOCALITY] != null
                                 && address[Contact.ADDR_REGION] != null) {
-                            // Invoke maps application for current Contact.
+                            // Invoke maps application for current Contact
                             Invoke.invokeApplication(Invoke.APP_TYPE_MAPS,
                                     new MapsArguments(c, 0));
                             foundAddress = true;
@@ -99,10 +99,14 @@ final class InvokeContactScreen extends MainScreen {
                     }
                 }
             } catch (final PIMException e) {
-                System.out.println(e.toString());
+                UiApplication.getUiApplication().invokeLater(new Runnable() {
+                    public void run() {
+                        Dialog.alert("PIM#openPIMList() threw PIMException");
+                    }
+                });
             }
 
-            // Invoke maps application with default map.
+            // Invoke maps application with default map
             if (!foundAddress) {
                 Invoke.invokeApplication(Invoke.APP_TYPE_MAPS,
                         new MapsArguments());

@@ -50,8 +50,10 @@ import net.rim.device.api.ui.container.MainScreen;
 /**
  * The client side of a simple serial port demonstration app. This application
  * will listen for text on the serial port and render the data when it arrives.
+ * Please refer to readme.txt in
+ * 'samples\com\rim\samples\server\bluetoothserialportdemo'.
  */
-class BluetoothSerialPortDemo extends UiApplication {
+public final class BluetoothSerialPortDemo extends UiApplication {
     // Statics
     // ------------------------------------------------------------------
     private static final int INSERT = 1;
@@ -59,6 +61,7 @@ class BluetoothSerialPortDemo extends UiApplication {
     private static final int JUST_OPEN = 3;
     private static final int CONTENTS = 4;
     private static final int NO_CONTENTS = 5;
+    private static final int FIRST = 0;
 
     // Members
     // -------------------------------------------------------------------
@@ -72,7 +75,6 @@ class BluetoothSerialPortDemo extends UiApplication {
      * application.
      */
     private final class BluetoothDemoScreen extends MainScreen {
-
         /**
          * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
          */
@@ -89,7 +91,7 @@ class BluetoothSerialPortDemo extends UiApplication {
         }
 
         /**
-         * Prevent the save dialog from being displayed.
+         * Prevent the save dialog from being displayed
          * 
          * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
          */
@@ -104,19 +106,22 @@ class BluetoothSerialPortDemo extends UiApplication {
             onExit();
             super.close();
         }
-
     }
 
     /**
-     * Entry point for application.
+     * Entry point for application
+     * 
+     * @param args
+     *            Command line arguments (not used)
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final BluetoothSerialPortDemo theApp = new BluetoothSerialPortDemo();
         theApp.enterEventDispatcher();
     }
 
     // Constructor
-    // ---------------------------------------------------------------
     private BluetoothSerialPortDemo() {
         final BluetoothDemoScreen mainScreen = new BluetoothDemoScreen();
         mainScreen.setTitle(new LabelField("Bluetooth Serial Port Demo",
@@ -134,13 +139,18 @@ class BluetoothSerialPortDemo extends UiApplication {
         });
     }
 
+    /**
+     * Closes the port when exiting the application
+     */
     protected void onExit() {
         closePort();
     }
 
-    // Close the serial port.
+    /**
+     * Close the serial port
+     */
     private void closePort() {
-
+        // Close the bluetooth connection
         if (_bluetoothConnection != null) {
             try {
                 _bluetoothConnection.close();
@@ -148,6 +158,7 @@ class BluetoothSerialPortDemo extends UiApplication {
             }
         }
 
+        // Close the input stream
         if (_din != null) {
             try {
                 _din.close();
@@ -155,6 +166,7 @@ class BluetoothSerialPortDemo extends UiApplication {
             }
         }
 
+        // Close the output stream
         if (_dout != null) {
             try {
                 _dout.close();
@@ -167,9 +179,10 @@ class BluetoothSerialPortDemo extends UiApplication {
         _dout = null;
     }
 
-    // Open the serial port.
+    /**
+     * Opens the serial port
+     */
     private void openPort() {
-
         if (_bluetoothConnection != null) {
             closePort();
         }
@@ -177,15 +190,26 @@ class BluetoothSerialPortDemo extends UiApplication {
         new InputThread().start();
     }
 
+    /**
+     * A thread which handles the bluetooth serial port communication between
+     * this device and the first device listed on its 'paired devices' list.
+     */
     private class InputThread extends Thread {
-
+        /**
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
+            // Try to connect to the first device on the list of pair devices
             try {
                 final BluetoothSerialPortInfo[] info =
                         BluetoothSerialPort.getSerialPortInfo();
 
-                if (info == null || info.length == 0) {
+                if (info == null || info.length == 0) // No devices paired
+                {
                     invokeAndWait(new Runnable() {
+                        /**
+                         * @see java.lang.Runnable#run()
+                         */
                         public void run() {
                             Dialog.alert("No bluetooth serial ports available for connection.");
                             onExit();
@@ -194,23 +218,33 @@ class BluetoothSerialPortDemo extends UiApplication {
                     });
                 }
 
+                // Set up the bluetooth connection
                 _bluetoothConnection =
-                        (StreamConnection) Connector.open(info[0].toString(),
-                                Connector.READ_WRITE);
+                        (StreamConnection) Connector.open(info[FIRST]
+                                .toString(), Connector.READ_WRITE);
 
                 _din = _bluetoothConnection.openDataInputStream();
                 _dout = _bluetoothConnection.openDataOutputStream();
 
-            } catch (final IOException e) {
+            } catch (final IOException e) // Unable to connect
+            {
                 invokeAndWait(new Runnable() {
+                    /**
+                     * @see java.lang.Runnable#run()
+                     */
                     public void run() {
                         Dialog.alert("Unable to open serial port");
                         onExit();
                         System.exit(1);
                     }
                 });
-            } catch (final UnsupportedOperationException e) {
+            } catch (final UnsupportedOperationException e) // Bluetooth not
+                                                            // supported
+            {
                 invokeAndWait(new Runnable() {
+                    /**
+                     * @see java.lang.Runnable#run()
+                     */
                     public void run() {
                         Dialog.alert("This handheld or simulator does not support bluetooth.");
                         onExit();
@@ -219,20 +253,30 @@ class BluetoothSerialPortDemo extends UiApplication {
                 });
             }
 
+            // Read information from the opened bluetooth serial port and
+            // respond to the type of action requested. Note: we flush the
+            // output stream every time we want to communicate to the other
+            // device to ensure the message is sent immediately.
             try {
                 int type, offset, count;
                 String value;
+
+                // Send the message that this connection has just been opened
                 _dout.writeInt(JUST_OPEN);
                 _dout.flush();
 
+                // Communicating with the other device indefinitely unless the
+                // connection is interrupted with an exception.
                 for (;;) {
-                    type = _din.readInt();
+                    type = _din.readInt(); // Type of operation to enact
 
                     if (type == INSERT) {
+                        // Insert the selected text at the specified position.
                         offset = _din.readInt();
                         value = _din.readUTF();
                         insert(value, offset);
                     } else if (type == REMOVE) {
+                        // Remove characters at specified position
                         offset = _din.readInt();
                         count = _din.readInt();
                         remove(offset, count);
@@ -241,26 +285,36 @@ class BluetoothSerialPortDemo extends UiApplication {
                         value = _infoField.getText();
 
                         if (value == null || value.length() == 0) {
+                            // Communicate that our text field is empty
                             _dout.writeInt(NO_CONTENTS);
                             _dout.flush();
                         } else {
+                            // Write out the contents of the text field
                             _dout.writeInt(CONTENTS);
                             _dout.writeUTF(_infoField.getText());
                             _dout.flush();
                         }
                     } else if (type == CONTENTS) {
+                        // Read in the contents and get the event lock for this
+                        // application so we can update the info field.
                         final String contents = _din.readUTF();
                         synchronized (Application.getEventLock()) {
                             _infoField.setText(contents);
                         }
 
                     } else if (type == NO_CONTENTS) {
+                        // Do nothing
                     } else {
+                        // This should not happen. 'type' did not match any type
+                        // which is suposed to be outputted.
                         throw new RuntimeException();
                     }
                 }
             } catch (final IOException ioe) {
                 invokeLater(new Runnable() {
+                    /**
+                     * @see java.lang.Runnable#run()
+                     */
                     public void run() {
                         Dialog.alert("Problems reading from or writing to serial port.");
                         onExit();
@@ -269,11 +323,21 @@ class BluetoothSerialPortDemo extends UiApplication {
                 });
             }
         }
-
     }
 
+    /**
+     * Inserts a message into the information text field displayed on the screen
+     * 
+     * @param msg
+     *            The message to insert
+     * @param offset
+     *            The position to insert the message at
+     */
     private void insert(final String msg, final int offset) {
         invokeLater(new Runnable() {
+            /**
+             * @see java.lang.Runnable#run()
+             */
             public void run() {
                 _infoField.setCursorPosition(offset);
                 _infoField.insert(msg);
@@ -281,8 +345,22 @@ class BluetoothSerialPortDemo extends UiApplication {
         });
     }
 
+    /**
+     * Removes a certain amount of characters at a specified position from the
+     * information text field displayed on the screen.
+     * 
+     * @param offset
+     *            The position just to the right of the rightmost character to
+     *            remove (index of rightmost character to remove + 1)
+     * @param count
+     *            The number of characters to the left of the offset position to
+     *            remove
+     */
     private void remove(final int offset, final int count) {
         invokeLater(new Runnable() {
+            /**
+             * @see java.lang.Runnable#run()
+             */
             public void run() {
                 _infoField.setCursorPosition(offset + count);
                 _infoField.backspace(count);

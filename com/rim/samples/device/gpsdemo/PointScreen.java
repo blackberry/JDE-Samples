@@ -36,7 +36,6 @@ import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
-import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.ListField;
 import net.rim.device.api.ui.component.ListFieldCallback;
 import net.rim.device.api.ui.component.Menu;
@@ -46,16 +45,15 @@ import net.rim.device.api.ui.container.MainScreen;
 import com.rim.samples.device.gpsdemo.GPSDemo.WayPoint;
 
 /**
- * A screen to render the saved WayPoints.
+ * A screen to render the saved waypoints.
  */
-class PointScreen extends MainScreen implements ListFieldCallback {
+public class PointScreen extends MainScreen implements ListFieldCallback {
     private final Vector _points;
     private final ListField _listField;
 
-    PointScreen(final Vector points) {
-
-        final LabelField title = new LabelField("Previous waypoints");
-        setTitle(title);
+    // Constructor
+    public PointScreen(final Vector points) {
+        setTitle("Previous waypoints");
 
         _points = points;
         _listField = new ListField();
@@ -64,22 +62,27 @@ class PointScreen extends MainScreen implements ListFieldCallback {
         reloadWayPointList();
     }
 
+    /**
+     * Refreshes the waypoint list on the screen.
+     */
     private void reloadWayPointList() {
-        // Refreshes wayPoint list on screen.
         _listField.setSize(_points.size());
     }
 
+    /**
+     * Displays the selected waypoint.
+     */
     private void displayWayPoint() {
         final int index = _listField.getSelectedIndex();
         final ViewScreen screen =
                 new ViewScreen((WayPoint) _points.elementAt(index), index);
-        UiApplication.getUiApplication().pushModalScreen(screen);
+        UiApplication.getUiApplication().pushScreen(screen);
     }
 
     /**
      * Overrides method in super class.
      * 
-     * @see net.rim.device.api.ui.Screen#makeMenu(Menu, int)
+     * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu, int)
      */
     protected void makeMenu(final Menu menu, final int instance) {
         if (!_listField.isEmpty()) {
@@ -138,8 +141,8 @@ class PointScreen extends MainScreen implements ListFieldCallback {
      */
     public Object get(final ListField listField, final int index) {
         if (listField == _listField) {
-            // If index is out of bounds an exception will be thrown, but that's
-            // the behaviour we want in that case.
+            // If index is out of bounds an exception will be thrown (desired
+            // behavior).
             return _points.elementAt(index);
         }
 
@@ -165,12 +168,18 @@ class PointScreen extends MainScreen implements ListFieldCallback {
 
     // Menu items
     // ---------------------------------------------------------------
+    /**
+     * Displays the selected waypoint
+     */
     MenuItem _viewPointAction = new MenuItem("View", 100000, 10) {
         public void run() {
             displayWayPoint();
         }
     };
 
+    /**
+     * Deletes the selected waypoint
+     */
     MenuItem _deletePointAction = new MenuItem("Delete", 100000, 11) {
         public void run() {
 
@@ -186,12 +195,19 @@ class PointScreen extends MainScreen implements ListFieldCallback {
     };
 
     /**
-     * A screen to render a particular Waypoint.
+     * A screen to render a particular waypoint's information.
      */
     private static class ViewScreen extends MainScreen {
+        /**
+         * Construcs a ViewScreen to view a specified waypoint
+         * 
+         * @param point
+         *            The waypoint to view
+         * @param count
+         *            The waypoint number
+         */
         ViewScreen(final WayPoint point, final int count) {
-            final LabelField title = new LabelField("Waypoint" + count);
-            setTitle(title);
+            setTitle("Waypoint" + count);
 
             Date date = new Date(point._startTime);
             final String startTime = date.toString();

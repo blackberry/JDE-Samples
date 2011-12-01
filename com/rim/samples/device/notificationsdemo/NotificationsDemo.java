@@ -39,10 +39,16 @@ import net.rim.device.api.ui.container.MainScreen;
  * startup. Immediate and deferred events are generated via a UI menu item and
  * the Event.fire() method.
  */
-final class NotificationsDemo extends UiApplication {
+public final class NotificationsDemo extends UiApplication {
     // com.rim.samples.device.notificationsdemo.NOTIFICATIONS_ID_1
     static final long NOTIFICATIONS_ID_1 = 0xdc5bf2f81374095L;
 
+    /**
+     * Entry point for application.
+     * 
+     * @param args
+     *            Command-line arguments
+     */
     public static void main(final String[] args) {
         if (args.length > 0 && args[0].equals("autostartup")) {
             final NotificationsDemo nd = new NotificationsDemo();
@@ -57,11 +63,19 @@ final class NotificationsDemo extends UiApplication {
         }
     }
 
+    /**
+     * Displays the NotificationDemoScreen.
+     */
     private void showGui() {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         pushScreen(new NotificationsDemoScreen());
         enterEventDispatcher();
     }
 
+    /**
+     * Registers this application as the notification manager.
+     */
     private void registerNotificationObjects() {
         // A source is registered to tell the system that our application will
         // be sending notification events. This will will cause a new user
@@ -89,6 +103,7 @@ final class NotificationsDemo extends UiApplication {
     private static class NotificationsDemoScreen extends MainScreen {
         private long _eventId;
 
+        // Constructor
         private NotificationsDemoScreen() {
             // Initialize UI components.
             setTitle("Notifications Demo");
@@ -96,7 +111,9 @@ final class NotificationsDemo extends UiApplication {
             addMenuItem(_notifyItem);
         }
 
-        // A menu item to generate immediate and deferred events.
+        /**
+         * A menu item to generate immediate and deferred events.
+         */
         private final MenuItem _notifyItem = new MenuItem("Notify (ID1)",
                 100000, 25) {
             public void run() {

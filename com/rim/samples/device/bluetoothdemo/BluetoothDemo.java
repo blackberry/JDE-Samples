@@ -27,14 +27,47 @@
 package com.rim.samples.device.bluetoothdemo;
 
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.component.Dialog;
 
-class BluetoothDemo extends UiApplication {
+/**
+ * This sample application demonstrates bluetooth communication between two
+ * BlackBerry smartphones using the net.rim.device.api.bluetooth API. This demo
+ * uses * serial communication to send text between two BlackBerry smartphones.
+ * See the "readme.txt" file included in this project for details on pairing two
+ * BlackBerry smartphones.
+ */
+public class BluetoothDemo extends UiApplication {
+    /**
+     * Entry point for application.
+     * 
+     * @param args
+     *            Command line arguments (not used)
+     */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final BluetoothDemo app = new BluetoothDemo();
         app.enterEventDispatcher();
     }
 
-    private BluetoothDemo() {
+    /**
+     * Default constructor
+     */
+    public BluetoothDemo() {
         pushScreen(new AppScreen());
+    }
+
+    /**
+     * Presents a dialog to the user with a given message
+     * 
+     * @param message
+     *            The text to display
+     */
+    public static void errorDialog(final String message) {
+        UiApplication.getUiApplication().invokeLater(new Runnable() {
+            public void run() {
+                Dialog.alert(message);
+            }
+        });
     }
 }

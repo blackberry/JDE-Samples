@@ -1,0 +1,63 @@
+## RIM Java Development Environment
+# RIM Project file
+#
+# This file is generated and managed by BlackBerry developer tools.
+# It SHOULD NOT BE modified manually.
+#
+AddOn=0
+AlwaysBuild=0
+[AlxImports
+]
+AutoRestart=0
+[ClassProtection
+]
+[CustomBuildFiles
+]
+[CustomBuildRules
+]
+[DefFiles
+]
+[DependsOn
+]
+ExcludeFromBuildAll=0
+Exported=0
+[Files
+AttachmentAction.java
+AttachmentDemo.java
+AttachmentDemoScreen.java
+attachments\logo.png
+attachments\test.abc
+attachments\test_doc.doc
+FileExplorerListField.java
+FileExplorerScreen.java
+FileHolder.java
+FileUploadAction.java
+FileUploadDialog.java
+img\icon_jde.png
+]
+HaveAlxImports=0
+HaveDefs=0
+HaveImports=0
+[Icons
+img\icon_jde.png
+]
+[ImplicitRules
+]
+[Imports
+]
+Listing=0
+Options=-quiet 
+OutputFileName=AttachmentDemo
+[PackageProtection
+]
+Platform=0
+RibbonPosition=0
+[RolloverIcons
+]
+RunOnStartup=0
+StartupTier=7
+SystemModule=0
+Title=Attachment Demo
+Type=0
+Vendor=Research In Motion Limited
+Version=0.9

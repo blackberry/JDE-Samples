@@ -34,7 +34,6 @@ import javax.microedition.location.Coordinates;
  * Coordinates from a byte array.
  */
 class MapFieldDemoTokenizer {
-
     /**
      * Converts a byte array into its corresponding int value.
      * 

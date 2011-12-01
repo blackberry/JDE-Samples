@@ -34,7 +34,7 @@ import net.rim.device.api.util.Persistable;
 /**
  * Represents an order record for a fictional business.
  */
-/* package */final class OrderRecord implements Persistable {
+public final class OrderRecord implements Persistable {
     // Members
     // -------------------------------------------------------------------------------------
     private long _date; // The date this ordered was placed on.
@@ -54,8 +54,8 @@ import net.rim.device.api.util.Persistable;
      * @param numOrdered
      *            The number of units ordered.
      */
-    OrderRecord(final long date, final String company, final String product,
-            final int numOrdered) {
+    public OrderRecord(final long date, final String company,
+            final String product, final int numOrdered) {
         _date = date;
         _company = company;
         _product = product;

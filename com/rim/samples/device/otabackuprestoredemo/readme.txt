@@ -11,26 +11,20 @@ Before 4.5 and multi-BES support, the sync service book that gets loaded on the 
 
 3. Press F5 on your keyboard to launch the BlackBerry device simulator.
 
-4. Launch the OTA Backup Restore Demo from the home screen.
+4. Launch the OTA Backup Restore Demo from the Downloads folder.
 
 5. Select Add from the menu, fill in the fields and select Save from the menu.  Close the application.
 
-6. Select: Options/Advanced Options/Service Book/Sync Service book/Delete. (See note at bottom)
+6. In the simulator window, select: Simulate/USB Cable Connected.
 
-7. In the simulator window, select: Simulate/USB Cable Connected.
+7. Allow Enterprise Activation to complete.
 
-8. Allow Enterprise Activation to complete.
+8. Close the BlackBerry device simulator.
 
-9. Close the BlackBerry device simulator.
+9. In the JDE, select File/Erase Simulator File/Erase File System and re-launch the BlackBerry device simulator.
 
-10. In the JDE, select File/Erase Simulator File/Erase File System and re-launch the BlackBerry device simulator.
+10. Press F5 on your keyboard to launch the BlackBerry device simulator.
 
-11. Press F5 on your keyboard to launch the BlackBerry device simulator.
+11. Repeat steps 6 and 7.
 
-12. Repeat steps 6 through 8.
-
-13. Launch the OTA Backup Restore Demo from the home screen to verify that the contact has been restored.
-
-
-Note: 
-Before 4.5 and multi-BES support, the sync service book that gets loaded on the BlackBerry device simulator by default (for use with the Sync Server SDK and the OTA Sync Demo) would get overwritten by a service book injection by whatever BES one was connecting to through Desktop Manager.  In order to activate a 4.5 device using Desktop Manager, the aforementioned sync service book must be deleted before connecting the BlackBerry device simulator to the desktop.
+12. Launch the OTA Backup Restore Demo from the Downloads folder to verify that the contact has been restored.

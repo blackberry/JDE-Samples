@@ -1,5 +1,9 @@
 ## RIM Java Development Environment
 # RIM Project file
+#
+# This file is generated and managed by BlackBerry developer tools.
+# It SHOULD NOT BE modified manually.
+#
 AddOn=0
 AlwaysBuild=0
 [AlxImports
@@ -20,9 +24,9 @@ AutoRestart=0
 [DependsOn
 ]
 ExcludeFromBuildAll=0
+Exported=0
 [Files
 filter\Protocol.java
-img\httpfilterdemo_jde.png
 PackageManager.java
 precanned\Protocol.java
 ]
@@ -30,7 +34,6 @@ HaveAlxImports=0
 HaveDefs=0
 HaveImports=0
 [Icons
-img\httpfilterdemo_jde.png
 ]
 [ImplicitRules
 ]
@@ -39,19 +42,17 @@ img\httpfilterdemo_jde.png
 Listing=0
 NoImport=0
 NoRuntime=0
-Options=-quiet
+Options=-quiet 
 OutputFileName=HttpFilterDemo
 [PackageProtection
 ]
 RibbonPosition=0
+[RolloverIcons
+]
 RunOnStartup=1
 StartupTier=7
-SystemModule=0
-Title=HTTP Filter Sample
-TitleResourceBundle=com.rim.samples.device.resource.HTTPDemoRes
-TitleResourceBundleKey=HTTPDEMO_TITLE
-TitleResourceBundlePath=..\samples\com\rim\samples\device\resource\HTTPDemoRes.rrh
-TitleResourceId=1
-Type=2
+SystemModule=1
+Title=HTTP Filter Demo
+Type=0
 Vendor=Research In Motion Limited
 Version=0.9

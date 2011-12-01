@@ -39,7 +39,7 @@ import java.io.EOFException;
  * allow the scalability of this class while still allowing the CDdb to store
  * and read previous versions of the CD class.
  */
-public class CD {
+public final class CD {
     private String _artist;
     private String _title;
     private String _fullName;
@@ -48,66 +48,66 @@ public class CD {
     private static final short TITLE = 1;
 
     /**
-     * Constructor for the URL object, given byte array.
+     * Constructs a new CD object, given byte array
      * 
      * @param data
-     *            Byte array for the CD.
+     *            Byte array for the CD
      * @exception java.io.IOException
-     *                IO error.
+     *                IO error
      */
     public CD(final byte[] data) throws java.io.IOException {
         fromByteArray(data);
     }
 
     /**
-     * Constructor for the URL object, given protocol and path.
+     * Constructor a new CD object, given protocol and path.
      * 
      * @param artist
-     *            The name of the CD artist.
+     *            The name of the CD artist
      * @param title
-     *            The title of the CD.
+     *            The title of the CD
      */
-    public CD(final String artist, final String title) {
+    CD(final String artist, final String title) {
         _artist = artist;
         _title = title;
         _fullName = _artist + ": " + _title;
     }
 
     /**
-     * Provide the CD in the form of a String.
+     * Retrieves the CD name in the form of a String
      * 
-     * @return The CD as a properly formed String.
+     * @return The CD name as a properly formed String
      */
     public String toString() {
         return _fullName;
     }
 
     /**
-     * Gets the artist attribute of the CD object.
+     * Retrieves the artist attribute of the CD object
      * 
-     * @return The arist name of the CD.
+     * @return The arist name of the CD
      */
-    public String getArtist() {
+    String getArtist() {
         return _artist;
     }
 
     /**
-     * Gets the title attribute of the CD object.
+     * Retrieves the title attribute of the CD object
      * 
-     * @return The title of the CD.
+     * @return The title of the CD
      */
-    public String getTitle() {
+    String getTitle() {
         return _title;
     }
 
     /**
-     * Convert a CD to a byte array.
+     * Converts a CD to a byte array
      * 
-     * @return Byte encoded version of the CD.
+     * @return Byte encoded version of the CD
      * @exception java.io.IOException
-     *                IO error.
+     *                Thrown if an I/O error occurs
      */
-    public byte[] toByteArray() throws java.io.IOException {
+    byte[] toByteArray() throws java.io.IOException {
         byte[] data;
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         final DataOutputStream dos = new DataOutputStream(baos);
@@ -123,19 +123,18 @@ public class CD {
     }
 
     /**
-     * Convert a byte array to a CD.
+     * Converts a byte array to a CD
      * 
      * @param array
-     *            CD encoded as a byte array.
+     *            CD encoded as a byte array
      * @exception java.io.IOException
-     *                IO error.
+     *                Thrown if an I/O exception error occurs
      */
     private void fromByteArray(final byte[] array) throws java.io.IOException {
         final ByteArrayInputStream bais = new ByteArrayInputStream(array);
         final DataInputStream dis = new DataInputStream(bais);
 
         short tag;
-        final int length;
 
         try {
             while (true) {
@@ -146,7 +145,7 @@ public class CD {
                 } else if (tag == TITLE) {
                     _title = dis.readUTF();
                 } else {
-                    // Unrecognized tag, skip value.
+                    // Unrecognized tag, skip value
                     dis.readUTF();
                 }
             }

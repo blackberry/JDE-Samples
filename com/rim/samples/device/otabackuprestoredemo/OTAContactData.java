@@ -29,55 +29,133 @@ package com.rim.samples.device.otabackuprestoredemo;
 import net.rim.device.api.synchronization.SyncObject;
 import net.rim.device.api.util.Persistable;
 
-class OTAContactData implements SyncObject, Persistable {
+/**
+ * This class represents a contact, encapsulating the contact's information. It
+ * also implements the SyncObject and Persistable interfaces which allow the
+ * OTAContactData to synchronize to a BES and allow the information to be
+ * commited to a persistant store.
+ */
+public class OTAContactData implements SyncObject, Persistable {
     private int _uid;
     private String _first, _last, _email;
 
-    OTAContactData() {
+    /**
+     * Default constructor
+     */
+    public OTAContactData() {
     }
 
-    OTAContactData(final int uid) {
+    /**
+     * Creates a new OTAContactData object
+     * 
+     * @param uid
+     *            The UID of the contact
+     */
+    public OTAContactData(final int uid) {
         _uid = uid;
     }
 
+    /**
+     * Sets the UID
+     * 
+     * @param uid
+     *            The UID to set
+     */
     void setUID(final int uid) {
         _uid = uid;
     }
 
+    /**
+     * @see SyncObject#getUID()
+     */
     public int getUID() {
         return _uid;
     }
 
+    /**
+     * Sets the first name of this contact
+     * 
+     * @param first
+     *            The first name of this contact
+     */
     void setFirst(final String first) {
         _first = first;
     }
 
+    /**
+     * Gets the first name of this contact
+     * 
+     * @return The first name of this contact
+     */
     String getFirst() {
         return _first;
     }
 
+    /**
+     * Sets the last name of this contact
+     * 
+     * @param last
+     *            The last name of this contact
+     */
     void setLast(final String last) {
         _last = last;
     }
 
+    /**
+     * Gets the last name of this contact
+     * 
+     * @return The last name of this contact
+     */
     String getLast() {
         return _last;
     }
 
+    /**
+     * Sets the contact's email address
+     * 
+     * @param email
+     *            The contact's email address
+     */
     void setEmail(final String email) {
         _email = email;
     }
 
+    /**
+     * Gets the contact's email address
+     * 
+     * @return The contact's email address
+     */
     String getEmail() {
         return _email;
     }
 
+    /**
+     * Determines equality by matching the first and last names
+     * 
+     * @see java.lang.Object#equals(Object)
+     */
     public boolean equals(final Object o) {
         if (o instanceof OTAContactData) {
-            if (getFirst().equals(((OTAContactData) o).getFirst())
-                    && getLast().equals(((OTAContactData) o).getLast())) {
-                return true;
+            final OTAContactData otherContact = (OTAContactData) o;
+
+            if (getFirst() == null) {
+                if (otherContact.getFirst() == null) {
+                    if (getLast() != null) {
+                        return getLast().equals(otherContact.getLast());
+                    } else {
+                        return otherContact.getLast() == null;
+                    }
+                }
+
+                return false;
+            } else if (getFirst().equals(otherContact.getFirst())) {
+                if (getLast() != null) {
+                    return getLast().equals(otherContact.getLast());
+                } else {
+                    return otherContact.getLast() == null;
+                }
             }
+
         }
 
         return false;

@@ -57,7 +57,7 @@ import net.rim.device.api.ui.component.KeywordFilterField;
  * newly added list elements.
  */
 
-final class KeywordFilterDemo extends UiApplication {
+public final class KeywordFilterDemo extends UiApplication {
     private KeywordFilterField _keywordFilterField;
     private CountryList _countryList;
     private final Vector _countries;
@@ -66,17 +66,19 @@ final class KeywordFilterDemo extends UiApplication {
      * Entry point for application.
      * 
      * @param args
-     *            Command line arguments.
+     *            Command line arguments (not used).
      */
     public static void main(final String[] args) {
         // Create a new instance of the application
-        // and start the application on the event thread.
         final KeywordFilterDemo app = new KeywordFilterDemo();
+
+        // Make the currently running thread the application's event
+        // dispatch thread and begin processing events.
         app.enterEventDispatcher();
     }
 
     // Constructor
-    private KeywordFilterDemo() {
+    public KeywordFilterDemo() {
         // Populate vector with data from file.
         _countries = getDataFromFile();
 
@@ -164,7 +166,14 @@ final class KeywordFilterDemo extends UiApplication {
                     // We've reached the end of the file.
                     break;
                 } catch (final IOException ioe) {
-                    System.out.println("Error reading data from file");
+                    UiApplication.getUiApplication().invokeLater(
+                            new Runnable() {
+                                public void run() {
+                                    Dialog.alert("LineReader#readLine() threw "
+                                            + ioe.toString());
+                                }
+                            });
+
                     return null;
                 }
             }

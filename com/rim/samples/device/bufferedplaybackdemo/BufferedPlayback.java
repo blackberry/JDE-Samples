@@ -35,7 +35,6 @@ import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BasicEditField;
 import net.rim.device.api.ui.component.ButtonField;
 import net.rim.device.api.ui.component.Dialog;
-import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 
@@ -45,42 +44,56 @@ import net.rim.device.api.ui.container.MainScreen;
  */
 public final class BufferedPlayback extends UiApplication {
     /**
-     * Entry point for the application.
+     * Entry point for application
      * 
      * @param args
-     *            Not used.
+     *            Command line arguments (not used)
      */
     public static void main(final String[] args) {
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
         final BufferedPlayback app = new BufferedPlayback();
         app.enterEventDispatcher();
     }
 
     /**
-     * Creates the main screen and pushes it.
+     * Creates the main screen and pushes it onto the display stack
      */
-    BufferedPlayback() {
+    public BufferedPlayback() {
         final BufferedPlaybackScreen screen = new BufferedPlaybackScreen();
         pushScreen(screen);
     }
 
     /**
-     * The main screen of the application.
+     * Presents a dialog to the user with a given message
+     * 
+     * @param message
+     *            The text to display
+     */
+    public static void errorDialog(final String message) {
+        UiApplication.getUiApplication().invokeLater(new Runnable() {
+            public void run() {
+                Dialog.alert(message);
+            }
+        });
+    }
+
+    /**
+     * The main screen of the application
      */
     private static final class BufferedPlaybackScreen extends MainScreen
             implements FieldChangeListener {
-        /** A field used to enter the URL of the remote media file. */
+        /** A field used to enter the URL of the remote media file */
         private final BasicEditField _urlField;
 
-        /** A field used to enter the MIME type of the remote media file. */
+        /** A field used to enter the MIME type of the remote media file */
         private final BasicEditField _mimeField;
 
-        /**
-         * A field used to display the number of bytes that have been loaded.
-         */
-        private final TextField _loadStatusField;
+        /** A field used to display the number of bytes that have been loaded */
+        private final BasicEditField _loadStatusField;
 
-        /** A field used to display the current status of the media player. */
-        private final TextField _playStatusField;
+        /** A field used to display the current status of the media player */
+        private final BasicEditField _playStatusField;
 
         /**
          * A field which contains the minimum number of bytes that must be
@@ -102,45 +115,43 @@ public final class BufferedPlayback extends UiApplication {
          */
         private final BasicEditField _resumeBytesField;
 
-        /** A field which contains the maximum byte size of a single read. */
+        /** A field which contains the maximum byte size of a single read */
         private final BasicEditField _readLimitField;
 
-        /** A button which starts the HTTP request and media playback. */
+        /** A button which starts the HTTP request and media playback */
         private final ButtonField _startPlayingButton;
 
-        /** A button which stops the HTTP request and media playback. */
+        /** A button which stops the HTTP request and media playback */
         private final ButtonField _stopPlayingButton;
 
-        /** A button which erases current request and playback progress. */
+        /** A button which erases current request and playback progress */
         private final ButtonField _resetField;
 
-        /** A stream for the resource we are retrieving. */
+        /** A stream for the resource we are retrieving */
         private LimitedRateStreamingSource _source;
 
         /** A player for the media stream. */
         private Player _player;
 
-        /** A thread which creates and starts the Player. */
+        /** A thread which creates and starts the Player */
         private PlayerThread _playerThread;
 
-        /**
-         * Constructor, creates the GUI.
-         */
-        BufferedPlaybackScreen() {
-            // Set the title of the window.
+        // Constructor
+        private BufferedPlaybackScreen() {
+            // Set the title of the window
             setTitle("Buffered Playback Demo");
 
-            // Create and add the field for the URL to be retrieved.
+            // Create and add the field for the URL to be retrieved
             _urlField = new BasicEditField("Media URL: ", "");
             add(_urlField);
 
-            // Create and add the field for the MIME type of the remote file.
+            // Create and add the field for the MIME type of the remote file
             _mimeField =
                     new BasicEditField("Mime: ", "audio/mpeg", 10,
                             Field.NON_FOCUSABLE);
             add(_mimeField);
 
-            // Create the START, STOP and RESET buttons.
+            // Create the START, STOP and RESET buttons
             _startPlayingButton =
                     new ButtonField("Play", ButtonField.CONSUME_CLICK);
             _stopPlayingButton =
@@ -150,7 +161,7 @@ public final class BufferedPlayback extends UiApplication {
             _stopPlayingButton.setChangeListener(this);
             _resetField.setChangeListener(this);
 
-            // Add the player control buttons to the screen.
+            // Add the player control buttons to the screen
             final HorizontalFieldManager buttonlist =
                     new HorizontalFieldManager();
             buttonlist.add(_startPlayingButton);
@@ -158,35 +169,37 @@ public final class BufferedPlayback extends UiApplication {
             buttonlist.add(_resetField);
             add(buttonlist);
 
-            // Create and add the field with the load progress.
+            // Create and add the field with the load progress
             _loadStatusField =
-                    new TextField("Load: ", "0 Bytes", 10, Field.NON_FOCUSABLE);
+                    new BasicEditField("Load: ", "0 Bytes", 10,
+                            Field.NON_FOCUSABLE);
             add(_loadStatusField);
 
-            // Create and add the field with the player status.
+            // Create and add the field with the player status
             _playStatusField =
-                    new TextField("Play: ", "Stopped", 10, Field.NON_FOCUSABLE);
+                    new BasicEditField("Play: ", "Stopped", 10,
+                            Field.NON_FOCUSABLE);
             add(_playStatusField);
 
-            // Create and add the field with the starting buffer.
+            // Create and add the field with the starting buffer
             _startBufferField =
                     new BasicEditField("Starting Buffer: ", "200000", 10,
                             BasicEditField.FILTER_INTEGER | Field.NON_FOCUSABLE);
             add(_startBufferField);
 
-            // Create and add the field with the minimum pause buffer.
+            // Create and add the field with the minimum pause buffer
             _pauseBytesField =
                     new BasicEditField("Pause At: ", "64000", 10,
                             BasicEditField.FILTER_INTEGER | Field.NON_FOCUSABLE);
             add(_pauseBytesField);
 
-            // Create and add the field with the minimum resume buffer.
+            // Create and add the field with the minimum resume buffer
             _resumeBytesField =
                     new BasicEditField("Resume At: ", "128000", 10,
                             BasicEditField.FILTER_INTEGER | Field.NON_FOCUSABLE);
             add(_resumeBytesField);
 
-            // Create and add the field with the read limit.
+            // Create and add the field with the read limit
             _readLimitField =
                     new BasicEditField("Read Limit: ", "32000", 10,
                             BasicEditField.FILTER_INTEGER | Field.NON_FOCUSABLE);
@@ -194,18 +207,18 @@ public final class BufferedPlayback extends UiApplication {
         }
 
         /**
-         * A common listener for all three player controls.
+         * A common listener for all three player controls
          * 
          * @param field
-         *            The field that changed.
+         *            The field that changed
          * @param context
-         *            Information specifying the origin of the change.
+         *            Information specifying the origin of the change
          */
         public void fieldChanged(final Field field, final int context) {
             try {
-                // If the START button was pressed, begin playback.
+                // If the START button was pressed, begin playback
                 if (field == _startPlayingButton) {
-                    // The player does not exist, we must initialize it.
+                    // The player does not exist, we must initialize it
                     if (_player == null) {
                         // Create a stream using the remote file.
                         _source =
@@ -226,57 +239,57 @@ public final class BufferedPlayback extends UiApplication {
                         _source.setLoadStatus(_loadStatusField);
                         _source.setPlayStatus(_playStatusField);
 
-                        // Acquire the UI lock.
+                        // Acquire the UI lock
                         UiApplication.getUiApplication().invokeLater(
                                 new Runnable() {
                                     public void run() {
-                                        // Update the player status.
+                                        // Update the player status
                                         _playStatusField.setText("Started");
                                     }
                                 });
 
-                        // Create and run the player's thread.
+                        // Create and run the player's thread
                         _playerThread = new PlayerThread();
                         _playerThread.start();
                     }
-                    // The player already exists, simply resume it.
+                    // The player already exists, simply resume it
                     else {
                         _player.start();
                     }
                 }
                 // If the STOP button was pressed:
                 else if (field == _stopPlayingButton) {
-                    // Acquire the UI lock.
+                    // Acquire the UI lock
                     UiApplication.getUiApplication().invokeLater(
                             new Runnable() {
                                 public void run() {
-                                    // Update the status fields.
+                                    // Update the status fields
                                     _playStatusField.setText("Stopped");
                                 }
                             });
 
                     if (_player != null) {
-                        // Stop the player.
+                        // Stop the playe.
                         _player.stop();
                     }
                 }
                 // If the RESET button was pressed:
                 else if (field == _resetField) {
-                    // Acquire the UI lock.
+                    // Acquire the UI lock
                     UiApplication.getUiApplication().invokeLater(
                             new Runnable() {
                                 public void run() {
-                                    // Update the status fields.
+                                    // Update the status fields
                                     _loadStatusField.setText("0 Bytes");
                                     _playStatusField.setText("Stopped");
                                 }
                             });
 
-                    // Destroy the Player and streams.
+                    // Destroy the Player and streams
                     destroy();
                 }
             } catch (final Exception e) {
-                System.err.println(e.getMessage());
+                errorDialog(e.toString());
             }
 
         }
@@ -287,29 +300,30 @@ public final class BufferedPlayback extends UiApplication {
          */
         public void close() {
             try {
-                // Destroy the Player and streams.
+                // Destroy the Player and streams
                 destroy();
             } catch (final Exception e) {
-                System.err.println(e.getMessage());
+                errorDialog("destroy() threw " + e.toString());
             } finally {
                 super.close();
-                System.exit(0);
             }
         }
 
         /**
-         * Prevent the save dialog from being displayed.
+         * Prevent the save dialog from being displayed
          * 
          * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
          */
-        public boolean onSavePrompt() {
+        protected boolean onSavePrompt() {
             return true;
         }
 
         /**
-         * Destroy the Player and streams.
+         * Destroy the Player and streams
          * 
          * @throws Exception
+         *             Thrown if the media player could not be closed or if the
+         *             connection stream could not be closed
          */
         private void destroy() throws Exception {
             // Destroy the player.
@@ -327,18 +341,20 @@ public final class BufferedPlayback extends UiApplication {
         }
 
         /**
-         * A thread for the media player.
+         * A thread for the media player
          */
         private class PlayerThread extends Thread {
             /**
-             * Create and start the player.
+             * Create and start the player
+             * 
+             * @see java.lang.Runnable#run()
              */
             public void run() {
                 try {
                     _player = Manager.createPlayer(_source);
                     _player.start();
                 } catch (final Exception e) {
-                    // Acquire the UI lock.
+                    // Acquire the UI lock
                     UiApplication.getUiApplication().invokeLater(
                             new Runnable() {
                                 public void run() {

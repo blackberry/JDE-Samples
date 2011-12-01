@@ -38,13 +38,13 @@ import net.rim.device.api.ui.UiApplication;
 /**
  * A thread class to handle communication with the server component.
  */
-class ConnectThread extends Thread {
+public class ConnectThread extends Thread {
     private InputStreamReader _in;
     private OutputStreamWriter _out;
     private final SocketDemoScreen _screen;
 
     // Constructor
-    ConnectThread() {
+    public ConnectThread() {
         _screen = ((SocketDemo) UiApplication.getUiApplication()).getScreen();
     }
 
@@ -85,7 +85,7 @@ class ConnectThread extends Thread {
         try {
             _screen.updateDisplay("Opening Connection...");
             final String url =
-                    "socket://" + _screen.getHostFieldText() + ":4444"
+                    "socket://" + _screen.getHostFieldText() + ":44444"
                             + (_screen.isDirectTCP() ? ";deviceside=true" : "");
             connection = (StreamConnection) Connector.open(url);
             _screen.updateDisplay("Connection open");
@@ -101,16 +101,24 @@ class ConnectThread extends Thread {
             // Send the GOODBYE string.
             exchange("Goodbye and farewell");
 
-            // Close the current connection.
-            _in.close();
-            _out.close();
-            connection.close();
-
             _screen.updateDisplay("Done!");
         } catch (final IOException e) {
             System.err.println(e.toString());
         } finally {
             _screen.setThreadRunning(false);
+
+            try {
+                _in.close();
+            } catch (final IOException ioe) {
+            }
+            try {
+                _out.close();
+            } catch (final IOException ioe) {
+            }
+            try {
+                connection.close();
+            } catch (final IOException ioe) {
+            }
         }
     }
 }

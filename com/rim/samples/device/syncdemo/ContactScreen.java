@@ -37,7 +37,10 @@ import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.MainScreen;
 
-final class ContactScreen extends MainScreen {
+/**
+ * This screen allows the user to view and edit a contact's information.
+ */
+public final class ContactScreen extends MainScreen {
     // Members
     // ------------------------------------------------------------------
     private final EditField _first, _last, _email;
@@ -46,11 +49,22 @@ final class ContactScreen extends MainScreen {
 
     // Inner classes
     // ------------------------------------------------------------
+    /**
+     * Saves the current contact's information.
+     */
     private class SaveMenuItem extends MenuItem {
+        /**
+         * Default constructor
+         */
         private SaveMenuItem() {
             super("Save", 100000, 5);
         }
 
+        /**
+         * Saves and closes this screen.
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             // If successful, return to contact list.
             if (onSave()) {
@@ -60,8 +74,10 @@ final class ContactScreen extends MainScreen {
         }
     }
 
-    // Constructor
-    ContactScreen() {
+    /**
+     * Default constructor
+     */
+    public ContactScreen() {
         _saveMenuItem = new SaveMenuItem();
 
         setTitle(new LabelField("Contact", DrawStyle.ELLIPSIS
@@ -81,24 +97,37 @@ final class ContactScreen extends MainScreen {
         addMenuItem(_saveMenuItem);
     }
 
-    public ContactScreen(final ContactData contact) {
+    /**
+     * Constructor to display an existing contact and allow the user to edit the
+     * information.
+     * 
+     * @param contact
+     *            The contact data to view and edit
+     * @param editable
+     *            True if the contact is editable, otherwise false
+     */
+    public ContactScreen(final ContactData contact, final boolean editable) {
         this();
 
         _contact = contact;
         _first.setText(_contact.getFirst());
-        _first.setEditable(false);
+        _first.setEditable(editable);
         _last.setText(_contact.getLast());
-        _last.setEditable(false);
+        _last.setEditable(editable);
         _email.setText(_contact.getEmail());
-        _email.setEditable(false);
+        _email.setEditable(editable);
     }
 
-    ContactData getContact() {
+    /**
+     * Gets the contact information displayed by this screen.
+     * 
+     * @return The contact information displayed by this screen
+     */
+    public ContactData getContact() {
         return _contact;
     }
 
     /**
-     * 
      * @see net.rim.device.api.ui.Screen#onSave()
      */
     protected boolean onSave() {
@@ -106,7 +135,7 @@ final class ContactScreen extends MainScreen {
         final String lastName = _last.getText().trim();
         final String email = _email.getText().trim();
 
-        // Check that first or last name and email has been entered.
+        // Check that a name and an email has been entered.
         if (firstName.length() == 0 && lastName.length() == 0
                 || email.length() == 0) {
             Dialog.inform("First or Last Name and Email required");

@@ -50,7 +50,7 @@ import net.rim.device.api.ui.container.PopupScreen;
 /**
  * The main screen for the application.
  */
-/* package */final class MemoryDemoMainScreen extends MainScreen implements
+public final class MemoryDemoMainScreen extends MainScreen implements
         ListFieldCallback, LowMemoryListener {
     // Members
     // -------------------------------------------------------------------------------------
@@ -68,8 +68,8 @@ import net.rim.device.api.ui.container.PopupScreen;
      * This constructor builds the main screen, prepares menu items for display,
      * and shows the list of order records.
      */
-    MemoryDemoMainScreen() {
-        setTitle(new LabelField("Order Records"));
+    public MemoryDemoMainScreen() {
+        setTitle("Order Records");
 
         _app = UiApplication.getUiApplication();
 
@@ -450,6 +450,9 @@ import net.rim.device.api.ui.container.PopupScreen;
             UiApplication.getUiApplication().pushScreen(_popupScreen);
         }
 
+        /**
+         * @see com.rim.samples.device.memorydemo.CountAndSortListener#counterUpdated(int)
+         */
         public void counterUpdated(final int counter) {
             // Update _gaugeField if at least one percent of the records have
             // been processed
@@ -467,6 +470,9 @@ import net.rim.device.api.ui.container.PopupScreen;
             }
         }
 
+        /**
+         * @see com.rim.samples.device.memorydemo.CountAndSortListener#sortingStarted()
+         */
         public void sortingStarted() {
             // Remove _gaugeField and change the text displayed on _popupScreen
             // to
@@ -479,6 +485,9 @@ import net.rim.device.api.ui.container.PopupScreen;
             });
         }
 
+        /**
+         * @see com.rim.samples.device.memorydemo.CountAndSortListener#sortingStarted()
+         */
         public void sortingFinished() {
             // Remove _popupScreen from the stack.
             UiApplication.getUiApplication().invokeLater(new Runnable() {
@@ -494,10 +503,16 @@ import net.rim.device.api.ui.container.PopupScreen;
      * priority.
      */
     private final class SimulateLmmLow extends MenuItem {
+        // Constructor
         private SimulateLmmLow() {
             super("Simulate LMM Low", 300000, 300000);
         }
 
+        /**
+         * Frees a stale object at low priority
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             /* outer. */freeStaleObject(LowMemoryListener.LOW_PRIORITY);
         }
@@ -508,10 +523,16 @@ import net.rim.device.api.ui.container.PopupScreen;
      * Medium priority.
      */
     private final class SimulateLmmMedium extends MenuItem {
+        // Constructor
         private SimulateLmmMedium() {
             super("Simulate LMM Medium", 300001, 300001);
         }
 
+        /**
+         * Frees a stale object at medium priority
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             /* outer. */freeStaleObject(LowMemoryListener.MEDIUM_PRIORITY);
         }
@@ -522,20 +543,42 @@ import net.rim.device.api.ui.container.PopupScreen;
      * priority.
      */
     private final class SimulateLmmHigh extends MenuItem {
+        // Constructor
         private SimulateLmmHigh() {
             super("Simulate LMM High", 300002, 300002);
         }
 
+        /**
+         * Frees a stale object at high priority
+         * 
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             /* outer. */freeStaleObject(LowMemoryListener.HIGH_PRIORITY);
         }
     }
 }
 
+/**
+ * Listener for when a count is updated, when sorting has started and when
+ * sorting had finished.
+ */
 interface CountAndSortListener {
+    /**
+     * Called when the counter is updated
+     * 
+     * @param counter
+     *            The new counter
+     */
     public void counterUpdated(int counter);
 
+    /**
+     * Called when sorting is started
+     */
     public void sortingStarted();
 
+    /**
+     * Called when sorting is finished
+     */
     public void sortingFinished();
 }

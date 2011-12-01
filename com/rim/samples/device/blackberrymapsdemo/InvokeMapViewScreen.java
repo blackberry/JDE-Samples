@@ -37,11 +37,8 @@ import net.rim.device.api.ui.container.MainScreen;
  * This example uses of a MapView object when invoking the the BlackBerryMaps
  * application.
  */
-final class InvokeMapViewScreen extends MainScreen {
-
-    /**
-     * Constructor
-     */
+public final class InvokeMapViewScreen extends MainScreen {
+    // Constructor
     InvokeMapViewScreen() {
         setTitle("Invoke Map View");
 
@@ -54,7 +51,7 @@ final class InvokeMapViewScreen extends MainScreen {
     }
 
     /**
-     * Invokes BlackBerry Maps application using a MapView object.
+     * Invokes BlackBerry Maps application using a MapView object
      */
     private final MenuItem viewMapItem = new MenuItem("View Map", 1000, 10) {
         public void run() {
@@ -63,7 +60,7 @@ final class InvokeMapViewScreen extends MainScreen {
             mapview.setLongitude(-7569792);
             mapview.setZoom(3);
 
-            // Invoke maps application with specified MapView.
+            // Invoke maps application with specified MapView
             Invoke.invokeApplication(Invoke.APP_TYPE_MAPS, new MapsArguments(
                     mapview));
         }

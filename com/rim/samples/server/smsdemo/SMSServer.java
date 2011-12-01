@@ -109,7 +109,7 @@ public final class SMSServer implements Runnable
 	    	_data[i] = data[start + i];
 	    }
 	
-	    _length = data[INDEX_LENGTH];
+	    _length = data[start + INDEX_LENGTH];
 	}
 	
 	public String getAddress()
@@ -225,8 +225,7 @@ public final class SMSServer implements Runnable
 	sb.append(_resources.getString(RECEIVED) + "\n");
 	sb.append(_resources.getString(SOURCE) + srcaddress + "\n");
 	sb.append(_resources.getString(DEST) + destaddress + "\n");
-	
-	sb.append(_resources.getString(DATA) + new String(data, PAYLOAD_INDEX, p.getLength() - PAYLOAD_INDEX));
+	sb.append(_resources.getString(DATA) + new String(data, PAYLOAD_INDEX, data.length - PAYLOAD_INDEX));
 	
 	System.out.println(sb.toString());
         System.out.println("\n");
@@ -312,10 +311,8 @@ public final class SMSServer implements Runnable
 	for (int i = 0; i < destbytes.length; ++i)
 	{
 	    data[i + SIZE_OF_ADDRESS] = destbytes[i];
-	}
-	
-	// Set the user data header present flag to true in case it has been corrupted
-	data[232] = 1;	
+	}	
+		
 		
 	DatagramPacket returnpacket = new DatagramPacket(data, p.getLength());
 	returnpacket.setAddress(p.getAddress());

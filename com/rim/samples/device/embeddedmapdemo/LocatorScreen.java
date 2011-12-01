@@ -50,7 +50,7 @@ import net.rim.device.api.ui.container.VerticalFieldManager;
  * matches are found, the user can choose which one to display (see
  * LookupMatchesScreen) and the location will be displayed on the map.
  */
-final class LocatorScreen extends MainScreen {
+public final class LocatorScreen extends MainScreen {
     private final EmbeddedMapDemo.EmbeddedMapDemoScreen _mainScreen;
 
     private final VerticalFieldManager _vfm;
@@ -67,9 +67,9 @@ final class LocatorScreen extends MainScreen {
      * Constructor
      * 
      * @param screen
-     *            - A pointer to the main screen.
+     *            A pointer to the main screen.
      */
-    LocatorScreen(final EmbeddedMapDemo.EmbeddedMapDemoScreen screen) {
+    public LocatorScreen(final EmbeddedMapDemo.EmbeddedMapDemoScreen screen) {
         setTitle("Location Search");
         _mainScreen = screen;
 
@@ -123,7 +123,7 @@ final class LocatorScreen extends MainScreen {
      * Update the _statusLabel label with a set prefix and the given text.
      * 
      * @param text
-     *            - the text to be displayed
+     *            The text to be displayed
      */
     private void setStatus(final String text) {
         _statusLabelField.setText("Locator Status: " + text);
@@ -170,7 +170,7 @@ final class LocatorScreen extends MainScreen {
      * 
      * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
      */
-    public boolean onSavePrompt() {
+    protected boolean onSavePrompt() {
         return true;
     }
 
@@ -202,6 +202,9 @@ final class LocatorScreen extends MainScreen {
      */
     private final FieldChangeListener _lookupListener =
             new FieldChangeListener() {
+                /**
+                 * @see FieldChangeListener#fieldChanged(Field, int)
+                 */
                 public void fieldChanged(final Field f, final int context) {
                     lookup();
                 }
@@ -218,11 +221,11 @@ final class LocatorScreen extends MainScreen {
          * Constructor using the freeform string lookup.
          * 
          * @param field
-         *            - the ExtendedMapField that will hold the location
+         *            The ExtendedMapField that will hold the location
          * @param location
-         *            - the String location to search for
+         *            The String location to search for
          */
-        LocatorRunnable(final String location) {
+        private LocatorRunnable(final String location) {
             _search = location;
             _address = null;
         }
@@ -231,11 +234,11 @@ final class LocatorScreen extends MainScreen {
          * Constructor using an AddressInfo object for lookup.
          * 
          * @param field
-         *            - the ExtendedMapField that will hold the location
+         *            The ExtendedMapField that will hold the location
          * @param address
-         *            - the AddressInfo object to search for
+         *            The AddressInfo object to search for
          */
-        LocatorRunnable(final AddressInfo address) {
+        private LocatorRunnable(final AddressInfo address) {
             _search = null;
             _address = address;
         }
@@ -306,9 +309,9 @@ final class LocatorScreen extends MainScreen {
          * Constructor that sets the text to be displayed
          * 
          * @param text
-         *            - to be displayed in status label
+         *            The text to be displayed in status label
          */
-        StatusRunnable(final String text) {
+        private StatusRunnable(final String text) {
             _message = text;
         }
 

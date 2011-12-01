@@ -33,21 +33,21 @@ import javax.microedition.rms.RecordStoreException;
 import javax.microedition.rms.RecordStoreNotOpenException;
 
 /**
- * Manage an RMS of Compact Disc titles.
+ * This class manages an RMS of Compact Disc titles
  * 
  */
-public class CDdb {
+public final class CDdb {
     RecordStore _rs;
 
     /**
-     * Constructor for the CDdb, creator.
+     * Constructs a new CDdb, creator
      * 
      * @param name
-     *            Name of the RMS.
+     *            Name of the RMS
      * @exception RecordStoreException
-     *                General record store exception.
+     *                General record store exception
      * @exception java.io.IOException
-     *                IO error.
+     *                Thrown if the record store could not be opened
      */
     public CDdb(final String name) throws RecordStoreException,
             java.io.IOException {
@@ -57,18 +57,18 @@ public class CDdb {
     }
 
     /**
-     * Constructor for the CDdb, consumer.
+     * Constructor a new CDdb object, consumer
      * 
      * @param recordStoreName
-     *            Name of the RMS.
+     *            Name of the RMS
      * @param vendorName
-     *            MIDlet suite vendor.
+     *            MIDlet suite vendor
      * @param suiteName
-     *            MIDlet suite name.
+     *            MIDlet suite name
      * @exception RecordStoreException
-     *                General record store exception.
+     *                General record store exception
      * @exception java.io.IOException
-     *                IO error.
+     *                Thrown if the record store could not be opened
      */
     public CDdb(final String recordStoreName, final String vendorName,
             final String suiteName) throws RecordStoreException,
@@ -79,19 +79,20 @@ public class CDdb {
     }
 
     /**
-     * Add a CD to the RecordStore.
+     * Adds a CD to the RecordStore
      * 
      * @param Artist
-     *            The name of the artist of the CD.
+     *            The name of the artist of the CD
      * @param title
-     *            The title of the CD.
-     * @return RecordID of new CD.
+     *            The title of the CD
+     * @return RecordID of new CD
      * @exception java.io.IOException
-     *                IO error.
+     *                Thrown if an error occurs while writing to the record
+     *                store
      * @exception RecordStoreNotOpenException
-     *                Record store not open.
+     *                Thrown if the record store is not open
      * @exception RecordStoreException
-     *                General record store exception.
+     *                Thrown if there is a record store error
      */
     public synchronized int add(final String artist, final String title)
             throws java.io.IOException, RecordStoreNotOpenException,
@@ -103,19 +104,20 @@ public class CDdb {
     }
 
     /**
-     * Edit a CD in the RecordStore
+     * Edits a CD in the RecordStore
      * 
      * @param artist
-     *            The name of the artist of the CD.
+     *            The name of the artist of the CD
      * @param title
-     *            The title of the CD.
-     * @return recordID of new CD.
+     *            The title of the CD
+     * @return recordID of new CD
      * @exception java.io.IOException
-     *                IO error.
+     *                Thrown if an error occurs while writing to the record
+     *                store
      * @exception RecordStoreNotOpenException
-     *                Record store not open.
+     *                Thrown if the record store is not open
      * @exception RecordStoreException
-     *                General record store exception.
+     *                Thrown if there is a record store error
      */
     public synchronized void edit(final int index, final String artist,
             final String title) throws java.io.IOException,
@@ -126,19 +128,20 @@ public class CDdb {
     }
 
     /**
-     * Return the CD of a given recordID with the RMS.
+     * Returns the CD of a given recordID with the RMS
      * 
      * @param recordID
-     *            RecordID of CD to retrieve.
-     * @return The CD corresponding to the recordID.
+     *            RecordID of CD to retrieve
+     * @return The CD corresponding to the recordID
      * @exception RecordStoreNotOpenException
-     *                Record store not open
+     *                Thrown if the record store is not open
      * @exception InvalidRecordIDException
-     *                RecordID is invalid
+     *                Thrown if the recordID is invalid
      * @exception RecordStoreException
-     *                General record store exception
+     *                Thrown if there is a record store error
      * @exception java.io.IOException
-     *                IO error
+     *                Thrown if there is an I/O error when retrieving the record
+     *                from the store
      */
     public CD getCD(final int recordID) throws RecordStoreNotOpenException,
             InvalidRecordIDException, RecordStoreException, java.io.IOException {
@@ -151,13 +154,13 @@ public class CDdb {
      * Delete a CD from the RecordStore
      * 
      * @param recordId
-     *            RecordID within the RMS.
+     *            RecordID within the RMS
      * @exception RecordStoreNotOpenException
-     *                Record store not open.
+     *                Thrown if the record store is not open
      * @exception InvalidRecordIDException
-     *                Invalid record ID.
+     *                Thrown if the recordID is invalid
      * @exception RecordStoreException
-     *                General record store exception.
+     *                Thrown if there is a record store error
      */
     public synchronized void delete(final int recordId)
             throws RecordStoreNotOpenException, InvalidRecordIDException,
@@ -166,13 +169,13 @@ public class CDdb {
     }
 
     /**
-     * Generate an enumeration for the RMS
+     * Generates an enumeration for the RMS
      * 
-     * @return An enumeration object for the RMS.
+     * @return An enumeration object for the RMS
      * @exception RecordStoreNotOpenException
-     *                Record store not open.
+     *                Thrown if the record store is not open
      */
-    public RecordEnumeration enumerate() throws RecordStoreNotOpenException {
+    RecordEnumeration enumerate() throws RecordStoreNotOpenException {
         return _rs.enumerateRecords(null, null, true);
     }
 }

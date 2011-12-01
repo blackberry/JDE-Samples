@@ -42,6 +42,8 @@ import net.rim.device.api.synchronization.SyncObject;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
 import net.rim.device.api.system.RuntimeStore;
+import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.util.CloneableVector;
 import net.rim.device.api.util.DataBuffer;
 import net.rim.device.api.util.ListenerUtilities;
@@ -49,9 +51,9 @@ import net.rim.device.api.util.ListenerUtilities;
 /**
  * A Collection that is completely synchable over the air.
  */
-class OTAContactCollection implements OTASyncCapable, OTASyncPriorityProvider,
-        OTASyncParametersProvider, SyncConverter, SyncCollection,
-        CollectionEventSource {
+public class OTAContactCollection implements OTASyncCapable,
+        OTASyncPriorityProvider, OTASyncParametersProvider, SyncConverter,
+        SyncCollection, CollectionEventSource {
 
     private static final long PERSISTENT_KEY = 0xb7abba0f9ef77e29L; // Hash of
                                                                     // com.rim.samples.device.otasyncdemo
@@ -71,7 +73,7 @@ class OTAContactCollection implements OTASyncCapable, OTASyncPriorityProvider,
     /**
      * Constructor
      */
-    private OTAContactCollection() {
+    public OTAContactCollection() {
         _persist = PersistentStore.getPersistentObject(PERSISTENT_KEY);
         _contacts = (Vector) _persist.getContents();
 
@@ -228,14 +230,23 @@ class OTAContactCollection implements OTASyncCapable, OTASyncPriorityProvider,
         return null;
     }
 
+    /**
+     * @see net.rim.device.api.synchronization.SyncCollection#isSyncObjectDirty(SyncObject)
+     */
     public boolean isSyncObjectDirty(final SyncObject object) {
         return false; // NA
     }
 
+    /**
+     * @see net.rim.device.api.synchronization.SyncCollection#setSyncObjectDirty(SyncObject)
+     */
     public void setSyncObjectDirty(final SyncObject object) {
         // NA
     }
 
+    /**
+     * @see net.rim.device.api.synchronization.SyncCollection#clearSyncObjectDirty(SyncObject)
+     */
     public void clearSyncObjectDirty(final SyncObject object) {
         // NA
     }
@@ -405,7 +416,11 @@ class OTAContactCollection implements OTASyncCapable, OTASyncPriorityProvider,
 
             return contact;
         } catch (final EOFException e) {
-            System.err.println(e.toString());
+            UiApplication.getUiApplication().invokeLater(new Runnable() {
+                public void run() {
+                    Dialog.alert(e.toString());
+                }
+            });
         }
 
         return null;
@@ -461,6 +476,13 @@ class OTAContactCollection implements OTASyncCapable, OTASyncPriorityProvider,
 
     // Class-specific methods
     // ---------------------------------------------------
+    /**
+     * Returns the contact from the contact list at a specific index.
+     * 
+     * @param index
+     *            The index of the contact to retrieve
+     * @return The contact from the list at the specific index
+     */
     Object getAt(final int index) {
         return _contacts.elementAt(index);
     }

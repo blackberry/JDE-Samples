@@ -32,7 +32,7 @@ import net.rim.device.api.notification.NotificationsManager;
  * A class representing a notification event. This class is used to start/stop
  * immediate and deferred events simultaneously.
  */
-final class Event {
+public final class Event {
     private final long _sourceId;
     long _eventId;
     int _priority;
@@ -40,7 +40,7 @@ final class Event {
     private final long _timeout;
 
     // Constructor
-    Event(final long sourceid, final long eventid, final int priority,
+    public Event(final long sourceid, final long eventid, final int priority,
             final long timeout, final int triggerIndex) {
         _sourceId = sourceid;
         _eventId = eventid;
@@ -49,7 +49,9 @@ final class Event {
         _timeout = timeout;
     }
 
-    // Invoke the event.
+    /**
+     * Invoke the event.
+     */
     void fire() {
         // negotiateDeferredEvent() will cause the event to be queued.
         // Ultimately, NotificationsEngineListener.proceedWithDeferredEvent()
@@ -69,7 +71,9 @@ final class Event {
         NotificationsManager.triggerImmediateEvent(_sourceId, 0, this, null);
     }
 
-    // Cancel the event.
+    /**
+     * Cancel the event.
+     */
     void cancel() {
         // If event exists in the queue, it will be removed and
         // NotificationsEngineListener.deferredEventWasSuperseded()
