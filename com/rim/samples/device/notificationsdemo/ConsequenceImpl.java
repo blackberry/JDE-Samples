@@ -43,7 +43,7 @@ import net.rim.device.api.util.Persistable;
  */
 class ConsequenceImpl implements Consequence, SyncConverter {
     // net.rim.samples.device.notificationsdemo.NotificationsDemo.ConsequenceImpl
-    public static final long ID = 0xbd2350c0dfda2a51L;
+    static final long ID = 0xbd2350c0dfda2a51L;
     private static final int TYPE = 'n' << 24 | 'o' << 16 | 't' << 8 | 'd';
 
     // Notd for NotificationsDemo.
@@ -92,7 +92,7 @@ class ConsequenceImpl implements Consequence, SyncConverter {
     private static final class Configuration implements SyncObject, Persistable {
         public byte[] _data;
 
-        public Configuration(final byte[] data) {
+        private Configuration(final byte[] data) {
             _data = data;
         }
 

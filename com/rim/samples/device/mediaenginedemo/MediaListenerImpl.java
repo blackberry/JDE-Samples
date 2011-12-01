@@ -24,7 +24,7 @@
  * Environment Development Guide associated with this release.
  */
 
-package com.rim.samples.device.mediaengine;
+package com.rim.samples.device.mediaenginedemo;
 
 import net.rim.plazmic.mediaengine.MediaException;
 import net.rim.plazmic.mediaengine.MediaListener;
@@ -33,7 +33,7 @@ import net.rim.plazmic.mediaengine.io.LoadingStatus;
 /**
  * The MediaListener implementation.
  */
-public final class MediaListenerImpl implements MediaListener {
+final class MediaListenerImpl implements MediaListener {
     /**
      * @see net.rim.plazmic.mediaengine.MediaListener#mediaEvent(Object, int,
      *      int, Object)

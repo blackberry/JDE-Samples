@@ -91,7 +91,7 @@ final class KeywordFilterDemoScreen extends MainScreen {
      * Creates an InfoScreen instance and pushes it onto the stack for
      * rendering.
      */
-    void displayInfoScreen() {
+    private void displayInfoScreen() {
         // Retrieve the selected Country and use it to invoke a new InfoScreen.
         final Country country =
                 (Country) _keywordFilterField.getSelectedElement();
@@ -103,7 +103,7 @@ final class KeywordFilterDemoScreen extends MainScreen {
 
     // Inner classes------------------------------------------------------------
 
-    final MenuItem addElementItem = new MenuItem("Add country", 0, 0) {
+    private final MenuItem addElementItem = new MenuItem("Add country", 0, 0) {
         public void run() {
             // Clear the search field.
             _keywordFilterField.setKeyword("");
@@ -129,7 +129,7 @@ final class KeywordFilterDemoScreen extends MainScreen {
     // selected country.
     private final static class InfoScreen extends MainScreen {
         // Constructor
-        public InfoScreen(final Country country) {
+        InfoScreen(final Country country) {
             // Set up and display UI elements.
             setTitle(country.toString());
             final BasicEditField popField =

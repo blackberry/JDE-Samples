@@ -51,13 +51,13 @@ import net.rim.device.api.ui.container.MainScreen;
  * for a particular locale are stored within a ResourceBundle onject.
  * 
  */
-public class LocalizationDemo extends UiApplication {
+class LocalizationDemo extends UiApplication {
     public static void main(final String[] args) {
         final LocalizationDemo theApp = new LocalizationDemo();
         theApp.enterEventDispatcher();
     }
 
-    public LocalizationDemo() {
+    private LocalizationDemo() {
         pushScreen(new LocalizationDemoScreen());
     }
 }
@@ -71,7 +71,7 @@ final class LocalizationDemoScreen extends MainScreen implements
     private static ResourceBundle _resources = ResourceBundle.getBundle(
             BUNDLE_ID, BUNDLE_NAME);
 
-    public LocalizationDemoScreen() {
+    LocalizationDemoScreen() {
         final LabelField title =
                 new LabelField(_resources.getString(APPLICATION_TITLE),
                         DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH);
@@ -145,7 +145,7 @@ class InfoScreen extends MainScreen implements LocalizationDemoResource {
     private static ResourceBundle _resources = ResourceBundle.getBundle(
             BUNDLE_ID, BUNDLE_NAME);
 
-    public InfoScreen() {
+    InfoScreen() {
         _countryField = new LabelField();
         _popField =
                 new BasicEditField(_resources.getString(FIELD_POP), null, 20,
@@ -164,7 +164,7 @@ class InfoScreen extends MainScreen implements LocalizationDemoResource {
         add(_citiesField);
     }
 
-    public void updateScreen(final int index) {
+    void updateScreen(final int index) {
         switch (index) {
         case US:
             _countryField.setText(_resources.getString(FIELD_US));

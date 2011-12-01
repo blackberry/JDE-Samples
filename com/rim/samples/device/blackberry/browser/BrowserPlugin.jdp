@@ -44,3 +44,5 @@ RunOnStartup=1
 StartupTier=7
 SystemModule=0
 Type=2
+Vendor=Research In Motion Limited
+Version=0.9

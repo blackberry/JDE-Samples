@@ -6,11 +6,10 @@ xsi:schemaLocation="http://www.w3.org/2000/svg http://www.plazmic.com/svg/schema
 xmlns:xlink="http://www.w3.org/1999/xlink"
 xmlns:xforms="http://www.w3.org/2002/xforms"
 xmlns:pz="http://www.plazmic.com/plazmic_extents"
- id="Untitled_2_26" xml:space="default" width="320" height="240" viewport-fill="#ffffff" viewBox="-160 -120 320 240" preserveAspectRatio="xMidYMid meet">
+ id="runner_svg_26" xml:space="default" width="480" height="320" viewport-fill="#ffffff" viewBox="-240 -160 480 320" preserveAspectRatio="xMidYMid meet">
 <g  id="Layer_1">
 	<!-- pz:tag type="layer" -->
-<g  id="Running_Man"
-	transform="translate(-4 2.30435) scale(0.607143 0.652174)">
+<g  id="Running_Man">
 	<!-- pz:tag type="animation" -->
 <g  id="Running_Man-Contents">
 	<!-- pz:tag type="layer" -->

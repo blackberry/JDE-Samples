@@ -61,7 +61,7 @@ class NotificationsEngineListenerImpl implements NotificationsEngineListener {
     private boolean _dialogShowing;
 
     // Constructor
-    public NotificationsEngineListenerImpl(final UiApplication app) {
+    NotificationsEngineListenerImpl(final UiApplication app) {
         _app = app;
         _dialogShowing = false;
     }

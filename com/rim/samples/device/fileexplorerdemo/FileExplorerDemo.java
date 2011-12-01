@@ -47,7 +47,7 @@ final class FileExplorerDemo extends UiApplication {
     /**
      * Constructor. Pushes the application's main screen onto the display stack.
      */
-    FileExplorerDemo() {
+    private FileExplorerDemo() {
         pushScreen(new FileExplorerDemoScreen());
     }
 }

@@ -56,7 +56,7 @@ import net.rim.device.api.ui.component.ListFieldCallback;
      * @param element
      *            The element to be added.
      */
-    public void add(final Object element) {
+    void add(final Object element) {
         _elements.addElement(element);
         setSize(getSize());
     }
@@ -140,7 +140,7 @@ import net.rim.device.api.ui.component.ListFieldCallback;
      * @param index
      *            The index of the element to remove.
      */
-    public void remove(final int index) {
+    void remove(final int index) {
         _elements.removeElementAt(index);
         setSize(getSize());
     }
@@ -148,7 +148,7 @@ import net.rim.device.api.ui.component.ListFieldCallback;
     /**
      * Removes all elements from this list field.
      */
-    public void removeAll() {
+    void removeAll() {
         _elements.removeAllElements();
         setSize(0);
     }

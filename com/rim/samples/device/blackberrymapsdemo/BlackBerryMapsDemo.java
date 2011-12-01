@@ -51,7 +51,7 @@ class BlackBerryMapsDemo extends UiApplication {
     /**
      * Constructor
      */
-    public BlackBerryMapsDemo() {
+    private BlackBerryMapsDemo() {
         final BlackBerryMapsDemoScreen screen = new BlackBerryMapsDemoScreen();
         pushScreen(screen);
     }
@@ -65,14 +65,13 @@ final class BlackBerryMapsDemoScreen extends MainScreen {
 
     BlackBerryMapsDemo _app;
 
-    public BlackBerryMapsDemoScreen() {
+    BlackBerryMapsDemoScreen() {
         setTitle("BlackBerry Maps Demo");
 
         _app = (BlackBerryMapsDemo) UiApplication.getUiApplication();
 
         final RichTextField rtf =
-                new RichTextField(
-                        "Select an option from the menu.\n\nNOTE: Using BlackBerry Maps within the BlackBerry simulator requires the MDS simulator to be running.",
+                new RichTextField("Select an option from the menu.",
                         Field.NON_FOCUSABLE);
         add(rtf);
 
@@ -89,7 +88,8 @@ final class BlackBerryMapsDemoScreen extends MainScreen {
     /**
      * Displays an InvokeContactScreen.
      */
-    MenuItem invokeContactItem = new MenuItem("Invoke Contact", 0, 0) {
+    private final MenuItem invokeContactItem = new MenuItem("Invoke Contact",
+            0, 0) {
         public void run() {
             final InvokeContactScreen invokeContactScreen =
                     new InvokeContactScreen();
@@ -100,7 +100,8 @@ final class BlackBerryMapsDemoScreen extends MainScreen {
     /**
      * Displays an InvokeDefaultScreen.
      */
-    MenuItem invokeDefaultItem = new MenuItem("Invoke Default", 0, 0) {
+    private final MenuItem invokeDefaultItem = new MenuItem("Invoke Default",
+            0, 0) {
         public void run() {
             final InvokeDefaultScreen invokeDefaultScreen =
                     new InvokeDefaultScreen();
@@ -111,7 +112,7 @@ final class BlackBerryMapsDemoScreen extends MainScreen {
     /**
      * Displays an InvokeLocationDocumentScreen.
      */
-    MenuItem invokeLocationDocumentItem = new MenuItem(
+    private final MenuItem invokeLocationDocumentItem = new MenuItem(
             "Invoke Location Document", 0, 0) {
         public void run() {
             final InvokeLocationDocumentScreen invokeLocationDocumentScreen =
@@ -123,7 +124,8 @@ final class BlackBerryMapsDemoScreen extends MainScreen {
     /**
      * Displays an InvokeMapViewScreen.
      */
-    MenuItem invokeMapViewItem = new MenuItem("Invoke Map View", 0, 0) {
+    private final MenuItem invokeMapViewItem = new MenuItem("Invoke Map View",
+            0, 0) {
         public void run() {
             final InvokeMapViewScreen invokeMapViewScreen =
                     new InvokeMapViewScreen();

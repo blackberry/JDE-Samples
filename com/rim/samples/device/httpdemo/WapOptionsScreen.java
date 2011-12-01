@@ -41,7 +41,7 @@ import net.rim.device.api.ui.container.MainScreen;
  * A simple options screen that allows the user to specify the WAP parameters to
  * use when opening an HTTP connection.
  */
-public final class WapOptionsScreen extends MainScreen {
+final class WapOptionsScreen extends MainScreen {
     // Cconstants
     // ----------------------------------------------------------------
     private static String WAP_PARAMETERKEY_GWAYIP = ";WapGatewayIP=";
@@ -67,7 +67,7 @@ public final class WapOptionsScreen extends MainScreen {
 
     // Constructors
     // -------------------------------------------------------------
-    public WapOptionsScreen(final UiApplication uiapp) {
+    WapOptionsScreen(final UiApplication uiapp) {
         super();
         _this = this;
         _app = uiapp;
@@ -106,7 +106,7 @@ public final class WapOptionsScreen extends MainScreen {
 
     // Methods
     // ------------------------------------------------------------------
-    public void display() {
+    void display() {
         _app.pushScreen(this);
     }
 
@@ -137,7 +137,7 @@ public final class WapOptionsScreen extends MainScreen {
      * 
      * @return a preformatted wap parameter string.
      */
-    public String getWapParameters() {
+    String getWapParameters() {
         return _wapParameters;
     }
 

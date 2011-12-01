@@ -296,7 +296,7 @@ class MapFieldDemoScreen extends MainScreen {
      * @param campus
      *            Name of the campus.
      */
-    public void displayTitle(final String campus) {
+    private void displayTitle(final String campus) {
         setTitle(new LabelField("Welcome to " + campus, Field.USE_ALL_WIDTH
                 | DrawStyle.HCENTER));
     }

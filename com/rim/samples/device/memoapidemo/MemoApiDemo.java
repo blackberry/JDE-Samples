@@ -41,7 +41,7 @@ import net.rim.device.api.ui.container.MainScreen;
  * Demo application that shows how to use BlackBerry's memo extension of the PIM
  * API.
  */
-public final class MemoApiDemo extends UiApplication {
+final class MemoApiDemo extends UiApplication {
 
     /**
      * Application entry point. Determines if the application is being run

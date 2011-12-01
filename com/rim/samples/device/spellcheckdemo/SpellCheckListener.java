@@ -107,11 +107,11 @@ class SpellCheckListener extends AbstractSpellCheckUIListener {
      * A runnable class which displays an instance of StatusScreen for a
      * specified interval.
      */
-    static final class popUpRunner implements Runnable {
+    private static final class popUpRunner implements Runnable {
         StatusScreen _popUp;
         RichTextField _rtf;
 
-        public popUpRunner(final String msg) {
+        private popUpRunner(final String msg) {
             final VerticalFieldManager vfm = new VerticalFieldManager();
             _popUp = new StatusScreen(vfm);
             _rtf =
@@ -129,10 +129,10 @@ class SpellCheckListener extends AbstractSpellCheckUIListener {
      * Extends PopupScreen class providing a method for pushing the screen and
      * dismissing after a specified interval.
      */
-    static final class StatusScreen extends PopupScreen {
+    private static final class StatusScreen extends PopupScreen {
         private final StatusScreenPopper _popupPopper;
 
-        public StatusScreen(final Manager manager) {
+        private StatusScreen(final Manager manager) {
             // super(manager,Field.FIELD_HCENTER);
             super(manager);
             _popupPopper = new StatusScreenPopper(this);
@@ -148,10 +148,10 @@ class SpellCheckListener extends AbstractSpellCheckUIListener {
     /**
      * A runnable class that can be invoked after a specified interval.
      */
-    static final class StatusScreenPopper implements Runnable {
+    private static final class StatusScreenPopper implements Runnable {
         private final PopupScreen _popup;
 
-        public StatusScreenPopper(final PopupScreen popup) {
+        private StatusScreenPopper(final PopupScreen popup) {
             _popup = popup;
         }
 

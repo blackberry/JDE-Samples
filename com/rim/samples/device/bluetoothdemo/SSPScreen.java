@@ -53,7 +53,7 @@ class SPPScreen extends MainScreen implements BluetoothSerialPortListener {
     private String _deviceName;
     private final DataBuffer _db;
 
-    public SPPScreen(final BluetoothSerialPortInfo info) {
+    SPPScreen(final BluetoothSerialPortInfo info) {
         // Fill a 1k array with the a character.
         Arrays.fill(_receiveBuffer, (byte) 'a');
 

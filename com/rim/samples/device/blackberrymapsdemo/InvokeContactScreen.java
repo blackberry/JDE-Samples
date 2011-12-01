@@ -51,7 +51,7 @@ final class InvokeContactScreen extends MainScreen {
     /**
      * Constructor
      */
-    public InvokeContactScreen() {
+    InvokeContactScreen() {
         setTitle("Invoke Contact");
 
         final LabelField instructions =
@@ -65,7 +65,7 @@ final class InvokeContactScreen extends MainScreen {
     /**
      * Displays a map based on an address from the address book.
      */
-    MenuItem viewMapItem = new MenuItem("View Map", 1000, 10) {
+    private final MenuItem viewMapItem = new MenuItem("View Map", 1000, 10) {
         /**
          * Run() method creates a list of Contacts from the address book and
          * searches list for first occurrence of a valid address.

@@ -24,7 +24,7 @@
  * Environment Development Guide associated with this release.
  */
 
-package internal.com.rim.samples.device.serviceroutingdemo;
+package com.rim.samples.device.serviceroutingdemo;
 
 import net.rim.device.api.servicebook.ServiceBook;
 import net.rim.device.api.servicebook.ServiceRecord;
@@ -45,8 +45,8 @@ import net.rim.device.api.ui.container.MainScreen;
  * the service routing API to leverage the serial bypass mechanism that was
  * implemented with 4.0 BES and 4.0 handhelds.
  */
-public class ServiceRoutingDemo extends UiApplication implements
-        TreeFieldCallback, ServiceRoutingListener {
+class ServiceRoutingDemo extends UiApplication implements TreeFieldCallback,
+        ServiceRoutingListener {
     private final MainScreen _screen; // Screen shown to the user.
     private final RichTextField _statusField; // Field containing connected or
                                               // disconnected string.
@@ -59,7 +59,7 @@ public class ServiceRoutingDemo extends UiApplication implements
         demo.enterEventDispatcher();
     }
 
-    public ServiceRoutingDemo() {
+    private ServiceRoutingDemo() {
         // Save the current application instance for later use.
         _app = UiApplication.getUiApplication();
 
@@ -214,7 +214,7 @@ public class ServiceRoutingDemo extends UiApplication implements
         private final String _service;
         private final boolean _serviceState;
 
-        public UpdateRunnable(final String service, final boolean serviceState) {
+        private UpdateRunnable(final String service, final boolean serviceState) {
             _service = service;
             _serviceState = serviceState;
         }

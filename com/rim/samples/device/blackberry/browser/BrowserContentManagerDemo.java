@@ -98,8 +98,7 @@ final public class BrowserContentManagerDemo extends UiApplication implements
         thread.start();
     }
 
-    public void
-            processConnection(final HttpConnection connection, final Event e) {
+    void processConnection(final HttpConnection connection, final Event e) {
         // Cancel previous request.
         if (_currentConnection != null) {
             try {

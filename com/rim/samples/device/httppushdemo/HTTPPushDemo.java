@@ -49,7 +49,7 @@ import net.rim.device.api.util.DataBuffer;
  * The client side of a simple HTTP Push system. This application will listen
  * for image data on the specified port and render the data when it arrives.
  */
-public class HTTPPushDemo extends UiApplication {
+class HTTPPushDemo extends UiApplication {
     // Constants
     // ----------------------------------------------------------------
     private static final String URL = "http://:100"; // PORT 100.
@@ -69,7 +69,7 @@ public class HTTPPushDemo extends UiApplication {
 
     // Constructor
     // --------------------------------------------------------------
-    public HTTPPushDemo() {
+    private HTTPPushDemo() {
         _mainScreen = new HTTPPushDemoScreen();
         _mainScreen.setTitle(new LabelField("HTTP Push Demo",
                 Field.USE_ALL_WIDTH));
@@ -97,7 +97,7 @@ public class HTTPPushDemo extends UiApplication {
         private boolean _stop = false;
         private StreamConnectionNotifier _notify;
 
-        public synchronized void stop() {
+        private synchronized void stop() {
             _stop = true;
             try {
                 // Close the connection so the thread will return.

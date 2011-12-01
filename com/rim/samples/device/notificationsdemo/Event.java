@@ -33,14 +33,14 @@ import net.rim.device.api.notification.NotificationsManager;
  * immediate and deferred events simultaneously.
  */
 final class Event {
-    long _sourceId;
+    private final long _sourceId;
     long _eventId;
     int _priority;
-    int _triggerIndex;
-    long _timeout;
+    private final int _triggerIndex;
+    private final long _timeout;
 
     // Constructor
-    public Event(final long sourceid, final long eventid, final int priority,
+    Event(final long sourceid, final long eventid, final int priority,
             final long timeout, final int triggerIndex) {
         _sourceId = sourceid;
         _eventId = eventid;
@@ -50,7 +50,7 @@ final class Event {
     }
 
     // Invoke the event.
-    public void fire() {
+    void fire() {
         // negotiateDeferredEvent() will cause the event to be queued.
         // Ultimately, NotificationsEngineListener.proceedWithDeferredEvent()
         // will be fired in response to the event.
@@ -70,7 +70,7 @@ final class Event {
     }
 
     // Cancel the event.
-    public void cancel() {
+    void cancel() {
         // If event exists in the queue, it will be removed and
         // NotificationsEngineListener.deferredEventWasSuperseded()
         // will be fired.

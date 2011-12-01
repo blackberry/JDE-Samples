@@ -74,7 +74,7 @@ public class MIDletDemo extends MIDlet implements CommandListener {
             }
         }
 
-        public void disarm() {
+        void disarm() {
             _disarmed = true;
         }
     }
@@ -83,7 +83,7 @@ public class MIDletDemo extends MIDlet implements CommandListener {
      * Thread that pops up the program's main dialog box.
      */
     private class GoCommand extends Command implements Runnable {
-        public GoCommand(final String label, final int type, final int priority) {
+        private GoCommand(final String label, final int type, final int priority) {
             super(label, type, priority);
         }
 

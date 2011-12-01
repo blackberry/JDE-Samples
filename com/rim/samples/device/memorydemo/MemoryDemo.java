@@ -1,18 +1,5 @@
 /*
- * MemoryDemo.java
- * 
- * An application that demonstrates the use of best memory practices for thousands
- * of records.  Makes use of the LowMemoryManager to free up memory from stale data,
- * and groups objects using the ObjectGroup API.
- * 
- * This application handles data for a fictional business.  It keeps records for each
- * of the business's customers, and records for each order the business places with 
- * other businesses.
- * 
- * In order to see the effects of running the Low Memory Manager without having to 
- * exhaust one of Flash Memory, Object Handles, or Persistent Object Handles, three
- * menu items are provided that cause the same methods to execute as would the 
- * Low Memory Manager.  The menu items are Simulate LMM {Low|Medium|High}.
+ * MemoryDemo.java 
  *
  * Copyright © 1998-2011 Research In Motion Limited
  * 
@@ -44,9 +31,17 @@ import java.util.Random;
 import net.rim.device.api.ui.UiApplication;
 
 /**
- * Main class for this application.
+ * An application that demonstrates the use of best memory practices for
+ * thousands of records. Makes use of the LowMemoryManager to free up memory
+ * from stale data, and groups objects using the ObjectGroup API. The
+ * application handles data for a fictional business. It keeps records for each
+ * order the business places with other businesses. In order to see the effects
+ * of running the Low Memory Manager without having to exhaust one of Flash
+ * Memory, Object Handles, or Persistent Object Handles, three menu items are
+ * provided that cause the same methods to execute as would the Low Memory
+ * Manager. The menu items are Simulate LMM {Low|Medium|High}.
  */
-public final class MemoryDemo extends UiApplication {
+final class MemoryDemo extends UiApplication {
     // Statics
     // -------------------------------------------------------------------------------------
     private static Random _random; // For generating random numbers for dates
@@ -91,7 +86,7 @@ public final class MemoryDemo extends UiApplication {
      *            The maximum length for the random string.
      * @return A random string.
      */
-    public static String randomString() {
+    static String randomString() {
         final int length =
                 randomIntBetween(MIN_STRING_LENGTH, MAX_STRING_LENGTH);
 
@@ -112,7 +107,7 @@ public final class MemoryDemo extends UiApplication {
      *            The upper threshold.
      * @return The random integer.
      */
-    public static int randomIntBetween(final int low, final int high) {
+    static int randomIntBetween(final int low, final int high) {
         final int range = high - low + 1;
         return Math.abs(_random.nextInt() % range) + low;
     }
@@ -127,7 +122,7 @@ public final class MemoryDemo extends UiApplication {
      *            The upper threshold.
      * @return The random date.
      */
-    public static long randomLongBetween(final long low, final long high) {
+    static long randomLongBetween(final long low, final long high) {
         final long range = high - low + 1;
         return Math.abs(_random.nextLong() % range) + low;
     }

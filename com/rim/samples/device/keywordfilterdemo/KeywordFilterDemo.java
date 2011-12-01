@@ -75,7 +75,7 @@ final class KeywordFilterDemo extends UiApplication {
     }
 
     // Constructor
-    KeywordFilterDemo() {
+    private KeywordFilterDemo() {
         // Populate vector with data from file.
         _countries = getDataFromFile();
 
@@ -125,7 +125,7 @@ final class KeywordFilterDemo extends UiApplication {
      * 
      * @return A vector containing Country objects.
      */
-    Vector getDataFromFile() {
+    private Vector getDataFromFile() {
         final Vector countries = new Vector();
 
         // Get an input stream from the file.
@@ -189,7 +189,7 @@ final class KeywordFilterDemo extends UiApplication {
      */
     final static class CustomKeywordField extends BasicEditField {
         // Contructor
-        public CustomKeywordField() {
+        CustomKeywordField() {
             // Custom style.
             super(USE_ALL_WIDTH | NON_FOCUSABLE | NO_LEARNING | NO_NEWLINE);
 

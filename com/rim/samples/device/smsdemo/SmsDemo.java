@@ -44,15 +44,11 @@ import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.container.MainScreen;
 
 /**
- * <p>
- * A simple demo of SMS send and receive. This program requires an associated
- * server component, you can find this component at
- * com.rim.samples.server.smsdemo
- * <p>
- * This application makes use of SIGNED APIs and therefore requires signing to
- * function on the device.
+ * A simple demo of SMS send and receive. This program requires the associated
+ * server component found in the com.rim.samples.server.smsdemo package under
+ * the samples directory in your JDE installation.
  */
-public class SmsDemo extends UiApplication {
+class SmsDemo extends UiApplication {
 
     // Constants
     // ----------------------------------------------------------------
@@ -98,7 +94,7 @@ public class SmsDemo extends UiApplication {
     // Inner Classes
     // ------------------------------------------------------------
     private class ListeningThread extends Thread {
-        public synchronized void stop() {
+        private synchronized void stop() {
             _stop = true;
 
             try {
@@ -141,12 +137,12 @@ public class SmsDemo extends UiApplication {
         private final String _address;
         private final String _msg;
 
-        public SmsMessage(final String address, final String msg) {
+        private SmsMessage(final String address, final String msg) {
             _address = address;
             _msg = msg;
         }
 
-        public Message toMessage(final MessageConnection mc) {
+        private Message toMessage(final MessageConnection mc) {
             final TextMessage m =
                     (TextMessage) mc.newMessage(MessageConnection.TEXT_MESSAGE,
                             "//" + _address + ":3590");
@@ -160,27 +156,23 @@ public class SmsDemo extends UiApplication {
      * A thread to manage outbound transactions.
      */
     private class SendThread extends Thread {
-        // Members
-        // --------------------------------------------------------------
         private static final int TIMEOUT = 500; // ms
 
-        // Create a vector of SmsMessage objects with an initial capacity of 5
-        // (unlikely that, in this implementation, more than 5 msgs will be
-        // queued at any one time).
+        // Create a vector of SmsMessage objects with an initial capacity of 5.
+        // For this implementation it is unlikely that more than 5 msgs will be
+        // queued at any one time.
         private final Vector _msgs = new Vector(5);
 
         private volatile boolean _start = false;
 
-        // Methods
-        // --------------------------------------------------------------
         // Requests are queued.
-        public synchronized void send(final String address, final String msg) {
+        private synchronized void send(final String address, final String msg) {
             _start = true;
             _msgs.addElement(new SmsMessage(address, msg));
         }
 
         // Shutdown the thread.
-        public synchronized void stop() {
+        private synchronized void stop() {
             _stop = true;
 
             try {
@@ -240,7 +232,8 @@ public class SmsDemo extends UiApplication {
 
     private class SmsDemoScreen extends MainScreen {
 
-        public SmsDemoScreen() {
+        // Constructor
+        private SmsDemoScreen() {
             setTitle(new LabelField("SMS Demo", Field.USE_ALL_WIDTH));
 
             _address =
@@ -280,7 +273,7 @@ public class SmsDemo extends UiApplication {
     }
 
     // Constructor
-    public SmsDemo() {
+    private SmsDemo() {
         _listener = new ListeningThread();
         _listener.start();
 

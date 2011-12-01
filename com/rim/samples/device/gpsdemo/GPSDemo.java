@@ -63,7 +63,7 @@ import net.rim.device.api.util.Persistable;
  * plots will be saved as JPEG files in the 'samples' directory of the JDE
  * installation.
  */
-public class GPSDemo extends UiApplication {
+class GPSDemo extends UiApplication {
 
     // Constants
     // -----------------------------------------------------------------------------------------------------------------
@@ -132,7 +132,7 @@ public class GPSDemo extends UiApplication {
     }
 
     // Constructor
-    public GPSDemo() {
+    private GPSDemo() {
         // Used by waypoints, represents the time since the last waypoint.
         _startTime = System.currentTimeMillis();
         _altitudes = new float[GRADE_INTERVAL];
@@ -142,7 +142,7 @@ public class GPSDemo extends UiApplication {
         final GPSDemoScreen screen = new GPSDemoScreen();
         screen.setTitle(new LabelField("GPS Demo", Field.USE_ALL_WIDTH));
 
-        _status = new EditField();
+        _status = new EditField(Field.NON_FOCUSABLE);
         screen.add(_status);
 
         // Try to start the GPS thread that listens for updates.
@@ -170,33 +170,23 @@ public class GPSDemo extends UiApplication {
     // Menu items
     // --------------------------------------------------------------------------------------------
 
-    // Cache the markwaypoint menu item for reuse.
-    private final MenuItem _markWayPoint = new MenuItem("Mark Waypoint", 110,
+    private final MenuItem _markWayPoint = new MenuItem("Mark waypoint", 110,
             10) {
         public void run() {
             GPSDemo.this.markPoint();
         }
     };
 
-    // Cache the view waypoints menu item for reuse.
-    private final MenuItem _viewWayPoints = new MenuItem("View Waypoints", 110,
-            10) {
+    private final MenuItem _viewWayPoints = new MenuItem("View waypoints", 110,
+            11) {
         public void run() {
             GPSDemo.this.viewPreviousPoints();
         }
     };
 
-    // Cache the options menu item for reuse.
     private final MenuItem _options = new MenuItem("Options", 110, 10) {
         public void run() {
             GPSDemo.this.viewOptions();
-        }
-    };
-
-    // Cache the options menu item for reuse.
-    private final MenuItem _close = new MenuItem("Close", 110, 10) {
-        public void run() {
-            System.exit(0);
         }
     };
 
@@ -281,7 +271,7 @@ public class GPSDemo extends UiApplication {
     /**
      * View the various options for this application.
      */
-    public void viewOptions() {
+    private void viewOptions() {
         final OptionScreen optionScreen = new OptionScreen();
         pushScreen(optionScreen);
     }
@@ -300,7 +290,7 @@ public class GPSDemo extends UiApplication {
      * @param p
      *            The point to add.
      */
-    /* package */synchronized static void addWayPoint(final WayPoint p) {
+    /* package */private synchronized static void addWayPoint(final WayPoint p) {
         _previousPoints.addElement(p);
         commit();
     }
@@ -487,9 +477,10 @@ public class GPSDemo extends UiApplication {
     private final class GPSDemoScreen extends MainScreen {
 
         // Constructor
-        public GPSDemoScreen() {
+        GPSDemoScreen() {
             final RichTextField instructions =
-                    new RichTextField("Waiting for location update...");
+                    new RichTextField("Waiting for location update...",
+                            Field.NON_FOCUSABLE);
             this.add(instructions);
 
             addMenuItem(_markWayPoint);
@@ -519,7 +510,7 @@ public class GPSDemo extends UiApplication {
     private class OptionScreen extends MainScreen {
         private final BasicEditField _serverAddressField;
 
-        public OptionScreen() {
+        OptionScreen() {
             super();
 
             final LabelField title =
@@ -533,14 +524,7 @@ public class GPSDemo extends UiApplication {
             add(_serverAddressField);
 
             addMenuItem(_save);
-            addMenuItem(_cancel);
         }
-
-        private final MenuItem _cancel = new MenuItem("Cancel", 300000, 10) {
-            public void run() {
-                OptionScreen.this.close();
-            }
-        };
 
         private final MenuItem _save = new MenuItem("Save", 200000, 10) {
             public void run() {
@@ -550,7 +534,6 @@ public class GPSDemo extends UiApplication {
                 GPSDemo.this.popScreen(OptionScreen.this);
             }
         };
-
     }
 
     /**
@@ -560,12 +543,12 @@ public class GPSDemo extends UiApplication {
      * package
      */
     static class WayPoint implements Persistable {
-        public long _startTime;
-        public long _endTime;
-        public float _distance;
-        public float _verticalDistance;
+        long _startTime;
+        long _endTime;
+        float _distance;
+        float _verticalDistance;
 
-        public WayPoint(final long startTime, final long endTime,
+        WayPoint(final long startTime, final long endTime,
                 final float distance, final float verticalDistance) {
             _startTime = startTime;
             _endTime = endTime;
@@ -596,25 +579,25 @@ public class GPSDemo extends UiApplication {
                                                  // server after a failed
                                                  // attempt.
 
-        public ServerConnectThread(final String host) {
+        ServerConnectThread(final String host) {
             setHost(host);
             _go = true;
             _data = new Vector();
             _delay = DEFAULT; // 5 second backoff to start.
         }
 
-        public synchronized void setHost(final String host) {
+        private synchronized void setHost(final String host) {
             _url = "socket://" + host; // + ";deviceside=false"; // Don't use
                                        // direct TCP.
             this.notify(); // Notify the thread method so that any pending data
                            // can be resent.
         }
 
-        public synchronized void stop() {
+        private synchronized void stop() {
             _go = false;
         }
 
-        public synchronized void sendUpdate(final String data) {
+        private synchronized void sendUpdate(final String data) {
             _data.addElement(data);
             this.notify();
         }

@@ -49,3 +49,5 @@ StartupTier=7
 SystemModule=0
 Title=Map Field Demo
 Type=0
+Vendor=Research In Motion Limited
+Version=0.9

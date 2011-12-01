@@ -45,10 +45,10 @@ import net.rim.device.api.ui.component.LabelField;
     /* package */static final int FOR_TITLE = 2;
     /* package */static final int FOR_ADD = 3;
 
-    /* package */BlackBerryMemo _memo;
-    /* package */BasicEditField _titleField;
-    /* package */BasicEditField _uidField;
-    /* package */BasicEditField _notesField;
+    /* package */private final BlackBerryMemo _memo;
+    /* package */private final BasicEditField _titleField;
+    /* package */private final BasicEditField _uidField;
+    /* package */private final BasicEditField _notesField;
 
     /**
      * Constructor. Creates the displayable fields and populates them with all

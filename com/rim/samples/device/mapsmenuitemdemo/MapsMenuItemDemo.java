@@ -55,8 +55,8 @@ import net.rim.device.api.ui.container.MainScreen;
  * The application will run in the background as a system module, without
  * displaying an icon on the BlackBerry device home screen.
  */
-public final class MapsMenuItemDemo extends UiApplication {
-    public static MapView _mv = new MapView();
+final class MapsMenuItemDemo extends UiApplication {
+    private static MapView _mv = new MapView();
 
     /**
      * Entry point for application
@@ -86,7 +86,7 @@ public final class MapsMenuItemDemo extends UiApplication {
 
     private static class MapsMenuItem extends ApplicationMenuItem {
         // Constructor
-        MapsMenuItem() {
+        private MapsMenuItem() {
             // Create a new ApplicationMenuItem instance with relative menu
             // position of 20. Lower numbers correspond to higher placement
             // in the menu.

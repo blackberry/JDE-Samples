@@ -1,5 +1,5 @@
 /**
- * ChapiDemo.java
+ * CHAPIDemo.java
  * 
  * Copyright © 1998-2011 Research In Motion Limited
  * 
@@ -55,22 +55,22 @@ import net.rim.device.api.ui.container.MainScreen;
  * Files\Research In Motion\BlackBerry JDE
  * 4.5.0\samples\com\rim\samples\device\chapidemo\Data).
  */
-public class ChapiDemo extends UiApplication implements RequestListener {
+class CHAPIDemo extends UiApplication implements RequestListener {
     // The Content Handler ID.
-    static final String ID = "com.rim.samples.device.chapidemo";
+    private static final String ID = "com.rim.samples.device.chapidemo";
 
     // The content handler class name.
-    static final String CLASSNAME = ID + ".ChapiDemo";
+    private static final String CLASSNAME = ID + ".CHAPIDemo";
 
     // The URL pointing to the location of the file we want to open.
-    static final String URL = "file:///SDCard/rim.csv";
+    private static final String URL = "file:///SDCard/rim.csv";
 
     // Entry point for application
     public static void main(final String[] args) {
         if (args != null && args.length > 0 && args[0].equals("startup")) {
             registerApp(); // Register this app as a content handler on startup.
         } else {
-            new ChapiDemo().enterEventDispatcher(); // GUI
+            new CHAPIDemo().enterEventDispatcher(); // GUI
         }
     }
 
@@ -78,7 +78,7 @@ public class ChapiDemo extends UiApplication implements RequestListener {
      * Registers this application with specified types, suffixes, actions and
      * classname. This method will run on startup.
      */
-    static void registerApp() {
+    private static void registerApp() {
         try {
             // This app will be a handler for csv files and will be invoked
             // with ACTION_OPEN.
@@ -99,7 +99,7 @@ public class ChapiDemo extends UiApplication implements RequestListener {
     }
 
     // Constructor for GUI app.
-    ChapiDemo() {
+    private CHAPIDemo() {
         try {
             // Get access to the ContentHandlerServer for this application and
             // register as a listener.
@@ -110,8 +110,8 @@ public class ChapiDemo extends UiApplication implements RequestListener {
             contentHandlerServer.setListener(this);
 
             // Push a new GUI screen.
-            final ChapiDemoScreen chapiDemoScreen = new ChapiDemoScreen();
-            pushScreen(chapiDemoScreen);
+            final CHAPIDemoScreen CHAPIDemoScreen = new CHAPIDemoScreen();
+            pushScreen(CHAPIDemoScreen);
         } catch (final ContentHandlerException che) {
             System.out.print(che.toString());
         }
@@ -121,7 +121,7 @@ public class ChapiDemo extends UiApplication implements RequestListener {
      * Creates an Invocation object and passes it to the Registry. Called by
      * 'Invoke' menu item.
      */
-    void doInvoke() {
+    private void doInvoke() {
         try {
             // Create the Invocation with our hard-coded URL.
             final Invocation invoc = new Invocation(URL);
@@ -140,7 +140,7 @@ public class ChapiDemo extends UiApplication implements RequestListener {
 
     // Reads text from the file pointed to by the URL contained
     // in the Invocation.
-    static String getViaStreamConnection(final Invocation invoc) {
+    private static String getViaStreamConnection(final Invocation invoc) {
         // Create a StreamConnection and use it to open an
         // InputStream for reading.
         StreamConnection streamConnection = null;
@@ -198,10 +198,10 @@ public class ChapiDemo extends UiApplication implements RequestListener {
     }
 
     // Simple GUI screen from which to create an Invocation.
-    final class ChapiDemoScreen extends MainScreen {
-        ChapiDemoScreen() {
+    private final class CHAPIDemoScreen extends MainScreen {
+        private CHAPIDemoScreen() {
             // Initialize UI components.
-            setTitle(new LabelField("Chapi Demo Screen", Field.FIELD_HCENTER));
+            setTitle(new LabelField("CHAPI Demo Screen", Field.FIELD_HCENTER));
             add(new LabelField("Select Invoke from the menu"));
             addMenuItem(new MenuItem("Invoke", 5, 5) {
                 public void run() {
@@ -214,12 +214,13 @@ public class ChapiDemo extends UiApplication implements RequestListener {
     /**
      * This screen will be used to display the content we are handling.
      */
-    static class DisplayContentScreen extends MainScreen {
+    private static class DisplayContentScreen extends MainScreen {
         // A field to display content.
-        TextField _contentField = new TextField(Field.NON_FOCUSABLE);
+        private final TextField _contentField = new TextField(
+                Field.NON_FOCUSABLE);
 
         // Constructor
-        DisplayContentScreen() {
+        private DisplayContentScreen() {
             setTitle(new LabelField("Display Content Screen",
                     Field.FIELD_HCENTER));
             add(_contentField);
@@ -227,7 +228,7 @@ public class ChapiDemo extends UiApplication implements RequestListener {
 
         // Parses the comma separated values in the content string
         // and displays the text.
-        void displayContent(final String content) {
+        private void displayContent(final String content) {
             // Let's count the number of commas in the content string.
             int commaCount = 0;
             for (int i = 0; i < content.length(); i++) {

@@ -1,0 +1,24 @@
+APPLICATION_TITLE#0="Demostraci\u00f3 de localitzaci\u00f3";
+FIELD_CHINA#0="Xina";
+FIELD_CHINA_CITIES#0="Pequ\u00edn i Xangai";
+FIELD_CHINA_LANG#0="Mandar\u00ed";
+FIELD_CHINA_POP#0="1,211,210,000";
+FIELD_CHOICE#0="Trieu un pa\u00eds: ";
+FIELD_CITIES#0="Ciutats principals: ";
+FIELD_COUNTRIES#0={
+    "Estats Units",
+    "Xina",
+    "Alemanya",
+};
+FIELD_GERMANY#0="Alemanya";
+FIELD_GERMANY_CITIES#0="Berl\u00edn i Munic";
+FIELD_GERMANY_LANG#0="Alemany";
+FIELD_GERMANY_POP#0="83,536,115";
+FIELD_LANG#0="Idiomes: ";
+FIELD_POP#0="Poblaci\u00f3: ";
+FIELD_TITLE#0="Exemple per demostrar l'API de localitzaci\u00f3";
+FIELD_US#0="Estats Units";
+FIELD_US_CITIES#0="Nova York i Los Angeles";
+FIELD_US_LANG#0="Angl\u00e8s i espanyol";
+FIELD_US_POP#0="266,993,000";
+MENUITEM_VIEW#0="Visualitza";

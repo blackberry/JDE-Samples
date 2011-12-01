@@ -28,7 +28,7 @@ package com.rim.samples.device.bluetoothdemo;
 
 import net.rim.device.api.ui.UiApplication;
 
-public class BluetoothDemo extends UiApplication {
+class BluetoothDemo extends UiApplication {
     public static void main(final String[] args) {
         final BluetoothDemo app = new BluetoothDemo();
         app.enterEventDispatcher();

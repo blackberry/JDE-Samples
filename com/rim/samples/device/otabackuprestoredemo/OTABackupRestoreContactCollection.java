@@ -367,11 +367,11 @@ class OTABackupRestoreContactCollection implements SyncConverter,
         _listeners = ListenerUtilities.removeListener(_listeners, listener);
     }
 
-    public int size() {
+    int size() {
         return _contacts.size();
     }
 
-    public OTAContactData contactAt(final int index) {
+    OTAContactData contactAt(final int index) {
         return (OTAContactData) _contacts.elementAt(index);
     }
 }

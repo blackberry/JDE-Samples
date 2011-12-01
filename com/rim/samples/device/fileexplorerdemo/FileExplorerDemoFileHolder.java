@@ -59,7 +59,7 @@ package com.rim.samples.device.fileexplorerdemo;
      * 
      * @return Name of the file, or null if it's a directory.
      */
-    public String getFileName() {
+    String getFileName() {
         return _filename;
     }
 
@@ -68,7 +68,7 @@ package com.rim.samples.device.fileexplorerdemo;
      * 
      * @return Fully qualified path.
      */
-    public String getPath() {
+    String getPath() {
         return _path;
     }
 
@@ -77,7 +77,7 @@ package com.rim.samples.device.fileexplorerdemo;
      * 
      * @return true if FileHolder is directory, otherwise false.
      */
-    public boolean isDirectory() {
+    boolean isDirectory() {
         return _isDir;
     }
 
@@ -87,7 +87,7 @@ package com.rim.samples.device.fileexplorerdemo;
      * @param isDir
      *            true if FileHolder should be a directory.
      */
-    public void setDirectory(final boolean isDir) {
+    void setDirectory(final boolean isDir) {
         _isDir = isDir;
     }
 }

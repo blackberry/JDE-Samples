@@ -1,0 +1,24 @@
+APPLICATION_TITLE#0="Demonstra\u00e7\u00e3o de Localiza\u00e7\u00e3o";
+FIELD_CHINA#0="China";
+FIELD_CHINA_CITIES#0="Pequim e Xangai";
+FIELD_CHINA_LANG#0="Mandarim";
+FIELD_CHINA_POP#0="1,211,210,000";
+FIELD_CHOICE#0="Seleccione um pa\u00eds: ";
+FIELD_CITIES#0="Cidades mais importantes: ";
+FIELD_COUNTRIES#0={
+    "Estados Unidos",
+    "China",
+    "Alemanha",
+};
+FIELD_GERMANY#0="Alemanha";
+FIELD_GERMANY_CITIES#0="Berlim e Munique";
+FIELD_GERMANY_LANG#0="Alem\u00e3o";
+FIELD_GERMANY_POP#0="83,536,115";
+FIELD_LANG#0="Idiomas: ";
+FIELD_POP#0="Popula\u00e7\u00e3o: ";
+FIELD_TITLE#0="Exemplo de demonstra\u00e7\u00e3o da API de localiza\u00e7\u00e3o";
+FIELD_US#0="Estados Unidos";
+FIELD_US_CITIES#0="Nova Iorque e Los Angeles";
+FIELD_US_LANG#0="Ingl\u00eas e espanhol";
+FIELD_US_POP#0="266,993,000";
+MENUITEM_VIEW#0="Ver";

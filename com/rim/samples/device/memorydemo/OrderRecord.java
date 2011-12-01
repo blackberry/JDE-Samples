@@ -54,8 +54,8 @@ import net.rim.device.api.util.Persistable;
      * @param numOrdered
      *            The number of units ordered.
      */
-    public OrderRecord(final long date, final String company,
-            final String product, final int numOrdered) {
+    OrderRecord(final long date, final String company, final String product,
+            final int numOrdered) {
         _date = date;
         _company = company;
         _product = product;
@@ -67,7 +67,7 @@ import net.rim.device.api.util.Persistable;
      * 
      * @return The date on this order record.
      */
-    public long getDate() {
+    long getDate() {
         return _date;
     }
 
@@ -77,7 +77,7 @@ import net.rim.device.api.util.Persistable;
      * @param date
      *            This order record's new date.
      */
-    public void setDate(final long date) {
+    void setDate(final long date) {
         _date = date;
     }
 
@@ -86,7 +86,7 @@ import net.rim.device.api.util.Persistable;
      * 
      * @return The company on this order record.
      */
-    public String getCompany() {
+    String getCompany() {
         return _company;
     }
 
@@ -96,7 +96,7 @@ import net.rim.device.api.util.Persistable;
      * @param company
      *            This order record's new company.
      */
-    public void setCompany(final String company) {
+    void setCompany(final String company) {
         _company = company;
     }
 
@@ -105,7 +105,7 @@ import net.rim.device.api.util.Persistable;
      * 
      * @return The product on this order record.
      */
-    public String getProduct() {
+    String getProduct() {
         return _product;
     }
 
@@ -115,7 +115,7 @@ import net.rim.device.api.util.Persistable;
      * @param product
      *            This order record's new product.
      */
-    public void setProduct(final String product) {
+    void setProduct(final String product) {
         _product = product;
     }
 
@@ -124,7 +124,7 @@ import net.rim.device.api.util.Persistable;
      * 
      * @return The number of units on this order record.
      */
-    public int getNumOrdered() {
+    int getNumOrdered() {
         return _numOrdered;
     }
 
@@ -134,7 +134,7 @@ import net.rim.device.api.util.Persistable;
      * @param numOrdered
      *            This order record's new number of units.
      */
-    public void setNumOrdered(final int numOrdered) {
+    void setNumOrdered(final int numOrdered) {
         _numOrdered = numOrdered;
     }
 

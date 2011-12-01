@@ -40,7 +40,7 @@ import net.rim.device.api.ui.container.MainScreen;
  * BlackBerry applications that provide a user interface must extend 
  * UiApplication.
  */
-public class HelloWorldDemo extends UiApplication {
+class HelloWorldDemo extends UiApplication {
     /**
      * Entry point for application.
      */
@@ -59,7 +59,7 @@ public class HelloWorldDemo extends UiApplication {
      * The default constructor. Creates all of the RIM UI components and pushes
      * the application's root screen onto the UI stack.
      */
-    public HelloWorldDemo() {
+    private HelloWorldDemo() {
         // Push the main screen instance onto the UI stack for rendering.
         pushScreen(new HelloWorldScreen());
     }
@@ -74,7 +74,7 @@ public class HelloWorldDemo extends UiApplication {
     /**
      * HelloWorldScreen constructor.
      */
-    public HelloWorldScreen() {
+    HelloWorldScreen() {
         // Add a field to the title region of the screen. We use a simple
         // LabelField
         // here. The ELLIPSIS option truncates the label text with "..." if the

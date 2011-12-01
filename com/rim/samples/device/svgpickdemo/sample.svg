@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" baseProfile="tiny" width="100%" height="100%">
+                
+    <!-- Group of selectable shapes -->
+    <g id="selectableShapesGroup">        
+        <!-- Square -->    
+        <rect id="rectangle1" x="100" y="200" height="100" width="100" fill="red"/>    
+        <!-- Circle -->
+        <circle id="circle1" cx="160" cy="100" r="50" fill="blue"/>          
+        <!-- Triangle -->
+        <polyline id="triangle1" points="320,200 260,280 380,280" fill="green"/>                   
+    </g>
+    <!-- The selected shape bounds -->    
+    <rect id="selectedShapeBounds" width="0" height="0" fill="none" stroke="black" display="none" />
+        
+        
+    <!-- Selected Shape Display -->
+    <g id="display" display="none" font-family="BBAlpha Sans" font-size="16" >
+        <!-- Display border -->
+        <rect id="displayBorder" x="220" rx="5" ry="5" y="40" height="50" width="250" fill="gray" stroke="black"/>     
+        <!-- Display name text -->
+        <text x="225" y="60" font-weight="bold" >Id:</text>                
+        <text id="displayName" x="290" y="60" />        
+        <!-- Display bounds text -->
+        <text x="225" y="75" font-weight="bold">Bounds:</text>        
+        <text id="displayBounds" x="290" y="75" />                 
+    </g>
+    
+    <!-- Cursor pointer -->
+    <polyline id="cursor" points="5,5 0,10 0,0 10,0 5,5 20,20" />
+    <!-- Cursor position text -->        
+    <text id="cursorPosition" x="10" y="300" font-family="BBAlpha Sans" font-size="16"/>     
+    
+</svg>

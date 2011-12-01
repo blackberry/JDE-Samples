@@ -30,6 +30,7 @@ import net.rim.blackberry.api.menuitem.ApplicationMenuItem;
 import net.rim.blackberry.api.stringpattern.PatternRepository;
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
+import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.ActiveAutoTextEditField;
 import net.rim.device.api.ui.component.RichTextField;
@@ -45,7 +46,7 @@ import net.rim.device.api.ui.container.MainScreen;
  * information corresponding to the matched pattern. This application also
  * provides a GUI demo screen with an ActiveAutoTextEditField.
  */
-public class ActiveTextFieldsDemo extends UiApplication {
+class ActiveTextFieldsDemo extends UiApplication {
     private static ApplicationMenuItem[] _menuItems =
             new ApplicationMenuItem[2];
     private RichTextField _trackingNumber;
@@ -113,7 +114,7 @@ public class ActiveTextFieldsDemo extends UiApplication {
      *            Flag to indicate whether application was invoked explicitly
      *            from the desktop or by invoking a menu item.
      */
-    ActiveTextFieldsDemo(final boolean isDemoApp) {
+    private ActiveTextFieldsDemo(final boolean isDemoApp) {
 
         /*
          * Display a MainScreen that simply allows user to type a 9 digit number
@@ -150,7 +151,7 @@ public class ActiveTextFieldsDemo extends UiApplication {
      * world situation the application would send the highlighted transaction
      * number back to a server and retrieve the status and location information.
      */
-    static ApplicationMenuItem statusItem = new ApplicationMenuItem(0) {
+    private static ApplicationMenuItem statusItem = new ApplicationMenuItem(0) {
 
         /**
          * Sets the label and text in the display fields of the handler screen.
@@ -160,12 +161,11 @@ public class ActiveTextFieldsDemo extends UiApplication {
          *            displayed.
          */
         public Object run(final Object context) {
-            ((ActiveTextFieldsDemo) UiApplication.getUiApplication())._trackingNumber
-                    .setLabel("Status for tracking No: ");
-            ((ActiveTextFieldsDemo) UiApplication.getUiApplication())._trackingNumber
-                    .setText(context.toString());
-            ((ActiveTextFieldsDemo) UiApplication.getUiApplication())._statusLocation
-                    .setText("< In Progress >");
+            final ActiveTextFieldsDemo app =
+                    (ActiveTextFieldsDemo) UiApplication.getUiApplication();
+            app._trackingNumber.setLabel("Status for tracking No: ");
+            app._trackingNumber.setText(context.toString());
+            app._statusLocation.setText("< In Progress >");
             return null;
         }
 
@@ -174,37 +174,39 @@ public class ActiveTextFieldsDemo extends UiApplication {
         }
     };
 
-    static ApplicationMenuItem locationItem = new ApplicationMenuItem(1) {
-        /**
-         * Sets the label and text in the display fields of the handler screen.
-         * 
-         * @param context
-         *            The String representation of the context object is
-         *            displayed.
-         */
-        public Object run(final Object context) {
-            ((ActiveTextFieldsDemo) UiApplication.getUiApplication())._trackingNumber
-                    .setLabel("Location for tracking No: ");
-            ((ActiveTextFieldsDemo) UiApplication.getUiApplication())._trackingNumber
-                    .setText(context.toString());
-            ((ActiveTextFieldsDemo) UiApplication.getUiApplication())._statusLocation
-                    .setText("< 39.3° N 76.6° W >");
-            return null;
-        }
+    private static ApplicationMenuItem locationItem =
+            new ApplicationMenuItem(1) {
+                /**
+                 * Sets the label and text in the display fields of the handler
+                 * screen.
+                 * 
+                 * @param context
+                 *            The String representation of the context object is
+                 *            displayed.
+                 */
+                public Object run(final Object context) {
+                    final ActiveTextFieldsDemo app =
+                            (ActiveTextFieldsDemo) UiApplication
+                                    .getUiApplication();
+                    app._trackingNumber.setLabel("Location for tracking No: ");
+                    app._trackingNumber.setText(context.toString());
+                    app._statusLocation.setText("< 39.3° N 76.6° W >");
+                    return null;
+                }
 
-        public String toString() {
-            return "Location";
-        }
-    };
+                public String toString() {
+                    return "Location";
+                }
+            };
 
     /**
      * The screen that is displayed when one of our application menu items is
      * invoked.
      */
-    final class HandlerScreen extends MainScreen {
+    private final class HandlerScreen extends MainScreen {
 
         // Constructor
-        public HandlerScreen() {
+        private HandlerScreen() {
             // Set the screen title.
             setTitle("Active Text Fields Handler");
 
@@ -223,13 +225,14 @@ public class ActiveTextFieldsDemo extends UiApplication {
 final class ActiveTextFieldsScreen extends MainScreen {
 
     // Constructor
-    public ActiveTextFieldsScreen() {
+    ActiveTextFieldsScreen() {
         // Set the screen title.
         setTitle("Active Text Fields Demo");
 
         // Add instructions.
         add(new RichTextField(
-                "Type a nine digit number in the Transaction No. field. Pattern will be hyperlinked and status and location menu items will be available.\n"));
+                "Type a nine digit number in the Transaction No. field. Pattern will be hyperlinked and status and location menu items will be available.\n",
+                Field.NON_FOCUSABLE));
 
         // Add an ActiveAutoTextEditField.
         final ActiveAutoTextEditField activeField =

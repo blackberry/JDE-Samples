@@ -32,8 +32,8 @@ import net.rim.device.api.ui.container.MainScreen;
  * An implementation of the MainScreen class which overrides certain
  * functionality to provide an optimized user experience.
  */
-public class ApplicationPermissionsScreen extends MainScreen {
-    public ApplicationPermissionsScreen() {
+class ApplicationPermissionsScreen extends MainScreen {
+    ApplicationPermissionsScreen() {
         super();
     }
 

@@ -33,7 +33,7 @@ import net.rim.device.api.ui.UiApplication;
 /**
  * The main class for the application.
  */
-public final class XMLDemo extends UiApplication {
+final class XMLDemo extends UiApplication {
     /**
      * This constructor simply pushes the main screen onto the display stack.
      */

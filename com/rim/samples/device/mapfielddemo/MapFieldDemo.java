@@ -49,7 +49,7 @@ class MapFieldDemo extends UiApplication {
     /**
      * Loads the application screen.
      */
-    MapFieldDemo() {
+    private MapFieldDemo() {
         pushScreen(new MapFieldDemoScreen());
     }
 }

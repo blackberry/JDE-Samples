@@ -37,7 +37,7 @@ import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.MainScreen;
 
-public final class OTAContactScreen extends MainScreen {
+final class OTAContactScreen extends MainScreen {
     // Members
     // ------------------------------------------------------------------
     private final EditField _first, _last, _email, _phone;
@@ -62,7 +62,7 @@ public final class OTAContactScreen extends MainScreen {
     }
 
     // Constructor
-    public OTAContactScreen() {
+    OTAContactScreen() {
         _saveMenuItem = new SaveMenuItem();
 
         setTitle(new LabelField("Edit Contact", DrawStyle.ELLIPSIS
@@ -87,7 +87,7 @@ public final class OTAContactScreen extends MainScreen {
         addMenuItem(_saveMenuItem);
     }
 
-    public OTAContactScreen(final OTAContactData contact) {
+    OTAContactScreen(final OTAContactData contact) {
         this();
 
         _uid = contact.getUID();
@@ -97,7 +97,7 @@ public final class OTAContactScreen extends MainScreen {
         _phone.setText(contact.getPhone());
     }
 
-    public OTAContactData getContact() {
+    OTAContactData getContact() {
         return _contact;
     }
 

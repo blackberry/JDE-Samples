@@ -1,0 +1,24 @@
+APPLICATION_TITLE#0="Demo Lokalisasi";
+FIELD_CHINA#0="Cina";
+FIELD_CHINA_CITIES#0="Beijing dan Shanghai";
+FIELD_CHINA_LANG#0="Bahasa Mandarin";
+FIELD_CHINA_POP#0="1,211,210,000";
+FIELD_CHOICE#0="Pilih negara: ";
+FIELD_CITIES#0="Kota Besar: ";
+FIELD_COUNTRIES#0={
+    "Amerika Serikat",
+    "Cina",
+    "Jerman",
+};
+FIELD_GERMANY#0="Jerman";
+FIELD_GERMANY_CITIES#0="Berlin dan Munich";
+FIELD_GERMANY_LANG#0="Bahasa Jerman";
+FIELD_GERMANY_POP#0="83,536,115";
+FIELD_LANG#0="Bahasa: ";
+FIELD_POP#0="Populasi: ";
+FIELD_TITLE#0="Contoh untuk mendemonstrasikan API Lokalisasi";
+FIELD_US#0="Amerika Serikat";
+FIELD_US_CITIES#0="New York dan Los Angeles";
+FIELD_US_LANG#0="Bahasa Inggris dan Bahasa Spanyol";
+FIELD_US_POP#0="266,993,000";
+MENUITEM_VIEW#0="Lihat";

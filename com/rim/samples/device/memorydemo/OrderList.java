@@ -27,13 +27,14 @@
 package com.rim.samples.device.memorydemo;
 
 import java.util.Date;
+import java.util.Vector;
 
 import net.rim.device.api.lowmemory.LowMemoryManager;
 import net.rim.device.api.system.ObjectGroup;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
-import net.rim.device.api.util.Arrays;
 import net.rim.device.api.util.Comparator;
+import net.rim.device.api.util.SimpleSortingVector;
 
 /**
  * Represents a list of order records for a fictional business.
@@ -42,36 +43,16 @@ import net.rim.device.api.util.Comparator;
     // Members
     // -------------------------------------------------------------------------------------
     private final PersistentObject _persist;
-    private OrderRecord[] _orderRecords;
+    private Vector _orderRecords;
 
     // Statics
     // -------------------------------------------------------------------------------------
     private static OrderList _instance;
-    private static Comparator _comparator;
 
     // Constants
     // -----------------------------------------------------------------------------------
     private static final long PERSIST = 0x9dbb6535e730ff7dL; // com.rim.samples.device.memorydemo.orders
     private static final int MAX_NUM_ORDERED = 100;
-
-    static {
-        _comparator = new Comparator() {
-            public int compare(final Object o1, final Object o2) {
-                final OrderRecord r1 = (OrderRecord) o1;
-                final OrderRecord r2 = (OrderRecord) o2;
-
-                if (r1.getDate() < r2.getDate()) {
-                    return -1;
-                }
-
-                if (r1.getDate() > r2.getDate()) {
-                    return 1;
-                }
-
-                return 0;
-            }
-        };
-    }
 
     /**
      * This constructor ensures that a persistent object is in place to store
@@ -79,10 +60,10 @@ import net.rim.device.api.util.Comparator;
      */
     private OrderList() {
         _persist = PersistentStore.getPersistentObject(PERSIST);
-        _orderRecords = (OrderRecord[]) _persist.getContents();
+        _orderRecords = (Vector) _persist.getContents();
 
         if (_orderRecords == null) {
-            _orderRecords = new OrderRecord[0];
+            _orderRecords = new Vector();
             _persist.setContents(_orderRecords);
             _persist.commit();
         }
@@ -93,7 +74,7 @@ import net.rim.device.api.util.Comparator;
      * 
      * @return The order list.
      */
-    public static OrderList getInstance() {
+    static OrderList getInstance() {
         if (_instance == null) {
             _instance = new OrderList();
         }
@@ -106,8 +87,8 @@ import net.rim.device.api.util.Comparator;
      * 
      * @return The number of order records.
      */
-    public int getNumOrderRecords() {
-        return _orderRecords.length;
+    int getNumOrderRecords() {
+        return _orderRecords.size();
     }
 
     /**
@@ -117,8 +98,8 @@ import net.rim.device.api.util.Comparator;
      *            The index of the order record to retrieve.
      * @return The retrieved order record.
      */
-    public OrderRecord getOrderRecordAt(final int index) {
-        return _orderRecords[index];
+    OrderRecord getOrderRecordAt(final int index) {
+        return (OrderRecord) _orderRecords.elementAt(index);
     }
 
     /**
@@ -127,15 +108,15 @@ import net.rim.device.api.util.Comparator;
      * @param orderRecord
      *            The order record to delete.
      */
-    public synchronized void deleteOrderRecord(final OrderRecord orderRecord) {
-        Arrays.remove(_orderRecords, orderRecord);
+    synchronized void deleteOrderRecord(final OrderRecord orderRecord) {
+        _orderRecords.removeElement(orderRecord);
     }
 
     /**
      * Deletes all order records from the list.
      */
-    public synchronized void deleteAllOrderRecords() {
-        _orderRecords = new OrderRecord[0];
+    synchronized void deleteAllOrderRecords() {
+        _orderRecords = new Vector();
         _persist.setContents(_orderRecords);
     }
 
@@ -150,10 +131,10 @@ import net.rim.device.api.util.Comparator;
      * @param newOrderRecord
      *            The new order record.
      */
-    public synchronized void replaceOrderRecordAt(final int index,
+    synchronized void replaceOrderRecordAt(final int index,
             final OrderRecord newOrderRecord) {
         ObjectGroup.createGroup(newOrderRecord);
-        _orderRecords[index] = newOrderRecord;
+        _orderRecords.setElementAt(newOrderRecord, index);
     }
 
     /**
@@ -164,38 +145,37 @@ import net.rim.device.api.util.Comparator;
      *            The cutoff date for deleting order records.
      * @return True if any records are deleted; false otherwise.
      */
-    public synchronized boolean removeStaleOrderRecords(final long before) {
-        if (_orderRecords.length == 0) {
+    synchronized boolean removeStaleOrderRecords(final long before) {
+        if (_orderRecords.size() == 0) {
             return false;
         }
 
-        Arrays.sort(_orderRecords, _comparator); // Make sure records are in
-                                                 // order by date.
+        // Sort the order records
+        _orderRecords = sortVector(_orderRecords); // Make sure records are in
+                                                   // order by date.
 
         boolean freedData = false;
 
-        final OrderRecord[] orderRecords = _orderRecords;
+        final Vector orderRecords = _orderRecords;
 
         int i = 0;
-        while (orderRecords[i].getDate() < before) // Skip over all stale
-                                                   // records.
+        while (((OrderRecord) orderRecords.elementAt(i)).getDate() < before) // Skip
+                                                                             // over
+                                                                             // all
+                                                                             // stale
+                                                                             // records.
         {
             ++i;
         }
 
-        // If some records are to be deleted (i.e., stale), make an array big
-        // enough to
-        // hold the records that are to be kept, and copy the kept records to
-        // that array.
-        // Delete the old array completely.
         if (i > 0) {
-            final int numRecordsKept = orderRecords.length - i;
-            _orderRecords = new OrderRecord[numRecordsKept];
+            final int numRecordsKept = orderRecords.size() - i;
+            _orderRecords = new Vector();
+
             _persist.setContents(_orderRecords);
 
             for (int j = 0; j < numRecordsKept; ++j) {
-                _orderRecords[j] = orderRecords[j + i];
-                orderRecords[j + i] = null;
+                _orderRecords.addElement(orderRecords.elementAt(j + i));
             }
 
             LowMemoryManager.markAsRecoverable(orderRecords);
@@ -209,9 +189,32 @@ import net.rim.device.api.util.Comparator;
     }
 
     /**
+     * Sorts a Vector of order records.
+     * 
+     * @param records
+     *            The Vector to be sorted.
+     * @return The sorted Vector.
+     */
+    private Vector sortVector(final Vector records) {
+        final SortableVector sortableVector = new SortableVector();
+
+        for (int i = 0; i < records.size(); ++i) {
+            sortableVector.addElement(records.elementAt(i));
+        }
+
+        sortableVector.reSort(); // Make sure records are in order by date.
+
+        for (int i = 0; i < sortableVector.size(); ++i) {
+            records.setElementAt(sortableVector.elementAt(i), i);
+        }
+
+        return records;
+    }
+
+    /**
      * Commits the order records to the persistent store.
      */
-    public synchronized void commit() {
+    synchronized void commit() {
         _persist.commit();
     }
 
@@ -225,9 +228,9 @@ import net.rim.device.api.util.Comparator;
      * @param listener
      *            Object that listens for counting and sorting updates.
      */
-    public synchronized void populate(final int totalRecords,
+    synchronized void populate(final int totalRecords,
             final CountAndSortListener listener) {
-        final int numRecordsToAdd = totalRecords - _orderRecords.length;
+        final int numRecordsToAdd = totalRecords - _orderRecords.size();
 
         for (int i = 0; i < numRecordsToAdd; ++i) {
             listener.counterUpdated(i);
@@ -246,9 +249,9 @@ import net.rim.device.api.util.Comparator;
 
         listener.sortingStarted();
 
-        Arrays.sort(_orderRecords, _comparator);
+        _orderRecords = sortVector(_orderRecords);
 
-        // Array sorting is done.
+        // Vector sorting is done.
         listener.sortingFinished();
     }
 
@@ -256,8 +259,8 @@ import net.rim.device.api.util.Comparator;
      * Retrieves the number of records to be added to the order list.
      * 
      */
-    public int getNumRecordsToAdd(final int totalRecords) {
-        return totalRecords - _orderRecords.length;
+    int getNumRecordsToAdd(final int totalRecords) {
+        return totalRecords - _orderRecords.size();
     }
 
     /**
@@ -271,6 +274,27 @@ import net.rim.device.api.util.Comparator;
      */
     private void addOrderRecord(final OrderRecord orderRecord) {
         ObjectGroup.createGroup(orderRecord);
-        Arrays.add(_orderRecords, orderRecord);
+        _orderRecords.addElement(orderRecord);
+    }
+
+    final static class SortableVector extends SimpleSortingVector {
+        SortableVector() {
+            setSortComparator(new Comparator() {
+                public int compare(final Object o1, final Object o2) {
+                    final OrderRecord r1 = (OrderRecord) o1;
+                    final OrderRecord r2 = (OrderRecord) o2;
+
+                    if (r1.getDate() < r2.getDate()) {
+                        return -1;
+                    }
+
+                    if (r1.getDate() > r2.getDate()) {
+                        return 1;
+                    }
+
+                    return 0;
+                }
+            });
+        }
     }
 }

@@ -36,7 +36,7 @@ import net.rim.device.api.system.Application;
  * @see net.rim.blackberry.api.blackberrymessenger.SessionRequestListener
  */
 class TTTRequestListener implements SessionRequestListener {
-    static TTTRequestListener _instance;
+    private static TTTRequestListener _instance;
 
     private TTTRequestListener() {
     }

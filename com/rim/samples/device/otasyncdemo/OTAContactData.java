@@ -29,23 +29,23 @@ package com.rim.samples.device.otasyncdemo;
 import net.rim.device.api.synchronization.SyncObject;
 import net.rim.device.api.util.Persistable;
 
-public class OTAContactData implements SyncObject, Persistable {
+class OTAContactData implements SyncObject, Persistable {
     private int _guid = 0;
     private String _first, _last, _email, _phone;
 
-    public OTAContactData() {
+    OTAContactData() {
         _first = "";
         _last = "";
         _email = "";
         _phone = "";
     }
 
-    public OTAContactData(final int guid) {
+    OTAContactData(final int guid) {
         this();
         _guid = guid;
     }
 
-    public int getGUID() {
+    int getGUID() {
         return _guid;
     }
 
@@ -53,39 +53,39 @@ public class OTAContactData implements SyncObject, Persistable {
         return _guid;
     }
 
-    public void setGUID(final int guid) {
+    void setGUID(final int guid) {
         _guid = guid;
     }
 
-    public void setFirst(final String first) {
+    void setFirst(final String first) {
         _first = first;
     }
 
-    public String getFirst() {
+    String getFirst() {
         return _first;
     }
 
-    public void setLast(final String last) {
+    void setLast(final String last) {
         _last = last;
     }
 
-    public String getLast() {
+    String getLast() {
         return _last;
     }
 
-    public void setEmail(final String email) {
+    void setEmail(final String email) {
         _email = email;
     }
 
-    public String getEmail() {
+    String getEmail() {
         return _email;
     }
 
-    public void setPhone(final String phone) {
+    void setPhone(final String phone) {
         _phone = phone;
     }
 
-    public String getPhone() {
+    String getPhone() {
         return _phone;
     }
 

@@ -29,6 +29,7 @@ package com.rim.samples.device.gpsdemo;
 import java.util.Date;
 import java.util.Vector;
 
+import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
@@ -38,23 +39,22 @@ import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.ListField;
 import net.rim.device.api.ui.component.ListFieldCallback;
-import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.container.MainScreen;
 
 import com.rim.samples.device.gpsdemo.GPSDemo.WayPoint;
 
-/*
- * PointScreen is a screen derivative that renders the saved WayPoints.
+/**
+ * A screen to render the saved WayPoints.
  */
-public class PointScreen extends MainScreen implements ListFieldCallback {
+class PointScreen extends MainScreen implements ListFieldCallback {
     private final Vector _points;
     private final ListField _listField;
 
-    public PointScreen(final Vector points) {
+    PointScreen(final Vector points) {
 
         final LabelField title =
-                new LabelField("Previous WayPoints", DrawStyle.ELLIPSIS
+                new LabelField("Previous waypoints", DrawStyle.ELLIPSIS
                         | Field.USE_ALL_WIDTH);
         setTitle(title);
 
@@ -62,6 +62,8 @@ public class PointScreen extends MainScreen implements ListFieldCallback {
         _listField = new ListField();
         _listField.setCallback(this);
         add(_listField);
+        addMenuItem(_viewPointAction);
+        addMenuItem(_deletePointAction);
 
         reloadWayPointList();
     }
@@ -69,6 +71,42 @@ public class PointScreen extends MainScreen implements ListFieldCallback {
     private void reloadWayPointList() {
         // Refreshes wayPoint list on screen.
         _listField.setSize(_points.size());
+    }
+
+    private void displayWayPoint() {
+        final int index = _listField.getSelectedIndex();
+        final ViewScreen screen =
+                new ViewScreen((WayPoint) _points.elementAt(index), index);
+        UiApplication.getUiApplication().pushModalScreen(screen);
+    }
+
+    /**
+     * Overrides method in super class.
+     * 
+     * @see net.rim.device.api.ui.Screen#keyChar(char,int,int)
+     */
+    protected boolean keyChar(final char key, final int status, final int time) {
+        // Intercept the ENTER key.
+        if (key == Characters.ENTER) {
+            displayWayPoint();
+            return true;
+        }
+        return super.keyChar(key, status, time);
+    }
+
+    /**
+     * Handles a trackball click and provides identical behavior to an ENTER
+     * keypress event.
+     * 
+     * @see net.rim.device.api.ui.Screen#invokeAction(int)
+     */
+    protected boolean invokeAction(final int action) {
+        switch (action) {
+        case ACTION_INVOKE: // Trackball click.
+            displayWayPoint();
+            return true; // We've consumed the event.
+        }
+        return super.invokeAction(action);
     }
 
     // ListFieldCallback methods
@@ -118,62 +156,25 @@ public class PointScreen extends MainScreen implements ListFieldCallback {
 
     // Menu items
     // ---------------------------------------------------------------
-    private class ViewPointAction extends MenuItem {
-        private final int _index;
-
-        public ViewPointAction(final int index) {
-            super("View", 100000, 10);
-            _index = index;
-        }
-
+    MenuItem _viewPointAction = new MenuItem("View", 100000, 10) {
         public void run() {
-            final ViewScreen screen =
-                    new ViewScreen((WayPoint) _points.elementAt(_index), _index);
-            UiApplication.getUiApplication().pushModalScreen(screen);
+            displayWayPoint();
         }
-    }
+    };
 
-    private class DeletePointAction extends MenuItem {
-        private final int _index;
-
-        public DeletePointAction(final int index) {
-            super("Delete", 100000, 10);
-            _index = index;
-        }
-
+    MenuItem _deletePointAction = new MenuItem("Delete", 100000, 11) {
         public void run() {
-            GPSDemo.removeWayPoint((WayPoint) _points.elementAt(_index));
+            GPSDemo.removeWayPoint((WayPoint) _points.elementAt(_listField
+                    .getSelectedIndex()));
             reloadWayPointList();
         }
-    }
+    };
 
     /**
-     * @see net.rim.device.api.ui.container.MainScreen#makeMenu(Menu,int)
-     */
-    protected void makeMenu(final Menu menu, final int instance) {
-        if (_points.size() > 0) {
-            final ViewPointAction viewPointAction =
-                    new ViewPointAction(_listField.getSelectedIndex());
-            menu.add(viewPointAction);
-            menu.addSeparator();
-
-            final DeletePointAction deletePointAction =
-                    new DeletePointAction(_listField.getSelectedIndex());
-            menu.add(deletePointAction);
-        }
-
-        super.makeMenu(menu, instance);
-    }
-
-    /**
-     * Renders a particular Waypoint
+     * A screen to render a particular Waypoint.
      */
     private static class ViewScreen extends MainScreen {
-        private MenuItem _cancel;
-
-        public ViewScreen(final WayPoint point, final int count) {
-            super();
-
+        ViewScreen(final WayPoint point, final int count) {
             final LabelField title =
                     new LabelField("Waypoint" + count, DrawStyle.ELLIPSIS
                             | Field.USE_ALL_WIDTH);
@@ -196,28 +197,6 @@ public class PointScreen extends MainScreen implements ListFieldCallback {
                     Field.NON_FOCUSABLE));
             add(new RichTextField("Average Speed(m/s): "
                     + Float.toString(avgSpeed), Field.NON_FOCUSABLE));
-        }
-
-        private class CancelMenuItem extends MenuItem {
-            public CancelMenuItem() {
-                // Reuse an identical resource below.
-                super("Cancel", 300000, 10);
-            }
-
-            public void run() {
-                final UiApplication uiapp = UiApplication.getUiApplication();
-                uiapp.popScreen(ViewScreen.this);
-            }
-        };
-
-        protected void makeMenu(final Menu menu, final int instance) {
-            if (_cancel == null) {
-                _cancel = new CancelMenuItem(); // Create on demand.
-            }
-
-            menu.add(_cancel);
-
-            super.makeMenu(menu, instance);
         }
     }
 }

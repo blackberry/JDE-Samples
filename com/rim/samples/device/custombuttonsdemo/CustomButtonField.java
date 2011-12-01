@@ -26,6 +26,8 @@
 
 package com.rim.samples.device.custombuttonsdemo;
 
+import net.rim.device.api.system.Display;
+import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Font;
@@ -36,9 +38,14 @@ import net.rim.device.api.ui.Graphics;
  * Demonstrates how to create custom ui fields.
  */
 class CustomButtonField extends Field implements DrawStyle {
-    public static final int RECTANGLE = 1;
-    public static final int TRIANGLE = 2;
-    public static final int OCTAGON = 3;
+    static final int RECTANGLE = 1;
+    static final int TRIANGLE = 2;
+    static final int OCTAGON = 3;
+    static final int FIXED_WIDTH = 4;
+    static final int FULLSCREEN = 5;
+    static final int COLOUR_BACKGROUND = 6;
+
+    static final int DEFAULT_FIXED_WIDTH = 225;
 
     private final String _label;
     private final int _shape;
@@ -49,29 +56,28 @@ class CustomButtonField extends Field implements DrawStyle {
     /**
      * Constructs a button with specified label, and default style and shape.
      */
-    public CustomButtonField(final String label) {
+    CustomButtonField(final String label) {
         this(label, RECTANGLE, 0);
     }
 
     /**
      * Constructs a button with specified label and shape, and default style.
      */
-    public CustomButtonField(final String label, final int shape) {
+    CustomButtonField(final String label, final int shape) {
         this(label, shape, 0);
     }
 
     /**
      * Constructs a button with specified label and style, and default shape.
      */
-    public CustomButtonField(final String label, final long style) {
+    CustomButtonField(final String label, final long style) {
         this(label, RECTANGLE, style);
     }
 
     /**
      * Constructs a button with specified label, shape, and style.
      */
-    public CustomButtonField(final String label, final int shape,
-            final long style) {
+    CustomButtonField(final String label, final int shape, final long style) {
         super(style);
 
         _label = label;
@@ -82,50 +88,16 @@ class CustomButtonField extends Field implements DrawStyle {
     }
 
     /**
-     * Draws the focus indicator for this button. Inverts the inside region of
-     * the shape.
-     * 
-     * @param graphics
-     *            Graphics context used for drawing the focus.
-     * @param on
-     *            True if the focus should be set; otherwise, false.
+     * @return The text on the button
      */
-    protected void drawFocus(final Graphics graphics, final boolean on) {
-        switch (_shape) {
-        case TRIANGLE:
-            final int w = getWidth();
-            final int h = w >> 1;
-
-            for (int i = h - 1; i >= 2; --i) {
-                graphics.invert(i, h - i, w - (i << 1), 1);
-            }
-
-            break;
-
-        case RECTANGLE:
-            graphics.invert(1, 1, getWidth() - 2, getHeight() - 2);
-            break;
-
-        case OCTAGON:
-            int x3 = getWidth();
-            final int x = 5 * x3 / 17;
-            int x2 = x3 - x;
-            x3 = x3 - 1;
-            x2 = x2 - 1;
-
-            graphics.invert(1, x, getWidth() - 2, x2 - x + 1);
-
-            for (int i = 1; i < x; ++i) {
-                graphics.invert(1 + i, x - i, getWidth() - (i + 1 << 1), 1);
-                graphics.invert(1 + i, x2 + i, getWidth() - (i + 1 << 1), 1);
-            }
-
-            break;
-        }
+    String getText() {
+        return _label;
     }
 
     /**
-     * Gets the preferred width of the button.
+     * Field implementation.
+     * 
+     * @see net.rim.device.api.ui.Field#getPreferredWidth()
      */
     public int getPreferredWidth() {
         switch (_shape) {
@@ -143,14 +115,22 @@ class CustomButtonField extends Field implements DrawStyle {
                 return _labelWidth + 8;
             }
 
-        case RECTANGLE:
+        case FIXED_WIDTH:
+            return DEFAULT_FIXED_WIDTH;
+
+        case FULLSCREEN:
+            return Display.getWidth();
+
         default:
             return _labelWidth + 8;
+
         }
     }
 
     /**
-     * Gets the preferred height of the button.
+     * Field implementation.
+     * 
+     * @see net.rim.device.api.ui.Field#getPreferredHeight()
      */
     public int getPreferredHeight() {
         switch (_shape) {
@@ -161,29 +141,58 @@ class CustomButtonField extends Field implements DrawStyle {
                 return _labelWidth;
             }
 
-        case RECTANGLE:
-            return _labelHeight + 4;
-
         case OCTAGON:
             return getPreferredWidth();
-        }
 
-        return 0;
+        default:
+            return _labelHeight + 4;
+        }
     }
 
     /**
-     * Lays out this button's contents.
+     * Field implementation.
      * 
-     * <p>
-     * This field's manager invokes this method during the layout process to
-     * instruct this field to arrange its contents, given an amount of available
-     * space.
+     * @see net.rim.device.api.ui.Field#drawFocus(Graphics, boolean)
+     */
+    protected void drawFocus(final Graphics graphics, final boolean on) {
+        switch (_shape) {
+        case TRIANGLE:
+            final int w = getWidth();
+            final int h = w >> 1;
+
+            for (int i = h - 1; i >= 2; --i) {
+                graphics.invert(i, h - i, w - (i << 1), 1);
+            }
+
+            break;
+
+        case OCTAGON:
+            int x3 = getWidth();
+            final int x = 5 * x3 / 17;
+            int x2 = x3 - x;
+            x3 = x3 - 1;
+            x2 = x2 - 1;
+
+            graphics.invert(1, x, getWidth() - 2, x2 - x + 1);
+
+            for (int i = 1; i < x; ++i) {
+                graphics.invert(1 + i, x - i, getWidth() - (i + 1 << 1), 1);
+                graphics.invert(1 + i, x2 + i, getWidth() - (i + 1 << 1), 1);
+            }
+
+            break;
+
+        default:
+            graphics.invert(1, 1, getWidth() - 2, getHeight() - 2);
+            break;
+        }
+    }
+
+    /**
+     * Field implementation.
      * 
-     * @param width
-     *            Amount of available horizontal space.
-     * @param height
-     *            Amount of available vertical space.
-     * */
+     * @see net.rim.device.api.ui.Field#layout(int, int)
+     */
     protected void layout(int width, int height) {
         // Update the cached font - in case it has been changed.
         _font = getFont();
@@ -201,22 +210,18 @@ class CustomButtonField extends Field implements DrawStyle {
     }
 
     /**
-     * Redraws this button.
+     * Field implementation.
      * 
-     * <p>
-     * This field's manager invokes this method during the repainting process to
-     * instruct this field to repaint itself.
-     * 
-     * @param graphics
-     *            Graphics context for repainting this field.
-     * */
+     * @see net.rim.device.api.ui.Field#paint(Graphics)
+     */
     protected void paint(final Graphics graphics) {
         int textX, textY, textWidth;
         final int w = getWidth();
+        int h = getHeight();
 
         switch (_shape) {
         case TRIANGLE:
-            final int h = w >> 1;
+            h = w >> 1;
             final int m = (w >> 1) - 1;
 
             graphics.drawLine(0, h - 1, m, 0);
@@ -247,9 +252,18 @@ class CustomButtonField extends Field implements DrawStyle {
             textY = w - _labelHeight >> 1;
             break;
 
-        case RECTANGLE:
+        case COLOUR_BACKGROUND:
+            graphics.setColor(Color.LIGHTBLUE);
+            graphics.fillRect(0, 0, w, h);
+            graphics.setColor(Color.BLACK);
+
+            textX = 4;
+            textY = 2;
+            textWidth = w - 6;
+            break;
+
         default:
-            graphics.drawRect(0, 0, w, getHeight());
+            graphics.drawRect(0, 0, w, h);
 
             textX = 4;
             textY = 2;
@@ -259,4 +273,16 @@ class CustomButtonField extends Field implements DrawStyle {
         graphics.drawText(_label, textX, textY, (int) (getStyle()
                 & DrawStyle.ELLIPSIS | DrawStyle.HALIGN_MASK), textWidth);
     }
+
+    /**
+     * Overridden so that the Event Dispatch thread can catch this event instead
+     * of having it be caught here.
+     * 
+     * @see net.rim.device.api.ui.Field#navigationClick(int, int)
+     */
+    protected boolean navigationClick(final int status, final int time) {
+        fieldChangeNotify(0);
+        return true;
+    }
+
 }

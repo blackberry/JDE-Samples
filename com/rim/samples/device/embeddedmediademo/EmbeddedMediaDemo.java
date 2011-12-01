@@ -53,14 +53,14 @@ import net.rim.device.api.ui.container.MainScreen;
  * bottom of the screen indicate current volume level, total playing time of the
  * media, and elapsed time when media is paused.
  */
-public class EmbeddedMediaDemo extends UiApplication {
+class EmbeddedMediaDemo extends UiApplication {
     // Entry point for this application.
     public static void main(final String[] args) {
         new EmbeddedMediaDemo().enterEventDispatcher();
     }
 
     // Constructor
-    public EmbeddedMediaDemo() {
+    private EmbeddedMediaDemo() {
         final EmbeddedMediaScreen screen = new EmbeddedMediaScreen();
         pushScreen(screen);
     }
@@ -110,7 +110,7 @@ final class EmbeddedMediaScreen extends MainScreen implements
      * Method to add UI fields to the main screen. Only called if media was
      * sucessfully loaded.
      */
-    public void addFields() {
+    private void addFields() {
         delete(_statusField);
         add(_videoField);
 
@@ -140,7 +140,7 @@ final class EmbeddedMediaScreen extends MainScreen implements
      * Creates a Player based on a specified URL and provides a VolumeControl
      * object.
      */
-    public void initializeMedia() {
+    private void initializeMedia() {
         try {
             /*
              * For the purpose of this sample we are supplying a URL to a media

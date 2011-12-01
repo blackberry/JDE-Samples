@@ -60,7 +60,7 @@ import net.rim.device.api.util.Persistable;
 /**
  * The main class for the Phone API demo app.
  */
-public final class PhoneApiDemo extends UiApplication {
+final class PhoneApiDemo extends UiApplication {
     // Members
     // -------------------------------------------------------------------------------------
     private final PhoneApiDemoMainScreen _mainScreen;
@@ -160,7 +160,7 @@ public final class PhoneApiDemo extends UiApplication {
          * PhoneApiDemoMainScreen constructor. Creates the fields and menu items
          * used on this screen.
          */
-        public PhoneApiDemoMainScreen() {
+        private PhoneApiDemoMainScreen() {
             super();
 
             /* parent. */setTitle(new LabelField("Phone API Demo",
@@ -191,7 +191,7 @@ public final class PhoneApiDemo extends UiApplication {
          * called at certain times, such as when validate() is called in the
          * PhoneApiDemo class.
          */
-        public void setPhoneNumberListFieldSize() {
+        void setPhoneNumberListFieldSize() {
             _phoneNumberListField.setSize(_phoneNumberList.size());
         }
 
@@ -266,7 +266,7 @@ public final class PhoneApiDemo extends UiApplication {
             // Members ----------------------------------------------
             private final PhoneNumberRecord _record;
 
-            public View(final PhoneNumberRecord record) {
+            private View(final PhoneNumberRecord record) {
                 super("View", 200000, 100);
                 _record = record;
             }
@@ -300,7 +300,7 @@ public final class PhoneApiDemo extends UiApplication {
             // Members ----------------------------------------------
             private final PhoneNumberRecord _record;
 
-            public Delete(final PhoneNumberRecord record) {
+            private Delete(final PhoneNumberRecord record) {
                 super("Delete", 300000, 110);
                 _record = record;
             }
@@ -326,10 +326,10 @@ public final class PhoneApiDemo extends UiApplication {
 
         // Constants
         // -------------------------------------------------------------------------------
-        public static final int PHONE_NUMBER = 0;
-        public static final int TALK_TIME = 1;
+        private static final int PHONE_NUMBER = 0;
+        private static final int TALK_TIME = 1;
 
-        public PhoneNumberRecord(final String phoneNumber) {
+        private PhoneNumberRecord(final String phoneNumber) {
             _fields = new Vector();
             _fields.addElement(phoneNumber);
             _fields.addElement(new Long(0));
@@ -343,7 +343,7 @@ public final class PhoneApiDemo extends UiApplication {
          *            The index of the field to retrieve.
          * @return The field.
          */
-        public Object getField(final int index) {
+        private Object getField(final int index) {
             return _fields.elementAt(index);
         }
 
@@ -355,7 +355,7 @@ public final class PhoneApiDemo extends UiApplication {
          * @param o
          *            The object that the field is set to.
          */
-        public void setField(final int index, final Object o) {
+        private void setField(final int index, final Object o) {
             _fields.setElementAt(o, index);
         }
 
@@ -388,7 +388,7 @@ public final class PhoneApiDemo extends UiApplication {
          * @return True if this record is currently recording "talk time"; false
          *         otherwise.
          */
-        public boolean isActive() {
+        private boolean isActive() {
             return _startTime != 0;
         }
 
@@ -402,7 +402,7 @@ public final class PhoneApiDemo extends UiApplication {
         /**
          * Causes this record to temporarily stop recording "talk time".
          */
-        public void putOnHold() {
+        private void putOnHold() {
             long talkTime = ((Long) _fields.elementAt(TALK_TIME)).longValue();
             talkTime += new Date().getTime() - _startTime;
             _fields.setElementAt(new Long(talkTime), TALK_TIME);
@@ -412,14 +412,14 @@ public final class PhoneApiDemo extends UiApplication {
         /**
          * Causes this record to resume recording "talk time".
          */
-        public void resume() {
+        private void resume() {
             start();
         }
 
         /**
          * Causes this record to stop recording "talk time".
          */
-        public void end() {
+        private void end() {
             putOnHold();
         }
     }
@@ -433,7 +433,7 @@ public final class PhoneApiDemo extends UiApplication {
         private final BasicEditField _phoneNumber;
         private final BasicEditField _talkTime;
 
-        public PhoneNumberRecordDisplayer(
+        private PhoneNumberRecordDisplayer(
                 final PhoneNumberRecord phoneNumberRecord) {
             final String phoneNumber =
                     (String) phoneNumberRecord
@@ -482,7 +482,7 @@ public final class PhoneApiDemo extends UiApplication {
          * 
          * @return This displayer's fields.
          */
-        public Vector getFields() {
+        private Vector getFields() {
             final Vector fields = new Vector();
             fields.addElement(_phoneNumber);
             fields.addElement(_talkTime);

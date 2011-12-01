@@ -57,7 +57,7 @@ import net.rim.device.api.util.DataBuffer;
  * Developers Knowledge Base. The javadocs contain additional sample code to
  * assist you.
  */
-public class CryptoDemo extends UiApplication {
+class CryptoDemo extends UiApplication {
 
     private final RichTextField _status;
 
@@ -72,7 +72,7 @@ public class CryptoDemo extends UiApplication {
     /**
      * Constructor
      */
-    public CryptoDemo() {
+    private CryptoDemo() {
         final MainScreen screen = new MainScreen();
         screen.setTitle(new LabelField("Crypto Demo", DrawStyle.ELLIPSIS
                 | Field.USE_ALL_WIDTH));
@@ -99,7 +99,7 @@ public class CryptoDemo extends UiApplication {
      * We want to create a sample that will encrypt and decrypt test data to
      * demonstrate how a simple crypto example can be implemented.
      */
-    public void go() {
+    private void go() {
         try {
             // We are going to use TripleDES as the algorithm for encrypting and
             // decrypting

@@ -62,7 +62,7 @@ import org.w3c.dom.NodeList;
      * @see DocumentBuilder
      * @see DocumentBuilderFactory
      */
-    public XMLDemoScreen() {
+    XMLDemoScreen() {
         setTitle(new LabelField("XML Demo", DrawStyle.ELLIPSIS
                 | Field.USE_ALL_WIDTH));
 

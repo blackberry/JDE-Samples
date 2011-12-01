@@ -39,9 +39,9 @@ import net.rim.device.api.ui.container.MainScreen;
  * startup. Immediate and deferred events are generated via a UI menu item and
  * the Event.fire() method.
  */
-public final class NotificationsDemo extends UiApplication {
+final class NotificationsDemo extends UiApplication {
     // com.rim.samples.device.notificationsdemo.NOTIFICATIONS_ID_1
-    public static final long NOTIFICATIONS_ID_1 = 0xdc5bf2f81374095L;
+    static final long NOTIFICATIONS_ID_1 = 0xdc5bf2f81374095L;
 
     public static void main(final String[] args) {
         if (args.length > 0 && args[0].equals("autostartup")) {
@@ -89,7 +89,7 @@ public final class NotificationsDemo extends UiApplication {
     private static class NotificationsDemoScreen extends MainScreen {
         private long _eventId;
 
-        public NotificationsDemoScreen() {
+        private NotificationsDemoScreen() {
             // Initialize UI components.
             setTitle("Notifications Demo");
             add(new RichTextField("Trigger notification from menu."));
@@ -97,7 +97,8 @@ public final class NotificationsDemo extends UiApplication {
         }
 
         // A menu item to generate immediate and deferred events.
-        MenuItem _notifyItem = new MenuItem("Notify (ID1)", 100000, 25) {
+        private final MenuItem _notifyItem = new MenuItem("Notify (ID1)",
+                100000, 25) {
             public void run() {
                 final int trigger = NotificationsConstants.MANUAL_TRIGGER;
 

@@ -42,7 +42,7 @@ final class InvokeMapViewScreen extends MainScreen {
     /**
      * Constructor
      */
-    public InvokeMapViewScreen() {
+    InvokeMapViewScreen() {
         setTitle("Invoke Map View");
 
         final LabelField instructions =
@@ -56,7 +56,7 @@ final class InvokeMapViewScreen extends MainScreen {
     /**
      * Invokes BlackBerry Maps application using a MapView object.
      */
-    MenuItem viewMapItem = new MenuItem("View Map", 1000, 10) {
+    private final MenuItem viewMapItem = new MenuItem("View Map", 1000, 10) {
         public void run() {
             final MapView mapview = new MapView();
             mapview.setLatitude(4542349);

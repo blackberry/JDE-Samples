@@ -461,7 +461,7 @@ class OTAContactCollection implements OTASyncCapable, OTASyncPriorityProvider,
 
     // Class-specific methods
     // ---------------------------------------------------
-    public Object getAt(final int index) {
+    Object getAt(final int index) {
         return _contacts.elementAt(index);
     }
 }

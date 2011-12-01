@@ -96,7 +96,7 @@ class DemoMapField extends MapField {
     /**
      * Runs through all the sites and sets their color.
      */
-    public void determineSiteColors() {
+    private void determineSiteColors() {
         final Vector highlightCandidates = new Vector(); // Stores the sites
                                                          // that the cursor
                                                          // touches.
@@ -263,14 +263,14 @@ class DemoMapField extends MapField {
      * @param site
      *            Site to be added.
      */
-    public void addSite(final MapFieldDemoSite site) {
+    void addSite(final MapFieldDemoSite site) {
         _allSites.addElement(site);
     }
 
     /**
      * Turns off the instructive text.
      */
-    public void turnOffText() {
+    void turnOffText() {
         _turnOffText = true;
     }
 
@@ -288,7 +288,7 @@ class DemoMapField extends MapField {
      * 
      * @return Highlighted sites.
      */
-    public MapFieldDemoSite getHighlightedSite() {
+    MapFieldDemoSite getHighlightedSite() {
         return _highlightedSite;
     }
 }

@@ -1,5 +1,9 @@
 ## RIM Java Development Environment
 # RIM Project file
+#
+# This file is generated and managed by BlackBerry developer tools.
+# It SHOULD NOT BE modified manually.
+#
 AddOn=0
 AlwaysBuild=0
 [AlxImports
@@ -26,6 +30,7 @@ OTABackupRestoreContactCollection.java
 OTABackupRestoreDemo.java
 OTAContactData.java
 OTAContactScreen.java
+readme.txt
 ]
 HaveAlxImports=0
 HaveDefs=0
@@ -44,8 +49,12 @@ OutputFileName=OTABackupRestoreDemo
 [PackageProtection
 ]
 RibbonPosition=0
+[RolloverIcons
+]
 RunOnStartup=0
 StartupTier=7
 SystemModule=0
 Title=OTA Backup Restore Demo
 Type=0
+Vendor=Research In Motion Limited
+Version=0.9

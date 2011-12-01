@@ -59,8 +59,7 @@ import net.rim.device.api.ui.container.MainScreen;
  * The TicTacToe sample implements a tic tac toe game where the computer plays
  * "O". You can also play a two-player game via BlackBerry Messenger.
  */
-public class TicTacToeDemo extends UiApplication implements
-        DialogClosedListener {
+class TicTacToeDemo extends UiApplication implements DialogClosedListener {
     // Members
     // ------------------------------------------------------------------
     private int _difficulty;
@@ -136,8 +135,8 @@ public class TicTacToeDemo extends UiApplication implements
             { _TOP_RIGHT, _CENTER, _BOTTOM_LEFT } // Diagonal line.
             };
 
-    static Session _twoPlayerSession; // Used for communication with a
-                                      // BlackBerry Messenger Contact.
+    private static Session _twoPlayerSession; // Used for communication with a
+                                              // BlackBerry Messenger Contact.
 
     private static final Dialog _twoPlayerRequestDialog = new Dialog(
             "Requesting two player game...", new Object[] { "Cancel" },
@@ -184,7 +183,7 @@ public class TicTacToeDemo extends UiApplication implements
      * The TicTacToe constructor. Creates all the RIM UI components and pushes
      * the application's root screen onto the UI stack.
      */
-    TicTacToeDemo() {
+    private TicTacToeDemo() {
         // MainScreen is the basic screen or frame class of the RIM UI.
         _mainScreen =
                 new TicTacToeScreen(Field.USE_ALL_HEIGHT | Field.FIELD_LEFT);
@@ -359,7 +358,7 @@ public class TicTacToeDemo extends UiApplication implements
          * @param style
          *            Style(s) for this new screen.
          */
-        public TicTacToeScreen(final long style) {
+        private TicTacToeScreen(final long style) {
             super(style);
 
             _newGameItem = new MenuItem("New Game", 100000, 10) {
@@ -512,17 +511,17 @@ public class TicTacToeDemo extends UiApplication implements
 
     private final class TurnField extends RichTextField {
         // Constructor
-        public TurnField() {
+        private TurnField() {
             super(Field.NON_FOCUSABLE | Field.FIELD_HCENTER
                     | Field.USE_ALL_WIDTH);
             yourTurn();
         }
 
-        public void yourTurn() {
+        private void yourTurn() {
             setText("Your turn...");
         }
 
-        public void theirTurn() {
+        private void theirTurn() {
             setText("Their Turn...");
         }
     }
@@ -542,7 +541,7 @@ public class TicTacToeDemo extends UiApplication implements
          * @param initialIndex
          *            Index of the initially selected value.
          */
-        public DifficultyField(final String label, final Object[] choices,
+        private DifficultyField(final String label, final Object[] choices,
                 final int initialIndex) {
             super(label, choices, initialIndex);
             setChangeListener(this);
@@ -580,16 +579,16 @@ public class TicTacToeDemo extends UiApplication implements
          *            Reference to square on the board.
          */
 
-        public SquareField(final int squareIndex) {
+        private SquareField(final int squareIndex) {
             super(_blankBitmap);
             _squareIndex = squareIndex;
         }
 
-        public int getGameState() {
+        private int getGameState() {
             return _state;
         }
 
-        public int getSquareIndex() {
+        private int getSquareIndex() {
             return _squareIndex;
         }
 
@@ -929,7 +928,7 @@ public class TicTacToeDemo extends UiApplication implements
         }
     }
 
-    public void requestTwoPlayerGame(final MessengerContact player) {
+    void requestTwoPlayerGame(final MessengerContact player) {
         _twoPlayerRequestDialog.setDialogClosedListener(this);
         _twoPlayerRequestDialog.show();
         new SetupTwoPlayerGameThread(player).start();

@@ -54,7 +54,7 @@ class OTABackupRestoreDemo extends UiApplication implements ListFieldCallback {
     // Inner Classes
     // ------------------------------------------------------------
     private class AddContactAction extends MenuItem {
-        public AddContactAction() {
+        private AddContactAction() {
             super("Add", 100000, 10);
         }
 
@@ -79,7 +79,7 @@ class OTABackupRestoreDemo extends UiApplication implements ListFieldCallback {
     private static class ViewContactAction extends MenuItem {
         private final int _index;
 
-        public ViewContactAction(final int index) {
+        private ViewContactAction(final int index) {
             super("View", 100000, 5);
             _index = index;
         }
@@ -94,7 +94,7 @@ class OTABackupRestoreDemo extends UiApplication implements ListFieldCallback {
     private static class EditContactAction extends MenuItem {
         private final int _index;
 
-        public EditContactAction(final int index) {
+        private EditContactAction(final int index) {
             super("Edit", 100000, 6);
             _index = index;
         }
@@ -137,7 +137,7 @@ class OTABackupRestoreDemo extends UiApplication implements ListFieldCallback {
     }
 
     // Constructor
-    public OTABackupRestoreDemo() {
+    private OTABackupRestoreDemo() {
 
         // Create a new screen for the application.
         final OTABackupRestoreDemoScreen screen =

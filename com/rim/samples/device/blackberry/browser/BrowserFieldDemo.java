@@ -47,7 +47,7 @@ import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Status;
 import net.rim.device.api.ui.container.MainScreen;
 
-final public class BrowserFieldDemo extends UiApplication implements
+final class BrowserFieldDemo extends UiApplication implements
         RenderingApplication {
 
     private static final String REFERER = "referer";
@@ -81,8 +81,7 @@ final public class BrowserFieldDemo extends UiApplication implements
 
     }
 
-    public void
-            processConnection(final HttpConnection connection, final Event e) {
+    void processConnection(final HttpConnection connection, final Event e) {
         // Cancel previous request.
         if (_currentConnection != null) {
             try {

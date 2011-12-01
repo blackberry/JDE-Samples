@@ -34,6 +34,7 @@ import net.rim.blackberry.api.mail.Session;
 import net.rim.blackberry.api.mail.Transport;
 import net.rim.device.api.applicationcontrol.ApplicationPermissions;
 import net.rim.device.api.applicationcontrol.ApplicationPermissionsManager;
+import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ControlledAccessException;
 import net.rim.device.api.system.Device;
 import net.rim.device.api.system.EventInjector;
@@ -45,7 +46,7 @@ import net.rim.device.api.ui.component.Dialog;
 
 /**
  * This sample demonstrates the ApplicationPermissions API available in
- * BlackBerry v4.2.1 handheld software and higher. If the required permissions
+ * BlackBery v4.2.1 handheld software and higher. If the required permissions
  * for this application have been denied by the user, the application will
  * prompt for access to these resources. The ability to test these capabilities
  * is provided as part of the sample.This sample needs to be run on a secure
@@ -55,7 +56,7 @@ import net.rim.device.api.ui.component.Dialog;
  * by this project signed with the Signature Tool. For more information on code
  * signing please refer to the BlackBerry Signature Tool Development Guide.
  */
-public class ApplicationPermissionsDemo extends UiApplication implements
+class ApplicationPermissionsDemo extends UiApplication implements
         FieldChangeListener {
     private ButtonField _eventInjectorButton;
     private ButtonField _phoneButton;
@@ -71,8 +72,10 @@ public class ApplicationPermissionsDemo extends UiApplication implements
         sample.enterEventDispatcher();
     }
 
-    // Constructor
-    public ApplicationPermissionsDemo() {
+    /**
+     * Constructor.
+     */
+    private ApplicationPermissionsDemo() {
         checkPermissions();
         showTestScreen();
     }
@@ -93,25 +96,30 @@ public class ApplicationPermissionsDemo extends UiApplication implements
         // --Phone
         // --Device Settings
         // --Email
-        // The sample demonstrates how these user defined permissions will cause
-        // the
-        // respective tests to succeed or fail. Individual applications will
-        // require
-        // access to different permissions. Please review the Javadocs for the
-        // ApplicationPermissions class for a list of all available permissions.
+        // The sample demonstrates how these user defined permissions will
+        // cause the respective tests to succeed or fail. Individual
+        // applications will require access to different permissions.
+        // Please review the Javadocs for the ApplicationPermissions class
+        // for a list of all available permissions
+        // May 13, 2008: updated permissions by replacing deprecated constants.
 
         // Capture the current state of permissions and check against the
         // requirements.
-        final ApplicationPermissions original =
-                ApplicationPermissionsManager.getInstance()
-                        .getApplicationPermissions();
+        final ApplicationPermissionsManager apm =
+                ApplicationPermissionsManager.getInstance();
+        final ApplicationPermissions original = apm.getApplicationPermissions();
+
+        // Set up and attach a reason provider
+        final DemoReasonProvider drp = new DemoReasonProvider();
+        apm.addReasonProvider(ApplicationDescriptor
+                .currentApplicationDescriptor(), drp);
 
         if (original
-                .getPermission(ApplicationPermissions.PERMISSION_EVENT_INJECTOR) == ApplicationPermissions.VALUE_ALLOW
+                .getPermission(ApplicationPermissions.PERMISSION_INPUT_SIMULATION) == ApplicationPermissions.VALUE_ALLOW
                 && original
                         .getPermission(ApplicationPermissions.PERMISSION_PHONE) == ApplicationPermissions.VALUE_ALLOW
                 && original
-                        .getPermission(ApplicationPermissions.PERMISSION_CHANGE_DEVICE_SETTINGS) == ApplicationPermissions.VALUE_ALLOW
+                        .getPermission(ApplicationPermissions.PERMISSION_DEVICE_SETTINGS) == ApplicationPermissions.VALUE_ALLOW
                 && original
                         .getPermission(ApplicationPermissions.PERMISSION_EMAIL) == ApplicationPermissions.VALUE_ALLOW) {
             // All of the necessary permissions are currently available.
@@ -127,10 +135,10 @@ public class ApplicationPermissionsDemo extends UiApplication implements
         // Please only request the permissions needed for your application.
         final ApplicationPermissions permRequest = new ApplicationPermissions();
         permRequest
-                .addPermission(ApplicationPermissions.PERMISSION_EVENT_INJECTOR);
+                .addPermission(ApplicationPermissions.PERMISSION_INPUT_SIMULATION);
         permRequest.addPermission(ApplicationPermissions.PERMISSION_PHONE);
         permRequest
-                .addPermission(ApplicationPermissions.PERMISSION_CHANGE_DEVICE_SETTINGS);
+                .addPermission(ApplicationPermissions.PERMISSION_DEVICE_SETTINGS);
         permRequest.addPermission(ApplicationPermissions.PERMISSION_EMAIL);
 
         final boolean acceptance =
@@ -142,16 +150,12 @@ public class ApplicationPermissionsDemo extends UiApplication implements
             return;
         } else {
             // The user has only accepted some or none of the permissions
-            // requested. In this
-            // sample, we will not perform any additional actions based on this
-            // information.
-            // However, there are several scenarios where this information could
-            // be used.
-            // For example, if the user denied networking capabilities then the
-            // application
+            // requested. In this sample, we will not perform any additional
+            // actions based on this information. However, there are several
+            // scenarios where this information could be used. For example,
+            // if the user denied networking capabilities then the application
             // could disable that functionality if it was not core to the
-            // operation of the
-            // application.
+            // operation of the application.
         }
     }
 
@@ -253,10 +257,10 @@ public class ApplicationPermissionsDemo extends UiApplication implements
                 testEmail();
             }
 
-            Dialog.inform("Test Successful");
+            Dialog.inform("Test successful.");
         } catch (final ControlledAccessException e) {
             // Do not have access to the API. Indicate as such.
-            Dialog.inform("Test Failed");
+            Dialog.inform("Test failed!");
         }
     }
 }

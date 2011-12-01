@@ -33,7 +33,7 @@ import net.rim.device.api.util.Persistable;
  * code. It is a persistent object and is intended to showcase how grouping
  * would be applied to this object.
  */
-public class AddressBookRecord implements Persistable {
+class AddressBookRecord implements Persistable {
     private String _title; // The title of the address book record.
     private String _firstName; // The first name of the address book record.
     private String _lastName; // The last name of the address book record.
@@ -41,7 +41,7 @@ public class AddressBookRecord implements Persistable {
     /**
      * Create an empty version of the AddressBookRecord.
      */
-    public AddressBookRecord() {
+    AddressBookRecord() {
         _title = "";
         _firstName = "";
         _lastName = "";
@@ -60,7 +60,7 @@ public class AddressBookRecord implements Persistable {
      * @throws IllegalArgumentException
      *             if any of the parameters are null.
      */
-    public AddressBookRecord(final String title, final String firstName,
+    AddressBookRecord(final String title, final String firstName,
             final String lastName) {
         if (title == null || firstName == null || lastName == null) {
             throw new IllegalArgumentException();
@@ -75,7 +75,7 @@ public class AddressBookRecord implements Persistable {
      * 
      * @return the titel of the AddressBookRecord.
      */
-    public String getTitle() {
+    String getTitle() {
         return _title;
     }
 
@@ -84,7 +84,7 @@ public class AddressBookRecord implements Persistable {
      * 
      * @return the first name of the AddressBookRecord.
      */
-    public String getFirstName() {
+    String getFirstName() {
         return _firstName;
     }
 
@@ -93,7 +93,7 @@ public class AddressBookRecord implements Persistable {
      * 
      * @return returns the last name of the AddressBookRecord.
      */
-    public String getLastName() {
+    String getLastName() {
         return _lastName;
     }
 
@@ -103,7 +103,7 @@ public class AddressBookRecord implements Persistable {
      * @param title
      *            the new title of the AddressBookRecord.
      */
-    public void setTitle(final String title) {
+    void setTitle(final String title) {
         _title = title;
     }
 
@@ -113,7 +113,7 @@ public class AddressBookRecord implements Persistable {
      * @param firstName
      *            the new first name of the AddressBookRecord.
      */
-    public void setFirstName(final String firstName) {
+    void setFirstName(final String firstName) {
         _firstName = firstName;
     }
 
@@ -123,7 +123,7 @@ public class AddressBookRecord implements Persistable {
      * @param lastName
      *            the new last name of the AddressBookRecord.
      */
-    public void setLastName(final String lastName) {
+    void setLastName(final String lastName) {
         _lastName = lastName;
     }
 

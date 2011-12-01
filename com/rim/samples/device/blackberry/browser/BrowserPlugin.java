@@ -47,7 +47,7 @@ import net.rim.device.api.ui.container.VerticalFieldManager;
  * To test the plugin - create a file with xxxtest extension and associate that
  * type with application/x-vnd.rim.xxxtest mime type on any web server.
  */
-public final class BrowserPlugin extends BrowserContentProvider implements
+final class BrowserPlugin extends BrowserContentProvider implements
         BrowserPageContext {
 
     private static final String[] ACCEPT = { "application/x-vnd.rim.xxxtest" };

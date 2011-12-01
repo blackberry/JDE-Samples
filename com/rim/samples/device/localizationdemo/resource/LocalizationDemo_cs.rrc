@@ -1,0 +1,24 @@
+APPLICATION_TITLE#0="Uk\u00e1zka lokalizace";
+FIELD_CHINA#0="\u010c\u00edna";
+FIELD_CHINA_CITIES#0="Peking a Shanghai";
+FIELD_CHINA_LANG#0="Mandarin\u0161tina";
+FIELD_CHINA_POP#0="1,211,210,000";
+FIELD_CHOICE#0="Vybrat zemi: ";
+FIELD_CITIES#0="V\u00fdznamn\u00e1 m\u011bsta: ";
+FIELD_COUNTRIES#0={
+    "Spojen\u00e9 st\u00e1ty",
+    "\u010c\u00edna",
+    "N\u011bmecko",
+};
+FIELD_GERMANY#0="N\u011bmecko";
+FIELD_GERMANY_CITIES#0="Berl\u00edn a Mnichov";
+FIELD_GERMANY_LANG#0="N\u011bm\u010dina";
+FIELD_GERMANY_POP#0="83,536,115";
+FIELD_LANG#0="Jazyky: ";
+FIELD_POP#0="Obyvatelstvo: ";
+FIELD_TITLE#0="Uk\u00e1zka demonstrace lokalizace pomoc\u00ed API";
+FIELD_US#0="Spojen\u00e9 st\u00e1ty";
+FIELD_US_CITIES#0="New York a Los Angeles";
+FIELD_US_LANG#0="Angli\u010dtina a \u0161pan\u011bl\u0161tina";
+FIELD_US_POP#0="266,993,000";
+MENUITEM_VIEW#0="Zobrazit";

@@ -23,7 +23,10 @@ ExcludeFromBuildAll=0
 [Files
 CustomButtonField.java
 CustomButtonsDemo.java
+img\blue_scribble.bmp
 img\custom_buttons_jde.png
+img\pink_scribble.bmp
+PictureBackgroundButtonField.java
 ]
 HaveAlxImports=0
 HaveDefs=0
@@ -43,6 +46,8 @@ OutputFileName=CustomButtonsDemo
 [PackageProtection
 ]
 RibbonPosition=0
+[RolloverIcons
+]
 RunOnStartup=0
 StartupTier=7
 SystemModule=0

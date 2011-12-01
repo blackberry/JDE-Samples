@@ -44,33 +44,22 @@ import net.rim.device.api.ui.component.GaugeField;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.ListField;
 import net.rim.device.api.ui.component.ListFieldCallback;
-import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.container.DialogFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.PopupScreen;
 
 /**
- * The main screen for the application. It displays either a list of customer
- * records, or a list of order records, and provides a menu item to switch
- * between the two.
+ * The main screen for the application.
  */
 /* package */final class MemoryDemoMainScreen extends MainScreen implements
         ListFieldCallback, LowMemoryListener {
     // Members
     // -------------------------------------------------------------------------------------
-    private final CustomerList _customerList;
-    private final MyListField _customerListField;
     private final OrderList _orderList;
-    private final MyListField _orderListField;
+    private final OrderListField _orderListField;
     private final UiApplication _app;
-    private final MenuItem _simulateLmmLowItem;
-    private final MenuItem _simulateLmmMediumItem;
-    private final MenuItem _simulateLmmHighItem;
-    private final MenuItem _viewCustomerRecordsItem;
-    private final MenuItem _viewOrderRecordsItem;
-    private ProgressBarDialog _progressDialog;
 
-    private boolean _viewingCustomerRecords;
+    private ProgressBarDialog _progressDialog;
 
     // Constants
     // -----------------------------------------------------------------------------------
@@ -78,50 +67,32 @@ import net.rim.device.api.ui.container.PopupScreen;
 
     /**
      * This constructor builds the main screen, prepares menu items for display,
-     * and shows the list of customer records.
+     * and shows the list of order records.
      */
-    public MemoryDemoMainScreen() {
-        super();
-
-        setTitle(new LabelField("Customer Records", DrawStyle.ELLIPSIS
+    MemoryDemoMainScreen() {
+        setTitle(new LabelField("Order Records", DrawStyle.ELLIPSIS
                 | Field.USE_ALL_WIDTH));
-
-        // Get and display the customer list.
-        _customerList = CustomerList.getInstance();
-        _customerListField =
-                new MyListField(_customerList.getNumCustomerRecords());
-        _customerListField.setCallback(this);
-        add(_customerListField);
-
-        // Get the order list.
-        _orderList = OrderList.getInstance();
-        _orderListField = new MyListField(_orderList.getNumOrderRecords());
-        _orderListField.setCallback(this);
 
         _app = UiApplication.getUiApplication();
 
-        // Prepare menu items.
-        _simulateLmmLowItem = new SimulateLmmLow();
-        _simulateLmmMediumItem = new SimulateLmmMedium();
-        _simulateLmmHighItem = new SimulateLmmHigh();
-        _viewCustomerRecordsItem = new ViewCustomerRecords();
-        _viewOrderRecordsItem = new ViewOrderRecords();
-
-        _viewingCustomerRecords = true;
+        // Get and display the order list.
+        _orderList = OrderList.getInstance();
+        _orderListField = new OrderListField(_orderList.getNumOrderRecords());
+        _orderListField.setCallback(this);
+        add(_orderListField);
 
         LowMemoryManager.addLowMemoryListener(this);
     }
 
     /**
      * Called when the main screen (and thus, the application) closes. Removes
-     * this screen as a low memory listener, and commits both the customer and
-     * order lists to the persistent store.
+     * this screen as a low memory listener, and commits the order list to the
+     * persistent store.
      * 
      * @see net.rim.device.api.ui.Screen#onClose()
      */
     public boolean onClose() {
         LowMemoryManager.removeLowMemoryListener(this);
-        _customerList.commit();
         _orderList.commit();
 
         return super.onClose();
@@ -140,27 +111,6 @@ import net.rim.device.api.ui.container.PopupScreen;
         return super.keyChar(key, status, time);
     }
 
-    /**
-     * Displays this screen's menu. Adds options to simulate the Low Memory
-     * Manager, and to switch between viewing the customer list and the order
-     * list.
-     * 
-     * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
-     */
-    protected void makeMenu(final Menu menu, final int instance) {
-        super.makeMenu(menu, instance);
-
-        menu.add(_simulateLmmLowItem);
-        menu.add(_simulateLmmMediumItem);
-        menu.add(_simulateLmmHighItem);
-
-        if (_viewingCustomerRecords) {
-            menu.add(_viewOrderRecordsItem);
-        } else {
-            menu.add(_viewCustomerRecordsItem);
-        }
-    }
-
     // ListFieldCallback methods
     // -------------------------------------------------------------------
 
@@ -170,7 +120,6 @@ import net.rim.device.api.ui.container.PopupScreen;
     public void drawListRow(final ListField listField, final Graphics graphics,
             final int index, final int y, final int width) {
         final Object object = get(listField, index);
-
         graphics.drawText(object.toString(), 0, y, 0, width);
     }
 
@@ -186,11 +135,7 @@ import net.rim.device.api.ui.container.PopupScreen;
      *      int)
      */
     public Object get(final ListField listField, final int index) {
-        if (listField == _customerListField) {
-            return _customerList.getCustomerRecordAt(index);
-        } else {
-            return _orderList.getOrderRecordAt(index);
-        }
+        return _orderList.getOrderRecordAt(index);
     }
 
     /**
@@ -271,9 +216,9 @@ import net.rim.device.api.ui.container.PopupScreen;
             final int year = calendar.get(Calendar.YEAR);
             calendar.set(Calendar.YEAR, year - numYearsAgo);
             freedData =
-                    _customerList.removeStaleCustomerRecords(calendar.getTime()
+                    _orderList.removeStaleOrderRecords(calendar.getTime()
                             .getTime());
-            _customerListField.setSize(_customerList.getNumCustomerRecords());
+            _orderListField.setSize(_orderList.getNumOrderRecords());
 
             break;
         }
@@ -287,15 +232,15 @@ import net.rim.device.api.ui.container.PopupScreen;
     /**
      * List field that has a custom context menu.
      */
-    private final class MyListField extends ListField {
-        public MyListField(final int numEntries) {
+    private final class OrderListField extends ListField {
+        OrderListField(final int numEntries) {
             super(numEntries);
         }
 
         /**
          * Displays this list field's custom context menu. If there is at least
-         * one item in the list, there are options to view, edit, and delete it
-         * (as well as delete them all). If there are less than the maximum
+         * one item in the list, there are options to act upon the selected item
+         * or run LowMemoryManager tasks. If there are less than the maximum
          * number of records, there is an option to fill up the list with random
          * data.
          * 
@@ -306,14 +251,17 @@ import net.rim.device.api.ui.container.PopupScreen;
 
             if (getSize() > 0) {
                 final int index = getSelectedIndex();
-                contextMenu.addItem(new View(index, this));
-                contextMenu.addItem(new Edit(index, this));
-                contextMenu.addItem(new Delete(index, this));
-                contextMenu.addItem(new DeleteAll(this));
+                contextMenu.addItem(new View(index));
+                contextMenu.addItem(new Edit(index));
+                contextMenu.addItem(new Delete(index));
+                contextMenu.addItem(new DeleteAll());
+                contextMenu.addItem(new SimulateLmmLow());
+                contextMenu.addItem(new SimulateLmmMedium());
+                contextMenu.addItem(new SimulateLmmHigh());
             }
 
             if (getSize() < /* outer. */MAX_RECORDS) {
-                contextMenu.addItem(new Populate(this));
+                contextMenu.addItem(new Populate());
             }
 
             return contextMenu;
@@ -325,43 +273,23 @@ import net.rim.device.api.ui.container.PopupScreen;
      */
     private final class View extends MenuItem {
         private final int _index;
-        private final MyListField _listField;
 
-        public View(final int index, final MyListField listField) {
+        private View(final int index) {
             super("View", 101, 100);
             _index = index;
-            _listField = listField;
         }
 
-        /**
-         * Displays either a customer record or an order record, depending on
-         * which list field was displayed when this menu item was selected.
-         */
         public void run() {
-            if (_listField == _customerListField) {
-                CustomerRecord customerRecord =
-                        (CustomerRecord) /* outer. */get(_listField, _index);
-                final MemoryDemoCustomerScreen screen =
-                        new MemoryDemoCustomerScreen(customerRecord, false);
-                /* outer. */_app.pushModalScreen(screen);
-                customerRecord = screen.getUpdatedCustomerRecord();
+            OrderRecord orderRecord =
+                    (OrderRecord) /* outer. */get(_orderListField, _index);
+            final MemoryDemoOrderScreen screen =
+                    new MemoryDemoOrderScreen(orderRecord, false);
+            /* outer. */_app.pushModalScreen(screen);
+            orderRecord = screen.getUpdatedOrderRecord();
 
-                if (customerRecord != null) {
-                    /* outer. */_customerList.replaceCustomerRecordAt(_index,
-                            customerRecord);
-                }
-            } else {
-                OrderRecord orderRecord =
-                        (OrderRecord) /* outer. */get(_listField, _index);
-                final MemoryDemoOrderScreen screen =
-                        new MemoryDemoOrderScreen(orderRecord, false);
-                /* outer. */_app.pushModalScreen(screen);
-                orderRecord = screen.getUpdatedOrderRecord();
-
-                if (orderRecord != null) {
-                    /* outer. */_orderList.replaceOrderRecordAt(_index,
-                            orderRecord);
-                }
+            if (orderRecord != null) {
+                /* outer. */_orderList
+                        .replaceOrderRecordAt(_index, orderRecord);
             }
         }
     }
@@ -371,43 +299,24 @@ import net.rim.device.api.ui.container.PopupScreen;
      */
     private final class Edit extends MenuItem {
         private final int _index;
-        private final MyListField _listField;
 
-        public Edit(final int index, final MyListField listField) {
+        private Edit(final int index) {
             super("Edit", 102, 102);
             _index = index;
-            _listField = listField;
         }
 
-        /**
-         * Edits either a customer record or an order record, depending on which
-         * list field was displayed when this menu item was selected.
-         */
         public void run() {
-            if (_listField == _customerListField) {
-                CustomerRecord customerRecord =
-                        (CustomerRecord) /* outer. */get(_listField, _index);
-                final MemoryDemoCustomerScreen screen =
-                        new MemoryDemoCustomerScreen(customerRecord, true);
-                /* outer. */_app.pushModalScreen(screen);
-                customerRecord = screen.getUpdatedCustomerRecord();
 
-                if (customerRecord != null) {
-                    /* outer. */_customerList.replaceCustomerRecordAt(_index,
-                            customerRecord);
-                }
-            } else {
-                OrderRecord orderRecord =
-                        (OrderRecord) /* outer. */get(_listField, _index);
-                final MemoryDemoOrderScreen screen =
-                        new MemoryDemoOrderScreen(orderRecord, true);
-                /* outer. */_app.pushModalScreen(screen);
-                orderRecord = screen.getUpdatedOrderRecord();
+            OrderRecord orderRecord =
+                    (OrderRecord) /* outer. */get(_orderListField, _index);
+            final MemoryDemoOrderScreen screen =
+                    new MemoryDemoOrderScreen(orderRecord, true);
+            /* outer. */_app.pushModalScreen(screen);
+            orderRecord = screen.getUpdatedOrderRecord();
 
-                if (orderRecord != null) {
-                    /* outer. */_orderList.replaceOrderRecordAt(_index,
-                            orderRecord);
-                }
+            if (orderRecord != null) {
+                /* outer. */_orderList
+                        .replaceOrderRecordAt(_index, orderRecord);
             }
         }
     }
@@ -417,141 +326,76 @@ import net.rim.device.api.ui.container.PopupScreen;
      */
     private final class Delete extends MenuItem {
         private final int _index;
-        private final MyListField _listField;
 
-        public Delete(final int index, final MyListField listField) {
+        private Delete(final int index) {
             super("Delete", 103, 103);
             _index = index;
-            _listField = listField;
         }
 
-        /**
-         * Deletes either a customer record or an order record, depending on
-         * which list field was displayed when this menu item was selected.
-         */
         public void run() {
             if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
-                if (_listField == _customerListField) {
-                    final CustomerRecord customerRecord =
-                            (CustomerRecord) /* outer. */get(_listField, _index);
-                    /* outer. */_customerList
-                            .deleteCustomerRecord(customerRecord);
-                    /* outer. */_customerListField
-                            .setSize( /* outer. */_customerList
-                                    .getNumCustomerRecords());
-                } else {
-                    final OrderRecord orderRecord =
-                            (OrderRecord) /* outer. */get(_listField, _index);
-                    /* outer. */_orderList.deleteOrderRecord(orderRecord);
-                    /* outer. */_orderListField.setSize( /* outer. */_orderList
-                            .getNumOrderRecords());
-                }
+
+                final OrderRecord orderRecord =
+                        (OrderRecord) /* outer. */get(_orderListField, _index);
+                /* outer. */_orderList.deleteOrderRecord(orderRecord);
+                /* outer. */_orderListField.setSize( /* outer. */_orderList
+                        .getNumOrderRecords());
             }
         }
     }
 
     /**
-     * A menu item to delete all records in a list field.
+     * A menu item to delete all records in the list field.
      */
     private final class DeleteAll extends MenuItem {
-        private final MyListField _listField;
-
-        public DeleteAll(final MyListField listField) {
+        private DeleteAll() {
             super("Delete All", 104, 104);
-            _listField = listField;
         }
 
-        /**
-         * Either deletes all customer records or deletes all order records,
-         * depending on which list field was displayed when this menu item was
-         * selected.
-         */
         public void run() {
             if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
-                if (_listField == _customerListField) {
-                    /* outer. */_customerList.deleteAllCustomerRecords();
-                    /* outer. */_customerListField.setSize(0);
-                } else {
-                    /* outer. */_orderList.deleteAllOrderRecords();
-                    /* outer. */_orderListField.setSize(0);
-                }
+                /* outer. */_orderList.deleteAllOrderRecords();
+                /* outer. */_orderListField.setSize(0);
             }
         }
     }
 
     /**
-     * A menu item to populate a list field.
+     * A menu item to populate the list field.
      */
     private final class Populate extends MenuItem {
-        private final MyListField _listField;
-
-        public Populate(final MyListField listField) {
+        private Populate() {
             super("Populate", 100000, 100000);
-            _listField = listField;
         }
 
-        /**
-         * Populates either the customer list or the order list, depending on
-         * which list field was displayed when this menu item was selected.
-         */
         public void run() {
-            if (_listField == _customerListField) {
+            _progressDialog =
+                    new ProgressBarDialog("Generating order records...",
+                            _orderList.getNumRecordsToAdd(MAX_RECORDS));
 
-                _progressDialog =
-                        new ProgressBarDialog("Generating customer records...",
-                                _customerList.getNumRecordsToAdd(MAX_RECORDS));
+            new Thread(new Runnable() {
+                public void run() {
+                    /* outer. */_orderList.populate(MAX_RECORDS,
+                            _progressDialog);
 
-                new Thread(new Runnable() {
-                    public void run() {
-                        /* outer. */_customerList.populate(MAX_RECORDS,
-                                _progressDialog);
-
-                        // Since all GUI operations must be executed on the
-                        // event dispatch thread , we
-                        // use invokeLater() to call run() on the event dispatch
-                        // thread after all
-                        // pending events are processed.
-                        UiApplication.getUiApplication().invokeLater(
-                                new Runnable() {
-                                    public void run() {
-                                        /* outer. */_customerListField
-                                                .setSize( /* outer. */_customerList
-                                                        .getNumCustomerRecords());
-                                    }
-                                });
-                    }
-                }).start();
-
-            } else {
-                _progressDialog =
-                        new ProgressBarDialog("Generating order records...",
-                                _orderList.getNumRecordsToAdd(MAX_RECORDS));
-
-                new Thread(new Runnable() {
-                    public void run() {
-                        /* outer. */_orderList.populate(MAX_RECORDS,
-                                _progressDialog);
-
-                        UiApplication.getUiApplication().invokeLater(
-                                new Runnable() {
-                                    public void run() {
-                                        /* outer. */_orderListField
-                                                .setSize( /* outer. */_orderList
-                                                        .getNumOrderRecords());
-                                    }
-                                });
-
-                    }
-                }).start();
-            }
+                    UiApplication.getUiApplication().invokeLater(
+                            new Runnable() {
+                                public void run() {
+                                    /* outer. */_orderListField
+                                            .setSize( /* outer. */_orderList
+                                                    .getNumOrderRecords());
+                                }
+                            });
+                }
+            }).start();
         }
     }
 
     /**
-     * Creates a popup dialog box containing a gauge field , displays the
-     * progress as the list is populated because it might take a while.
+     * Creates a popup dialog box containing a gauge field, displays the
+     * progress as the list is populated.
      */
-    class ProgressBarDialog implements CountAndSortListener {
+    static class ProgressBarDialog implements CountAndSortListener {
         private final DialogFieldManager _manager;
         private final PopupScreen _popupScreen;
         private final GaugeField _gaugeField;
@@ -568,15 +412,15 @@ import net.rim.device.api.ui.container.PopupScreen;
          * @param max
          *            Maximum value of the range _gaugeField can display.
          */
-        public ProgressBarDialog(final String title, final int max) {
+        private ProgressBarDialog(final String title, final int max) {
             _max = max; // Number of records to be added.
 
-            // Make sure that ( _max / 100 ) is at least as big as one.
+            // Make sure that step size is at least one.
             _stepSize = Math.max(_max / 100, 1);
 
             _manager = new DialogFieldManager();
             _popupScreen = new PopupScreen(_manager);
-            _gaugeField = new GaugeField(null, 0, _max, 0, GaugeField.PERCENT);
+            _gaugeField = new GaugeField(null, 0, max, 0, GaugeField.PERCENT);
             _lbfield = new LabelField(title, Field.USE_ALL_WIDTH);
 
             _manager.addCustomField(_lbfield);
@@ -588,8 +432,8 @@ import net.rim.device.api.ui.container.PopupScreen;
         public void counterUpdated(final int counter) {
             // Update _gaugeField if at least one percent of the records have
             // been processed
-            // since the last time _gaugeField was updated. So if we have 60,000
-            // records
+            // since the last time _gaugeField was updated e.g. if we have
+            // 60,000 records
             // to add , _gaugeField is updated once every 600 calls to
             // counterUpdated().
             // Similarly , if we have 50 records to add , an update occurs once
@@ -629,7 +473,7 @@ import net.rim.device.api.ui.container.PopupScreen;
      * priority.
      */
     private final class SimulateLmmLow extends MenuItem {
-        public SimulateLmmLow() {
+        private SimulateLmmLow() {
             super("Simulate LMM Low", 300000, 300000);
         }
 
@@ -643,7 +487,7 @@ import net.rim.device.api.ui.container.PopupScreen;
      * Medium priority.
      */
     private final class SimulateLmmMedium extends MenuItem {
-        public SimulateLmmMedium() {
+        private SimulateLmmMedium() {
             super("Simulate LMM Medium", 300001, 300001);
         }
 
@@ -657,46 +501,12 @@ import net.rim.device.api.ui.container.PopupScreen;
      * priority.
      */
     private final class SimulateLmmHigh extends MenuItem {
-        public SimulateLmmHigh() {
+        private SimulateLmmHigh() {
             super("Simulate LMM High", 300002, 300002);
         }
 
         public void run() {
             /* outer. */freeStaleObject(LowMemoryListener.HIGH_PRIORITY);
-        }
-    }
-
-    /**
-     * A menu item to display the customer record list on the screen.
-     */
-    private final class ViewCustomerRecords extends MenuItem {
-        public ViewCustomerRecords() {
-            super("View Customer Records", 200000, 200000);
-        }
-
-        public void run() {
-            /* outer. */_viewingCustomerRecords = true;
-            /* outer. */setTitle(new LabelField("Customer Records",
-                    DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH));
-            /* outer. */delete(_orderListField);
-            /* outer. */add(_customerListField);
-        }
-    }
-
-    /**
-     * A menu item to display the order record list on the screen.
-     */
-    private final class ViewOrderRecords extends MenuItem {
-        public ViewOrderRecords() {
-            super("View Order Records", 200000, 200000);
-        }
-
-        public void run() {
-            /* outer. */_viewingCustomerRecords = false;
-            /* outer. */setTitle(new LabelField("Order Records",
-                    DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH));
-            /* outer. */delete(_customerListField);
-            /* outer. */add(_orderListField);
         }
     }
 }

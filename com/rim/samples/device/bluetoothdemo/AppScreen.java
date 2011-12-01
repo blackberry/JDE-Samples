@@ -37,7 +37,7 @@ final class AppScreen extends MainScreen {
 
     private BluetoothSerialPortInfo[] _portInfo;
 
-    public AppScreen() {
+    AppScreen() {
         setTitle("Bluetooth Sample");
 
         // Determine if this BlackBerry model or simulator supports Bluetooth.

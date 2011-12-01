@@ -50,7 +50,7 @@ import net.rim.device.api.ui.container.MainScreen;
 /**
  * A simple example using the HTTP connection.
  */
-public class HTTPDemo extends UiApplication {
+class HTTPDemo extends UiApplication {
     // Constants
     // ----------------------------------------------------------------
     private static String SAMPLE_HTTPS_PAGE =
@@ -134,8 +134,8 @@ public class HTTPDemo extends UiApplication {
         }
     };
 
-    StatusThread _statusThread = new StatusThread();
-    ConnectionThread _connectionThread = new ConnectionThread();
+    private final StatusThread _statusThread = new StatusThread();
+    private final ConnectionThread _connectionThread = new ConnectionThread();
 
     public static void main(final String[] args) {
         final HTTPDemo theApp = new HTTPDemo();
@@ -160,17 +160,17 @@ public class HTTPDemo extends UiApplication {
         private volatile boolean _stop = false;
 
         // Retrieve the URL.
-        public synchronized String getUrl() {
+        private synchronized String getUrl() {
             return _theUrl;
         }
 
-        public boolean isStarted() {
+        private boolean isStarted() {
             return _start;
         }
 
         // Fetch a page.
         // Synchronized so that I don't miss requests.
-        public void fetch(final String url) {
+        private void fetch(final String url) {
             synchronized (this) {
                 _start = true;
                 _theUrl = url;
@@ -178,7 +178,7 @@ public class HTTPDemo extends UiApplication {
         }
 
         // Shutdown the thread.
-        public void stop() {
+        private void stop() {
             _stop = true;
         }
 
@@ -304,23 +304,23 @@ public class HTTPDemo extends UiApplication {
         private volatile boolean _isPaused = false;
 
         // Resume the thread.
-        public void go() {
+        private void go() {
             _running = true;
             _isPaused = false;
         }
 
         // Pause the thread.
-        public void pause() {
+        private void pause() {
             _running = false;
         }
 
         // Query the paused status.
-        public boolean isPaused() {
+        private boolean isPaused() {
             return _isPaused;
         }
 
         // Shutdown the thread.
-        public void stop() {
+        private void stop() {
             _stop = true;
         }
 
@@ -448,7 +448,7 @@ public class HTTPDemo extends UiApplication {
 
     // Constructors
     // -------------------------------------------------------------
-    public HTTPDemo() {
+    private HTTPDemo() {
         _wapOptionsScreen = new WapOptionsScreen(this);
         _mainScreen = new HTTPDemoScreen();
         _mainScreen.setTitle(new LabelField("HTTP Demo", DrawStyle.ELLIPSIS

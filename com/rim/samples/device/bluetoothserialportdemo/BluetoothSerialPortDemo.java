@@ -51,7 +51,7 @@ import net.rim.device.api.ui.container.MainScreen;
  * The client side of a simple serial port demonstration app. This application
  * will listen for text on the serial port and render the data when it arrives.
  */
-public class BluetoothSerialPortDemo extends UiApplication {
+class BluetoothSerialPortDemo extends UiApplication {
     // Statics
     // ------------------------------------------------------------------
     private static final int INSERT = 1;
@@ -118,7 +118,7 @@ public class BluetoothSerialPortDemo extends UiApplication {
 
     // Constructor
     // ---------------------------------------------------------------
-    public BluetoothSerialPortDemo() {
+    private BluetoothSerialPortDemo() {
         final BluetoothDemoScreen mainScreen = new BluetoothDemoScreen();
         mainScreen.setTitle(new LabelField("Bluetooth Serial Port Demo",
                 Field.USE_ALL_WIDTH));

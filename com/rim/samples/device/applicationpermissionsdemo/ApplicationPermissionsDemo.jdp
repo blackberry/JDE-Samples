@@ -19,6 +19,7 @@ ExcludeFromBuildAll=0
 [Files
 ApplicationPermissionsDemo.java
 ApplicationPermissionsScreen.java
+DemoReasonProvider.java
 img\apppermissions_jde.png
 ]
 HaveAlxImports=0
@@ -37,8 +38,12 @@ OutputFileName=ApplicationPermissionsDemo
 [PackageProtection
 ]
 RibbonPosition=0
+[RolloverIcons
+]
 RunOnStartup=0
 StartupTier=7
 SystemModule=0
 Title=Application Permissions Demo
 Type=0
+Vendor=Research In Motion Limited
+Version=0.9

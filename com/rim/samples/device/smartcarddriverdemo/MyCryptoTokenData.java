@@ -53,7 +53,7 @@ final class MyCryptoTokenData implements CryptoTokenPrivateKeyData, Persistable 
      * @param file
      *            which file on the smart card contains the private key
      */
-    public MyCryptoTokenData(final SmartCardID id, final byte file) {
+    MyCryptoTokenData(final SmartCardID id, final byte file) {
         _id = id;
         _file = file;
     }
@@ -65,7 +65,7 @@ final class MyCryptoTokenData implements CryptoTokenPrivateKeyData, Persistable 
      * @return the <code>SmartCardID</code> of the smart card which the private
      *         key is stored on.
      */
-    public SmartCardID getSmartCardID() {
+    SmartCardID getSmartCardID() {
         return _id;
     }
 
@@ -74,7 +74,7 @@ final class MyCryptoTokenData implements CryptoTokenPrivateKeyData, Persistable 
      * 
      * @return the private key file location on the card.
      */
-    public byte getFile() {
+    byte getFile() {
         return _file;
     }
 }

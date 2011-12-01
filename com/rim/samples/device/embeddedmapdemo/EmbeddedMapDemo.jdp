@@ -1,0 +1,52 @@
+## RIM Java Development Environment
+# RIM Project file
+AddOn=0
+AlwaysBuild=0
+[AlxImports
+]
+AutoRestart=0
+[ClassProtection
+]
+[CustomBuildFiles
+]
+[CustomBuildRules
+]
+[DefFiles
+]
+[DependsOn
+]
+ExcludeFromBuildAll=0
+[Files
+EmbeddedMapDemo.java
+ExtendedMapField.java
+img\marker.PNG
+img\pointer.png
+LocatorScreen.java
+LookupMatchesScreen.java
+MapLocation.java
+SavedLocationsScreen.java
+]
+HaveAlxImports=0
+HaveDefs=0
+HaveImports=0
+[Icons
+]
+[ImplicitRules
+]
+[Imports
+]
+Listing=0
+Options=-quiet
+OutputFileName=EmbeddedMapDemo
+[PackageProtection
+]
+RibbonPosition=0
+[RolloverIcons
+]
+RunOnStartup=0
+StartupTier=7
+SystemModule=0
+Title=Embedded Map Demo
+Type=0
+Vendor=Research In Motion Limited
+Version=0.9

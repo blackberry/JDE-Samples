@@ -1,5 +1,9 @@
 ## RIM Java Development Environment
 # RIM Project file
+#
+# This file is generated and managed by BlackBerry developer tools.
+# It SHOULD NOT BE modified manually.
+#
 AddOn=0
 AlwaysBuild=0
 [AlxImports
@@ -24,6 +28,7 @@ ExcludeFromBuildAll=0
 AppScreen.java
 BluetoothDemo.java
 img\bluetooth_jde.png
+readme.txt
 SSPScreen.java
 ]
 HaveAlxImports=0
@@ -43,8 +48,12 @@ OutputFileName=BluetoothDemo
 [PackageProtection
 ]
 RibbonPosition=0
+[RolloverIcons
+]
 RunOnStartup=0
 StartupTier=7
 SystemModule=0
 Title=Bluetooth Demo
 Type=0
+Vendor=Research In Motion Limited
+Version=0.9

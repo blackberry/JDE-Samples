@@ -21,11 +21,31 @@ img\localizationdemo_jde.png
 LocalizationDemo.java
 resource\LocalizationDemo.rrc
 resource\LocalizationDemo.rrh
+resource\LocalizationDemo_ar.rrc
+resource\LocalizationDemo_ca.rrc
+resource\LocalizationDemo_cs.rrc
 resource\LocalizationDemo_de.rrc
 resource\LocalizationDemo_en.rrc
 resource\LocalizationDemo_es.rrc
+resource\LocalizationDemo_eu.rrc
 resource\LocalizationDemo_fr.rrc
+resource\LocalizationDemo_gl.rrc
+resource\LocalizationDemo_he.rrc
+resource\LocalizationDemo_hu.rrc
+resource\LocalizationDemo_in.rrc
 resource\LocalizationDemo_it.rrc
+resource\LocalizationDemo_ja.rrc
+resource\LocalizationDemo_ko.rrc
+resource\LocalizationDemo_nl.rrc
+resource\LocalizationDemo_pl.rrc
+resource\LocalizationDemo_pt.rrc
+resource\LocalizationDemo_pt_BR.rrc
+resource\LocalizationDemo_ru.rrc
+resource\LocalizationDemo_th.rrc
+resource\LocalizationDemo_tr.rrc
+resource\LocalizationDemo_zh.rrc
+resource\LocalizationDemo_zh_CN.rrc
+resource\LocalizationDemo_zh_TW.rrc
 ]
 HaveAlxImports=0
 HaveDefs=0
@@ -52,3 +72,5 @@ TitleResourceBundleKey=APPLICATION_TITLE
 TitleResourceBundleName=LocalizationDemo
 TitleResourceBundlePath=resource\LocalizationDemo.rrh
 Type=0
+Vendor=Research In Motion Limited
+Version=0.9

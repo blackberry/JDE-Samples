@@ -45,7 +45,7 @@ final class InvokeLocationDocumentScreen extends MainScreen {
     /**
      * Constructor
      */
-    public InvokeLocationDocumentScreen() {
+    InvokeLocationDocumentScreen() {
         setTitle("Invoke Location Document");
 
         final RichTextField instructions =
@@ -62,10 +62,11 @@ final class InvokeLocationDocumentScreen extends MainScreen {
     /**
      * Displays a single location on a map.
      */
-    MenuItem viewSingleItem = new MenuItem("View Single Location", 1000, 10) {
+    private final MenuItem viewSingleItem = new MenuItem(
+            "View Single Location", 1000, 10) {
         public void run() {
             final String document =
-                    "<location-document><location lon='-7938675' lat='4367022' label='Toronto, ON' description='Go Leafs Go!' zoom='10'/></location-document>";
+                    "<location-document><lbs clear='ALL'/><location lon='-7938675' lat='4367022' label='Toronto, ON' description='Go Leafs Go!' zoom='10'/></location-document>";
 
             Invoke.invokeApplication(Invoke.APP_TYPE_MAPS, new MapsArguments(
                     MapsArguments.ARG_LOCATION_DOCUMENT, document));
@@ -75,17 +76,20 @@ final class InvokeLocationDocumentScreen extends MainScreen {
     /**
      * Displays multiple locations on a map.
      */
-    MenuItem viewMultipleItem = new MenuItem("View Multiple Locations", 2000,
-            10) {
+    private final MenuItem viewMultipleItem = new MenuItem(
+            "View Multiple Locations", 2000, 10) {
         public void run() {
-            final String document =
-                    "<location-document>"
-                            + "<location lon='-8030000' lat='4326000' label='Kitchener, ON' description='Kitchener, Ontario, Canada' />"
-                            + "<location lon='-7569792' lat='4542349' label='Ottawa, ON'    description='Ottawa, Ontario, Canada' />"
-                            + "</location-document>";
+            final StringBuffer stringBuffer =
+                    new StringBuffer("<location-document>");
+            stringBuffer
+                    .append("<location lon='-8030000' lat='4326000' label='Kitchener, ON' description='Kitchener, Ontario, Canada' />");
+            stringBuffer
+                    .append("<location lon='-7569792' lat='4542349' label='Ottawa, ON'    description='Ottawa, Ontario, Canada' />");
+            stringBuffer.append("</location-document>");
 
             Invoke.invokeApplication(Invoke.APP_TYPE_MAPS, new MapsArguments(
-                    MapsArguments.ARG_LOCATION_DOCUMENT, document));
+                    MapsArguments.ARG_LOCATION_DOCUMENT, stringBuffer
+                            .toString()));
 
         }
     };
@@ -93,16 +97,21 @@ final class InvokeLocationDocumentScreen extends MainScreen {
     /**
      * Displays a route between locations on a map.
      */
-    MenuItem viewRouteItem = new MenuItem("View Route", 3000, 10) {
-        public void run() {
-            final String document =
-                    "<location-document><GetRoute>"
-                            + "<location lon='-8030000' lat='4326000' label='Kitchener, ON' description='Kitchener, Ontario, Canada' />"
-                            + "<location lon='-7569792' lat='4542349' label='Ottawa, ON'    description='Ottawa, Ontario, Canada' />"
-                            + "</GetRoute></location-document>";
+    private final MenuItem viewRouteItem =
+            new MenuItem("View Route", 3000, 10) {
+                public void run() {
+                    final StringBuffer stringBuffer =
+                            new StringBuffer("<location-document><GetRoute>");
+                    stringBuffer
+                            .append("<location lon='-8030000' lat='4326000' label='Kitchener, ON' description='Kitchener, Ontario, Canada' />");
+                    stringBuffer
+                            .append("<location lon='-7569792' lat='4542349' label='Ottawa, ON'    description='Ottawa, Ontario, Canada' />");
+                    stringBuffer.append("</GetRoute></location-document>");
 
-            Invoke.invokeApplication(Invoke.APP_TYPE_MAPS, new MapsArguments(
-                    MapsArguments.ARG_LOCATION_DOCUMENT, document));
-        }
-    };
+                    Invoke.invokeApplication(Invoke.APP_TYPE_MAPS,
+                            new MapsArguments(
+                                    MapsArguments.ARG_LOCATION_DOCUMENT,
+                                    stringBuffer.toString()));
+                }
+            };
 }

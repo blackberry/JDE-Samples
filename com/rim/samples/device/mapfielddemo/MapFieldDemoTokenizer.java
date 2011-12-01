@@ -42,7 +42,7 @@ class MapFieldDemoTokenizer {
      *            The byte array to be converted.
      * @return The converted integer.
      */
-    public static int getInt(final byte[] line) {
+    static int getInt(final byte[] line) {
         final boolean isNegative = line[0] == '-';
         final int arrayLength = getEffectiveLength(line);
         int power = arrayLength - 1;
@@ -63,7 +63,7 @@ class MapFieldDemoTokenizer {
      *            The byte array to be converted.
      * @return The converted double.
      */
-    public static double getDouble(final byte[] line) {
+    private static double getDouble(final byte[] line) {
         final boolean isNegative = line[0] == '-';
         final int arrayLength = getEffectiveLength(line);
         int power;
@@ -114,7 +114,7 @@ class MapFieldDemoTokenizer {
      *            The byte array to be converted.
      * @return The converted String.
      */
-    public static String getString(final byte[] line) {
+    static String getString(final byte[] line) {
         final int arrayLength = getEffectiveLength(line);
 
         // If there is no white space, return the string equivalent of 'line'.
@@ -142,7 +142,7 @@ class MapFieldDemoTokenizer {
      *            The byte array to be converted.
      * @return The converted Coordinates.
      */
-    public static Coordinates getCoordinates(final byte[] line) {
+    static Coordinates getCoordinates(final byte[] line) {
         double latitude, longitude;
         byte[] partialLine;
         int locationOfSpace;
@@ -182,7 +182,7 @@ class MapFieldDemoTokenizer {
      *            The exponent of the exponential equation.
      * @return The value exponential equation.
      */
-    public static double pow(final double base, final int exponent) {
+    private static double pow(final double base, final int exponent) {
         int result = 0;
 
         if (exponent == 0) {

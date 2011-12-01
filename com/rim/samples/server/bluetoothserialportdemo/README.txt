@@ -14,7 +14,7 @@ Using Sun’s Java Communications API
 
 5. Before pairing the BlackBerry device with your computer, execute ‘run.bat’ from the ‘com\rim\samples\server\bluetoothserialportdemo’ directory.  A command prompt and a Swing window should appear.
 
-6. While the server component is running, pair the BlackBerry device with the computer.
+6. While the server component is running, pair the BlackBerry device with the computer (make sure that the BlackBerry device is discoverable before pairing).
 
 7. On the BlackBerry, select Options > Bluetooth, and make sure that the computer is the only paired device to the BlackBerry. Also check the “Device properties” for the computer that it is paired with. If the “Services:” area is blank, then you have not paired properly, remove the pairing, close the server and repeat from Step 5 until you see a "COMX" service under "Services:", where X is the incoming COM port number.
 
@@ -42,7 +42,7 @@ RXTX is an open-source alternative to Sun's Java Communications API. The RXTX li
 
 5. Before pairing the BlackBerry device with your computer, execute ‘run.bat’ from the ‘com\rim\samples\server\bluetoothserialportdemo’ directory.  A command prompt and a Swing window should appear.
 
-6. While the server component is running, pair the BlackBerry device with the computer.
+6. While the server component is running, pair the BlackBerry device with the computer (make sure that the BlackBerry device is discoverable before pairing).
 
 7. On the BlackBerry, select Options > Bluetooth, and make sure that the computer is the only paired device to the BlackBerry. Also check the “Device properties” for the computer that it is paired with. If the “Services:” area is blank, then you have not paired properly, remove the pairing, close the server and repeat from Step 5 until you see a "COMX" service under "Services:", where X is the incoming COM port number.
 

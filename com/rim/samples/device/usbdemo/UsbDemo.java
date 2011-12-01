@@ -47,7 +47,7 @@ import net.rim.device.api.util.DataBuffer;
  * A simple example of opening the usb port for communication with a desktop USB
  * client (one that uses the COM interfaces exposed by BBDevMgr.exe).
  */
-public final class UsbDemo extends UiApplication {
+final class UsbDemo extends UiApplication {
 
     // Constants
     // ----------------------------------------------------------------
@@ -81,7 +81,7 @@ public final class UsbDemo extends UiApplication {
 
     private class USBScreen extends MainScreen {
 
-        public USBScreen() {
+        private USBScreen() {
             addMenuItem(_connectGCF);
             addMenuItem(_connectLowLevel);
         }
@@ -383,7 +383,7 @@ public final class UsbDemo extends UiApplication {
 
     // Constructors
     // -------------------------------------------------------------
-    public UsbDemo() {
+    UsbDemo() {
 
         final USBScreen screen = new USBScreen();
         screen.setTitle("Usb Demo");

@@ -35,17 +35,17 @@ import net.rim.device.api.system.ObjectGroupReadOnlyException;
  * grouping and ungrouping should work. As well, it shows how an exception is
  * thrown if the object is grouped and the application attempts to modify it.
  */
-public class ObjectGroupingDemo extends Application {
+class ObjectGroupingDemo extends Application {
     public static void main(final String[] args) {
         final AddressBook addressBook = AddressBook.getInstance();
 
         // Create some sample address book entries.
         final AddressBookRecord record1 =
-                new AddressBookRecord("Mr.", "Tony", "Hawk");
+                new AddressBookRecord("Mr.", "Clyde", "Warren");
         final AddressBookRecord record2 = new AddressBookRecord();
         record2.setTitle("Mrs.");
-        record2.setFirstName("Greta");
-        record2.setLastName("Shaw");
+        record2.setFirstName("Heather");
+        record2.setLastName("Tiegs");
 
         addressBook.add(record1);
         addressBook.add(record2);
@@ -71,7 +71,7 @@ public class ObjectGroupingDemo extends Application {
         // Note that this is a runtime exception so we need to explicitly catch
         // it.
         try {
-            myRecord.setFirstName("Elizabeth");
+            myRecord.setFirstName("");
         } catch (final ObjectGroupReadOnlyException e) {
             System.out
                     .println("ObjectGroupReadOnlyException caught as expected: "

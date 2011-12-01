@@ -44,7 +44,7 @@ final class InvokeDefaultScreen extends MainScreen {
     /**
      * Constructor
      */
-    public InvokeDefaultScreen() {
+    InvokeDefaultScreen() {
         setTitle("Invoke Default");
 
         final LabelField instructions =
@@ -58,7 +58,7 @@ final class InvokeDefaultScreen extends MainScreen {
     /**
      * Displays the default map.
      */
-    MenuItem viewMapItem = new MenuItem("View Map", 1000, 10) {
+    private final MenuItem viewMapItem = new MenuItem("View Map", 1000, 10) {
         // Invoke maps application with default map.
         public void run() {
             Invoke.invokeApplication(Invoke.APP_TYPE_MAPS, new MapsArguments());

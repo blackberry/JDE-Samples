@@ -35,6 +35,7 @@ import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.ListField;
 import net.rim.device.api.ui.component.ListFieldCallback;
@@ -65,8 +66,8 @@ class OTASyncDemo extends UiApplication implements ListFieldCallback {
     // Inner Classes
     // ------------------------------------------------------------
     private class AddContactAction extends MenuItem {
-        public AddContactAction() {
-            super("Add", 100000, 10);
+        private AddContactAction() {
+            super("Add", 100000, 5);
         }
 
         public void run() {
@@ -87,8 +88,8 @@ class OTASyncDemo extends UiApplication implements ListFieldCallback {
     private class EditContactAction extends MenuItem {
         private final int _contactIndex;
 
-        public EditContactAction(final int contactIndex) {
-            super("Edit", 100000, 10);
+        private EditContactAction(final int contactIndex) {
+            super("Edit", 100000, 6);
             _contactIndex = contactIndex;
         }
 
@@ -113,22 +114,31 @@ class OTASyncDemo extends UiApplication implements ListFieldCallback {
     private class DeleteContactAction extends MenuItem {
         private final int _deleteIndex;
 
-        public DeleteContactAction(final int deleteIndex) {
-            super("Delete", 100000, 10);
+        private DeleteContactAction(final int deleteIndex) {
+            super("Delete", 100000, 7);
             _deleteIndex = deleteIndex;
         }
 
         public void run() {
-            _otaContactCollection
-                    .removeSyncObject((SyncObject) _otaContactCollection
-                            .getAt(_deleteIndex));
-            reloadContactList();
+            final OTAContactData contactData =
+                    (OTAContactData) _otaContactCollection.getAt(_deleteIndex);
+
+            final int result =
+                    Dialog.ask(Dialog.DELETE, "Delete "
+                            + contactData.getFirst() + " "
+                            + contactData.getLast() + "?");
+            if (result == Dialog.YES) {
+                _otaContactCollection
+                        .removeSyncObject((SyncObject) _otaContactCollection
+                                .getAt(_deleteIndex));
+                reloadContactList();
+            }
         }
     }
 
     private class RefreshAction extends MenuItem {
-        public RefreshAction() {
-            super("Refresh", 100000, 10);
+        private RefreshAction() {
+            super("Refresh", 100000, 8);
         }
 
         public void run() {
@@ -162,7 +172,7 @@ class OTASyncDemo extends UiApplication implements ListFieldCallback {
     }
 
     // Constructor
-    public OTASyncDemo() {
+    private OTASyncDemo() {
         // Create a new screen for the application.
         final OTASyncDemoScreen screen = new OTASyncDemoScreen();
 
@@ -212,9 +222,8 @@ class OTASyncDemo extends UiApplication implements ListFieldCallback {
      */
     public Object get(final ListField listField, final int index) {
         if (listField == _listField) {
-            // If index is out of bounds an exception will be thrown, but that's
-            // the
-            // behaviour we want in that case.
+            // If index is out of bounds an exception will be thrown, but
+            // that's the behaviour we want in that case.
             return _otaContactCollection.getAt(index);
         }
 

@@ -43,7 +43,7 @@ class MapFieldDemoSite {
     // Colors
     private static final int DEFAULT_COLOR = 0x00666666;
     private static final int HIGHLIGHT_COLOR = 0x00FF6666;
-    int _color = DEFAULT_COLOR;
+    private int _color = DEFAULT_COLOR;
 
     // Address Information
     private int _streetNumber;
@@ -99,7 +99,7 @@ class MapFieldDemoSite {
      * @param filePath
      *            The document that describes all the site's properties.
      */
-    public void formatSite(final String filePath) {
+    private void formatSite(final String filePath) {
         final LineReader lineReader =
                 new LineReader(getClass().getResourceAsStream(filePath));
 
@@ -262,7 +262,7 @@ class MapFieldDemoSite {
      * @param g
      *            A Graphics obeject.
      */
-    public void drawSite(final Graphics g) {
+    void drawSite(final Graphics g) {
         if (_map != null) {
             final XYPoint[] point = new XYPoint[_numberOfPoints];
             final int[] xPts = new int[_numberOfPoints];
@@ -304,7 +304,7 @@ class MapFieldDemoSite {
      * 
      * @return True if the site is highlighted, otherwise false.
      */
-    public boolean isHighlighted() {
+    boolean isHighlighted() {
         return _color == HIGHLIGHT_COLOR;
     }
 
@@ -314,7 +314,7 @@ class MapFieldDemoSite {
      * @param value
      *            True sets the highlight and false removes it.
      */
-    public void setHighlight(final boolean value) {
+    void setHighlight(final boolean value) {
         if (value) {
             _color = HIGHLIGHT_COLOR;
         } else {
@@ -327,7 +327,7 @@ class MapFieldDemoSite {
      * 
      * @return Site name.
      */
-    public String getSiteName() {
+    String getSiteName() {
         return _siteName;
     }
 
@@ -336,7 +336,7 @@ class MapFieldDemoSite {
      * 
      * @return Street number.
      */
-    public int getStreetNumber() {
+    int getStreetNumber() {
         return _streetNumber;
     }
 
@@ -345,7 +345,7 @@ class MapFieldDemoSite {
      * 
      * @return Street name.
      */
-    public String getStreetName() {
+    String getStreetName() {
         return _streetName;
     }
 
@@ -354,7 +354,7 @@ class MapFieldDemoSite {
      * 
      * @return City.
      */
-    public String getCity() {
+    String getCity() {
         return _city;
     }
 
@@ -363,7 +363,7 @@ class MapFieldDemoSite {
      * 
      * @return Province
      */
-    public String getProvince() {
+    String getProvince() {
         return _province;
     }
 
@@ -372,7 +372,7 @@ class MapFieldDemoSite {
      * 
      * @return Country
      */
-    public String getCountry() {
+    String getCountry() {
         return _country;
     }
 
@@ -382,7 +382,7 @@ class MapFieldDemoSite {
      * 
      * @return Highlightable area.
      */
-    public Coordinates[] getHighlightableArea() {
+    Coordinates[] getHighlightableArea() {
         return _highlightableArea;
     }
 
@@ -391,11 +391,11 @@ class MapFieldDemoSite {
      * 
      * @return Campus.
      */
-    public String getCampus() {
+    String getCampus() {
         return _campus;
     }
 
-    public boolean isStandAloneSite() {
+    boolean isStandAloneSite() {
         return _standAloneSite;
     }
 }

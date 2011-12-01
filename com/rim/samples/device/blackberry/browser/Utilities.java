@@ -36,9 +36,9 @@ import net.rim.device.api.io.http.HttpHeaders;
 import net.rim.device.api.io.http.HttpProtocolConstants;
 import net.rim.device.api.util.StringUtilities;
 
-public class Utilities {
+class Utilities {
 
-    public static HttpConnection makeConnection(final String url,
+    static HttpConnection makeConnection(final String url,
             final HttpHeaders requestHeaders, final byte[] postData) {
         HttpConnection conn = null;
         OutputStream out = null;

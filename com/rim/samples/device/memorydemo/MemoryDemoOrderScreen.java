@@ -70,8 +70,7 @@ import net.rim.device.api.ui.container.MainScreen;
      * @param editable
      *            Whether or not this screen is editable.
      */
-    public MemoryDemoOrderScreen(final OrderRecord orderRecord,
-            final boolean editable) {
+    MemoryDemoOrderScreen(final OrderRecord orderRecord, final boolean editable) {
         super();
 
         _editable = editable;
@@ -100,7 +99,7 @@ import net.rim.device.api.ui.container.MainScreen;
      * @return The updated order record, or null if this screen is not an edit
      *         screen.
      */
-    public OrderRecord getUpdatedOrderRecord() {
+    OrderRecord getUpdatedOrderRecord() {
         return _updatedOrderRecord;
     }
 

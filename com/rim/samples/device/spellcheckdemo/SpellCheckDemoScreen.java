@@ -148,8 +148,8 @@ final class SpellCheckDemoScreen extends MainScreen {
      * PopupScreen.
      * 
      */
-    final class OkButton extends ButtonField {
-        public OkButton() {
+    private final class OkButton extends ButtonField {
+        private OkButton() {
             super("OK", ButtonField.CONSUME_CLICK);
         }
 
@@ -170,8 +170,8 @@ final class SpellCheckDemoScreen extends MainScreen {
     /**
      * This inner class simply closes our 'Learn correction' PopupScreen.
      */
-    final class CancelButton extends ButtonField {
-        public CancelButton() {
+    private final class CancelButton extends ButtonField {
+        private CancelButton() {
             super("Cancel", ButtonField.CONSUME_CLICK);
         }
 
@@ -186,8 +186,8 @@ final class SpellCheckDemoScreen extends MainScreen {
      * We are extending the EditField class in order to provide our customized
      * context menu.
      */
-    final class TestField extends EditField {
-        public TestField(final String label, final String initialValue) {
+    private final class TestField extends EditField {
+        private TestField(final String label, final String initialValue) {
             super(label, initialValue);
         }
 

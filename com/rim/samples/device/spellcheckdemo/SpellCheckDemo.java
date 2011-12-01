@@ -55,7 +55,7 @@ class SpellCheckDemo extends UiApplication {
     }
 
     // Contructor
-    SpellCheckDemo() {
+    private SpellCheckDemo() {
         // Create our spell check objects.
         _spellCheckUI = SpellCheckEngineFactory.createSpellCheckUI();
         _spellCheckUI.addSpellCheckUIListener(new SpellCheckListener());
@@ -74,7 +74,7 @@ class SpellCheckDemo extends UiApplication {
      * @param correction
      *            The correction to learn.
      */
-    public void learnCorrection(final String text, final String correction) {
+    void learnCorrection(final String text, final String correction) {
         _spellCheckEngine.learnCorrection(new StringBuffer(text),
                 new StringBuffer(correction));
     }
@@ -85,7 +85,7 @@ class SpellCheckDemo extends UiApplication {
      * @param field
      *            The field to be spell checked.
      */
-    public void spellCheck(final EditField field) {
+    void spellCheck(final EditField field) {
         _spellCheckUI.spellCheck(field);
     }
 
@@ -95,7 +95,7 @@ class SpellCheckDemo extends UiApplication {
      * @param word
      *            The word to learn.
      */
-    public void learnWord(final String word) {
+    void learnWord(final String word) {
         _spellCheckEngine.learnWord(new StringBuffer(word));
     }
 }

@@ -1,0 +1,24 @@
+APPLICATION_TITLE#0="\ub85c\uceec\ub9ac\uc81c\uc774\uc158 \ub370\ubaa8";
+FIELD_CHINA#0="\uc911\uad6d";
+FIELD_CHINA_CITIES#0="\ubca0\uc774\uc9d5 \ubc0f \uc0c1\ud558\uc774";
+FIELD_CHINA_LANG#0="\ubd81\uacbd\uc5b4";
+FIELD_CHINA_POP#0="1,211,210,000";
+FIELD_CHOICE#0="\uad6d\uac00 \uc120\ud0dd: ";
+FIELD_CITIES#0="\uc8fc\uc694 \ub3c4\uc2dc: ";
+FIELD_COUNTRIES#0={
+    "\ubbf8\uad6d",
+    "\uc911\uad6d",
+    "\ub3c5\uc77c",
+};
+FIELD_GERMANY#0="\ub3c5\uc77c";
+FIELD_GERMANY_CITIES#0="\ubca0\ub97c\ub9b0 \ubc0f \ubb8c\ud5e8";
+FIELD_GERMANY_LANG#0="\ub3c5\uc77c\uc5b4";
+FIELD_GERMANY_POP#0="83,536,115";
+FIELD_LANG#0="\uc5b8\uc5b4: ";
+FIELD_POP#0="\uc778\uad6c: ";
+FIELD_TITLE#0="\ub85c\uceec\ub9ac\uc81c\uc774\uc158 API\ub97c \ub098\ud0c0\ub0b4\ub294 \uc0d8\ud50c";
+FIELD_US#0="\ubbf8\uad6d";
+FIELD_US_CITIES#0="\ub274\uc695 \ubc0f \ub85c\uc2a4\uc564\uc824\ub808\uc2a4";
+FIELD_US_LANG#0="\uc601\uc5b4 \ubc0f \uc2a4\ud398\uc778\uc5b4";
+FIELD_US_POP#0="266,993,000";
+MENUITEM_VIEW#0="\ubcf4\uae30";

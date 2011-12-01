@@ -24,7 +24,7 @@
  * Environment Development Guide associated with this release.
  */
 
-package com.rim.samples.device.mediaengine;
+package com.rim.samples.device.mediaenginedemo;
 
 import java.io.IOException;
 
@@ -45,14 +45,12 @@ import net.rim.plazmic.mediaengine.MediaPlayer;
 
 /**
  * A simple example of the MediaEngine API's. PME files in this sample are
- * version 1.2 In Plazmic Composer version 3.0.0.21 export content as SVG. Open
+ * version 1.2. In Plazmic Composer version 3.0.0.21 export content as SVG. Open
  * SVG file in a text editor and change height and width attributes within the
- * svg tag to pixel values. If content includes png files you may need to modify
- * the paths in the xlink:href attributes within the image tags as well.
- * Finally, use the command line utility to transcode the SVG to PME format (eg.
- * C:\projectDir>svgc -pme 12 filename.svg).
+ * svg tag to pixel values. Finally, use the command line utility to transcode
+ * the SVG to PME format (eg. C:\projectDir>svgc -pme 12 filename.svg).
  */
-public final class MediaEngineDemo extends UiApplication {
+final class MediaEngineDemo extends UiApplication {
     private RichTextField _statusField;
     private final MediaDisplayScreen _display;
 
@@ -67,7 +65,7 @@ public final class MediaEngineDemo extends UiApplication {
     /**
      * Constructor
      */
-    public MediaEngineDemo() {
+    private MediaEngineDemo() {
         _display = new MediaDisplayScreen();
         pushScreen(new MediaSampleScreen());
     }
@@ -79,7 +77,7 @@ public final class MediaEngineDemo extends UiApplication {
         /**
          * Contructor
          */
-        public MediaSampleScreen() {
+        MediaSampleScreen() {
             final LabelField title =
                     new LabelField("Media Engine Demo", DrawStyle.ELLIPSIS
                             | Field.USE_ALL_WIDTH);
@@ -98,8 +96,8 @@ public final class MediaEngineDemo extends UiApplication {
             menu.add(new MenuItem("PME 1", 5, 5) {
                 public void run() {
                     // Check for optimal screen dimensions.
-                    if (Display.getHeight() != 240 || Display.getWidth() != 320) {
-                        Dialog.alert("Sample has been optimized for a 320 x 240 display. "
+                    if (Display.getHeight() != 320 || Display.getWidth() != 480) {
+                        Dialog.alert("Sample has been optimized for a 480 x 320 display. "
                                 + "This device has a "
                                 + Display.getWidth()
                                 + " x " + Display.getHeight() + " display.");
@@ -122,8 +120,8 @@ public final class MediaEngineDemo extends UiApplication {
             menu.add(new MenuItem("PME 2", 6, 6) {
                 public void run() {
                     // Check for optimal screen dimensions.
-                    if (Display.getHeight() != 240 || Display.getWidth() != 320) {
-                        Dialog.alert("Sample has been optimized for a 320 x 240 display. "
+                    if (Display.getHeight() != 320 || Display.getWidth() != 480) {
+                        Dialog.alert("Sample has been optimized for a 480 x 320 display. "
                                 + "This device has a "
                                 + Display.getWidth()
                                 + " x " + Display.getHeight() + " display.");
@@ -135,7 +133,7 @@ public final class MediaEngineDemo extends UiApplication {
                     UiApplication.getUiApplication().invokeLater(
                             new Runnable() {
                                 public void run() {
-                                    playMedia("jar:///weather.pme");
+                                    playMedia("jar:///planets.pme");
                                     _statusField
                                             .setText("Please select a PME from the Menu.");
                                 }
@@ -182,10 +180,10 @@ public final class MediaEngineDemo extends UiApplication {
         private Field _current;
         private MediaPlayer _player;
 
-        public MediaDisplayScreen() {
+        MediaDisplayScreen() {
         }
 
-        public void init(final Field f, final MediaPlayer player) {
+        private void init(final Field f, final MediaPlayer player) {
             if (_player != null) {
                 _player.close();
             }

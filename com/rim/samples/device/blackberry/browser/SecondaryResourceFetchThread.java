@@ -68,7 +68,7 @@ class SecondaryResourceFetchThread extends Thread {
      * @param referrer
      *            - call back browsr field.
      */
-    public static void enqueue(final RequestedResource resource,
+    static void enqueue(final RequestedResource resource,
             final BrowserContent referrer) {
         if (resource == null) {
             return;
@@ -111,7 +111,7 @@ class SecondaryResourceFetchThread extends Thread {
     /**
      * Indicate that all images have been enqueued for this browser field.
      */
-    public static void doneAddingImages() {
+    static void doneAddingImages() {
         synchronized (_syncObject) {
             if (_currentThread != null) {
                 _currentThread._done = true;

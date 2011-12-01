@@ -46,7 +46,7 @@ import net.rim.device.api.ui.component.DateField;
     private final BasicEditField _product;
     private final BasicEditField _numOrdered;
 
-    public OrderRecordController(OrderRecord orderRecord, final boolean editable) {
+    OrderRecordController(OrderRecord orderRecord, final boolean editable) {
         _editable = editable;
 
         if (editable) {
@@ -81,7 +81,7 @@ import net.rim.device.api.ui.component.DateField;
      * 
      * @return The vector of fields.
      */
-    public Vector getFields() {
+    Vector getFields() {
         final Vector fields = new Vector();
 
         fields.addElement(_date);
@@ -101,7 +101,7 @@ import net.rim.device.api.ui.component.DateField;
      *             If an attempt is made to retrieve an updated order record
      *             when the controller is not editable.
      */
-    public OrderRecord getUpdatedOrderRecord() {
+    OrderRecord getUpdatedOrderRecord() {
         if (_editable) {
             _orderRecord.setDate(_date.getDate());
             _orderRecord.setCompany(_company.getText());
@@ -118,7 +118,7 @@ import net.rim.device.api.ui.component.DateField;
     /**
      * Makes this controller editable, allowing the order record to be changed.
      */
-    public void makeEditable() {
+    void makeEditable() {
         if (!_editable) {
             _editable = true;
 
