@@ -1,0 +1,44 @@
+## RIM Java Development Environment
+# RIM Project file
+AlwaysBuild=0
+[AlxImports
+]
+AutoRestart=0
+[ClassProtection
+]
+[CustomBuildFiles
+]
+[CustomBuildRules
+]
+[DefFiles
+]
+[DependsOn
+]
+ExcludeFromBuildAll=0
+[Files
+img\spellcheckdemo_jde.png
+SpellCheckDemo.java
+SpellCheckDemoScreen.java
+SpellCheckListener.java
+]
+HaveAlxImports=0
+HaveDefs=0
+HaveImports=0
+[Icons
+img\spellcheckdemo_jde.png
+]
+[ImplicitRules
+]
+[Imports
+]
+Listing=0
+Options=-quiet
+OutputFileName=SpellCheckDemo
+[PackageProtection
+]
+RibbonPosition=0
+RunOnStartup=0
+StartupTier=7
+SystemModule=0
+Title=Spell Check Demo
+Type=0

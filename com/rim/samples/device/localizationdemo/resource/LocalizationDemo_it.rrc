@@ -1,0 +1,24 @@
+APPLICATION_TITLE#0="Demo localizzazione";
+FIELD_CHINA#0="Cina";
+FIELD_CHINA_CITIES#0="Beijing e Shanghai";
+FIELD_CHINA_LANG#0="Mandarino";
+FIELD_CHINA_POP#0="1,211,210,000";
+FIELD_CHOICE#0="Scegliere un Paese: ";
+FIELD_CITIES#0="Citt\u00e0 principali: ";
+FIELD_COUNTRIES#0={
+    "Stati Uniti",
+    "Cina",
+    "Germania",
+};
+FIELD_GERMANY#0="Germania";
+FIELD_GERMANY_CITIES#0="Berlino e Monaco";
+FIELD_GERMANY_LANG#0="Tedesco";
+FIELD_GERMANY_POP#0="83,536,115";
+FIELD_LANG#0="Lingue: ";
+FIELD_POP#0="Popolazione: ";
+FIELD_TITLE#0="Modello per dimostrare API di localizzazione";
+FIELD_US#0="Stati Uniti";
+FIELD_US_CITIES#0="New York e Los Angeles";
+FIELD_US_LANG#0="Inglese e spagnolo";
+FIELD_US_POP#0="266,993,000";
+MENUITEM_VIEW#0="Visualizza";

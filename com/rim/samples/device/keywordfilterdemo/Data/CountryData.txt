@@ -1,0 +1,13 @@
+China,1322413000,Beijing
+India,1131043000,New Delhi
+United States,303545000,Washington D.C.
+Indonesia,231627000,Jakarta
+Brazil,185130000,Brasilia
+Pakistan,161930000,Islamabad
+Bangladesh,158665000,Dhaka
+Nigeria,148093000,Abuja
+Russia,142499000,Moscow
+Japan,127718000,Tokyo
+Mexico,106535000,Mexico City
+Philippines,88706300,Manila
+Vietnam,87375000,Hanoi

@@ -1,0 +1,29 @@
+HKCR
+{
+	Desktop.DesktopSample.1 = s 'DesktopSample Class'
+	{
+		CLSID = s '{7C23B673-FB1D-45D8-83BE-390398BA9876}'
+	}
+	Desktop.DesktopSample = s 'DesktopSample Class'
+	{
+		CLSID = s '{7C23B673-FB1D-45D8-83BE-390398BA9876}'
+		CurVer = s 'Desktop.DesktopSample.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {7C23B673-FB1D-45D8-83BE-390398BA9876} = s 'DesktopSample Class'
+		{
+			ProgID = s 'Desktop.DesktopSample.1'
+			VersionIndependentProgID = s 'Desktop.DesktopSample'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'both'
+			}
+			'Implemented Categories'
+			{
+				{DFCE97AB-25ED-4335-BB00-FE5863F41DED}
+			}
+		}
+	}
+}

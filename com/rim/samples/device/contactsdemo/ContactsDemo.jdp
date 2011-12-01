@@ -1,0 +1,55 @@
+## RIM Java Development Environment
+# RIM Project file
+AddOn=0
+AlwaysBuild=0
+[AlxImports
+]
+AutoRestart=0
+[BuildOnlyFiles
+]
+[ClassProtection
+]
+[CustomBuildFiles
+]
+[CustomBuildRules
+]
+[DefFiles
+]
+[DependencyFiles
+]
+[DependsOn
+]
+ExcludeFromBuildAll=0
+[Files
+ContactModel.java
+ContactsDemo.java
+ContactsPersistentContentListener.java
+Context.java
+CookieMenuItem.java
+img\contacts_jde.png
+]
+HaveAlxImports=0
+HaveDefs=0
+HaveImports=0
+[Icons
+img\contacts_jde.png
+]
+[ImplicitRules
+]
+[Imports
+]
+Listing=0
+NoImport=0
+NoRuntime=0
+Options=-quiet
+OutputFileName=ContactsDemo
+[PackageProtection
+]
+RibbonPosition=0
+RunOnStartup=0
+StartupTier=7
+SystemModule=0
+Title=Contacts Demo
+Type=0
+Vendor=Research In Motion Limited
+Version=0.9

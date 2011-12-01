@@ -1,0 +1,15 @@
+<HTML>
+	<HEAD>
+		<TITLE>Research In Motion - Developer Zone - Secure HTML Test Page</TITLE>
+	</HEAD>
+	<BODY style="font-family: Arial">
+		<h2>Secure HTML Test Page</h2>
+		<p>Congratulations, you've successfully reached Rim's Secure HTML test page
+		<br>
+		<br>
+		<hr>
+		<sub>
+			Copyright © 2002 Research In Motion Limited
+		</sub>
+	</BODY>
+</HTML>

@@ -1,0 +1,45 @@
+## RIM Java Development Environment
+# RIM Project file
+AddOn=0
+AlwaysBuild=0
+[AlxImports
+]
+AutoRestart=0
+[ClassProtection
+]
+[CustomBuildFiles
+]
+[CustomBuildRules
+]
+[DefFiles
+]
+[DependsOn
+]
+EntryFor=TicTacToeDemo
+ExcludeFromBuildAll=0
+HaveAlxImports=0
+HaveDefs=0
+HaveImports=0
+[Icons
+]
+[ImplicitRules
+]
+[Imports
+]
+Listing=0
+MidletClass=init
+Options=-quiet
+OutputFileName=com_rim_tictactoe_startup
+[PackageProtection
+]
+RibbonPosition=0
+RunOnStartup=1
+StartupTier=7
+SystemModule=1
+Title=Tic Tac Toe Demo
+TitleResourceBundle=com.rim.samples.device.resource.TicTacToeRes
+TitleResourceBundleKey=TICTACTOE_TITLE
+TitleResourceBundlePath=..\resource\TicTacToeRes.rrh
+Type=3
+Vendor=Research In Motion Limited
+Version=0.9

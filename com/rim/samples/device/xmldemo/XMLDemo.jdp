@@ -1,0 +1,56 @@
+## RIM Java Development Environment
+# RIM Project file
+AddOn=0
+AlwaysBuild=0
+[AlxImports
+]
+AutoRestart=0
+[BuildOnlyFiles
+]
+[ClassProtection
+]
+[CustomBuildFiles
+]
+[CustomBuildRules
+]
+[DefFiles
+]
+[DependencyFiles
+]
+[DependsOn
+]
+ExcludeFromBuildAll=0
+[Files
+img\xmldemo_jde.png
+xml\bookstore.xml
+XMLDemo.java
+XMLDemoScreen.java
+]
+HaveAlxImports=0
+HaveDefs=0
+HaveImports=1
+[Icons
+img\xmldemo_jde.png
+]
+[ImplicitRules
+]
+[Imports
+]
+Listing=0
+NoImport=0
+Options=-quiet
+OutputFileName=XMLDemo
+[PackageProtection
+]
+RibbonPosition=0
+RunOnStartup=0
+StartupTier=7
+SystemModule=0
+Title=XML Demo
+TitleResourceBundle=com.rim.samples.device.xmldemo.resources.XmlDemo
+TitleResourceBundleDescription=APPLICATION_DESCRIPTION
+TitleResourceBundleKey=APPLICATION_TITLE
+TitleResourceBundlePath=..\resource\XmlDemo.rrh
+Type=0
+Vendor=Research In Motion Limited
+Version=0.9

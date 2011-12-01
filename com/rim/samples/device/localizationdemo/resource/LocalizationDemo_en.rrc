@@ -1,0 +1,24 @@
+APPLICATION_TITLE#0="Localization Demo";
+FIELD_CHINA#0="China";
+FIELD_CHINA_CITIES#0="Beijing and Shanghai";
+FIELD_CHINA_LANG#0="Mandarin";
+FIELD_CHINA_POP#0="1,211,210,000";
+FIELD_CHOICE#0="Choose a country: ";
+FIELD_CITIES#0="Major Cities: ";
+FIELD_COUNTRIES#0={
+    "United States",
+    "China",
+    "Germany",
+};
+FIELD_GERMANY#0="Germany";
+FIELD_GERMANY_CITIES#0="Berlin and Munich";
+FIELD_GERMANY_LANG#0="German";
+FIELD_GERMANY_POP#0="83,536,115";
+FIELD_LANG#0="Languages: ";
+FIELD_POP#0="Population: ";
+FIELD_TITLE#0="Sample to demonstrate the Localization API";
+FIELD_US#0="United States";
+FIELD_US_CITIES#0="New York and Los Angeles";
+FIELD_US_LANG#0="English and Spanish";
+FIELD_US_POP#0="266,993,000";
+MENUITEM_VIEW#0="View";

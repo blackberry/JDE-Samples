@@ -1,0 +1,17 @@
+--$(boundary)
+Content-Type: application/xml; charset=UTF-8
+
+<?xml version="1.0"?>
+<!DOCTYPE pap PUBLIC "-//WAPFORUM//DTD PAP 2.0//EN"
+    "http://www.wapforum.org/DTD/pap_2.0.dtd"
+    [<?wap-pap-ver supported-versions="2.0,1.*"?>]>
+<pap>
+    <push-message push-id="$(pushid)">
+        <address address-value="WAPPUSH=$(email)%3A7874/TYPE=USER@rim.net"/>
+    </push-message>
+</pap>
+--$(boundary)
+$(headers)
+
+$(content)
+--$(boundary)--

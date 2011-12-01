@@ -1,0 +1,24 @@
+APPLICATION_TITLE#0="Sprachoptionen\u00a0\u2013 Demo";
+FIELD_CHINA#0="China";
+FIELD_CHINA_CITIES#0="Peking und Shanghai";
+FIELD_CHINA_LANG#0="Mandarin";
+FIELD_CHINA_POP#0="1,211,210,000";
+FIELD_CHOICE#0="W\u00e4hlen Sie ein Land: ";
+FIELD_CITIES#0="Bedeutende St\u00e4dte: ";
+FIELD_COUNTRIES#0={
+    "United States",
+    "China",
+    "Deutschland",
+};
+FIELD_GERMANY#0="Deutschland";
+FIELD_GERMANY_CITIES#0="Berlin und M\u00fcnchen";
+FIELD_GERMANY_LANG#0="Deutsch";
+FIELD_GERMANY_POP#0="83,536,115";
+FIELD_LANG#0="Sprachen: ";
+FIELD_POP#0="Einwohner: ";
+FIELD_TITLE#0="Beispiel zur Demonstration der Sprachoptionen-API";
+FIELD_US#0="United States";
+FIELD_US_CITIES#0="New York und Los Angeles";
+FIELD_US_LANG#0="Englisch und Spanisch";
+FIELD_US_POP#0="266,993,000";
+MENUITEM_VIEW#0="Anzeigen";

@@ -1,0 +1,40 @@
+// Desktop.idl : IDL source for Desktop.dll
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (Desktop.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+	[
+		object,
+		uuid(7CE4DB37-94FC-474A-89C6-C920C43491F9),
+		dual,
+		helpstring("IDesktopSample Interface"),
+		pointer_default(unique)
+	]
+	interface IDesktopSample : IDispatch
+	{
+	};
+
+[
+	uuid(C4299B4F-CF7F-43F0-8B67-7054B7B380C0),
+	version(1.0),
+	helpstring("Desktop 1.0 Type Library")
+]
+library DESKTOPLib
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+	importlib("..\..\..\BlackBerry\desktopapi.tlb");
+
+	[
+		uuid(7C23B673-FB1D-45D8-83BE-390398BA9876),
+		helpstring("DesktopSample Class")
+	]
+	coclass DesktopSample
+	{
+		[default] interface IDesktopSample;
+		interface IRimExtension;
+	};
+};

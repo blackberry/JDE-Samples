@@ -1,0 +1,17 @@
+<contactlist>
+	<contact first="Bob" last="Roberts">
+		<first>Bob</first>
+		<last>Roberts</last>
+		<email>broberts@foo.bar</email>
+	</contact>
+	<contact first="Alan" last="Alda">
+		<first>Alan</first>
+		<last>Alda</last>
+		<email>aalda@foo.bar</email>
+	</contact>
+	<contact first="George" last="Castanza">
+		<first>George</first>
+		<last>Castanza</last>
+		<email>gcastanza@foo.bar</email>
+	</contact>
+</contactlist>

@@ -1,0 +1,53 @@
+## RIM Java Development Environment
+# RIM Project file
+AddOn=0
+AlwaysBuild=0
+[AlxImports
+]
+AutoRestart=0
+[BuildOnlyFiles
+]
+[ClassProtection
+]
+[CustomBuildFiles
+]
+[CustomBuildRules
+]
+[DefFiles
+]
+[DependencyFiles
+]
+[DependsOn
+]
+ExcludeFromBuildAll=0
+[Files
+img\midletdemo_jde.png
+MIDletDemo.java
+]
+HaveAlxImports=0
+HaveDefs=0
+HaveImports=0
+[Icons
+img\midletdemo_jde.png
+]
+[ImplicitRules
+]
+[Imports
+]
+Listing=0
+MidletClass=com.rim.samples.device.midletdemo.MIDletDemo
+NoImport=0
+NoRuntime=0
+Options=-quiet
+OutputFileName=MIDletDemo
+[PackageProtection
+]
+RibbonPosition=0
+RunOnStartup=0
+StartupTier=7
+SystemModule=0
+Title=MIDlet Demo
+TitleResourceId=0
+Type=1
+Vendor=Research In Motion Limited
+Version=0.9

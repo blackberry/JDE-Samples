@@ -1,0 +1,39 @@
+<BookStore>
+  <Hours>
+    <Weekdays>
+      <Open>9:00am</Open>
+      <Close>5:00pm</Close>
+    </Weekdays>
+    
+    This is some text.
+    
+    <Weekends>
+      <Open>12:00pm</Open>
+      <Close>4:00pm</Close>
+    </Weekends>
+  </Hours>
+  
+  <Book>
+    <Title>The Origin of Species</Title>
+    <Author>
+      <LastName>Darwin</LastName>
+      <FirstName>Charles</FirstName>
+    </Author>
+    <ISBN>0785819118</ISBN>
+    <Price>$12.99</Price>
+  </Book>
+  
+  <Book>
+    <Title>Just Java 2</Title>
+    <Author>
+      <LastName>van der Linden</LastName>
+      <FirstName>Peter</FirstName>
+    </Author>
+    <ISBN>0131482114</ISBN>
+    <NumPages>1152</NumPages>
+    <Price>$71.99</Price>
+  </Book>
+  
+  This is some more text.
+  
+</BookStore>
