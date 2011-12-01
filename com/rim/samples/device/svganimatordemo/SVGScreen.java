@@ -114,7 +114,7 @@ final class SVGScreen extends MainScreen {
             _playButton.setFocus();
 
         } catch (final IOException e) {
-            e.printStackTrace();
+            System.out.println(e.toString());
         }
     }
 

@@ -104,7 +104,7 @@ final class MediaEngineDemo extends UiApplication {
                     }
                     _statusField.setText("Loading, please wait...");
 
-                    // Play media in a separate thread.
+                    // Play media after all pending events have been processed.
                     UiApplication.getUiApplication().invokeLater(
                             new Runnable() {
                                 public void run() {

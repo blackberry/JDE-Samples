@@ -48,7 +48,6 @@ import net.rim.device.api.ui.component.BasicEditField;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.EditField;
 import net.rim.device.api.ui.component.LabelField;
-import net.rim.device.api.ui.component.ListField;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.util.Persistable;
@@ -114,10 +113,8 @@ class GPSDemo extends UiApplication {
     private float _wayHorizontalDistance;
     private float _horizontalDistance;
     private float _verticalDistance;
-    private ListField _listField;
     private final EditField _status;
     private final StringBuffer _messageString;
-    private String _oldmessageString;
     private LocationProvider _locationProvider;
     private ServerConnectThread _serverConnectThread;
 
@@ -570,7 +567,6 @@ class GPSDemo extends UiApplication {
         private InputStreamReader _in;
         private OutputStreamWriter _out;
         private String _url;
-        private String _message;
         private boolean _go;
         private final Vector _data;
         private int _delay;

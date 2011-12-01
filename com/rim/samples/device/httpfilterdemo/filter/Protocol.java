@@ -39,15 +39,20 @@ import javax.microedition.io.HttpConnection;
 import net.rim.device.api.io.FilterBaseInterface;
 
 /**
- * An example of the HttpFilterRegistry apis. This class implements a simple
- * pass through mechanism that writes out the http response headers to
- * System.out
+ * A custom Connection protocol. This class implements a simple pass through
+ * mechanism that writes out the http response headers to System.out. The
+ * PackageManager class in this sample project registers a filter to filter URLs
+ * containing a fully qualified domain name of www.google.com for use with this
+ * protocol. The class name must be "Protocol", as this name is appended to the
+ * package name registered in PackageManager so as to create an instance of this
+ * class.
  */
+
 public final class Protocol implements FilterBaseInterface, HttpConnection {
     private HttpConnection _subConnection;
 
     /**
-     * This function will open a filtered Http Connection.
+     * This method will open a filtered Http Connection.
      * 
      * @see net.rim.device.api.io.FilterBaseInterface#openFilter(String, int,
      *      boolean)

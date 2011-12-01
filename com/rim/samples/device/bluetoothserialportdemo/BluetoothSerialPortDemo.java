@@ -56,10 +56,9 @@ class BluetoothSerialPortDemo extends UiApplication {
     // ------------------------------------------------------------------
     private static final int INSERT = 1;
     private static final int REMOVE = 2;
-    private static final int CHANGE = 3;
-    private static final int JUST_OPEN = 4;
-    private static final int CONTENTS = 5;
-    private static final int NO_CONTENTS = 6;
+    private static final int JUST_OPEN = 3;
+    private static final int CONTENTS = 4;
+    private static final int NO_CONTENTS = 5;
 
     // Members
     // -------------------------------------------------------------------

@@ -30,7 +30,6 @@ import net.rim.blackberry.api.invoke.Invoke;
 import net.rim.blackberry.api.invoke.PhoneArguments;
 import net.rim.blackberry.api.mail.Message;
 import net.rim.blackberry.api.mail.MessagingException;
-import net.rim.blackberry.api.mail.Session;
 import net.rim.blackberry.api.mail.Transport;
 import net.rim.device.api.applicationcontrol.ApplicationPermissions;
 import net.rim.device.api.applicationcontrol.ApplicationPermissionsManager;
@@ -229,14 +228,11 @@ class ApplicationPermissionsDemo extends UiApplication implements
      */
     private void testEmail() {
         try {
-            final Session session = Session.getDefaultInstance();
-
-            if (session != null) {
-                session.getTransport();
-                Transport.send(new Message());
-            }
+            Transport.send(new Message());
         } catch (final MessagingException e) {
+            System.out.println(e.toString());
         }
+
     }
 
     // /////////////////////////////////////////////////////////

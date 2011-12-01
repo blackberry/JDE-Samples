@@ -312,7 +312,6 @@ public final class EventScreen extends MainScreen {
             msg.setContent(multipart);
 
             // Send the message using transport .
-            final Transport t = Session.getDefaultInstance().getTransport();
             Transport.send(msg);
         } catch (final MessagingException e) {
             System.err.println(e);

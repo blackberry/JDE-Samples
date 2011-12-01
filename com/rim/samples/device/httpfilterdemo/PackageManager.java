@@ -31,14 +31,13 @@ import net.rim.device.api.io.http.HttpFilterRegistry;
 /**
  * An example of the HttpFilterRegistry apis.
  * 
- * This class runs on startup of the device and registers the necessary http
- * filters.
+ * This class runs on device startup and registers the necessary http filters.
  */
 final class PackageManager {
     public static void libMain(final String[] args) {
-        HttpFilterRegistry.registerFilter("content.blackberry.com",
+        HttpFilterRegistry.registerFilter("na.blackberry.com",
                 "com.rim.samples.device.httpfilterdemo.precanned", true);
-        HttpFilterRegistry.registerFilter("www.blackberry.com",
+        HttpFilterRegistry.registerFilter("www.rim.com",
                 "com.rim.samples.device.httpfilterdemo.filter");
     }
 }

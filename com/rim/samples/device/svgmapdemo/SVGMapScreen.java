@@ -325,4 +325,14 @@ final class SVGMapScreen extends MainScreen implements FieldChangeListener,
             });
         }
     }
+
+    /**
+     * Override this method to prevent save dialog from being displayed.
+     * 
+     * @see net.rim.device.api.ui.Screen#onClose()
+     */
+    public boolean onClose() {
+        close();
+        return true;
+    }
 }

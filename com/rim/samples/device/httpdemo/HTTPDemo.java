@@ -48,11 +48,10 @@ import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.container.MainScreen;
 
 /**
- * A simple example using the HTTP connection.
+ * This sample makes a an http or https connection to a specified URL and
+ * retrieves and displays html content.
  */
 class HTTPDemo extends UiApplication {
-    // Constants
-    // ----------------------------------------------------------------
     private static String SAMPLE_HTTPS_PAGE =
             "https://www.blackberry.com/go/mobile/samplehttps.shtml";
     private static final String[] HTTP_PROTOCOL = { "http://", "http:\\",
@@ -71,16 +70,55 @@ class HTTPDemo extends UiApplication {
 
     private static final char CR = 0x000D;
     private static final char LF = 0x000A;
+    private static final char TAB = 0x0009;
 
-    // Members
-    // ------------------------------------------------------------------
     private final HTTPDemoScreen _mainScreen;
     private final EditField _url;
     private final RichTextField _content;
     private boolean _useWapStack;
-    private final WapOptionsScreen _wapOptionsScreen; // cache for reuse
+    private final WapOptionsScreen _wapOptionsScreen;
 
-    // Cache the fetch menu item for reuse.
+    private final StatusThread _statusThread = new StatusThread();
+    private final ConnectionThread _connectionThread = new ConnectionThread();
+
+    /**
+     * Entry point for application.
+     * 
+     * @param args
+     *            Command line arguments.
+     */
+    public static void main(final String[] args) {
+        final HTTPDemo theApp = new HTTPDemo();
+        theApp.enterEventDispatcher();
+    }
+
+    private HTTPDemo() {
+        _wapOptionsScreen = new WapOptionsScreen(this);
+        _mainScreen = new HTTPDemoScreen();
+        _mainScreen.setTitle(new LabelField("HTTP Demo", DrawStyle.ELLIPSIS
+                | Field.USE_ALL_WIDTH));
+
+        _url =
+                new EditField("URL: ", "http://", Integer.MAX_VALUE,
+                        BasicEditField.FILTER_URL);
+        _url.setCursorPosition(7);
+        _mainScreen.add(_url);
+
+        _mainScreen.add(new SeparatorField());
+
+        _content = new RichTextField();
+        _mainScreen.add(_content);
+
+        // Start the helper threads.
+        _statusThread.start();
+        _connectionThread.start();
+
+        pushScreen(_mainScreen);
+    }
+
+    /**
+     * Menu item to fetch content from URL specified in URL field.
+     */
     private final MenuItem _fetchMenuItem = new MenuItem("Fetch", 100, 10) {
         public void run() {
             // Don't execute on a blank url.
@@ -94,7 +132,9 @@ class HTTPDemo extends UiApplication {
         }
     };
 
-    // Cache the clear content menu item for reuse.
+    /**
+     * Clears the content field.
+     */
     private final MenuItem _clearContent = new MenuItem("Clear Content", 105,
             10) {
         public void run() {
@@ -102,9 +142,11 @@ class HTTPDemo extends UiApplication {
         }
     };
 
-    // Cache the https menu item for reuse.
-    private final MenuItem _fetchTTPSPage = new MenuItem(
-            "Fetch sample HTTPS Page", 110, 10) {
+    /**
+     * Menu item to fetch pre-defined sample HTTPS page.
+     */
+    private final MenuItem _fetchHTTPSPage = new MenuItem(
+            "Fetch Sample HTTPS Page", 110, 10) {
         public void run() {
             if (!_connectionThread.isStarted()) {
                 // Menu items are executed on the event thread, therefore we can
@@ -118,7 +160,9 @@ class HTTPDemo extends UiApplication {
         }
     };
 
-    // Cache the wap stack toggle for reuse.
+    /**
+     * Toggles the wap stack option.
+     */
     private final MenuItem _wapStackOption = new MenuItem("Use Wap Stack", 115,
             10) {
         public void run() {
@@ -126,7 +170,9 @@ class HTTPDemo extends UiApplication {
         }
     };
 
-    // Cache the wap stack options screen invocation item for reuse.
+    /**
+     * Menu item to display the wap options screen.
+     */
     private final MenuItem _wapStackOptionScreen = new MenuItem("Wap Options",
             120, 10) {
         public void run() {
@@ -134,353 +180,13 @@ class HTTPDemo extends UiApplication {
         }
     };
 
-    private final StatusThread _statusThread = new StatusThread();
-    private final ConnectionThread _connectionThread = new ConnectionThread();
-
-    public static void main(final String[] args) {
-        final HTTPDemo theApp = new HTTPDemo();
-        theApp.enterEventDispatcher();
-    }
-
-    // Inner Classes
-    // -------------------------------------------------------------
-
-    /**
-     * The ConnectionThread class manages the HTTP connection. Fetch operations
-     * are not queued, however, if a fetch call is made and, while active,
-     * another request made, the 2nd request will stall until the previous
-     * request completes.
-     */
-    private class ConnectionThread extends Thread {
-        private static final int TIMEOUT = 500; // ms
-
-        private String _theUrl;
-
-        private volatile boolean _start = false;
-        private volatile boolean _stop = false;
-
-        // Retrieve the URL.
-        private synchronized String getUrl() {
-            return _theUrl;
-        }
-
-        private boolean isStarted() {
-            return _start;
-        }
-
-        // Fetch a page.
-        // Synchronized so that I don't miss requests.
-        private void fetch(final String url) {
-            synchronized (this) {
-                _start = true;
-                _theUrl = url;
-            }
-        }
-
-        // Shutdown the thread.
-        private void stop() {
-            _stop = true;
-        }
-
-        public void run() {
-            for (;;) {
-                // Thread control.
-                while (!_start && !_stop) {
-                    // Sleep for a bit so we don't spin.
-                    try {
-                        sleep(TIMEOUT);
-                    } catch (final InterruptedException e) {
-                        System.err.println(e.toString());
-                    }
-                }
-
-                // Exit condition.
-                if (_stop) {
-                    return;
-                }
-
-                // This entire block is synchronized, this ensures I won't miss
-                // fetch requests
-                // made while I process a page.
-                synchronized (this) {
-                    // Open the connection and extract the data.
-                    StreamConnection s = null;
-
-                    try {
-                        s = (StreamConnection) Connector.open(getUrl());
-                        final HttpConnection httpConn = (HttpConnection) s;
-
-                        final int status = httpConn.getResponseCode();
-
-                        if (status == HttpConnection.HTTP_OK) {
-                            // Is this html?
-                            final String ctype =
-                                    httpConn.getHeaderField(HEADER_CONTENTTYPE);
-                            final boolean htmlContent =
-                                    ctype != null
-                                            && ctype.equals(CONTENTTYPE_TEXTHTML);
-
-                            final InputStream input = s.openInputStream();
-
-                            final byte[] data = new byte[256];
-                            int len = 0;
-                            int size = 0;
-                            final StringBuffer raw = new StringBuffer();
-
-                            while (-1 != (len = input.read(data))) {
-                                raw.append(new String(data, 0, len));
-                                size += len;
-                            }
-
-                            raw.insert(0, "bytes received]\n");
-                            raw.insert(0, size);
-                            raw.insert(0, '[');
-                            String content = raw.toString();
-
-                            if (htmlContent) {
-                                content = prepareData(raw.toString());
-                            }
-
-                            // The long operation is the parsing above, after
-                            // the parsing is complete, shutdown
-                            // the status thread before setting the text (since
-                            // both threads modify the content
-                            // pane, we want to make sure we don't have the
-                            // status thread overwriting our data).
-                            stopStatusThread();
-                            updateContent(content);
-                            input.close();
-                        } else {
-                            stopStatusThread();
-                            updateContent("response code = " + status);
-                        }
-
-                        s.close();
-
-                    } catch (final IOException e) {
-                        System.err.println(e.toString());
-                        stopStatusThread();
-                        updateContent(e.toString());
-                    }
-
-                    // We're done one connection so reset the start state.
-                    _start = false;
-
-                }
-            }
-        }
-
-        private void stopStatusThread() {
-            _statusThread.pause();
-            try {
-                synchronized (_statusThread) {
-                    // Check the paused condition, incase the notify fires prior
-                    // to our wait, in which
-                    // case we may never see that nofity.
-                    while (!_statusThread.isPaused()) {
-                        ;
-                    }
-                    {
-                        _statusThread.wait();
-                    }
-                }
-            } catch (final InterruptedException e) {
-                System.err.println(e.toString());
-            }
-        }
-    }
-
-    /**
-     * The StatusThread class manages display of the status message while
-     * lengthy HTTP/HTML operations are taking place.
-     */
-    private class StatusThread extends Thread {
-        private static final int INTERVAL = 6;
-        private static final int TIMEOUT = 500; // ms
-        private static final int THREAD_TIMEOUT = 500;
-
-        private volatile boolean _stop = false;
-        private volatile boolean _running = false;
-        private volatile boolean _isPaused = false;
-
-        // Resume the thread.
-        private void go() {
-            _running = true;
-            _isPaused = false;
-        }
-
-        // Pause the thread.
-        private void pause() {
-            _running = false;
-        }
-
-        // Query the paused status.
-        private boolean isPaused() {
-            return _isPaused;
-        }
-
-        // Shutdown the thread.
-        private void stop() {
-            _stop = true;
-        }
-
-        public void run() {
-            int i = 0;
-
-            // Setup the status messages.
-            final String[] statusMsg = new String[6];
-            final StringBuffer status = new StringBuffer("Working");
-            statusMsg[0] = status.toString();
-
-            // Preincrement improves efficiency.
-            for (int j = 1; j < 6; ++j) {
-                statusMsg[j] = status.append(" .").toString();
-            }
-
-            for (;;) {
-                while (!_stop && !_running) {
-                    // Sleep a bit so we don't spin.
-                    try {
-                        sleep(THREAD_TIMEOUT);
-                    } catch (final InterruptedException e) {
-                        System.err.println(e.toString());
-                    }
-
-                }
-
-                if (_stop) {
-                    return;
-                }
-
-                i = 0;
-
-                // Clear the status buffer.
-                status.delete(0, status.length());
-
-                for (;;) {
-                    // We're not synchronizing on the boolean flag! value is
-                    // declared volatile therefore.
-                    if (_stop) {
-                        return;
-                    }
-
-                    if (!_running) {
-                        _isPaused = true;
-
-                        synchronized (this) {
-                            this.notify();
-                        }
-
-                        break;
-                    }
-
-                    updateContent(statusMsg[++i % 6]);
-
-                    try {
-                        Thread.sleep(TIMEOUT); // Wait for a bit.
-                    } catch (final InterruptedException e) {
-                        System.err.println(e.toString());
-                    }
-                }
-            }
-        }
-    }
-
-    private class HTTPDemoScreen extends MainScreen {
-
-        /**
-         * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
-         */
-        protected void makeMenu(final Menu menu, final int instance) {
-            menu.add(_fetchMenuItem);
-            menu.add(_clearContent);
-            menu.add(_fetchTTPSPage);
-            menu.add(_wapStackOptionScreen);
-
-            final StringBuffer sb = new StringBuffer();
-
-            if (_useWapStack) {
-                sb.append(Characters.CHECK_MARK);
-            }
-
-            sb.append("Use Wap Stack");
-            _wapStackOption.setText(sb.toString());
-            menu.add(_wapStackOption);
-
-            menu.addSeparator();
-
-            super.makeMenu(menu, instance);
-        }
-
-        /**
-         * Prevent the save dialog from being displayed.
-         * 
-         * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
-         */
-        public boolean onSavePrompt() {
-            return true;
-        }
-
-        /**
-         * @see net.rim.device.api.ui.Screen#close()
-         */
-        public void close() {
-            _statusThread.stop();
-            _connectionThread.stop();
-
-            super.close();
-        }
-
-        /**
-         * @see net.rim.device.api.ui.Screen#keyChar(char,int,int)
-         */
-        protected boolean keyChar(final char key, final int status,
-                final int time) {
-            // UiApplication.getUiApplication().getActiveScreen().
-            if (getLeafFieldWithFocus() == _url && key == Characters.ENTER) {
-                _fetchMenuItem.run();
-                return true; // I've absorbed this event, so return true.
-            } else {
-                return super.keyChar(key, status, time);
-            }
-        }
-    }
-
-    // Constructors
-    // -------------------------------------------------------------
-    private HTTPDemo() {
-        _wapOptionsScreen = new WapOptionsScreen(this);
-        _mainScreen = new HTTPDemoScreen();
-        _mainScreen.setTitle(new LabelField("HTTP Demo", DrawStyle.ELLIPSIS
-                | Field.USE_ALL_WIDTH));
-
-        _url =
-                new EditField("URL: ", null, Integer.MAX_VALUE,
-                        BasicEditField.FILTER_URL);
-        _mainScreen.add(_url);
-
-        _mainScreen.add(new SeparatorField());
-
-        _content = new RichTextField("<content>");
-        _mainScreen.add(_content);
-
-        // Start the helper threads.
-        _statusThread.start();
-        _connectionThread.start();
-
-        pushScreen(_mainScreen); // Push the main screen - a method on the
-                                 // UiApplication class.
-    }
-
-    // Methods
-    // ------------------------------------------------------------------
     private void fetchPage(String url) {
-        // First, normalize the url.
+        // Normalize the url.
         final String lcase = url.toLowerCase();
+
         boolean validHeader = false;
         int i = 0;
 
-        // Winding down and comparing to 0 saves instructions.
         for (i = HTTP_PROTOCOL.length - 1; i >= 0; --i) {
             if (-1 != lcase.indexOf(HTTP_PROTOCOL[i])) {
                 validHeader = true;
@@ -496,18 +202,20 @@ class HTTPDemo extends UiApplication {
             url = HTTP_PROTOCOL[0] + url; // Prepend the protocol specifier.
         }
 
-        /*
-         * It is illegal to open a connection on the event thread, due to the
-         * system architecture, therefore, spawn a new thread for connection
-         * operations.
-         */
+        // It is illegal to open a connection on the event thread. We need to
+        // spawn a new thread for connection operations.
         _connectionThread.fetch(url);
 
-        // Create a thread for showing status of the operation.
+        // Create a thread to display the status of the current operation.
         _statusThread.go();
-
     }
 
+    /**
+     * Method to update the content field.
+     * 
+     * @param text
+     *            The text to display.
+     */
     private void updateContent(final String text) {
         // This will create significant garbage, but avoids threading issues
         // (compared with creating a static Runnable and setting the text).
@@ -518,12 +226,17 @@ class HTTPDemo extends UiApplication {
         });
     }
 
+    /**
+     * Performs operations on the html data. Removes tags, comments, whitespace
+     * and inserts new lines for the
+     * <p>
+     * tag.
+     * 
+     * @param text
+     *            The text to be prepared for display.
+     * @return The processed text.
+     */
     private String prepareData(final String text) {
-
-        // Do some simple operations on the html data. A simple state machine
-        // for removing
-        // tags, comments, whitespace and inserting newlines for the <p> tag.
-
         final int text_length = text.length();
         final StringBuffer data = new StringBuffer(text_length);
         int state = STATE_0;
@@ -531,7 +244,6 @@ class HTTPDemo extends UiApplication {
         int writeIndex = -1;
         char c = (char) 0;
 
-        // Cache the text length and preincrement the counter for.
         for (int i = 0; i < text_length; ++i) {
             c = text.charAt(i);
             switch (state) {
@@ -610,8 +322,305 @@ class HTTPDemo extends UiApplication {
         return data.toString().substring(0, writeIndex + 1);
     }
 
+    /**
+     * Checks whether a char is a carriage return, line feed or tab character.
+     * 
+     * @param c
+     *            The char to check.
+     * @return True if char is a carriage return or a line feed, otherwise
+     *         false.
+     */
     private boolean specialChar(final char c) {
-        return c == LF || c == CR;
+        return c == LF || c == CR || c == TAB;
     }
 
+    /**
+     * The ConnectionThread class manages the HTTP connection. Fetch operations
+     * are not queued. However, if a fetch call is made and another request is
+     * made while the first is still active, the second request will stall until
+     * the previous request completes.
+     */
+    private class ConnectionThread extends Thread {
+        private static final int TIMEOUT = 500; // ms
+
+        private String _theUrl;
+
+        private volatile boolean _fetchStarted = false;
+        private volatile boolean _stop = false;
+
+        // Retrieve the URL.
+        private synchronized String getUrl() {
+            return _theUrl;
+        }
+
+        private boolean isStarted() {
+            return _fetchStarted;
+        }
+
+        // Fetch a page.
+        // Synchronized so that we don't miss requests.
+        private void fetch(final String url) {
+            synchronized (this) {
+                _fetchStarted = true;
+                _theUrl = url;
+            }
+        }
+
+        // Shutdown the thread.
+        private void stop() {
+            _stop = true;
+        }
+
+        public void run() {
+            for (;;) {
+                // Thread control
+                while (!_fetchStarted && !_stop) {
+                    // Sleep for a bit so we don't spin.
+                    try {
+                        sleep(TIMEOUT);
+                    } catch (final InterruptedException e) {
+                        System.err.println(e.toString());
+                    }
+                }
+
+                // Exit condition
+                if (_stop) {
+                    return;
+                }
+
+                // This entire block is synchronized. This ensures we won't miss
+                // fetch requests
+                // made while we process a page.
+                synchronized (this) {
+                    String content = "";
+
+                    // Open the connection and extract the data.
+                    try {
+                        StreamConnection s = null;
+                        s = (StreamConnection) Connector.open(getUrl());
+                        final HttpConnection httpConn = (HttpConnection) s;
+
+                        final int status = httpConn.getResponseCode();
+
+                        if (status == HttpConnection.HTTP_OK) {
+                            // Is this html?
+                            final String contentType =
+                                    httpConn.getHeaderField(HEADER_CONTENTTYPE);
+                            final boolean htmlContent =
+                                    contentType != null
+                                            && contentType
+                                                    .startsWith(CONTENTTYPE_TEXTHTML);
+
+                            final InputStream input = s.openInputStream();
+
+                            final byte[] data = new byte[256];
+                            int len = 0;
+                            int size = 0;
+                            final StringBuffer raw = new StringBuffer();
+
+                            while (-1 != (len = input.read(data))) {
+                                raw.append(new String(data, 0, len));
+                                size += len;
+                            }
+
+                            raw.insert(0, "bytes received]\n");
+                            raw.insert(0, size);
+                            raw.insert(0, '[');
+                            content = raw.toString();
+
+                            if (htmlContent) {
+                                content = prepareData(raw.toString());
+                            }
+                            input.close();
+                        } else {
+                            content = "response code = " + status;
+                        }
+                        s.close();
+                    } catch (final IOException e) {
+                        content = e.toString();
+                    } finally {
+                        // Make sure status thread doesn't overwrite our
+                        // content.
+                        stopStatusThread();
+                        updateContent(content);
+                    }
+
+                    // We're finished with the operation so reset
+                    // the start state.
+                    _fetchStarted = false;
+                }
+            }
+        }
+
+        private void stopStatusThread() {
+            _statusThread.pause();
+            try {
+                synchronized (_statusThread) {
+                    // Check the paused condition, in case the notify fires
+                    // prior to our wait, in which
+                    // case we may never see that notify.
+                    while (!_statusThread.isPaused()) {
+                        ;
+                    }
+                    {
+                        _statusThread.wait();
+                    }
+                }
+            } catch (final InterruptedException e) {
+                System.out.println(e.toString());
+            }
+        }
+    }
+
+    /**
+     * The StatusThread class manages display of the status message while
+     * lengthy HTTP/HTML operations are taking place.
+     */
+    private class StatusThread extends Thread {
+        private static final int TIMEOUT = 500; // ms
+        private static final int THREAD_TIMEOUT = 500; // ??? needed ???
+
+        private volatile boolean _stop = false;
+        private volatile boolean _running = false;
+        private volatile boolean _isPaused = false;
+
+        // Resume the thread.
+        private void go() {
+            _running = true;
+            _isPaused = false;
+        }
+
+        // Pause the thread.
+        private void pause() {
+            _running = false;
+        }
+
+        // Query the paused status.
+        private boolean isPaused() {
+            return _isPaused;
+        }
+
+        // Shut down the thread.
+        private void stop() {
+            _stop = true;
+        }
+
+        public void run() {
+            int i = 0;
+
+            // Set up the status messages.
+            final String[] statusMsg = new String[6];
+            final StringBuffer status = new StringBuffer("Working");
+            statusMsg[0] = status.toString();
+
+            for (int j = 1; j < 6; ++j) {
+                statusMsg[j] = status.append(" .").toString();
+            }
+
+            for (;;) {
+                while (!_stop && !_running) {
+                    // Sleep a bit so we don't spin.
+                    try {
+                        sleep(THREAD_TIMEOUT);
+                    } catch (final InterruptedException e) {
+                        System.out.println(e.toString());
+                    }
+                }
+
+                if (_stop) {
+                    return;
+                }
+
+                i = 0;
+
+                // Clear the status buffer.
+                status.delete(0, status.length());
+
+                for (;;) {
+                    // We're not synchronizing on the boolean flag! Therefore,
+                    // value is declared volatile.
+                    if (_stop) {
+                        return;
+                    }
+
+                    if (!_running) {
+                        _isPaused = true;
+
+                        synchronized (this) {
+                            this.notify();
+                        }
+
+                        break;
+                    }
+
+                    updateContent(statusMsg[++i % 6]);
+
+                    try {
+                        Thread.sleep(TIMEOUT); // Wait for a bit.
+                    } catch (final InterruptedException e) {
+                        System.err.println(e.toString());
+                    }
+                }
+            }
+        }
+    }
+
+    private class HTTPDemoScreen extends MainScreen {
+        /**
+         * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
+         */
+        protected void makeMenu(final Menu menu, final int instance) {
+            menu.add(_fetchMenuItem);
+            menu.add(_clearContent);
+            menu.add(_fetchHTTPSPage);
+            menu.add(_wapStackOptionScreen);
+
+            final StringBuffer sb = new StringBuffer();
+
+            if (_useWapStack) {
+                sb.append(Characters.CHECK_MARK);
+            }
+
+            sb.append("Use Wap Stack");
+            _wapStackOption.setText(sb.toString());
+            menu.add(_wapStackOption);
+
+            menu.addSeparator();
+
+            super.makeMenu(menu, instance);
+        }
+
+        /**
+         * Prevent the save dialog from being displayed.
+         * 
+         * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
+         */
+        public boolean onSavePrompt() {
+            return true;
+        }
+
+        /**
+         * @see net.rim.device.api.ui.Screen#close()
+         */
+        public void close() {
+            _statusThread.stop();
+            _connectionThread.stop();
+
+            super.close();
+        }
+
+        /**
+         * @see net.rim.device.api.ui.Screen#keyChar(char,int,int)
+         */
+        protected boolean keyChar(final char key, final int status,
+                final int time) {
+            // UiApplication.getUiApplication().getActiveScreen().
+            if (getLeafFieldWithFocus() == _url && key == Characters.ENTER) {
+                _fetchMenuItem.run();
+                return true; // I've absorbed this event, so return true.
+            } else {
+                return super.keyChar(key, status, time);
+            }
+        }
+    }
 }

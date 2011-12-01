@@ -84,7 +84,6 @@ final class InvokeContactScreen extends MainScreen {
                 // Search for a valid address.
                 while (enumContact.hasMoreElements() && !foundAddress) {
                     c = (Contact) enumContact.nextElement();
-                    final int id;
 
                     if (c.countValues(Contact.ADDR) > 0) {
                         final String address[] =
@@ -100,7 +99,7 @@ final class InvokeContactScreen extends MainScreen {
                     }
                 }
             } catch (final PIMException e) {
-                e.printStackTrace();
+                System.out.println(e.toString());
             }
 
             // Invoke maps application with default map.

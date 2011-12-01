@@ -39,7 +39,7 @@ class Worker extends Thread
     private Socket _clientSocket;
 
     private static final String HELLO = "Hello";
-    private static final String GOODBYE = "GoodbyeAndFarewell";
+    private static final String GOODBYE = "Goodbye and farewell";
     private static final String RESOURCE_PATH = "com/rim/samples/server/socketdemo/resources";
     private static ResourceBundle _resources = java.util.ResourceBundle.getBundle(RESOURCE_PATH);
 

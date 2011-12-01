@@ -1,6 +1,5 @@
 /**
  * WapOptionsScreen.java
- * The options screen for the httpdemo.
  * 
  * Copyright © 1998-2011 Research In Motion Limited
  * 
@@ -38,12 +37,10 @@ import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.MainScreen;
 
 /**
- * A simple options screen that allows the user to specify the WAP parameters to
- * use when opening an HTTP connection.
+ * A screen that allows the user to specify the WAP parameters to use when
+ * opening an HTTP connection.
  */
 final class WapOptionsScreen extends MainScreen {
-    // Cconstants
-    // ----------------------------------------------------------------
     private static String WAP_PARAMETERKEY_GWAYIP = ";WapGatewayIP=";
     private static String WAP_PARAMETERKEY_GWAYPORT = ";WapGatewayPort=";
     private static String WAP_PARAMETERKEY_APN = ";WapGatewayAPN=";
@@ -53,8 +50,6 @@ final class WapOptionsScreen extends MainScreen {
     private static String WAP_DEFAULT_SOURCEIP = "127.0.0.1";
     private static String WAP_DEFAULT_SOURCEPORT = "8205";
 
-    // Members
-    // ------------------------------------------------------------------
     private final UiApplication _app;
     private final EditField _gateway;
     private final EditField _gatewayPort;
@@ -65,14 +60,12 @@ final class WapOptionsScreen extends MainScreen {
     private final MainScreen _this;
     private final MenuItem _save;
 
-    // Constructors
-    // -------------------------------------------------------------
-    WapOptionsScreen(final UiApplication uiapp) {
+    // Constructor
+    WapOptionsScreen(final UiApplication app) {
         super();
         _this = this;
-        _app = uiapp;
+        _app = app;
 
-        // Instantiate some cached menu items.
         _save = new MenuItem("Ok", 105, 10) {
             public void run() {
                 formatWapParameters();
@@ -104,15 +97,16 @@ final class WapOptionsScreen extends MainScreen {
         addMenuItem(_save);
     }
 
-    // Methods
-    // ------------------------------------------------------------------
+    /**
+     * Pushes this screen on to the stack.
+     */
     void display() {
         _app.pushScreen(this);
     }
 
     /**
-     * Formats all the fields into the wap parameter string, ready for inclusion
-     * in a Connector.open call.
+     * Formats all the fields into the wap parameter string for inclusion in a
+     * Connector.open call.
      */
     private void formatWapParameters() {
         final StringBuffer sb = new StringBuffer();
@@ -142,7 +136,7 @@ final class WapOptionsScreen extends MainScreen {
     }
 
     /**
-     * Called when there have been changes and users saves screen.
+     * Called when there have been changes and user saves screen.
      */
     public void save() {
         formatWapParameters();

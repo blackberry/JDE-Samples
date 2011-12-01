@@ -29,13 +29,17 @@ package com.rim.samples.device.messagelistdemo;
 import java.util.Date;
 
 import net.rim.blackberry.api.messagelist.ApplicationMessage;
+import net.rim.device.api.ui.DrawStyle;
+import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.container.MainScreen;
 
 final class DemoMessageScreen extends MainScreen {
     DemoMessageScreen(final ApplicationMessage applicationMessage) {
-        final LabelField title = new LabelField("Demo Message Screen");
+        final LabelField title =
+                new LabelField("Demo Message Screen", DrawStyle.ELLIPSIS
+                        | Field.USE_ALL_WIDTH);
         setTitle(title);
         final DemoMessage demoMessage = (DemoMessage) applicationMessage;
         add(new LabelField("From: " + demoMessage.getContact()));

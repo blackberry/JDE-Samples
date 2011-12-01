@@ -309,25 +309,6 @@ public final class PhoneLogsDemo extends UiApplication {
                 final int start) {
             return -1; // Not implemented.
         }
-
-        // Private inner classes
-        // -----------------------------------------------------------------------
-
-        /**
-         * This class is a menu item allowing a user to add a new call log.
-         */
-        private final class AddPhoneCall extends MenuItem {
-            public AddPhoneCall() {
-                super("Add Phone Call", 200000, 110);
-            }
-
-            /**
-             * Creates a screen for adding a phone call.
-             */
-            public void run() {
-                PhoneLogsDemo.this.pushScreen(new AddPhoneCallLogScreen());
-            }
-        }
     }
 
     /**

@@ -99,7 +99,7 @@ final class BrowserPlugin extends BrowserContentProvider implements
             vfm.add(new LabelField(new String(data)));
 
         } catch (final IOException e) {
-            e.printStackTrace();
+            System.out.println(e.toString());
         }
 
         browserContentBaseImpl.setContent(vfm);

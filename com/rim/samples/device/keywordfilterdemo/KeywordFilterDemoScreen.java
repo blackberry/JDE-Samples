@@ -101,6 +101,15 @@ final class KeywordFilterDemoScreen extends MainScreen {
         }
     }
 
+    /**
+     * Prevent the save dialog from being displayed.
+     * 
+     * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
+     */
+    public boolean onSavePrompt() {
+        return true;
+    }
+
     // Inner classes------------------------------------------------------------
 
     private final MenuItem addElementItem = new MenuItem("Add country", 0, 0) {

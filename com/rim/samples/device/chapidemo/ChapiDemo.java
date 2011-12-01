@@ -46,7 +46,7 @@ import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.MainScreen;
 
 /**
- * This sample demonstrates the JSR 211 Content Handler API. Our application is
+ * This sample demonstrates the JSR 211 Content Handler API. This application is
  * acting as both the invoking application and the handler application. You will
  * need to configure the 'Data' folder of this project as the location of the
  * csv file for which this application will be invoked as a handler. Under
@@ -56,21 +56,22 @@ import net.rim.device.api.ui.container.MainScreen;
  * 4.5.0\samples\com\rim\samples\device\chapidemo\Data).
  */
 class CHAPIDemo extends UiApplication implements RequestListener {
-    // The Content Handler ID.
+    // The Content Handler ID
     private static final String ID = "com.rim.samples.device.chapidemo";
 
-    // The content handler class name.
+    // The content handler class name
     private static final String CLASSNAME = ID + ".CHAPIDemo";
 
-    // The URL pointing to the location of the file we want to open.
+    // The URL pointing to the location of the file we want to open
     private static final String URL = "file:///SDCard/rim.csv";
 
     // Entry point for application
     public static void main(final String[] args) {
         if (args != null && args.length > 0 && args[0].equals("startup")) {
-            registerApp(); // Register this app as a content handler on startup.
+            registerApp(); // Register this app as a content handler on startup
         } else {
-            new CHAPIDemo().enterEventDispatcher(); // GUI
+            final CHAPIDemo app = new CHAPIDemo();
+            app.enterEventDispatcher();
         }
     }
 
@@ -86,7 +87,7 @@ class CHAPIDemo extends UiApplication implements RequestListener {
             final String[] suffixes = { ".csv" };
             final String[] actions = { ContentHandler.ACTION_OPEN };
 
-            // Get access to the registry and register as a content handler.
+            // Get access to the registry and register as a content handler
             final Registry registry = Registry.getRegistry(CLASSNAME);
             registry.register(CLASSNAME, types, suffixes, actions, null, ID,
                     null);
@@ -98,23 +99,28 @@ class CHAPIDemo extends UiApplication implements RequestListener {
         }
     }
 
-    // Constructor for GUI app.
+    // Constructor for GUI app
     private CHAPIDemo() {
         try {
             // Get access to the ContentHandlerServer for this application and
             // register as a listener.
             final ContentHandlerServer contentHandlerServer =
                     Registry.getServer(CLASSNAME);
-
-            // Register as a RequestListener.
             contentHandlerServer.setListener(this);
-
-            // Push a new GUI screen.
-            final CHAPIDemoScreen CHAPIDemoScreen = new CHAPIDemoScreen();
-            pushScreen(CHAPIDemoScreen);
         } catch (final ContentHandlerException che) {
             System.out.print(che.toString());
+
+            UiApplication.getUiApplication().invokeLater(new Runnable() {
+                public void run() {
+                    Dialog.alert("Could not access Content Handler Server");
+                    System.exit(0);
+                }
+            });
         }
+
+        // Push a new GUI screen
+        final CHAPIDemoScreen CHAPIDemoScreen = new CHAPIDemoScreen();
+        pushScreen(CHAPIDemoScreen);
     }
 
     /**
@@ -123,14 +129,14 @@ class CHAPIDemo extends UiApplication implements RequestListener {
      */
     private void doInvoke() {
         try {
-            // Create the Invocation with our hard-coded URL.
+            // Create the Invocation with the hard-coded URL
             final Invocation invoc = new Invocation(URL);
-            invoc.setResponseRequired(false); // We don't require a response.
+            invoc.setResponseRequired(false); // We don't require a response
 
-            // We want to invoke a handler that has registered with ACTION_OPEN.
+            // We want to invoke a handler that has registered with ACTION_OPEN
             invoc.setAction(ContentHandler.ACTION_OPEN);
 
-            // Get access to the Registry and pass it the Invocation.
+            // Get access to the Registry and pass it the Invocation
             final Registry registry = Registry.getRegistry(CLASSNAME);
             registry.invoke(invoc);
         } catch (final IOException ioe) {
@@ -151,7 +157,7 @@ class CHAPIDemo extends UiApplication implements RequestListener {
             inputStream = streamConnection.openInputStream();
             int ch;
 
-            // Read from the InputStream and build text string.
+            // Read from the InputStream and build text string
             while ((ch = inputStream.read()) != -1) {
                 text = text.concat(String.valueOf((char) ch));
             }
@@ -173,34 +179,40 @@ class CHAPIDemo extends UiApplication implements RequestListener {
                 }
             }
         }
-        return text; // Return the text string.
+        return text;
     }
 
     /**
      * Implementation of RequestListener
      * 
      * @param handler
-     *            <description>
+     *            The content handler server from which to request Invocation
+     *            objects
      */
-    public void invocationRequestNotify(final ContentHandlerServer handler) {
-        final Invocation invoc = handler.getRequest(false);
+    public void invocationRequestNotify(final ContentHandlerServer server) {
+        // Retreive Invocation from the content handler server
+        final Invocation invoc = server.getRequest(false);
         if (invoc != null) {
             Dialog.alert("Handler has been invoked for: " + invoc.getURL());
             final String content = getViaStreamConnection(invoc);
 
             if (!"".equals(content)) {
+                // Display the content
                 final DisplayContentScreen displayContentScreen =
                         new DisplayContentScreen();
                 displayContentScreen.displayContent(content);
                 pushScreen(displayContentScreen);
             }
+
+            // Finish the invocation and set its status
+            server.finish(invoc, Invocation.OK);
         }
     }
 
-    // Simple GUI screen from which to create an Invocation.
+    // Simple GUI screen from which to create an Invocation
     private final class CHAPIDemoScreen extends MainScreen {
         private CHAPIDemoScreen() {
-            // Initialize UI components.
+            // Initialize UI components
             setTitle(new LabelField("CHAPI Demo Screen", Field.FIELD_HCENTER));
             add(new LabelField("Select Invoke from the menu"));
             addMenuItem(new MenuItem("Invoke", 5, 5) {
@@ -212,10 +224,10 @@ class CHAPIDemo extends UiApplication implements RequestListener {
     }
 
     /**
-     * This screen will be used to display the content we are handling.
+     * This screen will be used to display the content we are handling
      */
     private static class DisplayContentScreen extends MainScreen {
-        // A field to display content.
+        // A field to display content
         private final TextField _contentField = new TextField(
                 Field.NON_FOCUSABLE);
 
@@ -229,7 +241,7 @@ class CHAPIDemo extends UiApplication implements RequestListener {
         // Parses the comma separated values in the content string
         // and displays the text.
         private void displayContent(final String content) {
-            // Let's count the number of commas in the content string.
+            // Count the number of commas in the content string
             int commaCount = 0;
             for (int i = 0; i < content.length(); i++) {
                 if (content.charAt(i) == ',') {
@@ -237,8 +249,8 @@ class CHAPIDemo extends UiApplication implements RequestListener {
                 }
             }
 
-            // Now we extract the text values from the string and build a new
-            // string to display in our text field.
+            // Extract the text values from the string and build a new
+            // string to display in the text field.
             int begin = 0;
             int end = content.indexOf(',');
             String text = content.substring(begin, end);
@@ -250,7 +262,7 @@ class CHAPIDemo extends UiApplication implements RequestListener {
             begin = end + 1;
             text = text + "\n" + content.substring(begin, content.length());
 
-            // Display the content.
+            // Display the content
             _contentField.setText(text);
         }
     }

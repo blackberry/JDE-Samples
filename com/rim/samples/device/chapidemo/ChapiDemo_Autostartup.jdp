@@ -32,7 +32,7 @@ HaveImports=0
 ]
 Listing=0
 MidletClass=startup
-Options=-quiet
+Options=-quiet 
 OutputFileName=CHAPIdemo_autostartup
 [PackageProtection
 ]
@@ -43,3 +43,5 @@ RunOnStartup=1
 StartupTier=7
 SystemModule=1
 Type=3
+Vendor=Research In Motion Limited
+Version=0.9

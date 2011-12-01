@@ -47,7 +47,7 @@ import net.rim.device.api.util.DataBuffer;
 
 /**
  * The client side of a simple HTTP Push system. This application will listen
- * for image data on the specified port and render the data when it arrives.
+ * for data on the specified port and render the data when it arrives.
  */
 class HTTPPushDemo extends UiApplication {
     // Constants

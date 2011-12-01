@@ -128,9 +128,7 @@ final class BrowserFieldDemo extends UiApplication implements
         case Event.EVENT_URL_REQUESTED: {
             final UrlRequestedEvent urlRequestedEvent =
                     (UrlRequestedEvent) event;
-            final String absoluteUrl = urlRequestedEvent.getURL();
 
-            final HttpConnection conn = null;
             final PrimaryResourceFetchThread thread =
                     new PrimaryResourceFetchThread(urlRequestedEvent.getURL(),
                             urlRequestedEvent.getHeaders(), urlRequestedEvent

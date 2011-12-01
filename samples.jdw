@@ -5,6 +5,8 @@ Debug
 Release
 ]
 [Projects
+com\rim\samples\device\accessibilitydemo\customcomponentsdemo\CustomComponentsDemo.jdp
+com\rim\samples\device\accessibilitydemo\screenreaderdemo\ScreenReaderDemo.jdp
 com\rim\samples\device\activetextfieldsdemo\ActiveTextFieldsDemo.jdp
 com\rim\samples\device\activetextfieldsdemo\ActiveTextFieldsDemo_autostartup.jdp
 com\rim\samples\device\applicationpermissionsdemo\ApplicationPermissionsDemo.jdp
@@ -52,10 +54,11 @@ com\rim\samples\device\otabackuprestoredemo\OTABackupRestoreDemo_autostartup.jdp
 com\rim\samples\device\otasyncdemo\OTASyncDemo.jdp
 com\rim\samples\device\otasyncdemo\OTASyncDemo_autostartup.jdp
 com\rim\samples\device\persistentstoredemo\PersistentStoreDemo.jdp
-com\rim\samples\device\persistentstoredemo\PersistentStoreDemo_AutoStartUp.jdp
+com\rim\samples\device\persistentstoredemo\PersistentStoreDemo_autostartup.jdp
 com\rim\samples\device\phone\phoneapidemo\PhoneAPIDemo.jdp
 com\rim\samples\device\phone\phoneapidemo\PhoneAPIDemo_autostartup.jdp
 com\rim\samples\device\phone\phonelogsdemo\PhoneLogsDemo.jdp
+com\rim\samples\device\rmsdemo\rmsdemo.jdp
 com\rim\samples\device\serviceroutingdemo\ServiceRoutingDemo.jdp
 com\rim\samples\device\smartcarddriverdemo\SmartCardDriverDemo.jdp
 com\rim\samples\device\smsdemo\SmsDemo.jdp
@@ -67,12 +70,16 @@ com\rim\samples\device\svgmapdemo\SVGMapDemo.jdp
 com\rim\samples\device\svgmidletdemo\SVGMidletDemo.jdp
 com\rim\samples\device\svgpickdemo\SVGPickDemo.jdp
 com\rim\samples\device\svgtraitsdemo\SVGTraitsDemo.jdp
+com\rim\samples\device\syncdemo\SyncDemo.jdp
+com\rim\samples\device\syncdemo\SyncDemo_autostartup.jdp
 com\rim\samples\device\tictactoedemo\TicTacToeDemo.jdp
 com\rim\samples\device\tictactoedemo\TicTacToeDemo_autostartup.jdp
 com\rim\samples\device\usbdemo\UsbDemo.jdp
 com\rim\samples\device\xmldemo\XMLDemo.jdp
 ]
 [ReleaseActiveProjects
+com\rim\samples\device\accessibilitydemo\customcomponentsdemo\CustomComponentsDemo.jdp
+com\rim\samples\device\accessibilitydemo\screenreaderdemo\ScreenReaderDemo.jdp
 com\rim\samples\device\activetextfieldsdemo\ActiveTextFieldsDemo.jdp
 com\rim\samples\device\applicationpermissionsdemo\ApplicationPermissionsDemo.jdp
 com\rim\samples\device\blackberry\browser\BrowserContentManagerDemo.jdp
@@ -114,6 +121,7 @@ com\rim\samples\device\otasyncdemo\OTASyncDemo.jdp
 com\rim\samples\device\persistentstoredemo\PersistentStoreDemo.jdp
 com\rim\samples\device\phone\phoneapidemo\PhoneAPIDemo.jdp
 com\rim\samples\device\phone\phonelogsdemo\PhoneLogsDemo.jdp
+com\rim\samples\device\rmsdemo\rmsdemo.jdp
 com\rim\samples\device\serviceroutingdemo\ServiceRoutingDemo.jdp
 com\rim\samples\device\smartcarddriverdemo\SmartCardDriverDemo.jdp
 com\rim\samples\device\smsdemo\SmsDemo.jdp
@@ -125,6 +133,7 @@ com\rim\samples\device\svgmapdemo\SVGMapDemo.jdp
 com\rim\samples\device\svgmidletdemo\SVGMidletDemo.jdp
 com\rim\samples\device\svgpickdemo\SVGPickDemo.jdp
 com\rim\samples\device\svgtraitsdemo\SVGTraitsDemo.jdp
+com\rim\samples\device\syncdemo\SyncDemo.jdp
 com\rim\samples\device\tictactoedemo\TicTacToeDemo.jdp
 com\rim\samples\device\usbdemo\UsbDemo.jdp
 com\rim\samples\device\xmldemo\XMLDemo.jdp

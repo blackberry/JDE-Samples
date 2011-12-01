@@ -51,7 +51,6 @@ class MapFieldDemoSite {
                                 // Ave.
     private String _city;
     private String _province;
-    // private String _code;
     private String _country;
 
     // Visual Information
@@ -67,8 +66,6 @@ class MapFieldDemoSite {
 
     // Other Information
     private boolean _standAloneSite;
-    private int _numberOfSites;
-    // private Coordinates _campusLocation;
     private final String _siteName; // 'N\A' if there is no name.
     private String _campus;
 
@@ -140,11 +137,7 @@ class MapFieldDemoSite {
                             if (MapFieldDemoTokenizer.getString(
                                     lineReader.readLine()).equals(
                                     "Default Campus Location:")) {
-                                Coordinates campusLocation;
-                                campusLocation =
-                                        MapFieldDemoTokenizer
-                                                .getCoordinates(lineReader
-                                                        .readLine());
+                                lineReader.readLine();
                             }
 
                             if (MapFieldDemoTokenizer.getString(

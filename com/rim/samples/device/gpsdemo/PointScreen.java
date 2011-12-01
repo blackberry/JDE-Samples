@@ -36,9 +36,11 @@ import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.ListField;
 import net.rim.device.api.ui.component.ListFieldCallback;
+import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.container.MainScreen;
 
@@ -62,9 +64,6 @@ class PointScreen extends MainScreen implements ListFieldCallback {
         _listField = new ListField();
         _listField.setCallback(this);
         add(_listField);
-        addMenuItem(_viewPointAction);
-        addMenuItem(_deletePointAction);
-
         reloadWayPointList();
     }
 
@@ -78,6 +77,19 @@ class PointScreen extends MainScreen implements ListFieldCallback {
         final ViewScreen screen =
                 new ViewScreen((WayPoint) _points.elementAt(index), index);
         UiApplication.getUiApplication().pushModalScreen(screen);
+    }
+
+    /**
+     * Overrides method in super class.
+     * 
+     * @see net.rim.device.api.ui.Screen#makeMenu(Menu, int)
+     */
+    protected void makeMenu(final Menu menu, final int instance) {
+        if (!_listField.isEmpty()) {
+            menu.add(_viewPointAction);
+            menu.add(_deletePointAction);
+        }
+        super.makeMenu(menu, instance);
     }
 
     /**
@@ -164,9 +176,15 @@ class PointScreen extends MainScreen implements ListFieldCallback {
 
     MenuItem _deletePointAction = new MenuItem("Delete", 100000, 11) {
         public void run() {
-            GPSDemo.removeWayPoint((WayPoint) _points.elementAt(_listField
-                    .getSelectedIndex()));
-            reloadWayPointList();
+
+            final int result =
+                    Dialog.ask(Dialog.DELETE, "Delete Waypoint "
+                            + _listField.getSelectedIndex() + "?");
+            if (result == Dialog.YES) {
+                GPSDemo.removeWayPoint((WayPoint) _points.elementAt(_listField
+                        .getSelectedIndex()));
+                reloadWayPointList();
+            }
         }
     };
 

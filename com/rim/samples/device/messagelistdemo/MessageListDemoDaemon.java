@@ -107,62 +107,55 @@ final class MessageListDemoDaemon extends Application implements
                 new ApplicationIcon(EncodedImage
                         .getEncodedImageResource("img/deleted.png"));
 
-        reg.registerMessageIcon(DemoMessage.DEMO_MESSAGE_TYPE,
-                MessageListDemo.STATUS_NEW, newIcon);
-        reg.registerMessageIcon(DemoMessage.DEMO_MESSAGE_TYPE,
-                MessageListDemo.STATUS_OPENED, readIcon);
-        reg.registerMessageIcon(DemoMessage.DEMO_MESSAGE_TYPE,
-                MessageListDemo.STATUS_REPLIED, repliedIcon);
-        reg.registerMessageIcon(DemoMessage.DEMO_MESSAGE_TYPE,
-                MessageListDemo.STATUS_DELETED, deletedIcon);
+        reg.registerMessageIcon(0, MessageListDemo.STATUS_NEW, newIcon);
+        reg.registerMessageIcon(0, MessageListDemo.STATUS_OPENED, readIcon);
+        reg.registerMessageIcon(0, MessageListDemo.STATUS_REPLIED, repliedIcon);
+        reg.registerMessageIcon(0, MessageListDemo.STATUS_DELETED, deletedIcon);
 
         // 3. Register message menu items --------------------------------------
 
         final ApplicationMenuItem openMenuItem = new OpenContextMenu(0);
         final ApplicationMenuItem replyMenuItem = new ReplyContextMenu(1);
-        final ApplicationMenuItem markOpenedMenuItem =
-                new MarkOpenedContextMenu(2);
-        final ApplicationMenuItem markUnopenedMenuItem =
+        final ApplicationMenuItem markOpenedMenu = new MarkOpenedContextMenu(2);
+        final ApplicationMenuItem markUnopenedMenu =
                 new MarkUnreadContextMenu(3);
 
-        final ApplicationMenuItem[] newGuiMenuItems =
+        final ApplicationMenuItem[] newGuiMenus =
                 new ApplicationMenuItem[] { openMenuItem };
-        final ApplicationMenuItem[] newDaemonMenuItems =
-                new ApplicationMenuItem[] { markOpenedMenuItem, replyMenuItem };
-        final ApplicationMenuItem[] openedGuiMenuItems =
+        final ApplicationMenuItem[] newDaemonMenus =
+                new ApplicationMenuItem[] { markOpenedMenu, replyMenuItem };
+        final ApplicationMenuItem[] openedGuiMenus =
                 new ApplicationMenuItem[] { openMenuItem };
-        final ApplicationMenuItem[] openedDaemonMenuItems =
-                new ApplicationMenuItem[] { markUnopenedMenuItem, replyMenuItem };
-        final ApplicationMenuItem[] repliedGuiMenuItems =
+        final ApplicationMenuItem[] openedDaemonMenus =
+                new ApplicationMenuItem[] { markUnopenedMenu, replyMenuItem };
+        final ApplicationMenuItem[] repliedGuiMenus =
                 new ApplicationMenuItem[] { openMenuItem };
-        final ApplicationMenuItem[] repliedDaemonMenuItems =
-                new ApplicationMenuItem[] { markUnopenedMenuItem };
-        final ApplicationMenuItem[] deletedGuiMenuItems =
+        final ApplicationMenuItem[] repliedDaemonMenus =
+                new ApplicationMenuItem[] { markUnopenedMenu };
+        final ApplicationMenuItem[] deletedGuiMenus =
                 new ApplicationMenuItem[] { openMenuItem, };
 
-        reg.registerMessageMenuItems(DemoMessage.DEMO_MESSAGE_TYPE,
-                MessageListDemo.STATUS_NEW, newGuiMenuItems, guiDescr);
-        reg.registerMessageMenuItems(DemoMessage.DEMO_MESSAGE_TYPE,
-                MessageListDemo.STATUS_NEW, newDaemonMenuItems, daemonDescr);
-        reg.registerMessageMenuItems(DemoMessage.DEMO_MESSAGE_TYPE,
-                MessageListDemo.STATUS_OPENED, openedGuiMenuItems, guiDescr);
-        reg.registerMessageMenuItems(DemoMessage.DEMO_MESSAGE_TYPE,
-                MessageListDemo.STATUS_OPENED, openedDaemonMenuItems,
-                daemonDescr);
-        reg.registerMessageMenuItems(DemoMessage.DEMO_MESSAGE_TYPE,
-                MessageListDemo.STATUS_REPLIED, repliedGuiMenuItems, guiDescr);
-        reg.registerMessageMenuItems(DemoMessage.DEMO_MESSAGE_TYPE,
-                MessageListDemo.STATUS_REPLIED, repliedDaemonMenuItems,
-                daemonDescr);
-        reg.registerMessageMenuItems(DemoMessage.DEMO_MESSAGE_TYPE,
-                MessageListDemo.STATUS_DELETED, deletedGuiMenuItems, guiDescr);
+        reg.registerMessageMenuItems(0, MessageListDemo.STATUS_NEW,
+                newGuiMenus, guiDescr);
+        reg.registerMessageMenuItems(0, MessageListDemo.STATUS_NEW,
+                newDaemonMenus, daemonDescr);
+        reg.registerMessageMenuItems(0, MessageListDemo.STATUS_OPENED,
+                openedGuiMenus, guiDescr);
+        reg.registerMessageMenuItems(0, MessageListDemo.STATUS_OPENED,
+                openedDaemonMenus, daemonDescr);
+        reg.registerMessageMenuItems(0, MessageListDemo.STATUS_REPLIED,
+                repliedGuiMenus, guiDescr);
+        reg.registerMessageMenuItems(0, MessageListDemo.STATUS_REPLIED,
+                repliedDaemonMenus, daemonDescr);
+        reg.registerMessageMenuItems(0, MessageListDemo.STATUS_DELETED,
+                deletedGuiMenus, guiDescr);
 
-        reg.setBulkMarkOperationsSupport(DemoMessage.DEMO_MESSAGE_TYPE,
-                MessageListDemo.STATUS_NEW, true, false);
-        reg.setBulkMarkOperationsSupport(DemoMessage.DEMO_MESSAGE_TYPE,
-                MessageListDemo.STATUS_OPENED, false, true);
-        reg.setBulkMarkOperationsSupport(DemoMessage.DEMO_MESSAGE_TYPE,
-                MessageListDemo.STATUS_REPLIED, false, true);
+        reg.setBulkMarkOperationsSupport(0, MessageListDemo.STATUS_NEW, true,
+                false);
+        reg.setBulkMarkOperationsSupport(0, MessageListDemo.STATUS_OPENED,
+                false, true);
+        reg.setBulkMarkOperationsSupport(0, MessageListDemo.STATUS_REPLIED,
+                false, true);
     }
 
     /**

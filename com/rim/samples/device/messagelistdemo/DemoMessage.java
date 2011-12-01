@@ -32,7 +32,6 @@ import net.rim.blackberry.api.messagelist.ApplicationMessage;
 import net.rim.device.api.system.EncodedImage;
 
 final class DemoMessage implements ApplicationMessage {
-    static final int DEMO_MESSAGE_TYPE = 0x01;
 
     private String _sender;
     private String _subject;
@@ -167,7 +166,7 @@ final class DemoMessage implements ApplicationMessage {
      */
     public int getType() {
         // All messages have the same type.
-        return DEMO_MESSAGE_TYPE;
+        return 0;
     }
 
     /**

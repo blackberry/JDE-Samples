@@ -72,10 +72,7 @@ class MapFieldDemoScreen extends MainScreen {
      * Sets up screen elements and initializes the map.
      */
     MapFieldDemoScreen() {
-        final String siteName;
-        final MapFieldDemoSite defaultSite;
         Coordinates defaultLocation;
-        final byte[] line;
 
         // Reads data from file.
         final LineReader lineReader =

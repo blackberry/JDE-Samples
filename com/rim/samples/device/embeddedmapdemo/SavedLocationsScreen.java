@@ -33,6 +33,7 @@ import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.MenuItem;
+import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.ListField;
 import net.rim.device.api.ui.component.ListFieldCallback;
 import net.rim.device.api.ui.component.Menu;
@@ -65,18 +66,31 @@ final class SavedLocationsScreen extends MainScreen {
 
     private final MenuItem _deleteItem = new MenuItem("Delete", 110, 10) {
         public void run() {
-            _mapLocations.removeElementAt(_mapLocationsList.getSelectedIndex());
-            _mapLocationsList.reloadList();
-            _mainScreen.clearEditFields();
+            final MapLocation mapLocation =
+                    (MapLocation) _mapLocations.elementAt(_mapLocationsList
+                            .getSelectedIndex());
+            final int result =
+                    Dialog.ask(Dialog.DELETE, "Delete "
+                            + mapLocation.toString() + "?");
+            if (result == Dialog.YES) {
+                _mapLocations.removeElementAt(_mapLocationsList
+                        .getSelectedIndex());
+                _mapLocationsList.reloadList();
+                _mainScreen.clearEditFields();
+            }
         }
     };
 
     private final MenuItem _deleteAllItem =
             new MenuItem("Delete All", 110, 10) {
                 public void run() {
-                    _mapLocations.removeAllElements();
-                    _mainScreen.clearEditFields();
-                    close();
+                    final int result =
+                            Dialog.ask(Dialog.DELETE, "Are you sure?");
+                    if (result == Dialog.YES) {
+                        _mapLocations.removeAllElements();
+                        _mainScreen.clearEditFields();
+                        close();
+                    }
                 }
             };
 
@@ -117,9 +131,9 @@ final class SavedLocationsScreen extends MainScreen {
          */
         public void drawListRow(final ListField list, final Graphics graphics,
                 final int index, final int y, final int w) {
-            final MapLocation mapLocaiton =
+            final MapLocation mapLocation =
                     (MapLocation) _mapLocations.elementAt(index);
-            final String text = mapLocaiton.toString();
+            final String text = mapLocation.toString();
             graphics.drawText(text, 0, y, DrawStyle.ELLIPSIS, w);
         }
 

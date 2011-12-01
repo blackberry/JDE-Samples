@@ -127,9 +127,7 @@ final public class BrowserContentManagerDemo extends UiApplication implements
 
             final UrlRequestedEvent urlRequestedEvent =
                     (UrlRequestedEvent) event;
-            final String absoluteUrl = urlRequestedEvent.getURL();
 
-            final HttpConnection conn = null;
             final PrimaryResourceFetchThread thread =
                     new PrimaryResourceFetchThread(urlRequestedEvent.getURL(),
                             urlRequestedEvent.getHeaders(), urlRequestedEvent

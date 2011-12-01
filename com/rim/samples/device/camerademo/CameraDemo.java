@@ -38,7 +38,6 @@ import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.ButtonField;
-import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.ObjectChoiceField;
 import net.rim.device.api.ui.component.RichTextField;
@@ -146,7 +145,8 @@ final class CameraScreen extends MainScreen {
             // Set the player to the STARTED state (see Player docs.)
             player.start();
         } catch (final Exception e) {
-            Dialog.alert("ERROR " + e.getClass() + ":  " + e.getMessage());
+            System.out
+                    .println("ERROR " + e.getClass() + ":  " + e.getMessage());
         }
     }
 
@@ -249,7 +249,7 @@ final class CameraScreen extends MainScreen {
                     // create a screen to display the image to the user.
                     createImageScreen(_videoControl.getSnapshot(encoding));
                 } catch (final Exception e) {
-                    Dialog.alert("ERROR " + e.getClass() + ":  "
+                    System.out.println("ERROR " + e.getClass() + ":  "
                             + e.getMessage());
                 }
             }

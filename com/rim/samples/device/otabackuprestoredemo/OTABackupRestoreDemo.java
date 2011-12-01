@@ -48,7 +48,6 @@ class OTABackupRestoreDemo extends UiApplication implements ListFieldCallback {
 
     // Statics
     // ------------------------------------------------------------------
-    private static OTABackupRestoreDemo _demo;
     private static OTABackupRestoreContactCollection _contacts;
 
     // Inner Classes

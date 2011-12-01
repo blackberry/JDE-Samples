@@ -44,7 +44,12 @@ import net.rim.device.api.io.http.HttpProtocolConstants;
 import net.rim.device.api.util.StringUtilities;
 
 /**
- * An example of the HttpFilterRegistry apis.
+ * A custom Connection protocol. This class provides precanned html content. The
+ * PackageManager class in this sample project registers a filter to filter URLs
+ * containing a fully qualified domain name of na.blackberry.com for use with
+ * this protocol. The class name must be "Protocol", as this name is appended to
+ * the package name registered in PackageManager so as to create an instance of
+ * this class.
  */
 public final class Protocol implements FilterBaseInterface, HttpConnection {
     private String _url;
@@ -54,7 +59,7 @@ public final class Protocol implements FilterBaseInterface, HttpConnection {
     private byte[] _resultData;
 
     private final static byte[] PAGE_DATA =
-            "<html><body>This is a simple page that contains two links to precanned <a href=\"http://content.blackberry.com/italic.html\">Italic</a> and <a href=\"http://content.blackberry.com/bold.html\">Bold</a> content.</body></html>"
+            "<html><body>This is a simple page that contains two links to precanned <a href=\"http://na.blackberry.com/eng/developers/italic.html\">Italic</a> and <a href=\"http://na.blackberry.com/eng/developers/bold.html\">Bold</a> content.</body></html>"
                     .getBytes();
     private final static byte[] BOLD_PAGE_DATA =
             "<html><body>This is a simple page that contains <b>bold</b> content.</body></html>"
@@ -64,7 +69,7 @@ public final class Protocol implements FilterBaseInterface, HttpConnection {
                     .getBytes();
 
     /**
-     * This function will open a filtered Http Connection.
+     * This method will open a filtered Http Connection.
      * 
      * @see net.rim.device.api.io.FilterBaseInterface#openFilter(String, int,
      *      boolean)

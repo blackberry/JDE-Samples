@@ -37,6 +37,7 @@ import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.XYRect;
 import net.rim.device.api.ui.component.BasicEditField;
+import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.KeywordFilterField;
 
 /**
@@ -106,7 +107,12 @@ final class KeywordFilterDemo extends UiApplication {
             screen.add(_keywordFilterField);
             pushScreen(screen);
         } else {
-            System.exit(0);
+            UiApplication.getUiApplication().invokeLater(new Runnable() {
+                public void run() {
+                    Dialog.alert("Error reading data file.");
+                    System.exit(0);
+                }
+            });
         }
     }
 
@@ -194,15 +200,6 @@ final class KeywordFilterDemo extends UiApplication {
             super(USE_ALL_WIDTH | NON_FOCUSABLE | NO_LEARNING | NO_NEWLINE);
 
             setLabel("Search: ");
-        }
-
-        /**
-         * Overriding super, prevents save dialog from being displayed.
-         * 
-         * @see net.rim.device.api.ui.component.Field#isDirty()
-         */
-        public boolean isDirty() {
-            return false;
         }
 
         /**

@@ -36,8 +36,8 @@ img\chapidemo_jde.png
 [Imports
 ]
 Listing=0
-Options=-quiet
-OutputFileName=CHAPIDemo
+Options=-quiet 
+OutputFileName=chapidemo
 [PackageProtection
 ]
 RibbonPosition=0
@@ -48,3 +48,5 @@ StartupTier=7
 SystemModule=0
 Title=Chapi Demo
 Type=0
+Vendor=Research In Motion Limited
+Version=0.9

@@ -165,17 +165,15 @@ final class PersistentStoreDemoScreen extends MainScreen {
          * vector, then updates the list field to reflect the change.
          */
         public void run() {
-            if (!_meetingList.isEmpty()) {
-                final int i = _meetingList.getSelectedIndex();
-                final String meetingName =
-                        ((Meeting) _uiApp.getMeetings().elementAt(i))
-                                .getField(Meeting.MEETING_NAME);
-                final int result =
-                        Dialog.ask(Dialog.DELETE, "Delete " + meetingName + "?");
-                if (result == Dialog.YES) {
-                    _uiApp.getMeetings().removeElementAt(i);
-                    updateList();
-                }
+            final int i = _meetingList.getSelectedIndex();
+            final String meetingName =
+                    ((Meeting) _uiApp.getMeetings().elementAt(i))
+                            .getField(Meeting.MEETING_NAME);
+            final int result =
+                    Dialog.ask(Dialog.DELETE, "Delete " + meetingName + "?");
+            if (result == Dialog.YES) {
+                _uiApp.getMeetings().removeElementAt(i);
+                updateList();
             }
         }
     };

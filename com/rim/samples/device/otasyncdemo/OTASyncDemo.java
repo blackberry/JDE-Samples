@@ -61,7 +61,6 @@ class OTASyncDemo extends UiApplication implements ListFieldCallback {
     // Statics
     // ------------------------------------------------------------------
     private static OTAContactCollection _otaContactCollection;
-    private static OTASyncDemo _syncDemo;
 
     // Inner Classes
     // ------------------------------------------------------------

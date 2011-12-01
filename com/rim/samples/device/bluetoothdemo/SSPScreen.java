@@ -39,12 +39,8 @@ import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.util.Arrays;
 import net.rim.device.api.util.DataBuffer;
 
-/**
- * 
- */
 class SPPScreen extends MainScreen implements BluetoothSerialPortListener {
     private RichTextField _rtf;
-    private int _channel;
     private final StringBuffer _data;
     private final byte[] _receiveBuffer = new byte[1024];
     private BluetoothSerialPort _port;
