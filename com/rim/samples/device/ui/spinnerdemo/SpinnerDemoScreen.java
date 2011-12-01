@@ -334,7 +334,7 @@ public class SpinnerDemoScreen extends MainScreen {
         }
 
         /**
-         * @see TextField#layout(int, int)
+         * @see BasicEditField#layout(int, int)
          */
         protected void layout(final int width, final int height) {
             super.layout(width, height);

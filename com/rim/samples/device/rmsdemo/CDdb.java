@@ -81,7 +81,7 @@ public final class CDdb {
     /**
      * Adds a CD to the RecordStore
      * 
-     * @param Artist
+     * @param artist
      *            The name of the artist of the CD
      * @param title
      *            The title of the CD
@@ -110,7 +110,6 @@ public final class CDdb {
      *            The name of the artist of the CD
      * @param title
      *            The title of the CD
-     * @return recordID of new CD
      * @exception java.io.IOException
      *                Thrown if an error occurs while writing to the record
      *                store

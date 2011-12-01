@@ -107,7 +107,7 @@ public final class WapOptionsScreen extends MainScreen {
     }
 
     /**
-     * Pushes this screen on to the stack.
+     * Pushes this screen on to the stack
      */
     void display() {
         _app.pushScreen(this);
@@ -115,7 +115,7 @@ public final class WapOptionsScreen extends MainScreen {
 
     /**
      * Formats all the fields into the wap parameter string for inclusion in a
-     * Connector.open call.
+     * Connector.open() call.
      */
     private void formatWapParameters() {
         final StringBuffer sb = new StringBuffer();
@@ -136,16 +136,16 @@ public final class WapOptionsScreen extends MainScreen {
 
     /**
      * Returns a preformatted wap parameter string, appropriate to append to an
-     * HTTP Connector.open string.
+     * HTTP Connector.open() string.
      * 
-     * @return a preformatted wap parameter string.
+     * @return A preformatted wap parameter string
      */
     String getWapParameters() {
         return _wapParameters;
     }
 
     /**
-     * Called when there have been changes and user saves screen.
+     * Called when there have been changes and user saves screen
      */
     public void save() {
         formatWapParameters();

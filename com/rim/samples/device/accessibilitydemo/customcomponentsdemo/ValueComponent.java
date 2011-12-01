@@ -75,7 +75,7 @@ public final class ValueComponent extends Field implements AccessibleContext,
     // ********************Field implementation ********************************
 
     /**
-     * @see Field#getAccesssibleContext()
+     * @see Field#getAccessibleContext()
      */
     public AccessibleContext getAccessibleContext() {
         return this;
@@ -169,7 +169,7 @@ public final class ValueComponent extends Field implements AccessibleContext,
     }
 
     /**
-     * @see Field#onUnFocus()
+     * @see Field#onUnfocus()
      */
     protected void onUnfocus() {
         super.onUnfocus();
@@ -233,7 +233,7 @@ public final class ValueComponent extends Field implements AccessibleContext,
     }
 
     /**
-     * @see AccessibleContext#getAccessibleChildAt(int
+     * @see AccessibleContext#getAccessibleChildAt(int)
      */
     public AccessibleContext getAccessibleChildAt(final int index) {
         // No children in the value component

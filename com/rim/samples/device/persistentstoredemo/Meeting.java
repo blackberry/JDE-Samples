@@ -128,7 +128,6 @@ public final class Meeting implements Persistable {
      * @return Vector of decoded strings
      */
     Vector getAttendees() {
-        final Object encoding;
         final Vector decodedAttendees = new Vector();
 
         // Acquiring a reference to a ticket guarantees access to encrypted data
@@ -146,19 +145,15 @@ public final class Meeting implements Persistable {
 
     /**
      * Forces a re-encoding of the information stored in this Meeting object.
+     * Callers of this method should obtain a ticket using
+     * PersistentContent.getTicket().
      */
     void reEncode() {
-        // Acquiring a reference to a ticket guarantees access to encrypted data
-        // even if the device locks during the re-encoding operation.
-        final Object ticket = PersistentContent.getTicket();
-
-        if (ticket != null) {
-            for (int i = 0; i < NUM_FIELDS; ++i) {
-                Object encoding = _fields.elementAt(i);
-                if (!PersistentContent.checkEncoding(encoding)) {
-                    encoding = PersistentContent.reEncode(encoding);
-                    _fields.setElementAt(encoding, i);
-                }
+        for (int i = 0; i < NUM_FIELDS; ++i) {
+            Object encoding = _fields.elementAt(i);
+            if (!PersistentContent.checkEncoding(encoding)) {
+                encoding = PersistentContent.reEncode(encoding);
+                _fields.setElementAt(encoding, i);
             }
         }
     }

@@ -196,7 +196,5 @@ public final class SendNonBlockRssScreen extends MainScreen {
                     "Wait for response: timed out after " + timeout + " sec";
             Dialog.alert(timeoutMessage);
         }
-
     }
-
 }

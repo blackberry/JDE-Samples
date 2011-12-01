@@ -36,6 +36,7 @@ import javax.microedition.io.Connection;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 
+import net.rim.device.api.io.IOUtilities;
 import net.rim.device.api.util.Arrays;
 import net.rim.device.api.util.Comparator;
 import net.rim.device.api.util.StringComparator;
@@ -196,12 +197,8 @@ public class PlayList {
             }
 
             try {
-                final byte[] buffer = new byte[2048];
-                int readCount = in.read(buffer);
-                while (readCount >= 0) {
-                    out.write(buffer, 0, readCount);
-                    readCount = in.read(buffer);
-                }
+                final byte[] bytes = IOUtilities.streamToBytes(in);
+                out.write(bytes);
             } catch (final Exception e) {
                 throw new IOException("unable to copy data from "
                         + resourcePath + " to " + con.getURL() + ": " + e);

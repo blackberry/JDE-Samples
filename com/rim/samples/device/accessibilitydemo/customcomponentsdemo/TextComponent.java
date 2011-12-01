@@ -75,7 +75,7 @@ public final class TextComponent extends Field implements AccessibleContext,
     // *********************** Field implementation ****************************
 
     /**
-     * @see Field#getAccesssibleContext()
+     * @see Field#getAccessibleContext()
      */
     public AccessibleContext getAccessibleContext() {
         return this;
@@ -96,7 +96,7 @@ public final class TextComponent extends Field implements AccessibleContext,
     }
 
     /**
-     * @see Field#layout(width, height)
+     * @see Field#layout(int, int)
      */
     protected void layout(final int width, final int height) {
         // Split text into lines based on the given width
@@ -279,7 +279,7 @@ public final class TextComponent extends Field implements AccessibleContext,
     }
 
     /**
-     * @see AccessibleContext#getAccessibleChildSelected(int)
+     * @see AccessibleContext#isAccessibleChildSelected(int)
      */
     public boolean isAccessibleChildSelected(final int index) {
         // Text field doesn't have any children

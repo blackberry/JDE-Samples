@@ -36,6 +36,7 @@ import javax.microedition.media.control.GUIControl;
 import javax.microedition.media.control.VideoControl;
 import javax.microedition.media.control.VolumeControl;
 
+import net.rim.device.api.media.control.StreamingBufferControl;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
@@ -221,6 +222,13 @@ final class EmbeddedMediaScreen extends MainScreen implements
             _player.addPlayerListener(this);
             _player.realize();
 
+            // Cause playback to begin as soon as possible once start()
+            // is called on the Player.
+            final StreamingBufferControl sbc =
+                    (StreamingBufferControl) _player
+                            .getControl("net.rim.device.api.media.control.StreamingBufferControl");
+            sbc.setBufferTime(0);
+
             final VideoControl vc =
                     (VideoControl) _player.getControl("VideoControl");
             if (vc != null) {
@@ -358,7 +366,8 @@ final class EmbeddedMediaScreen extends MainScreen implements
         }
 
         /**
-         * @see java.lang.Thread#stop()
+         * Sets an internal flag such that {@link #run()} will stop as soon as
+         * possible
          */
         public void stop() {
             _threadCanRun = false;

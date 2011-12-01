@@ -49,8 +49,8 @@ public final class FullWidthButton extends ButtonField {
      * 
  label
      *            Label text to display on the button
-      to disp label
-     *            Style for the buttonparam label
+      to disp style
+     *            Style for the buttonparam style
      *            Style ffinal or the button
 final 
      */

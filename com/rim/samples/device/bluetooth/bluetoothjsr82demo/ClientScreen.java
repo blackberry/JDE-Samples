@@ -77,7 +77,6 @@ import net.rim.device.api.util.StringProvider;
 public final class ClientScreen extends MainScreen implements DiscoveryListener {
     private int _uuid;
     private RichTextField _statusField;
-    private RemoteDevice _remoteDevice;
     private String _url;
     private BluetoothTableModelAdapter _model;
     private TableView _view;
@@ -220,7 +219,7 @@ public final class ClientScreen extends MainScreen implements DiscoveryListener 
     // methods*************************************************
 
     /**
-     * @see javax.bluetooth.DiscoveryListener#diviceDiscovered(RemoteDevice,
+     * @see javax.bluetooth.DiscoveryListener#deviceDiscovered(RemoteDevice,
      *      DeviceClass)
      */
     public void deviceDiscovered(final RemoteDevice remoteDevice,
@@ -268,7 +267,7 @@ public final class ClientScreen extends MainScreen implements DiscoveryListener 
 
     /**
      * @see javax.bluetooth.DiscoveryListener#servicesDiscovered(int,
-     *      ServiceRecord)
+     *      ServiceRecord[])
      */
     public void servicesDiscovered(final int transID,
             final ServiceRecord[] servRecord) {

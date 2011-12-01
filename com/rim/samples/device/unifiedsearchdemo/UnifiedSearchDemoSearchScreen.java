@@ -1,13 +1,36 @@
 /*
  * UnifiedSearchDemoSearchScreen.java
  *
- * AUTO_COPY_RIGHT_SUB_TAG
+ * Copyright © 1998-2011 Research In Motion Limited
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Note: For the sake of simplicity, this sample application may not leverage
+ * resource bundles and resource strings.  However, it is STRONGLY recommended
+ * that application developers make use of the localization features available
+ * within the BlackBerry development platform to ensure a seamless application
+ * experience across a variety of languages and geographies.  For more information
+ * on localizing your application, please refer to the BlackBerry Java Development
+ * Environment Development Guide associated with this release.
  */
 
 package com.rim.samples.device.unifiedsearchdemo;
 
 import java.util.Vector;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Application;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.ui.ContextMenu;
@@ -33,7 +56,8 @@ import net.rim.device.api.unifiedsearch.UnifiedSearchServices;
 import net.rim.device.api.unifiedsearch.action.UiAction;
 import net.rim.device.api.unifiedsearch.entity.SearchableEntity;
 import net.rim.device.api.unifiedsearch.searchables.Searchable;
-import net.rim.device.api.unifiedsearch.searchables.SearchableContentTypeConstants;
+import net.rim.device.api.unifiedsearch.searchables.SearchableContentTypeConstantsInfo;
+import net.rim.device.api.util.StringProvider;
 
 /**
  * A MainScreen with a search field and a result list
@@ -66,7 +90,7 @@ public class UnifiedSearchDemoSearchScreen extends MainScreen implements
         _searchInput = new EditField("Search:", "", 30, TextField.NO_NEWLINE);
         _searchInput.setChangeListener(this);
 
-        _listField = new PointOfInterestListField();
+        _listField = new DemoListField();
         _listField.setCallback(this);
 
         // Add fields to respective managers
@@ -129,9 +153,10 @@ public class UnifiedSearchDemoSearchScreen extends MainScreen implements
         final UnifiedSearchServices services =
                 UnifiedSearchServices.getInstance();
 
-        // Retrieve all searchables
+        // Retrieve searchables
         final Vector vector =
-                services.getDeviceSearchables(SearchableContentTypeConstants.CONTENT_TYPE_DEFAULT_ALL);
+                services.getDeviceSearchables(SearchableContentTypeConstantsInfo
+                        .getAllContentTypes());
         final Searchable[] searchables = new Searchable[vector.size()];
         vector.copyInto(searchables);
 
@@ -173,7 +198,7 @@ public class UnifiedSearchDemoSearchScreen extends MainScreen implements
                                         dataSourceFields[j]);
                         for (int id = 0; id < objects.length; id++) {
                             final Object obj = objects[id];
-                            if (obj instanceof PointOfInterestEntity
+                            if (obj instanceof UnifiedSearchDemoEntity
                                     && !_displayables.contains(obj)) {
                                 _displayables.addElement(obj);
                             }
@@ -200,7 +225,7 @@ public class UnifiedSearchDemoSearchScreen extends MainScreen implements
             if (keyword.length() > 0) {
                 final Thread worker = new Thread(new Runnable() {
                     /**
-                     * @see Runnable.run()
+                     * @see Runnable#run()
                      */
                     public void run() {
                         try {
@@ -277,7 +302,7 @@ public class UnifiedSearchDemoSearchScreen extends MainScreen implements
     }
 
     /**
-     * @see ListFieldCallback#getPrferredWidth(ListField)
+     * @see ListFieldCallback#getPreferredWidth(ListField)
      */
     public int getPreferredWidth(final ListField listField) {
         return Integer.MAX_VALUE;
@@ -307,32 +332,46 @@ public class UnifiedSearchDemoSearchScreen extends MainScreen implements
     }
 
     /**
-     * A ListField with a context menu for the points of interest
+     * A ListField with a custom context menu
      */
-    private class PointOfInterestListField extends ListField {
+    private class DemoListField extends ListField {
         /**
          * @see ListField#getContextMenu()
          */
         public ContextMenu getContextMenu() {
             final ContextMenu menu = super.getContextMenu();
-            menu.clear();
-            final int i = getSelectedIndex();
 
-            if (_displayables != null && i < _displayables.size()) {
+            if (_displayables != null && !isEmpty()) {
+                menu.clear();
+
+                final int i = getSelectedIndex();
+
                 final Object element = _displayables.elementAt(i);
 
-                if (element instanceof PointOfInterestEntity) {
-                    final PointOfInterestEntity item =
-                            (PointOfInterestEntity) element;
+                if (element instanceof UnifiedSearchDemoEntity) {
+                    final UnifiedSearchDemoEntity item =
+                            (UnifiedSearchDemoEntity) element;
                     final UiAction action = item.getUiActions(null, null);
 
                     if (action != null) {
                         // Add the appropriate UiAction to the context menu
-                        menu.addItem(new MenuItem(action.toString(), 0, 0) {
-                            public void run() {
-                                action.performAction(item);
-                            }
-                        });
+                        final MenuItem performActionItem =
+                                new MenuItem(new StringProvider(action
+                                        .toString()), 0x230010, 0);
+                        performActionItem.setCommand(new Command(
+                                new CommandHandler() {
+                                    /**
+                                     * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+                                     *      Object)
+                                     */
+                                    public
+                                            void
+                                            execute(final ReadOnlyCommandMetadata metadata,
+                                                    final Object context) {
+                                        action.performAction(item);
+                                    }
+                                }));
+                        menu.addItem(performActionItem);
                     }
                 }
             }

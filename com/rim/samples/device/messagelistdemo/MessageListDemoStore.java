@@ -220,7 +220,7 @@ public final class MessageListDemoStore {
 
         /**
          * @see net.rim.device.api.collection.ReadableList#getAt(int, int,
-         *      Object, int)
+         *      Object[], int)
          */
         public int getAt(final int index, final int count,
                 final Object[] elements, final int destIndex) {

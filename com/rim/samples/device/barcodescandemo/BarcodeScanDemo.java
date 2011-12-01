@@ -29,40 +29,40 @@ package com.rim.samples.device.barcodescandemo;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import javax.microedition.media.MediaException;
-
+import net.rim.device.api.amms.control.camera.ImageDecoder;
+import net.rim.device.api.amms.control.camera.ImageDecoderListener;
+import net.rim.device.api.amms.control.camera.ImageScanner;
 import net.rim.device.api.barcodelib.BarcodeDecoder;
-import net.rim.device.api.barcodelib.BarcodeDecoderListener;
-import net.rim.device.api.barcodelib.BarcodeScanner;
-import net.rim.device.api.system.Alert;
-import net.rim.device.api.system.Characters;
+import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
+import net.rim.device.api.ui.TransitionContext;
+import net.rim.device.api.ui.Ui;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.UiEngineInstance;
 import net.rim.device.api.ui.component.ButtonField;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.container.MainScreen;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
+import com.google.zxing.Result;
 
 /*
  * This application demonstrates the use of the Barcode API. It
  * presents a simple interface for accessing and displaying a window
- * in which the user can center a QR (Quick Response) Code. When a 
- * code is scanned, the application will return to the original 
- * screen and display the code's embedded data.
+ * in which the user can center a bar code. When a code is scanned, 
+ * the application will display the code's type and embedded data.
  */
 public final class BarcodeScanDemo extends UiApplication {
+
     /**
-     * Entry point for application
+     * Entry point for the application
      * 
      * @param args
-     *            Command-line arguments (not used)
+     *            Command-line argument (not used)
      */
     public static void main(final String[] args) {
-        // Create a new instance of the application and make the currently
-        // running thread the application's event dispatch thread.
         new BarcodeScanDemo().enterEventDispatcher();
     }
 
@@ -70,171 +70,81 @@ public final class BarcodeScanDemo extends UiApplication {
      * Creates a new BarcodeScanDemo object
      */
     public BarcodeScanDemo() {
-        pushScreen(new BarcodeScanDemoScreen());
+        pushScreen(new ScanScreen());
     }
 }
 
 /**
  * A UI screen to display the camera display and buttons
  */
-final class BarcodeScanDemoScreen extends MainScreen {
-    private ViewFinderScreen _viewFinderScreen;
-    private final LabelField _scannedText;
+final class ScanScreen extends MainScreen {
+    private ImageScanner _scanner;
+    private MainScreen _vfScreen;
+    private ButtonField _QRButton;
+    private ButtonField _UPCButton;
+    private ButtonField _dataMatrixButton;
+    private ButtonField _code128Button;
 
     /**
-     * Creates a new BarcodeScanDemoScreen object
+     * Creates a new ScanScreen object
      */
-    public BarcodeScanDemoScreen() {
+    public ScanScreen() {
         // Set the title of the screen
         setTitle("Barcode Scan Demo");
-
-        // Create a button which will launch a viewfinder screen
-        final ButtonField buttonField =
-                new ButtonField("Scan QR Barcode", ButtonField.CONSUME_CLICK
-                        | ButtonField.NEVER_DIRTY | Field.FIELD_HCENTER
-                        | Field.FIELD_VCENTER);
-        buttonField.setChangeListener(new FieldChangeListener() {
-            public void fieldChanged(final Field field, final int context) {
-                // If no screen exists, create one before displaying
-                if (_viewFinderScreen == null) {
-                    _viewFinderScreen = new ViewFinderScreen();
-                }
-
-                // Push view finder screen onto the display stack
-                UiApplication.getUiApplication().pushScreen(_viewFinderScreen);
-
-                // Begin the scanning process
-                _viewFinderScreen.startScan();
-            }
-        });
-
-        buttonField.setPadding(2, 2, 2, 2);
-        add(buttonField);
-
-        _scannedText = new LabelField();
-        _scannedText.setPadding(5, 5, 5, 5);
-        add(_scannedText);
+        buildUi();
     }
 
     /**
-     * A MainScreen subclass to display a view finder which presents camera
-     * input to the user and uses a BarcodeScanner to periodically check for the
-     * presence of a QR code.
+     * Builds the user interface. Adds buttons and registers MyFieldListeners
+     * for each.
      */
-    private final class ViewFinderScreen extends MainScreen {
-        private BarcodeScanner _scanner;
-        private final short _frequency = 1046;
-        private final short _duration = 200;
-        private final int _volume = 100;
+    private void buildUi() {
 
-        /**
-         * Creates a new ViewFinderScreen object
-         */
-        public ViewFinderScreen() {
-            // Initialize Hashtable used to inform the scanner how to
-            // recognize the QR code format.
-            final Hashtable hints = new Hashtable();
-            final Vector formats = new Vector(1);
-            formats.addElement(BarcodeFormat.QR_CODE);
-            hints.put(DecodeHintType.POSSIBLE_FORMATS, formats);
+        _QRButton =
+                new MyButtonField("Scan QR", ButtonField.CONSUME_CLICK
+                        | ButtonField.NEVER_DIRTY | Field.FIELD_HCENTER
+                        | Field.FIELD_VCENTER);
+        _QRButton.setChangeListener(new MyFieldListener());
 
-            // Initialize the BarcodeDecoder
-            final BarcodeDecoder decoder = new BarcodeDecoder(hints);
+        _dataMatrixButton =
+                new MyButtonField("Scan DataMatrix", ButtonField.CONSUME_CLICK
+                        | ButtonField.NEVER_DIRTY | Field.FIELD_HCENTER
+                        | Field.FIELD_VCENTER);
+        _dataMatrixButton.setChangeListener(new MyFieldListener());
 
-            // Create a custom instance of a BarcodeDecoderListener to pop the
-            // screen and display results when a QR code is recognized.
-            final BarcodeDecoderListener decoderListener =
-                    new BarcodeDecoderListener() {
-                        /**
-                         * @see BarcodeDecoderListener#barcodeDecoded(String)
-                         */
-                        public void barcodeDecoded(final String rawText) {
-                            displayMessage(rawText);
-                            beep();
-                        }
-                    };
+        _UPCButton =
+                new MyButtonField("Scan UPC", ButtonField.CONSUME_CLICK
+                        | ButtonField.NEVER_DIRTY | Field.FIELD_HCENTER
+                        | Field.FIELD_VCENTER);
+        _UPCButton.setChangeListener(new MyFieldListener());
 
-            try {
-                // Initialize the BarcodeScanner object and add the associated
-                // view finder.
-                _scanner = new BarcodeScanner(decoder, decoderListener);
-                _scanner.getVideoControl().setDisplayFullScreen(true);
-                add(_scanner.getViewfinder());
+        _code128Button =
+                new MyButtonField("Scan Code 128", ButtonField.CONSUME_CLICK
+                        | ButtonField.NEVER_DIRTY | Field.FIELD_HCENTER
+                        | Field.FIELD_VCENTER);
+        _code128Button.setChangeListener(new MyFieldListener());
 
-            } catch (final Exception e) {
-                displayMessage("Error: " + e.getMessage());
-            }
+        add(_QRButton);
+        add(_dataMatrixButton);
+        add(_UPCButton);
+        add(_code128Button);
+    }
+
+    /**
+     * Allows for larger than normal ButtonFields
+     */
+    private class MyButtonField extends ButtonField {
+        public MyButtonField(final String label, final long style) {
+            super(label, style);
         }
 
         /**
-         * Informs the BarcodeScanner that it should begin scanning for QR Codes
-         */
-        public void startScan() {
-            try {
-                _scanner.startScan();
-            } catch (final MediaException me) {
-                displayMessage("Error: " + me.getMessage());
-            }
-        }
-
-        /**
-         * @see net.rim.device.api.ui.Screen#keyChar()
-         */
-        protected boolean keyChar(final char key, final int status,
-                final int time) {
-            if (key == Characters.ESCAPE) {
-                // Manually stop the scanning process and pop the screen
-                try {
-                    _scanner.stopScan();
-                    UiApplication.getUiApplication().popScreen(
-                            ViewFinderScreen.this);
-                } catch (final MediaException me) {
-                    displayMessage("Error: " + me.getMessage());
-                }
-            }
-
-            return super.keyChar(key, status, time);
-        }
-
-        /**
-         * @see net.rim.device.api.ui.Screen#close()
-         */
-        public void close() {
-            try {
-                _scanner.stopScan();
-            } catch (final MediaException me) {
-                displayMessage("Error: " + me.getMessage());
-            }
-
-            super.close();
-        }
-
-        /**
-         * Pops the ViewFinderScreen and displays text on the main screen
+         * Retreives the buttons perferred width (60% of Display.getWidth())
          * 
-         * @param text
-         *            Text to display on the screen
+         * @return The preferred width of the button
          */
-        private void displayMessage(final String text) {
-            UiApplication.getUiApplication().invokeLater(new Runnable() {
-                public void run() {
-                    _scannedText.setText(text);
-                    UiApplication.getUiApplication().popScreen(
-                            ViewFinderScreen.this);
-                }
-            });
-        }
-
-        /**
-         * Beeps to notify the user that a scan was successful
-         */
-        private void beep() {
-            UiApplication.getUiApplication().invokeLater(new Runnable() {
-                public void run() {
-                    Alert.startAudio(new short[] { _frequency, _duration },
-                            _volume);
-                }
-            });
+        public int getPreferredWidth() {
+            return (int) (Display.getWidth() * 0.60);
         }
     }
 
@@ -242,7 +152,145 @@ final class BarcodeScanDemoScreen extends MainScreen {
      * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
      */
     protected boolean onSavePrompt() {
-        // Suppress the save dialog
+        // Prevent the save dialog from being displayed
         return true;
+    }
+
+    /**
+     * Displays the decoded barcode text and the type of barcode that was just
+     * scanned.
+     * 
+     * @param result
+     *            The results from scanning a barcode
+     */
+    public void inform(final Result result) {
+        // Close the viewfinder first
+        UiApplication.getUiApplication().popScreen(_vfScreen);
+
+        final MainScreen resultsScreen = new MainScreen();
+
+        final LabelField text =
+                new LabelField("Barcode Text: " + result.getText());
+        text.setPadding(4, 4, 4, 4);
+
+        final LabelField type =
+                new LabelField("Barcode Type: "
+                        + result.getBarcodeFormat().toString());
+        type.setPadding(4, 4, 4, 4);
+
+        final TransitionContext context =
+                new TransitionContext(TransitionContext.TRANSITION_SLIDE);
+        context.setIntAttribute(TransitionContext.ATTR_DIRECTION,
+                TransitionContext.KIND_OUT);
+
+        Ui.getUiEngineInstance().setTransition(null, resultsScreen,
+                UiEngineInstance.TRIGGER_PUSH, context);
+
+        resultsScreen.add(text);
+        resultsScreen.add(type);
+
+        UiApplication.getUiApplication().pushScreen(resultsScreen);
+    }
+
+    /**
+     * Initializes the camara to begin scanning the barcode
+     * 
+     * @param decoder
+     *            The decoder that is going to be used to decode the barcode
+     * @param listener
+     *            The listner that is going to be used to tell when the barcode
+     *            is scanned
+     * @return An initialized Viewfinder screen to be displayed
+     */
+    private Field initializeCamera(final ImageDecoder decoder,
+            final ImageDecoderListener listener) {
+        try {
+            // Check if the ImageScanner has already been initialized. If it
+            // has,
+            // make sure to close its player, so that a new one can be created.
+            if (_scanner != null) {
+                _scanner.getPlayer().close();
+            }
+
+            _scanner = new ImageScanner(decoder, listener);
+            _scanner.getVideoControl().setDisplayFullScreen(true);
+            _scanner.startScan();
+            return _scanner.getViewfinder();
+        } catch (final Exception e) {
+        }
+        return null;
+    }
+
+    /**
+     * Handles field change events
+     */
+    private class MyFieldListener implements FieldChangeListener {
+
+        final ImageDecoderListener _imageDecoderListener =
+                new ImageDecoderListener() {
+
+                    /**
+                     * @see net.rim.device.api.amms.control.camera.ImageDecoderListener#imageDecoded(Object)
+                     */
+                    public void imageDecoded(final Object decoded) {
+                        UiApplication.getUiApplication().invokeLater(
+                                new Runnable() {
+                                    public void run() {
+                                        inform((Result) decoded);
+                                    }
+                                });
+                    }
+                };
+
+        /**
+         * Listens for when a button is pressed
+         * 
+         * @see net.rim.device.api.ui.FieldChangeListener#fieldChanged(Field,
+         *      int)
+         */
+        public void fieldChanged(final Field field, final int context) {
+            final Vector formats = new Vector();
+
+            // Find what button was pressed and add its format(s) to the vector
+            if (field == _QRButton) {
+                System.out.println("QR button");
+                formats.addElement(BarcodeFormat.QR_CODE);
+            } else if (field == _dataMatrixButton) {
+                formats.addElement(BarcodeFormat.DATAMATRIX);
+            } else if (field == _UPCButton) {
+                formats.addElement(BarcodeFormat.UPC_A);
+                formats.addElement(BarcodeFormat.UPC_E);
+                formats.addElement(BarcodeFormat.EAN_13);
+                formats.addElement(BarcodeFormat.EAN_8);
+            } else if (field == _code128Button) {
+                formats.addElement(BarcodeFormat.CODE_128);
+            }
+
+            // Allows for the decoder to look for a specific type of barcode.
+            // Can increase the decoders speed or accuracy.
+            final Hashtable hints = new Hashtable();
+            hints.put(DecodeHintType.POSSIBLE_FORMATS, formats);
+
+            // Uncomment the following line of java code if you wish to
+            // "try harder",
+            // but expect that as a result the decoding time for each image
+            // processed
+            // may take upwards of 20 times as long. It is recommended that this
+            // setting
+            // not be used in most cases.
+            // hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
+
+            // Initialize the camera object and video field
+            final Field cameraField =
+                    initializeCamera(new BarcodeDecoder(hints),
+                            _imageDecoderListener);
+
+            // If the field was constructed successfully, create the UI
+            if (cameraField != null) {
+                _vfScreen = new MainScreen();
+                _vfScreen.add(cameraField);
+                UiApplication.getUiApplication().pushScreen(_vfScreen);
+            }
+        }
     }
 }

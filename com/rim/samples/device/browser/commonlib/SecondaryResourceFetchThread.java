@@ -37,7 +37,7 @@ import net.rim.device.api.browser.field.RequestedResource;
  * This class provides the ability to set up an http connection if a referrer
  * exists (a browser making the request).
  */
-class SecondaryResourceFetchThread extends Thread {
+public class SecondaryResourceFetchThread extends Thread {
 
     /**
      * Callback browser field.
@@ -72,7 +72,7 @@ class SecondaryResourceFetchThread extends Thread {
      * @param referrer
      *            - call back browsr field.
      */
-    static void enqueue(final RequestedResource resource,
+    public static void enqueue(final RequestedResource resource,
             final BrowserContent referrer) {
         if (resource == null) {
             return;
@@ -115,7 +115,7 @@ class SecondaryResourceFetchThread extends Thread {
     /**
      * Indicate that all images have been enqueued for this browser field.
      */
-    static void doneAddingImages() {
+    public static void doneAddingImages() {
         synchronized (_syncObject) {
             if (_currentThread != null) {
                 _currentThread._done = true;

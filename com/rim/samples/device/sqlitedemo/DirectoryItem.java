@@ -54,8 +54,6 @@ public final class DirectoryItem {
      *            item
      * @param categoryId
      *            The category to which the directory item belongs
-     * @param node
-     *            The tree field node number that maps to this directory item
      */
     public DirectoryItem(final int id, final String name,
             final String location, final String phone, final int categoryId) {
@@ -112,6 +110,14 @@ public final class DirectoryItem {
                             && item.getPhone().equals(_phone);
         }
         return equal;
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    public int hashCode() {
+        final String name = _name;
+        return name == null ? 0 : _name.hashCode();
     }
 
     /**

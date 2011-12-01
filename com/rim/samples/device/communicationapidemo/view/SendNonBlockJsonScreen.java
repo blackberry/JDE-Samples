@@ -48,7 +48,6 @@ import com.rim.samples.device.communicationapidemo.ResponseCallback;
 import com.rim.samples.device.communicationapidemo.ui.FullWidthButton;
 
 public final class SendNonBlockJsonScreen extends MainScreen {
-
     private final TreeField _treeField;
     private final EditField _uriSenderField;
     private final ResponseCallback _callback;
@@ -89,7 +88,6 @@ public final class SendNonBlockJsonScreen extends MainScreen {
         add(_uriSenderField);
         add(postButton);
         add(_treeField);
-
     }
 
     private void updateTree(final Message message) {
@@ -234,7 +232,6 @@ public final class SendNonBlockJsonScreen extends MainScreen {
 
     private static final class SendNonBlockJsonScreenCallback extends
             ResponseCallback {
-
         private final SendNonBlockJsonScreen _screen;
 
         private SendNonBlockJsonScreenCallback(
@@ -255,7 +252,5 @@ public final class SendNonBlockJsonScreen extends MainScreen {
                     "Wait for response: timed out after " + timeout + " sec";
             Dialog.alert(timeoutMessage);
         }
-
     }
-
 }

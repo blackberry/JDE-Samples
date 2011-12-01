@@ -30,17 +30,30 @@ import net.rim.blackberry.api.options.OptionsManager;
 import net.rim.blackberry.api.options.OptionsProvider;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
+import net.rim.device.api.ui.Field;
+import net.rim.device.api.ui.XYEdges;
+import net.rim.device.api.ui.component.CheckboxField;
+import net.rim.device.api.ui.component.EditField;
+import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.ObjectChoiceField;
+import net.rim.device.api.ui.component.RichTextField;
+import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.decor.BackgroundFactory;
+import net.rim.device.api.ui.decor.Border;
+import net.rim.device.api.ui.decor.BorderFactory;
 import net.rim.device.api.util.Persistable;
 
 /**
  * A simple library class to demonstrate the use of the options facilities
  */
 public final class OptionsProviderDemo implements OptionsProvider {
-    private ObjectChoiceField _ocf;
+    private ObjectChoiceField _objectChoiceField;
+    private CheckboxField _checkboxField;
+    private EditField _editField;
     private final OptionsDemoData _data;
     private final String _title;
+    private final int MAX_CHARS = 100;
 
     private static OptionsProviderDemo _instance;
 
@@ -53,6 +66,7 @@ public final class OptionsProviderDemo implements OptionsProvider {
     private OptionsProviderDemo(final String title) {
         _title = title;
         _data = OptionsDemoData.load();
+
     }
 
     /**
@@ -91,10 +105,49 @@ public final class OptionsProviderDemo implements OptionsProvider {
      */
     public void populateMainScreen(final MainScreen screen) {
         final int index = _data.getSelected();
-        _ocf =
+        final boolean checked = _data.getChecked();
+        final String oldText = _data.getOldText();
+
+        final XYEdges xyEdges = new XYEdges(2, 2, 2, 2);
+
+        final FieldSet fieldSetOne =
+                new FieldSet("Field Set 1", BorderFactory
+                        .createBevelBorder(xyEdges), BorderFactory
+                        .createSimpleBorder(xyEdges), Border.STYLE_SOLID);
+        _objectChoiceField =
                 new ObjectChoiceField("Choices: ", new String[] { "RIM",
                         "Options", "Demo" }, index);
-        screen.add(_ocf);
+        _checkboxField =
+                new CheckboxField("Checkbox: ", checked, Field.FIELD_TRAILING
+                        | Field.USE_ALL_WIDTH);
+        fieldSetOne.add(_objectChoiceField);
+        fieldSetOne.add(_checkboxField);
+        fieldSetOne.setMargin(2, 5, 5, 5);
+        fieldSetOne.setBackground(BackgroundFactory
+                .createSolidBackground(0x00FFFFFF));
+
+        final FieldSet fieldSetTwo =
+                new FieldSet("Field Set 2", BorderFactory
+                        .createBevelBorder(xyEdges), BorderFactory
+                        .createRoundedBorder(xyEdges), Border.STYLE_SOLID);
+        _editField =
+                new EditField("", oldText, MAX_CHARS, Field.EDITABLE
+                        | TextField.NO_NEWLINE);
+        _editField.setBackground(BackgroundFactory
+                .createSolidBackground(0xf6f6f6));
+        _editField.setBorder(BorderFactory.createRoundedBorder(new XYEdges(4,
+                4, 4, 4), 0xc6c6c6, Border.STYLE_SOLID));
+        fieldSetTwo.add(new LabelField("Input: "));
+        fieldSetTwo.add(_editField);
+        fieldSetTwo
+                .add(new RichTextField(
+                        "This is the OptionsProviderDemo implemented using the FieldSet class"));
+        fieldSetTwo.setMargin(2, 5, 5, 5);
+        fieldSetTwo.setBackground(BackgroundFactory
+                .createSolidBackground(0x00FFFFFF));
+
+        screen.add(fieldSetOne);
+        screen.add(fieldSetTwo);
     }
 
     /**
@@ -103,7 +156,9 @@ public final class OptionsProviderDemo implements OptionsProvider {
      * @see net.rim.blackberry.api.options.OptionsProvider#save()
      */
     public void save() {
-        _data.setSelected(_ocf.getSelectedIndex());
+        _data.setSelected(_objectChoiceField.getSelectedIndex());
+        _data.setChecked(_checkboxField.getChecked());
+        _data.setOldText(_editField.getText());
         _data.commit();
     }
 
@@ -115,22 +170,89 @@ public final class OptionsProviderDemo implements OptionsProvider {
         return _data;
     }
 
+    /**
+     * Assists OptionsProviderDemo in loading and saving the data to/from the
+     * fields
+     */
     public static final class OptionsDemoData implements Persistable {
         private static final long ID = 0x6af0b5eb44dc5164L; // "net.rim.device.bb.samples.options.OptionsDemoData"
         private int _selectedOption;
+        private boolean _checkedBox;
+        private String _textEntered;
 
+        /**
+         * Retreives the saved text from the AutoTextEditField
+         * 
+         * @return The text that was saved in the AutoTextEditField
+         */
+        public String getOldText() {
+            return _textEntered;
+        }
+
+        /**
+         * Sets the text to save from the AutoTextEditField to be saved
+         * 
+         * @param text
+         *            The text that was entered in the AutoTextEditField
+         */
+        public void setOldText(final String text) {
+            _textEntered = text;
+        }
+
+        /**
+         * Retreives the saved state of the CheckboxField
+         * 
+         * @return <code>true</code> if the Checkbox was checked,
+         *         <code>false</code> if the Checkbox was not checked
+         */
+        public boolean getChecked() {
+            return _checkedBox;
+        }
+
+        /**
+         * Sets the state of the CheckboxField
+         * 
+         * @param checked
+         *            <code>true</code> if the CheckboxField was checked,
+         *            <code>false</code> if the CheckboxField was not checked
+         */
+        public void setChecked(final boolean checked) {
+            _checkedBox = checked;
+        }
+
+        /**
+         * Retreives the saved choice index of the ObjectChoiceField
+         * 
+         * @return The saved index choice of the ObjectChoiceField
+         */
         public int getSelected() {
             return _selectedOption;
         }
 
+        /**
+         * Sets the user's ObjectChoiceField choice to save
+         * 
+         * @param index
+         *            The index of the choice the user made
+         */
         public void setSelected(final int index) {
             _selectedOption = index;
         }
 
+        /**
+         * Commits all the data that was saved
+         */
         public void commit() {
             PersistentObject.commit(this);
         }
 
+        /**
+         * Loads the data that was saved to the fields
+         * 
+         * @return An OptionsDemoData instance with all the saved field vales.
+         *         If there is no data that has been saved, it returns an empty
+         *         instance
+         */
         private static OptionsDemoData load() {
             final PersistentObject persist =
                     PersistentStore.getPersistentObject(OptionsDemoData.ID);

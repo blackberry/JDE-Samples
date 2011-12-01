@@ -103,7 +103,7 @@ public class HelpScreen extends PopupScreen {
      * Invokes {@link #onClose()} if the ENTER or ESCAPE keys are pressed;
      * otherwise, passes the keypress on to the superclass.
      * 
-     * @see Screen#keyDown(int, int)
+     * @see net.rim.device.api.ui.Screen#keyDown(int, int)
      */
     protected boolean keyDown(final int keycode, final int time) {
         final int key = Keypad.key(keycode);
@@ -116,7 +116,7 @@ public class HelpScreen extends PopupScreen {
     }
 
     /**
-     * @see Screen#navigationClick(int, int)
+     * @see net.rim.device.api.ui.Screen#navigationClick(int, int)
      */
     protected boolean navigationClick(final int status, final int time) {
         this.onClose();
@@ -124,7 +124,7 @@ public class HelpScreen extends PopupScreen {
     }
 
     /**
-     * @see Screen#navigationMovement(int, int, int, int)
+     * @see net.rim.device.api.ui.Screen#navigationMovement(int, int, int, int)
      */
     protected boolean navigationMovement(final int dx, final int dy,
             final int status, final int time) {

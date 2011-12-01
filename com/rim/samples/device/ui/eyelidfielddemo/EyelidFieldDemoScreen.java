@@ -160,7 +160,7 @@ public final class EyelidFieldDemoScreen extends MainScreen implements
         }
 
         /**
-         * @see BasicEditField#paint()
+         * @see BasicEditField#paint(Graphics)
          */
         public void paint(final Graphics graphics) {
             graphics.setColor(Color.WHITE);
@@ -184,7 +184,7 @@ public final class EyelidFieldDemoScreen extends MainScreen implements
         }
 
         /**
-         * @see LabelField#paint()
+         * @see LabelField#paint(Graphics)
          */
         public void paint(final Graphics graphics) {
             graphics.setColor(Color.WHITE);

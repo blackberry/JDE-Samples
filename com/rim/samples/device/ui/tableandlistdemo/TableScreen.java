@@ -199,7 +199,7 @@ public final class TableScreen extends MainScreen {
             case 1:
                 horizontal = RegionStyles.ALIGN_LEFT;
                 break;
-            case 3:
+            case 2:
                 horizontal = RegionStyles.ALIGN_RIGHT;
                 break;
             }
@@ -257,11 +257,10 @@ public final class TableScreen extends MainScreen {
                     }
                 };
 
-        dataTemplate.createRegion(new XYRect(0, 1, 1, 3), _style);
-
         // Set the style and apply it to the data template via the
         // setRowProperties() method
-        dataTemplate.createRegion(new XYRect(0, 0, 2, 1), _style);
+        dataTemplate.createRegion(new XYRect(0, 0, 1, 4), _style);
+
         dataTemplate.setRowProperties(0, new TemplateRowProperties(Font
                 .getDefault().getHeight()
                 + (_style.getBorder() == null ? 0 : _style.getBorder().getTop()
@@ -269,7 +268,7 @@ public final class TableScreen extends MainScreen {
                 + (_style.getMargin() == null ? 0 : _style.getMargin().top
                         + _style.getMargin().bottom)));
 
-        for (int i = 1; i < NUM_ROWS; i++) {
+        for (int i = 0; i < NUM_ROWS; i++) {
             dataTemplate.createRegion(new XYRect(1, i, 1, 1), _style);
             dataTemplate.setRowProperties(i, new TemplateRowProperties(Font
                     .getDefault().getHeight()

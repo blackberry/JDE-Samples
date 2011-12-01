@@ -87,7 +87,7 @@ public final class TableComponent extends HorizontalFieldManager implements
     }
 
     /**
-     * @see Manager#getAccesssibleContext()
+     * @see Manager#getAccessibleContext()
      */
     public AccessibleContext getAccessibleContext() {
         return this;
@@ -386,7 +386,7 @@ public final class TableComponent extends HorizontalFieldManager implements
     }
 
     /**
-     * @see AccessibleContext#isAccessibleStateSet()
+     * @see AccessibleContext#isAccessibleStateSet(int)
      */
     public boolean isAccessibleStateSet(final int state) {
         return (state & getAccessibleStateSet()) != 0;

@@ -239,7 +239,7 @@ public final class MemoMainScreen extends MainScreen {
         }
 
         /**
-         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doRemoveRowAt(Objecy)
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doRemoveRowAt(int)
          */
         public boolean doRemoveRowAt(final int index) {
             try {

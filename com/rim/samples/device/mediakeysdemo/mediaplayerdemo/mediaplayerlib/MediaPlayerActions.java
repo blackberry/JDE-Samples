@@ -32,6 +32,7 @@ import javax.microedition.media.Player;
 import javax.microedition.media.PlayerListener;
 import javax.microedition.media.control.VolumeControl;
 
+import net.rim.device.api.media.control.StreamingBufferControl;
 import net.rim.device.api.ui.UiApplication;
 
 import com.rim.samples.device.mediakeysdemo.mediaplayerdemo.mediaplayerlib.MediaPlayerDemo.MediaActionException;
@@ -218,6 +219,13 @@ public class MediaPlayerActions {
             } catch (final Exception e) {
                 throw new MediaActionException("unable to fetch media: " + e);
             }
+
+            // Cause playback to begin as soon as possible once start()
+            // is called on the Player.
+            final StreamingBufferControl sbc =
+                    (StreamingBufferControl) player
+                            .getControl("net.rim.device.api.media.control.StreamingBufferControl");
+            sbc.setBufferTime(0);
 
             Control control = player.getControl("VolumeControl");
             if (control instanceof VolumeControl) {

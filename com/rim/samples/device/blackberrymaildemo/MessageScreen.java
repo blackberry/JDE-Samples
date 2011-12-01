@@ -64,9 +64,15 @@ public class MessageScreen extends MainScreen {
     public final static String NO_SUBJECT = "<No Subject>";
     public final static String UNKNOWN_NAME = "<?>";
 
-    protected final static int SUBJECT = 0;
-    protected final static int BODY = 1;
-    protected final static int INFO = 2;
+    // Message.RecipientType.TO, Message.RecipientType.CC,
+    // Message.RecipientType.BCC
+    // start from 0, and since we share the same IntHashtable with HEADER_KEYS,
+    // ensure
+    // the keys don't overlap (don't use values 0, 1, 2 here).
+    protected final static int SUBJECT = 40000;
+    protected final static int BODY = 40001;
+    protected final static int INFO = 40002;
+
     protected final static int[] HEADER_KEYS = { Message.RecipientType.TO,
             Message.RecipientType.CC, Message.RecipientType.BCC };
     protected final static String[] HEADER_NAMES = { "To: ", "Cc: ", "Bcc: " };
@@ -278,8 +284,6 @@ public class MessageScreen extends MainScreen {
      * 
      * @param multipart
      *            The multi-part to display
-     * @param editable
-     *            True if this multi-part is editable
      */
     protected void displayMultipart(final Multipart multipart) {
         // This vector stores fields which are to be displayed only after all
@@ -444,7 +448,7 @@ public class MessageScreen extends MainScreen {
         }
 
         if (status == Message.Status.TX_GENERAL_FAILURE) {
-            statusStrBuffer.append("RX ERROR, ");
+            statusStrBuffer.append("TX GENERAL FAILURE, ");
         }
 
         if (status == Message.Status.TX_ERROR) {
@@ -474,10 +478,11 @@ public class MessageScreen extends MainScreen {
         }
 
         // If there are any characters in the status string then delete the last
-        // two characters if there are any characters to delete. Should be
-        // either ", " or "  ".
-        statusStrBuffer.delete(statusStrBuffer.length() - 2, statusStrBuffer
-                .length());
+        // two characters (i.e. ", ").
+        if (statusStrBuffer.length() > 0) {
+            statusStrBuffer.delete(statusStrBuffer.length() - 2,
+                    statusStrBuffer.length());
+        }
 
         return statusStrBuffer.toString();
     }

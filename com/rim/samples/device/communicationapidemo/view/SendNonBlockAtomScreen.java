@@ -90,7 +90,6 @@ public final class SendNonBlockAtomScreen extends MainScreen {
         add(_uriSenderField);
         add(postButton);
         add(_treeField);
-
     }
 
     private void updateTree(final Message message) {
@@ -197,7 +196,5 @@ public final class SendNonBlockAtomScreen extends MainScreen {
                     "Wait for response: timed out after " + timeout + " sec";
             Dialog.alert(timeoutMessage);
         }
-
     }
-
 }

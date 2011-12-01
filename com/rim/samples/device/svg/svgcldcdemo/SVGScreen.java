@@ -74,8 +74,6 @@ public final class SVGScreen extends MainScreen {
      * Creates a new SVGScreen object
      */
     public SVGScreen() {
-        setTitle("SVG CLDC Demo");
-
         _displayWidth = Display.getWidth();
         _displayHeight = Display.getHeight();
 

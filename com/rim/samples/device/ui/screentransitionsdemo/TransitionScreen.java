@@ -63,7 +63,7 @@ public class TransitionScreen extends MainScreen {
     }
 
     /**
-     * @see Screen#TouchEvent(TouchEvent)
+     * @see Screen#touchEvent(TouchEvent)
      */
     public boolean touchEvent(final TouchEvent event) {
         if (event.getEvent() == TouchEvent.UNCLICK) {

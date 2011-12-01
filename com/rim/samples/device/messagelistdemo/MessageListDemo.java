@@ -360,8 +360,6 @@ public final class MessageListDemo extends UiApplication {
          * 
          * @param label
          *            The text to appear with the menu item
-         * @param ordinal
-         *            Ordering parameter
          * @param priority
          *            The priority of the menu item
          * @param iconResourcePath

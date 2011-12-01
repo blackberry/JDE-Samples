@@ -105,7 +105,6 @@ public final class SendNonBlockSoapScreen extends MainScreen {
         } else {
             clearSoapVew("* No SOAP Message *");
         }
-
     }
 
     /**
@@ -209,7 +208,5 @@ public final class SendNonBlockSoapScreen extends MainScreen {
                     "Wait for response: timed out after " + timeout + " sec";
             Dialog.alert(timeoutMessage);
         }
-
     }
-
 }

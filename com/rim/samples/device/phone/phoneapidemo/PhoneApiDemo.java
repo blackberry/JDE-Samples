@@ -270,7 +270,7 @@ public final class PhoneApiDemo extends UiApplication {
                         final Object context) {
                     if (Dialog.ask(Dialog.D_DELETE) == Dialog.DELETE) {
                         while (_model.getNumberOfRows() > 1) {
-                            _model.removeRowAt(0, false);
+                            _model.removeRowAt(0, true);
                         }
                         if (_model.getNumberOfRows() == 1) {
                             _model.removeRowAt(0);
@@ -465,6 +465,14 @@ public final class PhoneApiDemo extends UiApplication {
             }
 
             return false;
+        }
+
+        /**
+         * @see java.lang.Object#hashCode()
+         */
+        public int hashCode() {
+            final Object phoneNumber = _fields.elementAt(PHONE_NUMBER);
+            return phoneNumber == null ? 0 : phoneNumber.hashCode();
         }
 
         /**

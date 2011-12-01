@@ -119,8 +119,7 @@ public class NotificationsEngineListenerImpl implements
     }
 
     /**
-     * @see net.rim.device.api.notification.NotificationsEngineListener#
-     *      notificationsEngineStateChanged(int,long.long,Object,Object)
+     * @see net.rim.device.api.notification.NotificationsEngineListener#notificationsEngineStateChanged(int,long,long,Object,Object)
      */
     public void notificationsEngineStateChanged(final int stateInt,
             final long sourceID, final long eventID,

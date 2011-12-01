@@ -158,7 +158,7 @@ public final class PictureScrollFieldDemoScreen extends MainScreen implements
     }
 
     /**
-     * @see Screen#touchEvent()
+     * @see Screen#touchEvent(TouchEvent)
      */
     protected boolean touchEvent(final TouchEvent message) {
         if (message.getEvent() == TouchEvent.CLICK) {
@@ -179,7 +179,7 @@ public final class PictureScrollFieldDemoScreen extends MainScreen implements
     }
 
     /**
-     * @see FieldChangeListener(Field, int)
+     * @see FieldChangeListener#fieldChanged(Field, int)
      */
     public void fieldChanged(final Field field, final int context) {
         if (field == _choiceField) {

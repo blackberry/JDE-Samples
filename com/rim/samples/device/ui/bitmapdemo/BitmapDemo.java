@@ -83,10 +83,12 @@ public class BitmapDemo extends UiApplication {
             // Create a Bitmap from a project resource
             final Bitmap bitmapOrig = Bitmap.getBitmapResource("rim.png");
 
-            // Create a Bitmap of arbitrary size
+            // Create a new Bitmap of arbitrary size with a bit
+            // depth of 32 bits.
             final int scaledX = 175;
             final int scaledY = 50;
-            Bitmap bitmapScaled = new Bitmap(scaledX, scaledY);
+            Bitmap bitmapScaled =
+                    new Bitmap(Bitmap.ROWWISE_32BIT_ARGB8888, scaledX, scaledY);
 
             // Scale the original Bitmap into the new Bitmap using
             // a Lanczos filter.
@@ -119,7 +121,8 @@ public class BitmapDemo extends UiApplication {
             add(new SeparatorField());
 
             // Redefine the scaled Bitmap
-            bitmapScaled = new Bitmap(scaledX, scaledY);
+            bitmapScaled =
+                    new Bitmap(Bitmap.ROWWISE_32BIT_ARGB8888, scaledX, scaledY);
 
             // Scale the original Bitmap into the new Bitmap using
             // a bilinear filter and maintaining aspect ratio.
@@ -141,7 +144,8 @@ public class BitmapDemo extends UiApplication {
             add(new SeparatorField());
 
             // Redefine the scaled Bitmap
-            bitmapScaled = new Bitmap(scaledX, scaledY);
+            bitmapScaled =
+                    new Bitmap(Bitmap.ROWWISE_32BIT_ARGB8888, scaledX, scaledY);
 
             // Calculate fragment dimensions
             final int fragmentWidth = bitmapOrig.getWidth() >> 1; // >> 1

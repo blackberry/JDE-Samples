@@ -35,6 +35,10 @@ import javax.microedition.media.control.GUIControl;
 import javax.microedition.media.control.VideoControl;
 
 import net.rim.device.api.amms.control.camera.EnhancedFocusControl;
+import net.rim.device.api.amms.control.camera.FeatureControl;
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Application;
 import net.rim.device.api.system.EncodedImage;
 import net.rim.device.api.ui.Field;
@@ -43,10 +47,12 @@ import net.rim.device.api.ui.TouchEvent;
 import net.rim.device.api.ui.TouchGesture;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
+import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.input.InputSettings;
 import net.rim.device.api.ui.input.NavigationDeviceSettings;
+import net.rim.device.api.ui.menu.SubMenu;
 import net.rim.device.api.util.StringProvider;
 import net.rim.device.api.util.StringUtilities;
 
@@ -76,7 +82,9 @@ public final class CameraDemo extends UiApplication {
     public CameraDemo() {
         UiApplication.getUiApplication().invokeLater(new Runnable() {
             public void run() {
-                Dialog.alert("Click the trackball or screen to take a picture. Zoom in or out by swiping the trackpad up or down. You can change the image settings by selecting 'Encoding Settings' from the menu.");
+                Dialog.alert("Click the trackpad or tap the screen to take a picture."
+                        + "Zoom in or out by swiping the trackpad up or down. You can change"
+                        + " the image settings by selecting 'Encoding Settings' from the menu.");
             }
         });
         final CameraScreen screen = new CameraScreen();
@@ -102,22 +110,19 @@ public final class CameraDemo extends UiApplication {
  * A UI screen to display the camera display and buttons
  */
 final class CameraScreen extends MainScreen {
-    /** The camera's video controller */
     private VideoControl _videoControl;
-
-    /** The field containing the feed from the camera */
     private Field _videoField;
-
-    /** An array of valid snapshot encodings */
     private EncodingProperties[] _encodings;
+    private EnhancedFocusControl _efc;
+    private ZoomControl _zoomControl;
+    private Player _player;
+    private MenuItem _turnOffAutoFocusMenuItem;
+    private MenuItem _turnOnAutoFocusMenuItem;
 
     private int _indexOfEncoding = 0;
 
-    private EnhancedFocusControl _efc;
-    private ZoomControl _zoomControl;
-
     /**
-     * Constructor - initializes the camera and creates the UI.
+     * Creates a new CameraScreen object
      */
     public CameraScreen() {
         // Set the title of the screen
@@ -131,20 +136,107 @@ final class CameraScreen extends MainScreen {
 
         // If the field was constructed successfully, create the UI
         if (_videoField != null) {
-            createUI();
-            addMenuItem(_encodingMenuItem);
-            addMenuItem(_toggleAutoFocusMenuItem);
+            // Add the video field to the screen
+            add(_videoField);
+
+            // Initialize the camera features menus
+            buildFocusModeMenuItems();
+            buildSceneModeMenuItems();
+
+            _turnOffAutoFocusMenuItem =
+                    new MenuItem(new StringProvider("Turn Off Auto-Focus"),
+                            0x230020, 0);
+            _turnOffAutoFocusMenuItem.setCommand(new Command(
+                    new CommandHandler() {
+                        /**
+                         * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                         *      Object)
+                         */
+                        public void execute(
+                                final ReadOnlyCommandMetadata metadata,
+                                final Object context) {
+                            try {
+                                if (_efc != null) {
+                                    _efc.stopAutoFocus();
+                                } else {
+                                    CameraDemo
+                                            .errorDialog("ERROR: Focus control not initialized.");
+                                }
+                            } catch (final Exception e) {
+                                CameraDemo.errorDialog("ERROR " + e.getClass()
+                                        + ":  " + e.getMessage());
+                            }
+                        }
+                    }));
+
+            _turnOnAutoFocusMenuItem =
+                    new MenuItem(new StringProvider("Turn on Auto-Focus"),
+                            0x230020, 0);
+            _turnOnAutoFocusMenuItem.setCommand(new Command(
+                    new CommandHandler() {
+                        /**
+                         * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                         *      Object)
+                         */
+                        public void execute(
+                                final ReadOnlyCommandMetadata metadata,
+                                final Object context) {
+                            try {
+                                if (_efc != null) {
+                                    _efc.startAutoFocus();
+                                } else {
+                                    CameraDemo
+                                            .errorDialog("ERROR: Focus control not initialized.");
+                                }
+                            } catch (final Exception e) {
+                                CameraDemo.errorDialog("ERROR " + e.getClass()
+                                        + ":  " + e.getMessage());
+                            }
+                        }
+                    }));
+
+            final MenuItem encodingMenuItem =
+                    new MenuItem(new StringProvider("Encoding Settings"),
+                            0x230010, 0);
+            encodingMenuItem.setCommand(new Command(new CommandHandler() {
+                /**
+                 * @see CommandHandler#execute(ReadOnlyCommandMetadata, Object)
+                 */
+                public void execute(final ReadOnlyCommandMetadata metadata,
+                        final Object context) {
+                    final EncodingPropertiesScreen encodingPropertiesScreen =
+                            new EncodingPropertiesScreen(_encodings,
+                                    CameraScreen.this, _indexOfEncoding);
+                    UiApplication.getUiApplication().pushModalScreen(
+                            encodingPropertiesScreen);
+                }
+            }));
+
+            addMenuItem(encodingMenuItem);
+
+            // Allow the screen to capture trackpad swipes
+            final InputSettings settings =
+                    NavigationDeviceSettings.createEmptySet();
+            settings.set(NavigationDeviceSettings.DETECT_SWIPE, 1);
+            addInputSettings(settings);
         }
         // If not, display an error message to the user
         else {
             add(new RichTextField("Error connecting to camera."));
         }
+    }
 
-        // Allow the screen to capture trackpad swipes
-        final InputSettings settings =
-                NavigationDeviceSettings.createEmptySet();
-        settings.set(NavigationDeviceSettings.DETECT_SWIPE, 1);
-        addInputSettings(settings);
+    /**
+     * @see net.rim.device.api.ui.Screen#makeMenu(Menu, int)
+     */
+    protected void makeMenu(final Menu menu, final int instance) {
+        super.makeMenu(menu, instance);
+
+        if (_efc.isAutoFocusLocked()) {
+            menu.add(_turnOffAutoFocusMenuItem);
+        } else {
+            menu.add(_turnOnAutoFocusMenuItem);
+        }
     }
 
     /**
@@ -177,46 +269,406 @@ final class CameraScreen extends MainScreen {
     }
 
     /**
-     * Displays the various encoding choices available
+     * This method allows an array of menu items to be added to the submenu
+     * which then gets added to the parent menu.
+     * 
+     * @param items
+     *            The array of menu items that represents the submenu
+     * @param menuTitle
+     *            The text string of parent menu item that will contain the
+     *            submenu items
+     * @param ordering
+     *            Ordering of the submenu relative to other items in the parent
+     *            menu
      */
-    private final MenuItem _encodingMenuItem = new MenuItem(new StringProvider(
-            "Encoding Settings"), 0x230010, 0) {
-        public void run() {
-            final EncodingPropertiesScreen s =
-                    new EncodingPropertiesScreen(_encodings, CameraScreen.this,
-                            _indexOfEncoding);
-            UiApplication.getUiApplication().pushModalScreen(s);
+    private void addSubMenu(final Vector items, final String menuTitle,
+            final int ordering) {
+        final int size = items.size();
+
+        if (size > 0) {
+            final SubMenu subMenu =
+                    new SubMenu(null, menuTitle, ordering, Integer.MAX_VALUE);
+
+            for (int i = size - 1; i >= 0; --i) {
+                final Object obj = items.elementAt(i);
+                if (obj instanceof MenuItem) {
+                    subMenu.add((MenuItem) obj);
+                }
+            }
+
+            addMenuItem(subMenu.getMenuItem());
         }
-    };
+    }
 
     /**
-     * Toggles auto focus for the camera
+     * Builds the menu items for the various focus modes supported on the
+     * device.
      */
-    private final MenuItem _toggleAutoFocusMenuItem = new MenuItem(
-            new StringProvider("Toggle Auto-focus"), 0x230020, 0) {
-        public void run() {
-            try {
-                if (_efc != null) {
-                    if (_efc.isAutoFocusLocked()) {
-                        _efc.stopAutoFocus();
-                    } else {
-                        _efc.startAutoFocus();
-                    }
-                } else {
-                    CameraDemo
-                            .errorDialog("ERROR: Focus control not initialized.");
-                }
-            } catch (final Exception e) {
-                CameraDemo.errorDialog("ERROR " + e.getClass() + ":  "
-                        + e.getMessage());
+    private void buildFocusModeMenuItems() {
+        if (_efc != null) {
+            // Use a Vector to store each of the focus (sub)menu items
+            final Vector focusMenuItems = new Vector();
+
+            // Check for fixed focus mode support
+            if (_efc.isFocusModeSupported(EnhancedFocusControl.FOCUS_MODE_FIXED)) {
+                final MenuItem enableFixedFocus =
+                        new MenuItem(new StringProvider(
+                                "Enable Fixed Auto Focus"), 0x230010, 0);
+                enableFixedFocus.setCommand(new Command(new CommandHandler() {
+                    /**
+                     * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                     *      Object)
+                     */
+                    public void execute(final ReadOnlyCommandMetadata metadata,
+                            final Object context) {
+                        final EnhancedFocusControl efc =
+                                (EnhancedFocusControl) _player
+                                        .getControl("net.rim.device.api.amms.control.camera.EnhancedFocusControl");
+                        efc.setFocusMode(EnhancedFocusControl.FOCUS_MODE_FIXED);
+                    };
+                }));
+
+                focusMenuItems.addElement(enableFixedFocus);
             }
+
+            // Check for continuous focus mode support
+            if (_efc.isFocusModeSupported(EnhancedFocusControl.FOCUS_MODE_CONTINUOUS)) {
+                final MenuItem enableContinuousAutoFocus =
+                        new MenuItem(new StringProvider(
+                                "Enable Continuous Auto Focus"), 0x230020, 0);
+                enableContinuousAutoFocus.setCommand(new Command(
+                        new CommandHandler() {
+                            /**
+                             * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                             *      Object)
+                             */
+                            public void execute(
+                                    final ReadOnlyCommandMetadata metadata,
+                                    final Object context) {
+                                final EnhancedFocusControl efc =
+                                        (EnhancedFocusControl) _player
+                                                .getControl("net.rim.device.api.amms.control.camera.EnhancedFocusControl");
+                                efc.setFocusMode(EnhancedFocusControl.FOCUS_MODE_CONTINUOUS);
+                            };
+                        }));
+
+                focusMenuItems.addElement(enableContinuousAutoFocus);
+            }
+
+            // Check for single shot focus mode support
+            if (_efc.isFocusModeSupported(EnhancedFocusControl.FOCUS_MODE_SINGLESHOT)) {
+                final MenuItem enableSingleShotAutoFocus =
+                        new MenuItem(new StringProvider(
+                                "Enable Single Shot Auto Focus"), 0x230030, 0);
+                enableSingleShotAutoFocus.setCommand(new Command(
+                        new CommandHandler() {
+                            /**
+                             * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                             *      Object)
+                             */
+                            public void execute(
+                                    final ReadOnlyCommandMetadata metadata,
+                                    final Object context) {
+                                final EnhancedFocusControl efc =
+                                        (EnhancedFocusControl) _player
+                                                .getControl("net.rim.device.api.amms.control.camera.EnhancedFocusControl");
+                                efc.setFocusMode(EnhancedFocusControl.FOCUS_MODE_SINGLESHOT);
+                            };
+                        }));
+
+                focusMenuItems.addElement(enableSingleShotAutoFocus);
+            }
+
+            addSubMenu(focusMenuItems, "Auto Focus Modes", 0x230030);
         }
-    };
+    }
+
+    /**
+     * Builds the menu items for the various scene modes supported on the device
+     */
+    private void buildSceneModeMenuItems() {
+
+        // Feature Control allows for accessing the various scene modes
+        final FeatureControl featureControl =
+                (FeatureControl) _player
+                        .getControl("net.rim.device.api.amms.control.camera.FeatureControl");
+
+        if (featureControl != null) {
+            // Use a Vector to store each of the scene mode (sub)menu items
+            final Vector sceneModeMenuItems = new Vector();
+
+            // Check for auto scene mode support
+            if (featureControl
+                    .isSceneModeSupported(FeatureControl.SCENE_MODE_AUTO)) {
+                final MenuItem enableSceneModeAuto =
+                        new MenuItem(new StringProvider(
+                                "Enable Scene Mode: AUTO"), Integer.MAX_VALUE,
+                                0);
+                enableSceneModeAuto.setCommand(new Command(
+                        new CommandHandler() {
+                            /**
+                             * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                             *      Object)
+                             */
+                            public void execute(
+                                    final ReadOnlyCommandMetadata metadata,
+                                    final Object context) {
+                                featureControl
+                                        .setSceneMode(FeatureControl.SCENE_MODE_AUTO);
+                            };
+                        }));
+
+                sceneModeMenuItems.addElement(enableSceneModeAuto);
+            }
+
+            // Check for beach scene mode support
+            if (featureControl
+                    .isSceneModeSupported(FeatureControl.SCENE_MODE_BEACH)) {
+                final MenuItem enableSceneModeBeach =
+                        new MenuItem(new StringProvider(
+                                "Enable Scene Mode: BEACH"), Integer.MAX_VALUE,
+                                0);
+                enableSceneModeBeach.setCommand(new Command(
+                        new CommandHandler() {
+                            /**
+                             * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                             *      Object)
+                             */
+                            public void execute(
+                                    final ReadOnlyCommandMetadata metadata,
+                                    final Object context) {
+                                featureControl
+                                        .setSceneMode(FeatureControl.SCENE_MODE_BEACH);
+                            };
+                        }));
+
+                sceneModeMenuItems.addElement(enableSceneModeBeach);
+            }
+
+            // Check for face detection scene mode support
+            if (featureControl
+                    .isSceneModeSupported(FeatureControl.SCENE_MODE_FACEDETECTION)) {
+                final MenuItem enableSceneModeFaceDetection =
+                        new MenuItem(new StringProvider(
+                                "Enable Scene Mode: FACE DETECTION"),
+                                Integer.MAX_VALUE, 0);
+                enableSceneModeFaceDetection.setCommand(new Command(
+                        new CommandHandler() {
+                            /**
+                             * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                             *      Object)
+                             */
+                            public void execute(
+                                    final ReadOnlyCommandMetadata metadata,
+                                    final Object context) {
+                                featureControl
+                                        .setSceneMode(FeatureControl.SCENE_MODE_FACEDETECTION);
+                            };
+                        }));
+
+                sceneModeMenuItems.addElement(enableSceneModeFaceDetection);
+            }
+
+            // Check for landscape scene mode support
+            if (featureControl
+                    .isSceneModeSupported(FeatureControl.SCENE_MODE_LANDSCAPE)) {
+                final MenuItem enableSceneModeLandscape =
+                        new MenuItem(new StringProvider(
+                                "Enable Scene Mode: LANDSCAPE"),
+                                Integer.MAX_VALUE, 0);
+                enableSceneModeLandscape.setCommand(new Command(
+                        new CommandHandler() {
+                            /**
+                             * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                             *      Object)
+                             */
+                            public void execute(
+                                    final ReadOnlyCommandMetadata metadata,
+                                    final Object context) {
+                                featureControl
+                                        .setSceneMode(FeatureControl.SCENE_MODE_LANDSCAPE);
+                            };
+                        }));
+
+                sceneModeMenuItems.addElement(enableSceneModeLandscape);
+            }
+
+            // Check for macro scene mode support
+            if (featureControl
+                    .isSceneModeSupported(FeatureControl.SCENE_MODE_MACRO)) {
+                final MenuItem enableSceneModeMacro =
+                        new MenuItem(new StringProvider(
+                                "Enable Scene Mode: MACRO"), Integer.MAX_VALUE,
+                                0);
+                enableSceneModeMacro.setCommand(new Command(
+                        new CommandHandler() {
+                            /**
+                             * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                             *      Object)
+                             */
+                            public void execute(
+                                    final ReadOnlyCommandMetadata metadata,
+                                    final Object context) {
+                                featureControl
+                                        .setSceneMode(FeatureControl.SCENE_MODE_MACRO);
+                            };
+                        }));
+
+                sceneModeMenuItems.addElement(enableSceneModeMacro);
+            }
+
+            // Check for night scene mode support
+            if (featureControl
+                    .isSceneModeSupported(FeatureControl.SCENE_MODE_NIGHT)) {
+                final MenuItem enableSceneModeNight =
+                        new MenuItem(new StringProvider(
+                                "Enable Scene Mode: NIGHT"), Integer.MAX_VALUE,
+                                0);
+                enableSceneModeNight.setCommand(new Command(
+                        new CommandHandler() {
+                            /**
+                             * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                             *      Object)
+                             */
+                            public void execute(
+                                    final ReadOnlyCommandMetadata metadata,
+                                    final Object context) {
+                                featureControl
+                                        .setSceneMode(FeatureControl.SCENE_MODE_NIGHT);
+                            };
+                        }));
+
+                sceneModeMenuItems.addElement(enableSceneModeNight);
+            }
+
+            // Check for party scene mode support
+            if (featureControl
+                    .isSceneModeSupported(FeatureControl.SCENE_MODE_PARTY)) {
+                final MenuItem enableSceneModeParty =
+                        new MenuItem(new StringProvider(
+                                "Enable Scene Mode: PARTY"), Integer.MAX_VALUE,
+                                0);
+                enableSceneModeParty.setCommand(new Command(
+                        new CommandHandler() {
+                            /**
+                             * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                             *      Object)
+                             */
+                            public void execute(
+                                    final ReadOnlyCommandMetadata metadata,
+                                    final Object context) {
+                                featureControl
+                                        .setSceneMode(FeatureControl.SCENE_MODE_PARTY);
+                            };
+                        }));
+
+                sceneModeMenuItems.addElement(enableSceneModeParty);
+            }
+
+            // Check for portrait scene mode support
+            if (featureControl
+                    .isSceneModeSupported(FeatureControl.SCENE_MODE_PORTRAIT)) {
+                final MenuItem enableSceneModePortrait =
+                        new MenuItem(new StringProvider(
+                                "Enable Scene Mode: PORTRAIT"),
+                                Integer.MAX_VALUE, 0);
+                enableSceneModePortrait.setCommand(new Command(
+                        new CommandHandler() {
+                            /**
+                             * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                             *      Object)
+                             */
+                            public void execute(
+                                    final ReadOnlyCommandMetadata metadata,
+                                    final Object context) {
+                                featureControl
+                                        .setSceneMode(FeatureControl.SCENE_MODE_PORTRAIT);
+                            };
+                        }));
+
+                sceneModeMenuItems.addElement(enableSceneModePortrait);
+            }
+
+            // Check for snow scene mode support
+            if (featureControl
+                    .isSceneModeSupported(FeatureControl.SCENE_MODE_SNOW)) {
+                final MenuItem enableSceneModeSnow =
+                        new MenuItem(new StringProvider(
+                                "Enable Scene Mode: SNOW"), Integer.MAX_VALUE,
+                                0);
+                enableSceneModeSnow.setCommand(new Command(
+                        new CommandHandler() {
+                            /**
+                             * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                             *      Object)
+                             */
+                            public void execute(
+                                    final ReadOnlyCommandMetadata metadata,
+                                    final Object context) {
+                                featureControl
+                                        .setSceneMode(FeatureControl.SCENE_MODE_SNOW);
+                            };
+                        }));
+
+                sceneModeMenuItems.addElement(enableSceneModeSnow);
+            }
+
+            // Check for sport scene mode support
+            if (featureControl
+                    .isSceneModeSupported(FeatureControl.SCENE_MODE_SPORT)) {
+                final MenuItem enableSceneModeSport =
+                        new MenuItem(new StringProvider(
+                                "Enable Scene Mode: SPORT"), Integer.MAX_VALUE,
+                                0);
+                enableSceneModeSport.setCommand(new Command(
+                        new CommandHandler() {
+                            /**
+                             * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                             *      Object)
+                             */
+                            public void execute(
+                                    final ReadOnlyCommandMetadata metadata,
+                                    final Object context) {
+                                featureControl
+                                        .setSceneMode(FeatureControl.SCENE_MODE_SPORT);
+                            };
+                        }));
+
+                sceneModeMenuItems.addElement(enableSceneModeSport);
+            }
+
+            // Check for text scene mode support
+            if (featureControl
+                    .isSceneModeSupported(FeatureControl.SCENE_MODE_TEXT)) {
+                final MenuItem enableSceneModeText =
+                        new MenuItem(new StringProvider(
+                                "Enable Scene Mode: TEXT"), Integer.MAX_VALUE,
+                                0);
+                enableSceneModeText.setCommand(new Command(
+                        new CommandHandler() {
+                            /**
+                             * @see CommandHandler#execute(ReadOnlyCommandMetadata,
+                             *      Object)
+                             */
+                            public void execute(
+                                    final ReadOnlyCommandMetadata metadata,
+                                    final Object context) {
+                                featureControl
+                                        .setSceneMode(FeatureControl.SCENE_MODE_TEXT);
+                            };
+                        }));
+
+                sceneModeMenuItems.addElement(enableSceneModeText);
+            }
+
+            addSubMenu(sceneModeMenuItems, "Scene Modes", 0x230040);
+        }
+    }
 
     /**
      * Takes a picture with the selected encoding settings
      */
-    public void takePicture() {
+    private void takePicture() {
         try {
             // A null encoding indicates that the camera should
             // use the default snapshot encoding.
@@ -245,18 +697,32 @@ final class CameraScreen extends MainScreen {
     }
 
     /**
+     * @see net.rim.device.api.ui.Screen#close()
+     */
+    public void close() {
+        if (_player != null) {
+            try {
+                _player.close();
+            } catch (final Exception e) {
+            }
+        }
+
+        super.close();
+    }
+
+    /**
      * Initializes the Player, VideoControl and VideoField
      */
     private void initializeCamera() {
         try {
             // Create a player for the Blackberry's camera
-            final Player player = Manager.createPlayer("capture://video");
+            _player = Manager.createPlayer("capture://video");
 
             // Set the player to the REALIZED state (see Player javadoc)
-            player.realize();
+            _player.realize();
 
-            // Grab the video control and set it to the current display
-            _videoControl = (VideoControl) player.getControl("VideoControl");
+            // Get the video control
+            _videoControl = (VideoControl) _player.getControl("VideoControl");
 
             if (_videoControl != null) {
                 // Create the video field as a GUI primitive (as opposed to a
@@ -271,16 +737,16 @@ final class CameraScreen extends MainScreen {
             }
 
             // Set the player to the STARTED state (see Player javadoc)
-            player.start();
+            _player.start();
 
             // Enable auto-focus for the camera
             _efc =
-                    (EnhancedFocusControl) player
+                    (EnhancedFocusControl) _player
                             .getControl("net.rim.device.api.amms.control.camera.EnhancedFocusControl");
 
             // Enable zoom for the camera
             _zoomControl =
-                    (ZoomControl) player
+                    (ZoomControl) _player
                             .getControl("javax.microedition.amms.control.camera.ZoomControl");
         } catch (final Exception e) {
             CameraDemo.errorDialog("ERROR " + e.getClass() + ":  "
@@ -315,8 +781,8 @@ final class CameraScreen extends MainScreen {
             for (int i = 0; i < properties.length; ++i) {
                 if (properties[i].equals(encoding)) {
                     if (temp != null && temp.isComplete()) {
-                        // Add a new encoding to the list if it has been
-                        // properly set.
+                        // Add a new encoding to the list if it
+                        // has been properly set.
                         encodingList.addElement(temp);
                     }
                     temp = new EncodingProperties();
@@ -348,14 +814,6 @@ final class CameraScreen extends MainScreen {
             _encodings = null;
             CameraDemo.errorDialog(e.toString());
         }
-    }
-
-    /**
-     * Adds the VideoField to the screen
-     */
-    private void createUI() {
-        // Add the video field to the screen
-        add(_videoField);
     }
 
     /**

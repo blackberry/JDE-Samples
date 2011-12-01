@@ -30,7 +30,6 @@ import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
-import net.rim.device.api.ui.Touchscreen;
 import net.rim.device.api.ui.Ui;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.UiEngineInstance;
@@ -43,10 +42,10 @@ import net.rim.device.api.ui.container.MainScreen;
 
 /**
  * This sample application demonstrates how to control the tilting and virtual
- * keyboard functionality on a touch screen BlackBerry Smartphone. The sample
- * shows how to control which tilt orientations are allowed and also
- * demonstrates manually displaying or hiding the virtual keyboard. The sample
- * also contains an example of how to trap virtual keyboard input.
+ * keyboard functionality on a BlackBerry Smartphone that supports device
+ * rotation. The sample shows how to control which tilt orientations are allowed
+ * and also demonstrates manually displaying or hiding the virtual keyboard. The
+ * sample also contains an example of how to trap virtual keyboard input.
  */
 public final class TiltDemo extends UiApplication {
     /**
@@ -72,70 +71,61 @@ public final class TiltDemo extends UiApplication {
 }
 
 /**
- * Main screen for the Tilt Demo.
+ * Main screen for the Tilt Demo application
  */
 final class TiltDemoScreen extends MainScreen implements FieldChangeListener {
-    private CheckboxField _northCheckbox;
-    private CheckboxField _eastCheckbox;
-    private CheckboxField _westCheckbox;
+    private final CheckboxField _northCheckbox;
+    private final CheckboxField _eastCheckbox;
+    private final CheckboxField _westCheckbox;
 
     private ButtonField _keyboardButton;
 
-    private BasicEditField _editField;
+    private final BasicEditField _editField;
 
-    private CustomSpanField _customSpanField;
+    private final CustomSpanField _customSpanField;
 
     /**
      * Creates a new TiltDemoScreen object
      */
     public TiltDemoScreen() {
-        // If this is not a touchscreen device, exit the application.
-        if (!Touchscreen.isSupported()) {
-            UiApplication.getUiApplication().invokeLater(new Runnable() {
-                public void run() {
-                    Dialog.alert("This application requires a touch screen device.");
-                    System.exit(0);
-                }
-            });
-        } else {
-            setTitle("Tilt Demo");
+        setTitle("Tilt Demo");
 
-            // Create a Field that will change size depending on orientation.
-            _customSpanField = new CustomSpanField();
-            add(_customSpanField);
+        // Create a Field that will change size depending on orientation
+        _customSpanField = new CustomSpanField();
+        add(_customSpanField);
 
-            // Create a button to toggle the visibility of the virtual keyboard.
+        if (VirtualKeyboard.isSupported()) {
+            // Create a button to toggle the visibility of the virtual keyboard
             _keyboardButton =
                     new ButtonField("Toggle Keyboard",
                             ButtonField.CONSUME_CLICK);
             _keyboardButton.setChangeListener(this);
             add(_keyboardButton);
-
-            /*
-             * Create a BasicEditField for simple text input. This field can be
-             * used to experiment with how the virtual keyboard works in the
-             * different orientations, and show how bringing the focus to a
-             * field that requires input will display the virtual keyboard if it
-             * isn't already visible.
-             */
-            _editField = new BasicEditField("Basic Edit Field: ", "");
-            add(_editField);
-
-            // Create one check box per direction.
-            _northCheckbox =
-                    new CheckboxField("Allow north orientation?", true);
-            _eastCheckbox = new CheckboxField("Allow east orientation?", true);
-            _westCheckbox = new CheckboxField("Allow west orientation?", true);
-
-            // Set change listeners and add to the screen.
-            _northCheckbox.setChangeListener(this);
-            _eastCheckbox.setChangeListener(this);
-            _westCheckbox.setChangeListener(this);
-
-            add(_northCheckbox);
-            add(_eastCheckbox);
-            add(_westCheckbox);
         }
+
+        /*
+         * Create a BasicEditField for simple text input. This field can be used
+         * to experiment with how the virtual keyboard works in the different
+         * orientations, and show how bringing the focus to a field that
+         * requires input will display the virtual keyboard if it isn't already
+         * visible.
+         */
+        _editField = new BasicEditField("Basic Edit Field: ", "");
+        add(_editField);
+
+        // Create one check box per direction
+        _northCheckbox = new CheckboxField("Allow north orientation?", true);
+        _eastCheckbox = new CheckboxField("Allow east orientation?", true);
+        _westCheckbox = new CheckboxField("Allow west orientation?", true);
+
+        // Set change listeners and add to the screen
+        _northCheckbox.setChangeListener(this);
+        _eastCheckbox.setChangeListener(this);
+        _westCheckbox.setChangeListener(this);
+
+        add(_northCheckbox);
+        add(_eastCheckbox);
+        add(_westCheckbox);
     }
 
     /**
@@ -143,7 +133,6 @@ final class TiltDemoScreen extends MainScreen implements FieldChangeListener {
      */
     public void fieldChanged(final Field field, final int context) {
         if (field instanceof CheckboxField) {
-
             boolean checked = false;
 
             // We want to set the acceptable directions to every direction which
@@ -151,7 +140,7 @@ final class TiltDemoScreen extends MainScreen implements FieldChangeListener {
             // its corresponding check box checked.
             int acceptableDirections = 0;
 
-            // For each direction, set the bit if the checkbox is checked.
+            // For each direction, set the bit if the checkbox is checked
             if (_northCheckbox.getChecked() == true) {
                 acceptableDirections =
                         acceptableDirections | Display.DIRECTION_NORTH;
@@ -169,14 +158,12 @@ final class TiltDemoScreen extends MainScreen implements FieldChangeListener {
             }
 
             if (!checked) {
-
                 // If no checkboxes are checked, all directions will be allowed.
                 // We won't allow the user to uncheck all checkboxes.
                 final CheckboxField checkboxField = (CheckboxField) field;
                 checkboxField.setChecked(true);
                 Dialog.alert("Please allow at least one direction");
             } else {
-
                 // Set the acceptable directions and then force the app to check
                 // if the screen requires a rotation.
                 final UiEngineInstance ui = Ui.getUiEngineInstance();
@@ -212,7 +199,7 @@ final class TiltDemoScreen extends MainScreen implements FieldChangeListener {
      * @see net.rim.device.api.system.KeyListener#keyChar(char,int,int)
      */
     public boolean keyChar(final char key, final int status, final int time) {
-        // If the key pressed is ENTER, show the menu.
+        // If the key pressed is ENTER, show the menu
         if (key == Characters.ENTER) {
             return this.onMenu(0);
         }

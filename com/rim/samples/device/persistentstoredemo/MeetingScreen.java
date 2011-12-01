@@ -41,6 +41,7 @@ import net.rim.device.api.ui.component.ButtonField;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.EditField;
 import net.rim.device.api.ui.component.LabelField;
+import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.component.table.AbstractTableModel;
 import net.rim.device.api.ui.component.table.DataTemplate;
 import net.rim.device.api.ui.component.table.TableController;
@@ -192,6 +193,7 @@ public final class MeetingScreen extends MainScreen {
         _view.setDataTemplate(dataTemplate);
         dataTemplate.useFixedHeight(true);
 
+        add(new RichTextField("Attendees:", Field.NON_FOCUSABLE));
         add(_view);
 
     }

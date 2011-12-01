@@ -46,12 +46,15 @@ import javax.microedition.media.control.VideoControl;
 import javax.microedition.media.control.VolumeControl;
 
 import net.rim.device.api.media.MediaActionHandler;
+import net.rim.device.api.media.control.StreamingBufferControl;
 import net.rim.device.api.system.Bitmap;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.Field;
+import net.rim.device.api.ui.Screen;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BitmapField;
 import net.rim.device.api.ui.component.Dialog;
+import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.container.MainScreen;
 
 /**
@@ -158,38 +161,58 @@ public final class SendMediaDemo extends UiApplication implements
     public void invocationRequestNotify(final ContentHandlerServer server) {
         final Invocation invoc = server.getRequest(false);
         if (invoc != null) {
-            final String type = invoc.getType();
+            if (getActiveScreen() == null) {
+                final String type = invoc.getType();
 
-            if (type.equals("audio/mp4") || type.equals("audio/amr")
-                    || type.equals("audio/mpeg")) {
-                // Play an audio file
-                if (_audioPlayer == null) {
-                    final String url = invoc.getURL();
-                    final int answer =
-                            Dialog.ask(Dialog.D_YES_NO,
-                                    "Would you like Send Media Demo to play the audio file:\n/"
-                                            + url + "?");
-                    if (answer == Dialog.YES) {
+                final DemoMainScreen screen = new DemoMainScreen();
+                screen.setTitle("Send Media Demo");
+
+                if (type.equals("audio/mp4") || type.equals("audio/amr")
+                        || type.equals("audio/mpeg")) {
+                    screen.setType(DemoMainScreen.AUDIO_TYPE);
+
+                    // Play an audio file
+                    if (_audioPlayer == null) {
+                        final String url = invoc.getURL();
+                        screen.add(new LabelField("Playing audio file: " + url));
+
                         initAudio(url);
-                    } else {
-                        server.finish(invoc, Invocation.OK);
-                        System.exit(0);
                     }
                 }
-            } else if (getActiveScreen() == null) {
+
                 if (type.equals("image/bmp") || type.equals("image/png")
                         || type.equals("image/jpeg")) {
-                    // Display an image
+                    screen.setType(DemoMainScreen.IMAGE_TYPE);
+
+                    // Get data from URL
                     final byte[] data = getData(invoc.getURL());
-                    displayImage(data);
+
+                    // Create image field
+                    final Bitmap image =
+                            Bitmap.createBitmapFromBytes(data, 0, -1, 5);
+                    final BitmapField imageField =
+                            new BitmapField(image, Field.FIELD_HCENTER);
+
+                    screen.add(imageField);
                 } else if (type.equals("video/3gpp")
                         || type.equals("video/mp4")) {
+                    screen.setType(DemoMainScreen.VIDEO_TYPE);
+
                     // Play a video
                     initVideo(invoc.getURL());
                     if (_videoField != null) {
-                        displayVideo();
+                        screen.add(_videoField);
+
+                        try {
+                            // Start video player
+                            _videoPlayer.start();
+                        } catch (final MediaException pe) {
+                            errorDialog("Player#start() threw " + pe.toString());
+                        }
                     }
                 }
+
+                pushScreen(screen);
             }
 
             server.finish(invoc, Invocation.OK);
@@ -206,10 +229,22 @@ public final class SendMediaDemo extends UiApplication implements
         if (event.equals(PlayerListener.END_OF_MEDIA)) {
             if (player == _audioPlayer) {
                 // We've finished playing the audio file, close the player and
-                // exit
+                // update screen
                 _audioPlayer.close();
             }
-            System.exit(0);
+
+            final Screen screen = getActiveScreen();
+            if (screen instanceof MainScreen) {
+                final Field field = screen.getField(0);
+                if (field instanceof LabelField) {
+                    final LabelField labelField = (LabelField) field;
+                    invokeLater(new Runnable() {
+                        public void run() {
+                            labelField.setText("End of media reached.");
+                        }
+                    });
+                }
+            }
         }
     }
 
@@ -232,6 +267,14 @@ public final class SendMediaDemo extends UiApplication implements
                             javax.microedition.media.Manager.createPlayer(url);
                     _audioPlayer.addPlayerListener(SendMediaDemo.this);
                     _audioPlayer.realize();
+
+                    // Cause playback to begin as soon as possible once start()
+                    // is called on the Player.
+                    final StreamingBufferControl sbc =
+                            (StreamingBufferControl) _audioPlayer
+                                    .getControl("net.rim.device.api.media.control.StreamingBufferControl");
+                    sbc.setBufferTime(0);
+
                     _audioPlayer.start();
 
                     // Create a volume control
@@ -247,8 +290,6 @@ public final class SendMediaDemo extends UiApplication implements
             }
         });
         thread.start();
-
-        requestBackground();
     }
 
     /**
@@ -296,6 +337,13 @@ public final class SendMediaDemo extends UiApplication implements
             _videoPlayer = javax.microedition.media.Manager.createPlayer(url);
             _videoPlayer.realize();
 
+            // Cause playback to begin as soon as possible once start()
+            // is called on the Player.
+            final StreamingBufferControl sbc =
+                    (StreamingBufferControl) _videoPlayer
+                            .getControl("net.rim.device.api.media.control.StreamingBufferControl");
+            sbc.setBufferTime(0);
+
             _vc = (VideoControl) _videoPlayer.getControl("VideoControl");
             if (_vc != null) {
                 _videoField =
@@ -331,24 +379,6 @@ public final class SendMediaDemo extends UiApplication implements
     }
 
     /**
-     * Creates a video screen and starts the video player
-     */
-    private void displayVideo() {
-        // Create and display screen
-        final VideoMainScreen screen = new VideoMainScreen();
-        screen.setTitle("Send Media Demo");
-        screen.add(_videoField);
-        pushScreen(screen);
-
-        try {
-            // Start video player
-            _videoPlayer.start();
-        } catch (final MediaException pe) {
-            errorDialog("Player#start() threw " + pe.toString());
-        }
-    }
-
-    /**
      * Returns a byte array containing data representing the image at the
      * specified URL
      * 
@@ -371,26 +401,6 @@ public final class SendMediaDemo extends UiApplication implements
     }
 
     /**
-     * Creates a screen and displays an image on it
-     * 
-     * @param data
-     *            The data representing the image to be rendered
-     */
-    private void displayImage(final byte[] data) {
-        // Create image field
-        final Bitmap image = Bitmap.createBitmapFromBytes(data, 0, -1, 5);
-        final BitmapField imageField =
-                new BitmapField(image, Field.FIELD_HCENTER);
-
-        // Create and display screen
-        final MainScreen screen =
-                new MainScreen(net.rim.device.api.ui.Manager.NO_VERTICAL_SCROLL);
-        screen.setTitle("Send Media Demo");
-        screen.add(imageField);
-        pushScreen(screen);
-    }
-
-    /**
      * Presents a dialog to the user with a given message
      * 
      * @param message
@@ -405,21 +415,41 @@ public final class SendMediaDemo extends UiApplication implements
     }
 
     /**
-     * A main screen in which to play video files
+     * A MainScreen subclass for displaying either an image, a video, or a
+     * status field to indicate an audio file is being played.
      */
-    final private class VideoMainScreen extends MainScreen {
+    final private class DemoMainScreen extends MainScreen {
+        public final static int AUDIO_TYPE = 0;
+        public final static int VIDEO_TYPE = 1;
+        public final static int IMAGE_TYPE = 2;
+
+        private int _mediaType = -1;
+
         /**
-         * Creates a new VideoMainScreen object
+         * Creates a new DemoMainScreen object
          */
-        VideoMainScreen() {
+        DemoMainScreen() {
             super(net.rim.device.api.ui.Manager.NO_VERTICAL_SCROLL);
+        }
+
+        /**
+         * Sets the media type for this screen
+         * 
+         * @param mediaType
+         *            The media type of which to associate this screen
+         */
+        public void setType(final int mediaType) {
+            _mediaType = mediaType;
         }
 
         /**
          * @see net.rim.device.api.ui.Manager#sublayout(int,int)
          */
         protected void sublayout(final int width, final int height) {
-            setVideoSize(Display.getWidth(), Display.getHeight());
+            if (_mediaType == VIDEO_TYPE) {
+                setVideoSize(Display.getWidth(), Display.getHeight());
+            }
+
             super.sublayout(width, height);
         }
 
@@ -438,6 +468,10 @@ public final class SendMediaDemo extends UiApplication implements
 
             if (_videoPlayer != null) {
                 _videoPlayer.close();
+            }
+
+            if (_audioPlayer != null) {
+                _audioPlayer.close();
             }
 
             return super.onClose();

@@ -36,6 +36,7 @@ import net.rim.device.api.command.Command;
 import net.rim.device.api.command.CommandHandler;
 import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.io.IOCancelledException;
+import net.rim.device.api.io.IOUtilities;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
@@ -83,10 +84,10 @@ public class HTTPDemo extends UiApplication {
     private ConnectionThread _connectionThread = new ConnectionThread();
 
     /**
-     * Entry point for application.
+     * Entry point for application
      * 
      * @param args
-     *            Command line arguments.
+     *            Command line arguments (not used)
      */
     public static void main(final String[] args) {
         // Create a new instance of the application and make the currently
@@ -162,7 +163,7 @@ public class HTTPDemo extends UiApplication {
              */
             public void execute(final ReadOnlyCommandMetadata metadata,
                     final Object context) {
-                _useWapStack = !_useWapStack; // Toggle the wap stack option.
+                _useWapStack = !_useWapStack; // Toggle the wap stack option
             }
         }));
 
@@ -194,7 +195,7 @@ public class HTTPDemo extends UiApplication {
         _content = new RichTextField();
         _mainScreen.add(_content);
 
-        // Start the helper threads.
+        // Start the helper threads
         _statusThread.start();
         _connectionThread.start();
 
@@ -202,32 +203,32 @@ public class HTTPDemo extends UiApplication {
     }
 
     /**
-     * Menu item to fetch content from URL specified in URL field.
+     * Menu item to fetch content from URL specified in URL field
      */
     private final MenuItem _fetchMenuItem;
 
     /**
-     * Clears the content field.
+     * Clears the content field
      */
     private final MenuItem _clearContent;
 
     /**
-     * Menu item to fetch pre-defined sample HTTPS page.
+     * Menu item to fetch pre-defined sample HTTPS page
      */
     private final MenuItem _fetchHTTPSPage;
 
     /**
-     * Toggles the wap stack option.
+     * Toggles the wap stack option
      */
     private final MenuItem _wapStackOption;
 
     /**
-     * Menu item to display the wap options screen.
+     * Menu item to display the wap options screen
      */
     private final MenuItem _wapStackOptionScreen;
 
     /**
-     * Stops current fetch and initiates a new fetch.
+     * Stops current fetch and initiates a new fetch
      * 
      * @param url
      *            The url of the content to fetch
@@ -250,13 +251,13 @@ public class HTTPDemo extends UiApplication {
     }
 
     /**
-     * Fetches the content on the speicifed url.
+     * Fetches the content on the speicifed url
      * 
      * @param url
      *            The url of the content to fetch
      */
     private void fetchPage(String url) {
-        // Normalize the url.
+        // Normalize the url
         final String lcase = url.toLowerCase();
 
         boolean validHeader = false;
@@ -274,22 +275,22 @@ public class HTTPDemo extends UiApplication {
         }
 
         if (!validHeader) {
-            url = HTTP_PROTOCOL[0] + url; // Prepend the protocol specifier.
+            url = HTTP_PROTOCOL[0] + url; // Prepend the protocol specifier
         }
 
         // It is illegal to open a connection on the event thread. We need to
         // spawn a new thread for connection operations.
         _connectionThread.fetch(url);
 
-        // Create a thread to display the status of the current operation.
+        // Create a thread to display the status of the current operation
         _statusThread.go();
     }
 
     /**
-     * Method to update the content field.
+     * Method to update the content field
      * 
      * @param text
-     *            The text to display.
+     *            The text to display
      */
     private void updateContent(final String text) {
         // This will create significant garbage, but avoids threading issues
@@ -308,8 +309,8 @@ public class HTTPDemo extends UiApplication {
      * tag.
      * 
      * @param text
-     *            The text to be prepared for display.
-     * @return The processed text.
+     *            The text to be prepared for display
+     * @return The processed text
      */
     private String prepareData(final String text) {
         final int text_length = text.length();
@@ -398,12 +399,11 @@ public class HTTPDemo extends UiApplication {
     }
 
     /**
-     * Checks whether a char is a carriage return, line feed or tab character.
+     * Checks whether a char is a carriage return, line feed or tab character
      * 
      * @param c
-     *            The char to check.
-     * @return True if char is a carriage return or a line feed, otherwise
-     *         false.
+     *            The char to check
+     * @return True if char is a carriage return or a line feed, otherwise false
      */
     private boolean specialChar(final char c) {
         return c == LF || c == CR || c == TAB;
@@ -423,7 +423,7 @@ public class HTTPDemo extends UiApplication {
         private volatile boolean _stop = false;
 
         /**
-         * Retrieves the url this thread is trying to connect to.
+         * Retrieves the url this thread is trying to connect to
          * 
          * @return The url that this thread is trying to connect to
          */
@@ -432,7 +432,7 @@ public class HTTPDemo extends UiApplication {
         }
 
         /**
-         * Tells whether the thread has started fetching yet.
+         * Indicates whether the thread has started fetching yet
          * 
          * @return True if the fetching has started, false otherwise
          */
@@ -441,7 +441,7 @@ public class HTTPDemo extends UiApplication {
         }
 
         /**
-         * Fetch a page.
+         * Fetches a page
          * 
          * @param url
          *            The url of the page to fetch
@@ -452,7 +452,7 @@ public class HTTPDemo extends UiApplication {
         }
 
         /**
-         * Stop the thread.
+         * Stop the thread
          */
         private void stop() {
             _stop = true;
@@ -468,7 +468,7 @@ public class HTTPDemo extends UiApplication {
             for (;;) {
                 // Thread control
                 while (!_fetchStarted && !_stop) {
-                    // Sleep for a bit so we don't spin.
+                    // Sleep for a bit so we don't spin
                     try {
                         sleep(TIMEOUT);
                     } catch (final InterruptedException e) {
@@ -483,7 +483,7 @@ public class HTTPDemo extends UiApplication {
 
                 String content = "";
 
-                // Open the connection and extract the data.
+                // Open the connection and extract the data
                 try {
                     final HttpConnection httpConn =
                             (HttpConnection) Connector.open(getUrl());
@@ -501,26 +501,14 @@ public class HTTPDemo extends UiApplication {
 
                         final InputStream input = httpConn.openInputStream();
 
-                        final byte[] data = new byte[256];
-                        int len = 0;
-                        int size = 0;
-                        final StringBuffer raw = new StringBuffer();
+                        final byte[] bytes = IOUtilities.streamToBytes(input);
 
-                        while (-1 != (len = input.read(data))) {
-                            // Exit condition for the thread. An IOException is
-                            // thrown because of the call to httpConn.close(),
-                            // causing the thread to terminate.
-                            if (_stop) {
-                                httpConn.close();
-                                input.close();
-                            }
-                            raw.append(new String(data, 0, len));
-                            size += len;
-                        }
-
+                        final StringBuffer raw =
+                                new StringBuffer(new String(bytes));
                         raw.insert(0, "bytes received]\n");
-                        raw.insert(0, size);
+                        raw.insert(0, bytes.length);
                         raw.insert(0, '[');
+
                         content = raw.toString();
 
                         if (htmlContent) {
@@ -539,7 +527,7 @@ public class HTTPDemo extends UiApplication {
                     return;
                 }
 
-                // Make sure status thread doesn't overwrite our content
+                // Make sure status thread doesn't overwrite the content
                 stopStatusThread();
                 updateContent(content);
 
@@ -556,9 +544,9 @@ public class HTTPDemo extends UiApplication {
             _statusThread.pause();
             try {
                 synchronized (_statusThread) {
-                    // Check the paused condition, in case the notify fires
-                    // prior to our wait, in which
-                    // case we may never see that notify.
+                    // Check the paused condition, in case the notify
+                    // fires prior to our wait, in which case we may
+                    // never see that notify.
                     while (!_statusThread.isPaused()) {
                         ;
                     }
@@ -604,7 +592,7 @@ public class HTTPDemo extends UiApplication {
         }
 
         /**
-         * Queries the paused status
+         * Queries the paused status of this thread
          * 
          * @return True if the thread is paused, false otherwise
          */
@@ -628,7 +616,7 @@ public class HTTPDemo extends UiApplication {
         public void run() {
             int i = 0;
 
-            // Set up the status messages.
+            // Set up the status messages
             final String[] statusMsg = new String[6];
             final StringBuffer status = new StringBuffer("Working");
             statusMsg[0] = status.toString();
@@ -639,7 +627,7 @@ public class HTTPDemo extends UiApplication {
 
             for (;;) {
                 while (!_stop && !_running) {
-                    // Sleep a bit so we don't spin.
+                    // Sleep a bit so we don't spin
                     try {
                         sleep(THREAD_TIMEOUT);
                     } catch (final InterruptedException e) {
@@ -653,12 +641,12 @@ public class HTTPDemo extends UiApplication {
 
                 i = 0;
 
-                // Clear the status buffer.
+                // Clear the status buffer
                 status.delete(0, status.length());
 
                 for (;;) {
-                    // We're not synchronizing on the boolean flag! Therefore,
-                    // value is declared volatile.
+                    // We're not synchronizing on the boolean flag,
+                    // therefore, value is declared volatile.
                     if (_stop) {
                         return;
                     }
@@ -715,11 +703,10 @@ public class HTTPDemo extends UiApplication {
         }
 
         /**
-         * Prevent the save dialog from being displayed.
-         * 
          * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
          */
         public boolean onSavePrompt() {
+            // Prevent the save dialog from being displayed
             return true;
         }
 
@@ -740,7 +727,7 @@ public class HTTPDemo extends UiApplication {
                 final int time) {
             if (getLeafFieldWithFocus() == _url && key == Characters.ENTER) {
                 _fetchMenuItem.run();
-                return true; // I've absorbed this event, so return true.
+                return true; // Consume the key event
             } else {
                 return super.keyChar(key, status, time);
             }

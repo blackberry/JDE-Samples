@@ -141,7 +141,7 @@ public final class PhoneMultiLineScreen extends MainScreen {
     }
 
     /**
-     * @see Screen#onClose()
+     * @see net.rim.device.api.ui.Screen#onClose()
      */
     public boolean onClose() {
         Phone.removePhoneListener(_action);

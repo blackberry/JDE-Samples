@@ -131,7 +131,7 @@ public class FileExplorerScreen extends MainScreen {
         _view.setDataTemplate(dataTemplate);
         dataTemplate.useFixedHeight(true);
 
-        // Add the file to the screen
+        // Add the TableView to the screen
         add(_view);
 
         readRoots(ROOT);
@@ -218,10 +218,11 @@ public class FileExplorerScreen extends MainScreen {
         // Reset the table contents
         _model.removeAllRows();
 
-        FileConnection fc = null;
         Enumeration rootEnum = null;
 
         if (root != null) {
+            FileConnection fc = null;
+
             // Open the file system and get the list of directories/files
             try {
                 fc = (FileConnection) Connector.open(root);
@@ -276,8 +277,8 @@ public class FileExplorerScreen extends MainScreen {
                     new FileHolder(file, fc.isDirectory());
             _model.addRow(fileholder);
         } catch (final IOException e) {
-            AttachmentDemo
-                    .errorDialog("Connector.open() threw " + e.toString());
+            System.out.println("Connector.open(" + file + ") threw "
+                    + e.toString());
         } finally {
             if (fc != null) {
                 // Everything is read. Close the connection.
@@ -375,7 +376,7 @@ public class FileExplorerScreen extends MainScreen {
         }
 
         /**
-         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doRemoveRowAt()
+         * @see net.rim.device.api.ui.component.table.TableModelAdapter#doRemoveRowAt(int)
          */
         protected boolean doRemoveRowAt(final int index) {
             _elements.removeElementAt(index);
@@ -390,7 +391,7 @@ public class FileExplorerScreen extends MainScreen {
         }
 
         /**
-         * @see net.rim.device.api.ui.component.table.TableModelAdapter#removeAllRows()
+         * Removes all rows by repeatedly invoking {@link #removeRowAt}
          */
         public void removeAllRows() {
             while (getNumberOfRows() > 0) {

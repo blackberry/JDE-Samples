@@ -41,7 +41,7 @@ import net.rim.device.api.ui.component.Dialog;
 public class VideoRecordingDemo extends UiApplication {
     private static final int ANY_ENCODING = 0;
 
-    private static final int MIN_FILE_SYSTEM_SIZE = 1024 * 50; // 50 MB
+    public static final int MIN_FILE_SYSTEM_SIZE = 1024 * 50; // 50 MB
 
     /**
      * Creates a new VideoRecordingDemo object

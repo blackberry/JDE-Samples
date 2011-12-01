@@ -113,7 +113,7 @@ public class WireFrameLayoutDemo extends UiApplication {
         }
 
         /**
-         * @see FieldChangeListener#fieldChanged(field, int)
+         * @see FieldChangeListener#fieldChanged(Field, int)
          */
         public void fieldChanged(final Field field, final int context) {
             // Push appropriate screen depending on which button was clicked

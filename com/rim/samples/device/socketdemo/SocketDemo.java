@@ -41,7 +41,7 @@ public class SocketDemo extends UiApplication {
     /**
      * Entry point for application.
      * 
-     * @param Command
+     * @param args
      *            line arguments.
      */
     public static void main(final String[] args) {

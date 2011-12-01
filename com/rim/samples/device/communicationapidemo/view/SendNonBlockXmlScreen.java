@@ -184,7 +184,5 @@ public final class SendNonBlockXmlScreen extends MainScreen {
                     "Wait for response: timed out after " + timeout + " sec";
             Dialog.alert(timeoutMessage);
         }
-
     }
-
 }

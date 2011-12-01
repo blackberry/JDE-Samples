@@ -79,11 +79,10 @@ public final class EncodingProperties {
     }
 
     /**
-     * Return the encoding as a coherent String to be used in menus
-     * 
      * @see Object#toString()
      */
     public String toString() {
+        // Return the encoding as a coherent String to be used in menus
         final StringBuffer display = new StringBuffer();
 
         display.append(_width);

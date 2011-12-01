@@ -163,7 +163,9 @@ class HomeScreenDemo extends UiApplication {
         FileConnection fc = null;
 
         try {
-            fc = (FileConnection) Connector.open("file:///" + root);
+            fc =
+                    (FileConnection) Connector.open("file:///" + root,
+                            Connector.READ);
 
             if (fc.isDirectory()) {
                 final Enumeration e = fc.list();
@@ -264,17 +266,15 @@ class HomeScreenDemo extends UiApplication {
             }
 
             // Set the list to display when a list item is activated
-            _list.setCommand(new CommandHandler() {
+            _list.setCommand(new Command(new CommandHandler() {
                 /**
-                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
-                 *      Object)
+                 * @see CommandHandler#execute(ReadOnlyCommandMetadata, Object)
                  */
                 public void execute(final ReadOnlyCommandMetadata metadata,
                         final Object context) {
                     displayDirectoryPictures(_list.get(_list.getFocusRow()));
                 }
-
-            }, null, null);
+            }));
 
             if (DeviceInfo.hasCamera()) {
                 add(new RichTextField("\n...or invoke the camera application",

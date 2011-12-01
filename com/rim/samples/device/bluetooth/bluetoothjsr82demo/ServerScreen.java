@@ -283,12 +283,11 @@ public final class ServerScreen extends MainScreen {
     }
 
     /**
-     * A class that handles incomming requests from a connected OPP client
-     * device
+     * A class that handles incoming requests from a connected OPP client device
      */
     class ObexServerRequestHandler extends ServerRequestHandler {
-        /**
-         * @see javax.obex.SeverRequestHandler#onConnect(HeaderSet, HeaderSet)
+        /*
+         * @see javax.obex.ServerRequestHandler#onConnect(HeaderSet, HeaderSet)
          */
         public int onConnect(final HeaderSet request, final HeaderSet reply) {
             updateStatus("[SERVER] OPP session created");
@@ -296,7 +295,7 @@ public final class ServerScreen extends MainScreen {
         }
 
         /**
-         * @see javax.obex.SeverRequestHandler#onPut(Operation)
+         * @see javax.obex.ServerRequestHandler#onPut(Operation)
          */
         public int onPut(final Operation op) {
             // Display information about the data received
@@ -322,7 +321,7 @@ public final class ServerScreen extends MainScreen {
         }
 
         /**
-         * @see javax.obex.SeverRequestHandler#onDisconnect(HeaderSet,
+         * @see javax.obex.ServerRequestHandler#onDisconnect(HeaderSet,
          *      HeaderSet)
          */
         public void onDisconnect(final HeaderSet req, final HeaderSet resp) {

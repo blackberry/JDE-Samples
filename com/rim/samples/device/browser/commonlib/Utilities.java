@@ -43,7 +43,7 @@ import net.rim.device.api.util.StringUtilities;
  * BrowserContentManagerDemo and BrowserFieldDemo. This class allows the
  * aforementioned classes to make a connection to a specified url.
  */
-class Utilities {
+public class Utilities {
     /**
      * Connect to a web resource
      * 
@@ -56,7 +56,7 @@ class Utilities {
      * @return The HttpConnection object representing the connection to the
      *         resource, null if no connection could be made
      */
-    static HttpConnection makeConnection(final String url,
+    public static HttpConnection makeConnection(final String url,
             final HttpHeaders requestHeaders, final byte[] postData) {
         HttpConnection conn = null;
         OutputStream out = null;

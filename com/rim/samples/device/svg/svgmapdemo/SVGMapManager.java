@@ -35,7 +35,7 @@ public final class SVGMapManager extends VerticalFieldManager {
     private boolean _isPanning;
 
     /**
-     * @see Manager#moveFocus(int,int,int)
+     * @see net.rim.device.api.ui.Manager#moveFocus(int,int,int)
      */
     protected int moveFocus(final int amount, final int status, final int time) {
         if (_isPanning) {

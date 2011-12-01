@@ -278,7 +278,7 @@ public final class RMSDemo extends MIDlet implements CommandListener {
     /**
      * Not implemented.
      * 
-     * @see javax.microedition.midlet.MIDlet#destroyApp()
+     * @see javax.microedition.midlet.MIDlet#destroyApp(boolean)
      */
     public void destroyApp(final boolean unconditional) {
         // Not implemented

@@ -54,7 +54,8 @@ public final class SendFireForgetScreen extends MainScreen {
         // Initialize UI components
         final LabelField instructions =
                 new LabelField(
-                        "Enter a destination URL and send a fire-and-forget message to it. Responses are not processed.",
+                        "Enter a destination URL and send a fire-and-forget message to it. "
+                                + "Responses are not processed.",
                         Field.NON_FOCUSABLE);
 
         _isLocal = new CheckboxField("Local Address ", true);

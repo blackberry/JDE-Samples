@@ -188,10 +188,10 @@ final class UdpDemoScreen extends MainScreen implements FieldChangeListener {
     }
 
     /**
-     * @see net.rim.device.api.ui.MainScreen#onSavePrompt()
+     * @see net.rim.device.api.ui.container.MainScreen#onSavePrompt()
      */
     protected boolean onSavePrompt() {
-        // Supress the save dialog
+        // Suppress the save dialog
         return true;
     }
 

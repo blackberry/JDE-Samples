@@ -197,7 +197,7 @@ public final class IconToolbarComponent extends Field implements
     }
 
     /**
-     * @see Field#onUnFocus()
+     * @see Field#onUnfocus()
      */
     protected void onUnfocus() {
         super.onUnfocus();
@@ -215,7 +215,7 @@ public final class IconToolbarComponent extends Field implements
     }
 
     /**
-     * @see Field#getAccesssibleContext()
+     * @see Field#getAccessibleContext()
      */
     public AccessibleContext getAccessibleContext() {
         return this;
@@ -298,7 +298,7 @@ public final class IconToolbarComponent extends Field implements
     }
 
     /**
-     * @see AccessibleContext#getAccessibleChildSelected(int)
+     * @see AccessibleContext#isAccessibleChildSelected(int)
      */
     public boolean isAccessibleChildSelected(final int index) {
         // Check whether child icon at the specified index is selected

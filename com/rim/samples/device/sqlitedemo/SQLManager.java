@@ -174,19 +174,19 @@ public class SQLManager {
      */
     void deleteCategory(final int id) {
         try {
-            // Delete the record in the Category database table
-            // corresponding to the highlighted category.
+            // Delete all items in the DirectoryItems database
+            // table belonging to the highlighted category.
             Statement statement =
-                    _db.createStatement("DELETE FROM Category WHERE category_id = ?");
+                    _db.createStatement("DELETE FROM DirectoryItems WHERE category_id = ?");
             statement.prepare();
             statement.bind(1, id);
             statement.execute();
             statement.close();
 
-            // Delete all items in the DirectoryItems database
-            // table belonging to the highlighted category.
+            // Delete the record in the Category database table
+            // corresponding to the highlighted category.
             statement =
-                    _db.createStatement("DELETE FROM DirectoryItems WHERE category_id = ?");
+                    _db.createStatement("DELETE FROM Category WHERE category_id = ?");
             statement.prepare();
             statement.bind(1, id);
             statement.execute();

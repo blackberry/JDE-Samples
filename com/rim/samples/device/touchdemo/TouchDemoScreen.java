@@ -264,8 +264,8 @@ public final class TouchDemoScreen extends MainScreen {
     /**
      * @see Manager#sublayout(int, int)
      */
-    protected void sublayout(final int height, final int width) {
-        super.sublayout(height, width);
+    protected void sublayout(final int width, final int height) {
+        super.sublayout(width, height);
 
         // Calculate the title height
         final Manager manager = getMainManager();

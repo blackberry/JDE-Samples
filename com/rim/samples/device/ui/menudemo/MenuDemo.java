@@ -195,7 +195,7 @@ public class MenuDemo extends UiApplication {
         }
 
         /**
-         * @see MainScreen#makeMenu(Menu, context)
+         * @see MainScreen#makeMenu(Menu, int)
          */
         protected void makeMenu(final Menu menu, final int context) {
             if (_radioButtonImage.isSelected()) {

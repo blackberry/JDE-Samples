@@ -261,7 +261,7 @@ public final class DemoMessage implements ApplicationMessage {
     }
 
     /**
-     * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getCookie()
+     * @see net.rim.blackberry.api.messagelist.ApplicationMessage#getCookie(int)
      */
     public Object getCookie(final int cookieId) {
         return null;

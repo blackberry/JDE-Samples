@@ -1,0 +1,67 @@
+## RIM Java Development Environment
+# RIM Project file
+#
+# This file is generated and managed by BlackBerry developer tools.
+# It SHOULD NOT BE modified manually.
+#
+AddOn=0
+AlwaysBuild=0
+[AlxImports
+]
+AutoRestart=0
+[ClassProtection
+]
+[CustomBuildFiles
+]
+[CustomBuildRules
+]
+[DefFiles
+]
+[DependsOn
+]
+ExcludeFromBuildAll=0
+Exported=0
+[Files
+res\img\character.png
+res\img\level_block.png
+res\img\level_end.png
+res\img\lose.png
+res\img\obstacle_ball.png
+res\img\obstacle_spikewheel.png
+res\img\openglspritegamedemo_jde.png
+res\img\RandOmazeLogo.png
+res\img\win.png
+res\level\levelone.xml
+res\level\leveltwo.xml
+Sprite.java
+SpriteGame.java
+SpriteGameCharacter.java
+SpriteGameGLField.java
+SpriteGameLevel.java
+SpriteGameScreen.java
+SpriteGameSplashScreen.java
+]
+HaveAlxImports=0
+HaveDefs=0
+HaveImports=0
+[Icons
+res\img\openglspritegamedemo_jde.png
+]
+[ImplicitRules
+]
+[Imports
+]
+Listing=0
+Options=-quiet 
+OutputFileName=OpenGLSpriteGameDemo
+[PackageProtection
+]
+RibbonPosition=0
+[RolloverIcons
+]
+RunOnStartup=0
+SkipCompile=0
+StartupTier=7
+SystemModule=0
+Title=OpenGL Sprite Game Demo
+Type=0

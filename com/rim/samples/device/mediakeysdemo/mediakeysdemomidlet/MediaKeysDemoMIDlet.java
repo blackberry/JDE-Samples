@@ -177,7 +177,7 @@ public final class MediaKeysDemoMIDlet extends MIDlet implements
 
             // Allows user to toggle the 'media player mode' by clicking the
             // trackball/trackpad.
-            if (keyCode == MediaKeysMIDletConstants.TRACKBALL
+            if (keyCode == MediaKeysMIDletConstants.TRACKPAD
                     && _mediaBehaviourControl != null) {
                 final boolean enabled =
                         !_mediaBehaviourControl.isMediaPlayerModeEnabled();

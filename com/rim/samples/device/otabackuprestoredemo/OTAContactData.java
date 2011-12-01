@@ -33,7 +33,7 @@ import net.rim.device.api.util.Persistable;
  * This class represents a contact, encapsulating the contact's information. It
  * also implements the SyncObject and Persistable interfaces which allow the
  * OTAContactData to synchronize to a BES and allow the information to be
- * commited to a persistant store.
+ * committed to a persistent store.
  */
 public class OTAContactData implements SyncObject, Persistable {
     private int _uid;
@@ -159,5 +159,24 @@ public class OTAContactData implements SyncObject, Persistable {
         }
 
         return false;
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    public int hashCode() {
+        int hashCode = 0;
+
+        final String first = getFirst();
+        if (first != null) {
+            hashCode += first.hashCode();
+        }
+
+        final String last = getLast();
+        if (last != null) {
+            hashCode += last.hashCode();
+        }
+
+        return hashCode;
     }
 }

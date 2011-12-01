@@ -77,43 +77,24 @@ public final class PersistentStoreDemo extends UiApplication {
      * Entry point for application
      * 
      * @param args
-     *            Command-line arguments
+     *            Command-line arguments (not used)
      */
     public static void main(final String[] args) {
-        if (args != null && args.length > 0 && args[0].equals("startup")) {
-            final PersistentObject store =
-                    PersistentStore
-                            .getPersistentObject(PERSISTENT_STORE_DEMO_ID);
-
-            // Synchronize on the PersistentObject so that no other object can
-            // acquire the lock before we finish our commit operation.
-            synchronized (store) {
-                // If the PersistentObject is empty, initialize it
-                if (store.getContents() == null) {
-                    store.setContents(new Vector());
-                    PersistentObject.commit(store);
-                }
-            }
-
-            // Register a PersistentContentListener on device start-up.
-            // The listener listens for changes to the device content
-            // protection and compression settings as well as persistent
-            // content state changes.
-            PersistentContent.addListener(new PersistentStoreListener());
-        } else {
-            // Launch GUI version of the application
-            final PersistentStoreDemo theApp = new PersistentStoreDemo();
-
-            // Make the currently running thread the application's event
-            // dispatch thread and begin processing events.
-            theApp.enterEventDispatcher();
-        }
+        // Create a new instance of the application and make the currently
+        // running thread the application's event dispatch thread.
+        final PersistentStoreDemo theApp = new PersistentStoreDemo();
+        theApp.enterEventDispatcher();
     }
 
     /**
      * Creates a new PersistentStoreDemo object
      */
     public PersistentStoreDemo() {
+        // The PersistentContentListener listens for changes to the device
+        // content protection and compression settings as well as persistent
+        // content state changes.
+        PersistentContent.addListener(new PersistentStoreListener());
+
         // Persist an object protected by a code signing key. Please see
         // instructions above.
         final PersistentObject controlledStore =
@@ -130,6 +111,13 @@ public final class PersistentStoreDemo extends UiApplication {
 
         // Retrieve the persistent object for this application
         _store = PersistentStore.getPersistentObject(PERSISTENT_STORE_DEMO_ID);
+
+        synchronized (_store) {
+            // If the PersistentObject is empty, initialize it
+            if (_store.getContents() == null) {
+                _store.setContents(new Vector());
+            }
+        }
 
         // Retrieve the saved Meeting objects from the persistent store
         _meetings = (Vector) _store.getContents();

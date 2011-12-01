@@ -37,7 +37,6 @@ import net.rim.device.api.command.CommandHandler;
 import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.EncodedImage;
 import net.rim.device.api.ui.MenuItem;
-import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.extension.container.ZoomScreen;
 import net.rim.device.api.util.StringProvider;
@@ -46,36 +45,44 @@ import net.rim.device.api.util.StringProvider;
  * A screen to display an image taken with the camera demo
  */
 public final class ImageScreen extends ZoomScreen {
-
-    /** The base file name used to store pictures */
     private static final String FILE_NAME = System
             .getProperty("fileconn.dir.photos")
             + "IMAGE";
-
-    /** The extension of the pictures to be saved */
     private static final String EXTENSION = ".bmp";
 
-    /** A counter for the number of snapshots taken */
-    private static int _counter;
+    private static int _counter; // A counter for the number of snapshots taken
+
+    private final SaveMenuItem _saveMenuItem;
 
     /**
      * Creates a new ImageScreen object
      * 
      * @param raw
      *            A byte array representing an image
-     * @param raw
+     * @param image
      *            Image to display
      */
     public ImageScreen(final byte[] raw, final EncodedImage image) {
         super(image);
-        addMenuItem(new SaveMenuItem("Save", raw));
+
+        _saveMenuItem = new SaveMenuItem("Save", raw);
+        addMenuItem(_saveMenuItem);
+
+        // Initialize the zoom screen to be zoomed all the way out
+        setViewableArea(0, 0, 0);
+    }
+
+    /**
+     * @see ZoomScreen#zoomedOutNearToFit()
+     */
+    public void zoomedOutNearToFit() {
+        close();
     }
 
     /**
      * A MenuItem class to save the displayed image as a file
      */
     private final class SaveMenuItem extends MenuItem {
-
         private final byte[] _raw;
 
         /**
@@ -98,15 +105,15 @@ public final class ImageScreen extends ZoomScreen {
                 public void execute(final ReadOnlyCommandMetadata metadata,
                         final Object context) {
                     try {
-                        // Create the connection to a file that may or
+                        // Create connection to a file that may or
                         // may not exist.
                         FileConnection file =
                                 (FileConnection) Connector.open(FILE_NAME
                                         + _counter + EXTENSION);
 
-                        // If the file exists, increment the counter until we
-                        // find
-                        // one that hasn't been created yet.
+                        // If the file exists, increment the counter and try
+                        // again until we have a filename for a file that hasn't
+                        // been created yet.
                         while (file.exists()) {
                             file.close();
                             ++_counter;
@@ -125,38 +132,23 @@ public final class ImageScreen extends ZoomScreen {
                         // Close the connections
                         out.close();
                         file.close();
+
+                        // Inform the user where the file has been saved
+                        Dialog.inform("Saved to " + FILE_NAME + _counter
+                                + EXTENSION);
+
+                        // Remove the save menu item, as the file has
+                        // already been saved.
+                        ImageScreen.this.removeMenuItem(_saveMenuItem);
+
+                        // Don't close the screen directly, leave it open to
+                        // allow the user to send the image.
                     } catch (final IOException ioe) {
                         CameraDemo.errorDialog("ERROR " + ioe.getClass()
                                 + ":  " + ioe.getMessage());
                     }
-
-                    // Inform the user where the file has been saved
-                    Dialog.inform("Saved to " + FILE_NAME + _counter
-                            + EXTENSION);
-
-                    // Increment the image counter
-                    ++_counter;
-
-                    // Return to the main camera screen
-                    UiApplication.getUiApplication()
-                            .popScreen(ImageScreen.this);
                 }
             }));
         }
-    }
-
-    /**
-     * @see net.rim.device.api.ui.Screen#invokeAction(int)
-     */
-    protected boolean invokeAction(final int action) {
-        final boolean handled = super.invokeAction(action);
-
-        if (!handled) {
-            if (action == ACTION_INVOKE) {
-                return true;
-            }
-        }
-
-        return handled;
     }
 }

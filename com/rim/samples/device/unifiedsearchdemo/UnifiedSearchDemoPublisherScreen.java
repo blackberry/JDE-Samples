@@ -1,7 +1,27 @@
 /*
  * UnifiedSearchDemoPublisherScreen.java
  *
- * AUTO_COPY_RIGHT_SUB_TAG
+ * Copyright © 1998-2011 Research In Motion Limited
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Note: For the sake of simplicity, this sample application may not leverage
+ * resource bundles and resource strings.  However, it is STRONGLY recommended
+ * that application developers make use of the localization features available
+ * within the BlackBerry development platform to ensure a seamless application
+ * experience across a variety of languages and geographies.  For more information
+ * on localizing your application, please refer to the BlackBerry Java Development
+ * Environment Development Guide associated with this release.
  */
 
 package com.rim.samples.device.unifiedsearchdemo;
@@ -30,23 +50,25 @@ import net.rim.device.api.unifiedsearch.searchables.SearchableContentTypeConstan
  */
 public class UnifiedSearchDemoPublisherScreen extends MainScreen implements
         FieldChangeListener {
-    private LabelField _poiListTitle;
-    private ObjectListField _poiList;
-    private ButtonField _addPoiButton, _publishButton, _searchButton,
-            _addFromFileButton;
-    private final Vector _poiVector = new Vector();
-    private final PointOfInterestPublisher _poiPublisher;
+    private LabelField _listTitle;
+    private ObjectListField _listField;
+    private ButtonField _addButton;
+    private ButtonField _publishButton;
+    private ButtonField _searchButton;
+    private ButtonField _addFromFileButton;
+    private final Vector _dataObjects;
+    private final UnifiedSearchDemoPublisher _publisher;
 
     /**
      * Creates a new UnifiedSearchDemoPublisherScreen object
      */
     public UnifiedSearchDemoPublisherScreen(
-            final PointOfInterestPublisher poiPublisher) {
+            final UnifiedSearchDemoPublisher publisher) {
         super(NO_VERTICAL_SCROLL);
 
-        _poiPublisher = poiPublisher;
+        _publisher = publisher;
 
-        setTitle("Unified Search Demo");
+        _dataObjects = new Vector();
 
         createUI();
     }
@@ -55,7 +77,7 @@ public class UnifiedSearchDemoPublisherScreen extends MainScreen implements
      * @see net.rim.device.api.ui.Screen#onSavePrompt()
      */
     protected boolean onSavePrompt() {
-        if (_poiVector.size() == 0) {
+        if (_dataObjects.size() == 0) {
             // Suppress the save dialog
             return true;
         }
@@ -67,96 +89,96 @@ public class UnifiedSearchDemoPublisherScreen extends MainScreen implements
      * @see Screen#save()
      */
     public void save() {
-        _poiPublisher.insertPOIs(_poiVector);
+        _publisher.insertData(_dataObjects);
 
-        // Clear POIs from the collection and list
-        _poiVector.removeAllElements();
-        _poiList.set(null);
+        // Clear data from the collection and list
+        _dataObjects.removeAllElements();
+        _listField.set(null);
         setDirty(false);
     }
 
     /**
-     * Adds some points of interest to the screen's collection
+     * Adds some data to the screen's collection
      */
-    private void onAddPOIs() {
-        // Add new POIs to collection
-        _poiVector.addElement(new PointOfInterest("Rim One", "175 Columbia St",
+    private void onAddData() {
+        // Add new data to collection
+        _dataObjects.addElement(new UnifiedSearchDemoDataObject("Rim One",
+                "175 Columbia St",
                 SearchableContentTypeConstants.CONTENT_TYPE_LOCATION));
-        _poiVector.addElement(new PointOfInterest("Rim Two", "295 Phillip St",
+        _dataObjects.addElement(new UnifiedSearchDemoDataObject("Rim Two",
+                "295 Phillip St",
                 SearchableContentTypeConstants.CONTENT_TYPE_LOCATION));
-        _poiVector.addElement(new PointOfInterest("Rim Three",
+        _dataObjects.addElement(new UnifiedSearchDemoDataObject("Rim Three",
                 "185 Columbia St",
                 SearchableContentTypeConstants.CONTENT_TYPE_LOCATION));
-        _poiVector.addElement(new PointOfInterest("John Graham", "aaa@bbb.com",
+        _dataObjects.addElement(new UnifiedSearchDemoDataObject("John Graham",
+                "aaa@bbb.com",
                 SearchableContentTypeConstants.CONTENT_TYPE_CONTACTS));
-        _poiVector.addElement(new PointOfInterest("Google",
-                "http://www.google.com/",
+        _dataObjects.addElement(new UnifiedSearchDemoDataObject("BlackBerry",
+                "http://mobile.blackberry.com",
                 SearchableContentTypeConstants.CONTENT_TYPE_BROWSER));
 
-        updatePOIs();
+        updateData();
     }
 
     /**
-     * Updates the screen's list of POIs
+     * Updates the screen's list of data
      */
-    private void updatePOIs() {
-        // Update the UI list to display the new POIs
-        final Object[] elementArray = new Object[_poiVector.size()];
-        _poiVector.copyInto(elementArray);
-        _poiList.set(elementArray);
+    private void updateData() {
+        // Update the UI list to display the new data
+        final Object[] elementArray = new Object[_dataObjects.size()];
+        _dataObjects.copyInto(elementArray);
+        _listField.set(elementArray);
     }
 
     /**
-     * Retrieves PointOfInterest objects represented in a file
+     * Retrieves data objects represented in a file
      */
     private void onAddFromFile() {
-        final InputStream is = getClass().getResourceAsStream("/POIs.txt");
+        final InputStream is = getClass().getResourceAsStream("/data.txt");
         if (is == null) {
             UnifiedSearchDemo.errorDialog("Could not find file resource");
         } else {
             try {
-                final Vector newPois =
-                        UnifiedSearchDemoFileReader.getPoisFromStream(is);
-                if (newPois != null) {
-                    final int size = newPois.size();
+                final Vector objectsFromFile =
+                        UnifiedSearchDemoFileReader.getDataFromStream(is);
+                if (objectsFromFile != null) {
+                    final int size = objectsFromFile.size();
                     for (int i = 0; i < size; ++i) {
-                        _poiVector.addElement(newPois.elementAt(i));
+                        _dataObjects.addElement(objectsFromFile.elementAt(i));
                     }
-                    updatePOIs();
+                    updateData();
                 }
             } catch (final IOException ioe) {
-                UnifiedSearchDemo
-                        .errorDialog("Could not add points of interest from file: "
-                                + ioe.getMessage());
+                UnifiedSearchDemo.errorDialog("Could not add data from file: "
+                        + ioe.getMessage());
             }
         }
     }
 
     /**
-     * Creates the user interface fields for the screen
+     * Creates the user interface for the screen
      */
     private void createUI() {
+        setTitle("Unified Search Demo");
+
         // Add a label for the list
-        _poiListTitle =
-                new LabelField("Points of interest", Field.USE_ALL_WIDTH);
-        _poiListTitle.setBackground(BackgroundFactory
+        _listTitle = new LabelField("Data: ", Field.USE_ALL_WIDTH);
+        _listTitle.setBackground(BackgroundFactory
                 .createSolidTransparentBackground(Color.DARKBLUE, 128));
-        add(_poiListTitle);
+        add(_listTitle);
 
         // Create list field
-        _poiList = new ObjectListField();
+        _listField = new ObjectListField();
 
         // Initialize buttons
-        _addPoiButton =
-                new ButtonField("Add points of interest",
-                        ButtonField.CONSUME_CLICK);
+        _addButton = new ButtonField("Add Data", ButtonField.CONSUME_CLICK);
         _addFromFileButton =
-                new ButtonField("Add from file", ButtonField.CONSUME_CLICK);
+                new ButtonField("Add From File", ButtonField.CONSUME_CLICK);
         _publishButton =
-                new ButtonField("Publish points of interest",
-                        ButtonField.CONSUME_CLICK);
+                new ButtonField("Publish Data", ButtonField.CONSUME_CLICK);
         _searchButton = new ButtonField("Search", ButtonField.CONSUME_CLICK);
-        _addPoiButton.setChangeListener(this);
+        _addButton.setChangeListener(this);
         _publishButton.setChangeListener(this);
         _addFromFileButton.setChangeListener(this);
         _searchButton.setChangeListener(this);
@@ -164,9 +186,9 @@ public class UnifiedSearchDemoPublisherScreen extends MainScreen implements
         // Add fields to manager
         final VerticalFieldManager vfm =
                 new VerticalFieldManager(VERTICAL_SCROLL);
-        vfm.add(_poiList);
+        vfm.add(_listField);
         vfm.add(new SeparatorField());
-        vfm.add(_addPoiButton);
+        vfm.add(_addButton);
         vfm.add(new SeparatorField());
         vfm.add(_addFromFileButton);
         vfm.add(new SeparatorField());
@@ -181,16 +203,16 @@ public class UnifiedSearchDemoPublisherScreen extends MainScreen implements
      * @see FieldChangeListener#fieldChanged(Field, int)
      */
     public void fieldChanged(final Field field, final int context) {
-        if (field == _addPoiButton) {
-            onAddPOIs();
+        if (field == _addButton) {
+            onAddData();
         } else if (field == _searchButton) {
             UiApplication.getUiApplication().pushScreen(
                     new UnifiedSearchDemoSearchScreen());
         } else if (field == _addFromFileButton) {
             onAddFromFile();
         } else if (field == _publishButton) {
-            if (_poiVector.size() == 0) {
-                Dialog.alert("No points of interest to publish");
+            if (_dataObjects.size() == 0) {
+                Dialog.alert("No data to publish");
             } else {
                 save();
             }

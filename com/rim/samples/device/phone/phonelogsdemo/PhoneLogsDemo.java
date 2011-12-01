@@ -322,14 +322,14 @@ public final class PhoneLogsDemo extends UiApplication {
             setTitle("PhoneLogs API Demo");
 
             add(new RichTextField("Normal Calls",
-                    RichTextField.TEXT_ALIGN_HCENTER | Field.NON_FOCUSABLE));
+                    RichTextField.TEXT_JUSTIFY_HCENTER | Field.NON_FOCUSABLE));
 
             _normalCallTable = new PhoneCallTable(_normalCallModel);
 
             add(_normalCallTable.getView());
 
             add(new RichTextField("Missed Calls",
-                    RichTextField.TEXT_ALIGN_HCENTER | Field.NON_FOCUSABLE));
+                    RichTextField.TEXT_JUSTIFY_HCENTER | Field.NON_FOCUSABLE));
 
             _missedCallTable = new PhoneCallTable(_missedCallModel);
 
@@ -831,8 +831,8 @@ public final class PhoneLogsDemo extends UiApplication {
          *            The call log to be copied and edited
          * @param index
          *            The index of the call log to be edited
-         * @param folder
-         *            The folder to which the call log belongs
+         * @param model
+         *            The model for the call log
          */
         public EditCallLogScreen(final CallLog callLog, final int index,
                 final PhoneCallTableModelAdapter model) {

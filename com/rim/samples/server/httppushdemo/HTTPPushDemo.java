@@ -207,7 +207,9 @@ public class HTTPPushDemo extends javax.swing.JFrame {
             conn.setRequestMethod("POST");//Post the data to the proxy
             conn.setRequestProperty("X-RIM-PUSH-ID", pushId);
             conn.setRequestProperty("X-RIM-Push-NotifyURL", notifyURL);
-            conn.setRequestProperty("X-RIM-Push-Reliability-Mode","APPLICATION");
+
+            // To enable application level push reliability, uncomment the following line                  
+            //conn.setRequestProperty("X-RIM-Push-Reliability-Mode","APPLICATION");
 
             //Write the data
             OutputStream out = conn.getOutputStream();
@@ -238,7 +240,7 @@ public class HTTPPushDemo extends javax.swing.JFrame {
 
         try {
             String papFilename =  "com/rim/samples/server/httppushdemo/pap_push.txt";
-	      	InputStream ins = new BufferedInputStream(new FileInputStream(papFilename));            
+                InputStream ins = new BufferedInputStream(new FileInputStream(papFilename));            
             ByteArrayOutputStream bouts = new ByteArrayOutputStream();
             copyStreams(ins, bouts);
             this.requestTemplate = new String(bouts.toByteArray());
@@ -264,7 +266,6 @@ public class HTTPPushDemo extends javax.swing.JFrame {
         setupNotifyThread();
         
         readPapTemplate();
-        String errorCode = null;
         try {
             String mdsHost = "localhost";
             URL mdsUrl = new URL("http", mdsHost, MDS_PORT, "/pap");
@@ -288,7 +289,7 @@ public class HTTPPushDemo extends javax.swing.JFrame {
             output = output.replaceAll("\\$\\(notifyURL\\)", "" + notifyURL);
             output = output.replaceAll("\\$\\(pin\\)", "" + _pinField.getText());
 
-            String   deliveryMethod = "confirmed";
+            String   deliveryMethod = "application-level";
 
             output = output.replaceAll("\\$\\(deliveryMethod\\)", deliveryMethod);
 
@@ -317,11 +318,6 @@ public class HTTPPushDemo extends javax.swing.JFrame {
             }
 
         } catch (Exception exception) {
-            if (errorCode == null)
-            {
-                errorCode = exception.getClass().getName();
-            }
-
             System.out.println(" encountered error on submission: " + exception.toString());
         }
     }

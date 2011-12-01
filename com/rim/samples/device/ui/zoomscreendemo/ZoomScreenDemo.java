@@ -84,7 +84,7 @@ public final class ZoomScreenDemo extends UiApplication {
         }
 
         /**
-         * @see Screen#navigationClick(int, int)
+         * @see net.rim.device.api.ui.Screen#navigationClick(int, int)
          */
         protected boolean navigationClick(final int status, final int time) {
             // Push a new ZoomScreen if trackpad or screen is clicked
@@ -94,7 +94,7 @@ public final class ZoomScreenDemo extends UiApplication {
         }
 
         /**
-         * @see Screen#touchEvent(TouchEvent)
+         * @see net.rim.device.api.ui.Screen#touchEvent(TouchEvent)
          */
         protected boolean touchEvent(final TouchEvent message) {
             if (message.getEvent() == TouchEvent.CLICK) {

@@ -110,7 +110,7 @@ public final class CommunicationController {
      *            Uri where the request is sent to
      * @param releaseDestination
      *            Release destination on completion of the method
-     * @param ResponseCallback
+     * @param callback
      *            Callback object responsible for updating UI upon message
      *            delivery / request timeout
      */
@@ -382,7 +382,7 @@ public final class CommunicationController {
                     DestinationFactory.getReceiverDestination(URI
                             .create(uriStr));
             if (dest != null) {
-                dest.release(); //
+                dest.release();
             }
         } catch (final Exception e) {
             alertDialog(e.toString());
@@ -465,7 +465,8 @@ public final class CommunicationController {
      */
     public void testCancelAllCancellable() {
         try {
-            if (_cancellationDest == null) { // check if destination is created
+            if (_cancellationDest == null) // check if destination is created
+            {
                 alertDialog("Please register destination first!");
                 return;
             }
@@ -496,8 +497,8 @@ public final class CommunicationController {
             // Use another method to cancel all
             _cancellationDest.cancelAllCancellable();
 
-            // NOTE: If a message has already been sent, then it can not be
-            // canceled.
+            // NOTE: If a message has already been sent, then it
+            // can not be canceled.
 
         } catch (final Exception e) {
             alertDialog(e.toString());
@@ -507,13 +508,12 @@ public final class CommunicationController {
     /**
      * Gets response from a URI which requires credentials
      * 
-     * @param ResponseCallback
+     * @param callback
      *            Callback object responsible for updating UI upon message
      *            delivery / request timeout
      */
     public void authenticate(final String uriStr, final String username,
             final String password, final ResponseCallback callback) {
-
         MonitoredDestinationListener responseListener;
 
         try {
@@ -551,7 +551,6 @@ public final class CommunicationController {
         } catch (final Exception e) {
             alertDialog(e.toString());
         }
-
     }
 
     /**
@@ -596,7 +595,7 @@ public final class CommunicationController {
     /**
      * Uploads data in the form of streams to a server
      * 
-     * @param ResponseCallback
+     * @param callback
      *            Callback object responsible for updating UI upon message
      *            delivery / request timeout
      */
@@ -642,7 +641,6 @@ public final class CommunicationController {
         } catch (final Exception e) {
             alertDialog(e.toString());
         }
-
     }
 
     /**
@@ -676,7 +674,7 @@ public final class CommunicationController {
 
         /**
          * Sends get request and receives response using
-         * BlockingSenderDestination.
+         * BlockingSenderDestination
          * 
          * @see Thread#run()
          */
@@ -759,10 +757,10 @@ public final class CommunicationController {
         public void run() {
             BlockingReceiverDestination blockRecvDest = null;
             try {
-
                 blockRecvDest =
                         (BlockingReceiverDestination) DestinationFactory
                                 .getReceiverDestination(URI.create(_uriStr));
+
                 if (blockRecvDest == null) // Not registered yet
                 {
                     InboundDestinationConfiguration config;
@@ -868,7 +866,6 @@ public final class CommunicationController {
                 }
                 alertDialog(alertString);
             }
-
         }
 
         /**
@@ -908,7 +905,6 @@ public final class CommunicationController {
         public Message getResponse() {
             return _response;
         }
-
     }
 
     /**
@@ -1000,7 +996,6 @@ public final class CommunicationController {
 
     private final class MonitoredDestinationListener extends
             DestinationListener {
-
         private final Object _lock;
 
         /**
@@ -1060,7 +1055,6 @@ public final class CommunicationController {
         public void run() {
 
             try {
-
                 final Object lock = _responseListener.getLock();
 
                 // Send message to retrieve the response
@@ -1095,8 +1089,6 @@ public final class CommunicationController {
                     _destination.release();
                 }
             }
-
         }
-
     }
 }

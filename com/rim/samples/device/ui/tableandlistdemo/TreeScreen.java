@@ -26,6 +26,7 @@
 
 package com.rim.samples.device.ui.tableandlistdemo;
 
+import net.rim.device.api.command.Command;
 import net.rim.device.api.command.CommandHandler;
 import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Bitmap;
@@ -116,7 +117,7 @@ public final class TreeScreen extends MainScreen {
         tableController.setFocusPolicy(TableController.ROW_FOCUS);
 
         // Set the behaviour of the controller when a table item is clicked
-        tableController.setCommand(new CommandHandler() {
+        tableController.setCommand(new Command(new CommandHandler() {
             /**
              * @see CommandHandler#execute(ReadOnlyCommandMetadata, Object)
              */
@@ -124,8 +125,7 @@ public final class TreeScreen extends MainScreen {
                     final Object context) {
                 Dialog.alert("Command Executed");
             }
-
-        }, null, null);
+        }));
 
         tableView.setController(tableController);
 

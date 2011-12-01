@@ -61,31 +61,41 @@ public final class PersistentStoreListener implements PersistentContentListener 
      *            protection settings since the listener was notified.
      */
     public void persistentContentModeChanged(final int generation) {
-        final PersistentObject persist =
-                PersistentStore
-                        .getPersistentObject(PersistentStoreDemo.PERSISTENT_STORE_DEMO_ID);
+        // Acquiring a reference to a ticket guarantees access to encrypted data
+        // even if the device locks during the re-encoding operation.
+        final Object ticket = PersistentContent.getTicket();
 
-        if (persist != null) {
-            synchronized (persist.getContents()) {
-                final Vector meetings = (Vector) persist.getContents();
-                if (meetings == null) {
-                    // Contents empty; nothing to re-encode.
-                    return;
-                }
-                for (int i = 0; i < meetings.size(); ++i) {
-                    final Meeting meeting = (Meeting) meetings.elementAt(i);
-                    meeting.reEncode();
-                    if (generation != PersistentContent.getModeGeneration()) {
-                        // Device's Content Protection/Compression security
-                        // settings have changed again since the listener was
-                        // last notified. Abort this re-encoding because it
-                        // will have to be done again anyway according to the
-                        // new Content Protection/Compression security settings.
-                        break;
+        if (ticket != null) {
+            final PersistentObject store =
+                    PersistentStore
+                            .getPersistentObject(PersistentStoreDemo.PERSISTENT_STORE_DEMO_ID);
+
+            if (store != null) {
+                synchronized (store.getContents()) {
+                    final Vector meetings = (Vector) store.getContents();
+                    if (meetings == null) {
+                        // Contents empty; nothing to re-encode.
+                        return;
                     }
+                    for (int i = 0; i < meetings.size(); ++i) {
+                        if (generation != PersistentContent.getModeGeneration()) {
+                            // Device's Content Protection/Compression security
+                            // settings have changed again since the listener
+                            // was
+                            // last notified. Abort this re-encoding because it
+                            // will have to be done again anyway according to
+                            // the
+                            // new Content Protection/Compression security
+                            // settings.
+                            break;
+                        }
+
+                        final Meeting meeting = (Meeting) meetings.elementAt(i);
+                        meeting.reEncode();
+                    }
+                    // Commit the updated data to the persistent store.
+                    PersistentObject.commit(store);
                 }
-                // Commit the updated data to the persistent store.
-                persist.commit();
             }
         }
     }

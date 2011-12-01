@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<level>
+    <layer>
+        <tile position="0.0,1.0" repeat="6" texture="level_block.png"/>
+        <tile position="0.0,2.0" repeat="1" texture="level_block.png"/>
+        <tile position="0.0,3.0" repeat="1" texture="level_block.png"/>
+        <tile position="5.0,2.0" repeat="2" texture="level_block.png"/>
+        <tile position="6.0,3.0" repeat="3" texture="level_block.png"/>
+        <tile position="7.0,4.0" repeat="2" texture="level_block.png"/>
+        <tile position="7.0,5.0" repeat="2" texture="level_block.png"/>
+        <tile position="7.0,6.0" repeat="2" texture="level_block.png"/>
+        <tile position="4.0,4.0" repeat="1" texture="level_block.png"/>
+        <tile position="3.0,5.0" repeat="1" texture="level_block.png"/>
+        <tile position="5.0,6.0" repeat="1" texture="level_block.png"/>
+        <tile position="6.0,7.0" repeat="3" texture="level_block.png"/>
+        <tile position="10.0,8.0" repeat="2" texture="level_block.png"/>
+        <tile position="14.0,8.0" repeat="2" texture="level_block.png"/>
+        <tile position="18.0,8.0" repeat="4" texture="level_block.png"/>
+        <tile position="19.0,9.0" repeat="3" texture="level_block.png"/>
+        <tile position="21.0,10.0" repeat="1" texture="level_block.png"/>
+        <tile position="25.0,7.0" repeat="3" texture="level_block.png"/>
+		<tile position="30.0,7.0" repeat="1" texture="level_block.png"/>
+		<tile position="32.0,7.0" repeat="1" texture="level_block.png"/>
+		<tile position="34.0,8.0" repeat="1" texture="level_block.png"/>
+		<tile position="37.0,8.0" repeat="1" texture="level_block.png"/>
+		<tile position="39.0,9.0" repeat="1" texture="level_block.png"/>
+		<tile position="40.0,10.0" repeat="1" texture="level_block.png"/>
+		<tile position="37.0,11.0" repeat="1" texture="level_block.png"/>
+		<tile position="34.0,11.0" repeat="1" texture="level_block.png"/>
+		<tile position="32.0,12.0" repeat="1" texture="level_block.png"/>
+    </layer>
+    <layer>
+        <goal position="32.0,13.0" texture="level_end.png"/>
+        <character position="1.0,2.0" texture="character.png"/>
+        <enemy position="0.0,6.0" texture="obstacle_ball.png">
+            <animation type="translate" frames="3" values="0.0,0.0;4.0,0.0;0.0,0.0" times="0.0;0.5;1.0" curve="linear" repeat="-1" duration="2000"/>
+        </enemy>
+		<enemy position="9.0,11.0" texture="obstacle_ball.png">
+            <animation type="translate" frames="3" values="0.0,0.0;0.0,-5.0;0.0,0.0" times="0.0;0.5;1.0" curve="linear" repeat="-1" duration="2000"/>
+        </enemy>
+		<enemy position="16.0,11.0" texture="obstacle_ball.png">
+            <animation type="translate" frames="3" values="0.0,0.0;0.0,-5.0;0.0,0.0" times="0.0;0.5;1.0" curve="linear" repeat="-1" duration="3000"/>
+        </enemy>
+		<enemy position="17.0,5.0" texture="obstacle_ball.png">
+            <animation type="translate" frames="3" values="0.0,0.0;0.0,7.0;0.0,0.0" times="0.0;0.5;1.0" curve="linear" repeat="-1" duration="2000"/>
+        </enemy>
+		<enemy position="24.0,8.0" texture="obstacle_ball.png">
+            <animation type="translate" frames="5" values="0.0,0.0;4.0,0.0;4.0,-2.0;0.0,-2.0;0.0,0.0" times="0.0;0.25;0.5;0.75;1.0" curve="linear" repeat="-1" duration="4000"/>
+        </enemy>
+		<enemy position="36.0,12.0" texture="obstacle_ball.png">
+            <animation type="translate" frames="5" values="0.0,0.0;2.0,0.0;2.0,-2.0;0.0,-2.0;0.0,0.0" times="0.0;0.25;0.5;0.75;1.0" curve="linear" repeat="-1" duration="4000"/>
+        </enemy>
+    </layer>
+</level>

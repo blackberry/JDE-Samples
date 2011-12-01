@@ -48,7 +48,6 @@ import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.Menu;
-import net.rim.device.api.ui.component.ObjectChoiceField;
 import net.rim.device.api.ui.component.RadioButtonField;
 import net.rim.device.api.ui.component.RadioButtonGroup;
 import net.rim.device.api.ui.component.RichTextField;
@@ -78,8 +77,6 @@ public class VideoRecordingScreen extends MainScreen {
     private boolean _displayVisible;
     private boolean _recordToStream;
 
-    private ObjectChoiceField _recordLocation;
-
     private ByteArrayOutputStream _outStream;
 
     /**
@@ -89,7 +86,7 @@ public class VideoRecordingScreen extends MainScreen {
      * @param encoding
      *            The non-null video encoding to be used when recording video to
      *            a file
-     * @param fileSystem
+     * @param filePath
      *            The file system to record the video file to, <code>null</code>
      *            if no file system was chosen
      * 
@@ -584,7 +581,7 @@ public class VideoRecordingScreen extends MainScreen {
         }
 
         /**
-         * @see net.rim.device.api.ui.Screen.invokeAction(int)
+         * @see net.rim.device.api.ui.Screen#invokeAction(int)
          */
         protected boolean invokeAction(final int action) {
             final boolean result = super.invokeAction(action);
@@ -598,7 +595,7 @@ public class VideoRecordingScreen extends MainScreen {
         }
 
         /**
-         * @see net.rim.device.api.ui.Screen.keyChar(char, int, int)
+         * @see net.rim.device.api.ui.Screen#keyChar(char, int, int)
          */
         protected boolean
                 keyChar(final char c, final int status, final int time) {

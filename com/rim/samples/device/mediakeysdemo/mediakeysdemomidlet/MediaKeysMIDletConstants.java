@@ -31,7 +31,7 @@ package com.rim.samples.device.mediakeysdemo.mediakeysdemomidlet;
  * available, as documented in <code>javax.microedition.lcdui.Canvas</code>.
  */
 public class MediaKeysMIDletConstants {
-    public static final int TRACKBALL = -8;
+    public static final int TRACKPAD = -8;
     public static final int VOLUME_UP = -150;
     public static final int VOLUME_DOWN = -151;
     public static final int MUTE = -2731;

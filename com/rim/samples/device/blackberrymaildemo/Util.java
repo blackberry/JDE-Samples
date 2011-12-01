@@ -44,42 +44,41 @@ public final class Util {
      * Retrieves an icon associated with a message status
      * 
      * @param message
-     *            The message for which to retrieve an icon respresenting its
+     *            The message for which to retrieve an icon representing its
      *            status
-     * @return The character icon associated with the mesage status, ' ' if none
-     *         found
+     * @return The character icon associated with the message status, ' ' if
+     *         none found
      * 
      */
     public static char getStatusIcon(final Message message) {
-        char icon = ' ';
-
         switch (message.getStatus()) {
         case Message.Status.TX_COMPOSING:
-            icon = Characters.BALLOT_BOX;
+            return Characters.BALLOT_BOX;
         case Message.Status.TX_COMPRESSING:
-            icon = Characters.BLACK_DOWN_POINTING_SMALL_TRIANGLE;
+            return Characters.BLACK_DOWN_POINTING_SMALL_TRIANGLE;
         case Message.Status.TX_ENCRYPTING:
-            icon = Message.Icons.TX_ENCRYPTING;
+            return Message.Icons.TX_ENCRYPTING;
         case Message.Status.TX_PENDING:
-            icon = Characters.BLACK_RIGHT_POINTING_POINTER;
+            return Characters.BLACK_RIGHT_POINTING_POINTER;
         case Message.Status.TX_SENDING:
-            icon = Characters.BLACK_RIGHT_POINTING_POINTER;
+            return Characters.BLACK_RIGHT_POINTING_POINTER;
         case Message.Status.TX_SENT:
-            icon = Characters.BALLOT_BOX_WITH_CHECK;
+            return Characters.BALLOT_BOX_WITH_CHECK;
         case Message.Status.TX_DELIVERED:
-            icon = Characters.BALLOT_BOX_WITH_CHECK;
+            return Characters.BALLOT_BOX_WITH_CHECK;
         case Message.Status.TX_READ:
-            icon = Characters.CHECK_MARK;
+            return Characters.CHECK_MARK;
         case Message.Status.TX_ERROR:
-            icon = Characters.BALLOT_X;
+            return Characters.BALLOT_X;
         case Message.Status.TX_GENERAL_FAILURE:
-            icon = Characters.BALLOT_X;
+            return Characters.BALLOT_X;
         case Message.Status.RX_ERROR:
-            icon = Characters.BALLOT_X;
+            return Characters.BALLOT_X;
         case Message.Status.RX_RECEIVED:
-            icon = Characters.ENVELOPE;
+            return Characters.ENVELOPE;
+        default:
+            return ' ';
         }
-        return icon;
     }
 
     /**

@@ -40,6 +40,7 @@ import net.rim.device.api.database.DatabaseException;
 import net.rim.device.api.database.DatabaseFactory;
 import net.rim.device.api.database.DatabaseOptions;
 import net.rim.device.api.database.DatabaseSecurityOptions;
+import net.rim.device.api.io.IOUtilities;
 import net.rim.device.api.io.URI;
 import net.rim.device.api.system.CodeModuleManager;
 import net.rim.device.api.system.CodeSigningKey;
@@ -127,9 +128,7 @@ public final class SQLiteDemo extends UiApplication {
             // Open or create a plain text database. This will create the
             // directory and file defined by the URI (if they do not already
             // exist).
-            Database db =
-                    DatabaseFactory.openOrCreate(uri,
-                            new DatabaseSecurityOptions(false));
+            Database db = DatabaseFactory.openOrCreate(uri);
 
             // Close the database in case it is blank and we need to write to
             // the file
@@ -196,11 +195,8 @@ public final class SQLiteDemo extends UiApplication {
 
         // Read data from the input stream and write the data to the
         // output stream.
-        final byte[] data = new byte[256];
-        int length = 0;
-        while (-1 != (length = inputStream.read(data))) {
-            outputStream.write(data, 0, length);
-        }
+        final byte[] bytes = IOUtilities.streamToBytes(inputStream);
+        outputStream.write(bytes);
 
         // Close the connections
         if (fileConnection != null) {

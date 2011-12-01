@@ -1,0 +1,7 @@
+Rim Four, 305 Phillip St, location
+Rim Five, 156 Columbia St, location
+Rim Six, 170 Columbia St, location
+Karen Whittle, ccc@rim.com, contact
+Beth Horton, ddd@rim.com, contact
+Research In Motion, http://www.rim.com/, url
+String, Hello BlackBerry, other

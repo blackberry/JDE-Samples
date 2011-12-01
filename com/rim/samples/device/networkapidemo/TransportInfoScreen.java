@@ -139,26 +139,25 @@ public final class TransportInfoScreen extends MainScreen implements
                 showTransports();
                 Status.show(getTransportsInCoverage(transportsInCoverage));
             }
-
-            /**
-             * Converts transports int array to String of transport names
-             */
-            private String getTransportsInCoverage(
-                    final int[] transportsInCoverage) {
-                if (transportsInCoverage == null) {
-                    return "No transports are in coverage";
-                }
-                final StringBuffer buffer =
-                        new StringBuffer("Transports in coverage:");
-                final int size = transportsInCoverage.length;
-                for (int i = 0; i < size; i++) {
-                    buffer.append('\n')
-                            .append(TransportInfo
-                                    .getTransportTypeName(transportsInCoverage[i]));
-                }
-                return buffer.toString();
-            }
         });
+    }
+
+    /**
+     * Converts transports int array to String of transport names
+     */
+    private static String getTransportsInCoverage(
+            final int[] transportsInCoverage) {
+        if (transportsInCoverage == null) {
+            return "No transports are in coverage";
+        }
+        final StringBuffer buffer = new StringBuffer("Transports in coverage:");
+        final int size = transportsInCoverage.length;
+        for (int i = 0; i < size; i++) {
+            buffer.append('\n')
+                    .append(TransportInfo
+                            .getTransportTypeName(transportsInCoverage[i]));
+        }
+        return buffer.toString();
     }
 
     /**

@@ -1,6 +1,0 @@
-Rim Four, 305 Phillip St, location
-Rim Five, 156 Columbia St, location
-Rim Six, 170 Columbia St, location
-Karen Whittle, ccc@ddd.com, contact
-Wikipedia, http://www.wikipedia.org/, url
-String, Hello World, other

@@ -96,7 +96,8 @@ public final class PersistentStoreDemoScreen extends MainScreen {
         final DataTemplate dataTemplate = new DataTemplate(_view, 1, 1) {
             public Field[] getDataFields(final int modelRowIndex) {
                 final String text =
-                        ((Meeting) _model.getRow(modelRowIndex)).getField(0);
+                        ((Meeting) _model.getRow(modelRowIndex))
+                                .getField(Meeting.MEETING_NAME);
                 final Field[] fields =
                         { new LabelField(text, Field.NON_FOCUSABLE) };
 
@@ -276,7 +277,7 @@ public final class PersistentStoreDemoScreen extends MainScreen {
      */
     protected boolean invokeAction(final int action) {
         switch (action) {
-        case ACTION_INVOKE: // Trackball click
+        case ACTION_INVOKE: // Trackpad click
             displayMeeting(false);
             return true;
         }
@@ -318,7 +319,7 @@ public final class PersistentStoreDemoScreen extends MainScreen {
             if (_meetings.size() == 0) {
                 _meetings.addElement(object);
             } else {
-                _meetings.setElementAt(object, index);
+                _meetings.insertElementAt(object, index);
             }
             return true;
         }

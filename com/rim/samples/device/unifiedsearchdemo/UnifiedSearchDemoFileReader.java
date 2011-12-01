@@ -1,7 +1,27 @@
 /*
  * UnifiedSearchDemoFileReader.java
  *
- * AUTO_COPY_RIGHT_SUB_TAG
+ * Copyright © 1998-2011 Research In Motion Limited
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Note: For the sake of simplicity, this sample application may not leverage
+ * resource bundles and resource strings.  However, it is STRONGLY recommended
+ * that application developers make use of the localization features available
+ * within the BlackBerry development platform to ensure a seamless application
+ * experience across a variety of languages and geographies.  For more information
+ * on localizing your application, please refer to the BlackBerry Java Development
+ * Environment Development Guide associated with this release.
  */
 
 package com.rim.samples.device.unifiedsearchdemo;
@@ -12,9 +32,10 @@ import java.util.Vector;
 
 import net.rim.device.api.io.IOUtilities;
 import net.rim.device.api.unifiedsearch.searchables.SearchableContentTypeConstants;
+import net.rim.device.api.unifiedsearch.searchables.SearchableContentTypeConstantsInfo;
 
 /**
- * A class that reads points of interest stored in a file
+ * A class that reads data stored in a file
  */
 public final class UnifiedSearchDemoFileReader {
     private static final String RECORD_SEPARATOR = "\r\n";
@@ -28,72 +49,70 @@ public final class UnifiedSearchDemoFileReader {
     }
 
     /**
-     * Returns a Vector of PointOfInterest objects read from an InputStream
+     * Returns a Vector of data objects read from an InputStream
      * 
      * @param stream
-     *            POI data read from file
-     * @return a Vector of PointOfInterest objects
+     *            data read from file
+     * @return a Vector of data objects
      * @throws IOException
      *             if reading from the given InputStream throws it or if the
-     *             data read from the input stream has syntax errors.
+     *             data read from the input stream has syntax errors
      */
-    public static Vector getPoisFromStream(final InputStream stream)
+    public static Vector getDataFromStream(final InputStream stream)
             throws IOException {
-        final String poiData = readPoiData(stream);
+        final String data = readData(stream);
 
-        if (poiData == null) {
+        if (data == null) {
             // The file is empty
             return null;
         } else {
-            return buildPoiList(poiData);
+            return buildDataList(data);
         }
     }
 
     /**
-     * Reads POI data from an InputStream
+     * Reads data from an InputStream
      * 
      * @param stream
-     *            POI data read from file
+     *            Data read from file
      * @return A String containing the file's contents. Returns null if the file
      *         is empty.
      * @throws IOException
      *             if an I/O error occurs
      */
-    private static String readPoiData(final InputStream stream)
-            throws IOException {
+    private static String readData(final InputStream stream) throws IOException {
         final byte[] data = IOUtilities.streamToBytes(stream);
 
         return new String(data);
     }
 
     /**
-     * Builds a Vector of PointOfInterest objects
+     * Builds a Vector of data objects
      * 
-     * @param rawPoiData
-     *            A string of POI data normally fetched from a file
-     * @return A Vector of PointOfInterest objects
+     * @param rawData
+     *            A string of data normally fetched from a file
+     * @return A Vector of data objects
      * @throws IOException
-     *             if a POI record is invalid
+     *             if a record is invalid
      */
-    private static Vector buildPoiList(final String rawPoiData)
+    private static Vector buildDataList(final String rawData)
             throws IOException {
-        final String[] poiRecords = split(rawPoiData, RECORD_SEPARATOR);
-        final Vector newPois = new Vector();
+        final String[] records = split(rawData, RECORD_SEPARATOR);
+        final Vector objects = new Vector();
 
-        for (int i = 0; i < poiRecords.length; ++i) {
-            if (poiRecords[i].length() > 0) {
-                final String[] poiFields =
-                        split(poiRecords[i], FIELD_SEPARATOR);
-                if (poiFields.length != 3) {
+        for (int i = 0; i < records.length; ++i) {
+            if (records[i].length() > 0) {
+                final String[] fields = split(records[i], FIELD_SEPARATOR);
+                if (fields.length != 3) {
                     throw new IOException("Invalid record in file at line "
                             + (i + 1));
                 }
-                newPois.addElement(new PointOfInterest(poiFields[0],
-                        poiFields[1], getType(poiFields[2])));
+                objects.addElement(new UnifiedSearchDemoDataObject(fields[0],
+                        fields[1], getType(fields[2])));
             }
         }
 
-        return newPois;
+        return objects;
     }
 
     /**
@@ -101,7 +120,7 @@ public final class UnifiedSearchDemoFileReader {
      * recognized, the default type is returned.
      * 
      * @param type
-     *            The type of the point of interest
+     *            The type of data
      * @return The integer representation of the type
      */
     private static long getType(final String type) {
@@ -118,7 +137,7 @@ public final class UnifiedSearchDemoFileReader {
         }
 
         else {
-            return SearchableContentTypeConstants.CONTENT_TYPE_DEFAULT_ALL;
+            return SearchableContentTypeConstantsInfo.getAllContentTypes();
         }
     }
 

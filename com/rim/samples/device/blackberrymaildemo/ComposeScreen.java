@@ -290,11 +290,16 @@ public final class ComposeScreen extends MessageScreen {
 
                 Folder outbox = null;
                 for (int i = allOutboxFolders.length - 1; i >= 0; --i) {
-                    if (allOutboxFolders[i].getParent().getName().startsWith(
-                            "Mailbox")) {
+                    final Folder parent = allOutboxFolders[i].getParent();
+                    if (parent != null
+                            && parent.getName().startsWith("Mailbox")) {
                         outbox = allOutboxFolders[i];
                         break;
                     }
+                }
+
+                if (outbox == null) {
+                    throw new MessagingException("no outbox folder found");
                 }
 
                 // Save the new message and replace the old one if it exists

@@ -24,7 +24,7 @@
  * Environment Development Guide associated with this release.
  */
 
-package com.rim.samples.device.browser;
+package com.rim.samples.device.browser.browsercontentmanagerdemo;
 
 import java.io.IOException;
 
@@ -47,6 +47,9 @@ import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Status;
 import net.rim.device.api.ui.container.MainScreen;
+
+import com.rim.samples.device.browser.SecondaryResourceFetchThread;
+import com.rim.samples.device.browser.Utilities;
 
 /**
  * This sample application demonstrates how to render content using the
@@ -83,9 +86,10 @@ public final class BrowserContentManagerDemo extends UiApplication implements
                 _browserContentManager.getRenderingSession()
                         .getRenderingOptions();
 
-        // Turn off images in html
+        // Turn on images in html. Change 'true' to 'false'
+        // to disable image rendering.
         renderingOptions.setProperty(RenderingOptions.CORE_OPTIONS_GUID,
-                RenderingOptions.SHOW_IMAGES_IN_HTML, false);
+                RenderingOptions.SHOW_IMAGES_IN_HTML, true);
 
         _mainScreen = new MainScreen();
         _mainScreen.add(new LabelField("Label before the content",
@@ -98,8 +102,8 @@ public final class BrowserContentManagerDemo extends UiApplication implements
         pushScreen(_mainScreen);
 
         final PrimaryResourceFetchThread thread =
-                new PrimaryResourceFetchThread("http://www.google.com", null,
-                        null, null, this);
+                new PrimaryResourceFetchThread("http://mobile.blackberry.com",
+                        null, null, null, this);
         thread.start();
     }
 
@@ -130,7 +134,7 @@ public final class BrowserContentManagerDemo extends UiApplication implements
     }
 
     /**
-     * @see net.rim.device.api.browser.RenderingApplication#eventOccurred(net.rim.device.api.browser.Event)
+     * @see net.rim.device.api.browser.field.RenderingApplication#eventOccurred(Event)
      */
     public Object eventOccurred(final Event event) {
         final int eventId = event.getUID();
@@ -233,7 +237,7 @@ public final class BrowserContentManagerDemo extends UiApplication implements
     }
 
     /**
-     * @see net.rim.device.api.browser.RenderingApplication#getAvailableHeight(net.rim.device.api.browser.BrowserContent)
+     * @see net.rim.device.api.browser.field.RenderingApplication#getAvailableHeight(BrowserContent)
      */
     public int getAvailableHeight(final BrowserContent browserField) {
         // Field has full screen
@@ -241,7 +245,7 @@ public final class BrowserContentManagerDemo extends UiApplication implements
     }
 
     /**
-     * @see net.rim.device.api.browser.RenderingApplication#getAvailableWidth(net.rim.device.api.browser.BrowserContent)
+     * @see net.rim.device.api.browser.field.RenderingApplication#getAvailableWidth(BrowserContent)
      */
     public int getAvailableWidth(final BrowserContent browserField) {
         // Field has full screen
@@ -249,7 +253,7 @@ public final class BrowserContentManagerDemo extends UiApplication implements
     }
 
     /**
-     * @see net.rim.device.api.browser.RenderingApplication#getHistoryPosition(net.rim.device.api.browser.BrowserContent)
+     * @see net.rim.device.api.browser.field.RenderingApplication#getHistoryPosition(BrowserContent)
      */
     public int getHistoryPosition(final BrowserContent browserField) {
         // No history support
@@ -257,7 +261,7 @@ public final class BrowserContentManagerDemo extends UiApplication implements
     }
 
     /**
-     * @see net.rim.device.api.browser.RenderingApplication#getHTTPCookie(java.lang.String)
+     * @see net.rim.device.api.browser.field.RenderingApplication#getHTTPCookie(String)
      */
     public String getHTTPCookie(final String url) {
         // No cookie support
@@ -265,8 +269,8 @@ public final class BrowserContentManagerDemo extends UiApplication implements
     }
 
     /**
-     * @see net.rim.device.api.browser.RenderingApplication#getResource(net.rim.device.api.browser.RequestedResource,
-     *      net.rim.device.api.browser.BrowserContent)
+     * @see net.rim.device.api.browser.field.RenderingApplication#getResource(RequestedResource,
+     *      BrowserContent)
      */
     public HttpConnection getResource(final RequestedResource resource,
             final BrowserContent referrer) {
@@ -302,7 +306,7 @@ public final class BrowserContentManagerDemo extends UiApplication implements
     }
 
     /**
-     * @see net.rim.device.api.browser.RenderingApplication#invokeRunnable(java.lang.Runnable)
+     * @see net.rim.device.api.browser.field.RenderingApplication#invokeRunnable(Runnable)
      */
     public void invokeRunnable(final Runnable runnable) {
         new Thread(runnable).start();

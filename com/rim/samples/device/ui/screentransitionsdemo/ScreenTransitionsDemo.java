@@ -114,7 +114,7 @@ public final class ScreenTransitionsDemo extends UiApplication {
         }
 
         /**
-         * @see Screen#TouchEvent(TouchEvent)
+         * @see Screen#touchEvent(TouchEvent)
          */
         public boolean touchEvent(final TouchEvent event) {
             if (event.getEvent() == TouchEvent.UNCLICK) {
@@ -188,8 +188,8 @@ public final class ScreenTransitionsDemo extends UiApplication {
         }
 
         /**
-         * Creates a TransitionContext object for both pushing and popping a
-         * screen pushes a TransitionScreen onto the stack.
+         * Creates TransitionContext objects for both pushing and popping a
+         * screen and pushes a TransitionScreen onto the stack.
          * 
          * @param type
          *            Represents the type of screen transitions to execute

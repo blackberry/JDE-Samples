@@ -86,7 +86,7 @@ public final class FileExplorerDemoScreen extends MainScreen {
         _view = new TableView(_model);
         final TableController controller = new TableController(_model, _view);
         controller.setFocusPolicy(TableController.ROW_FOCUS);
-        controller.setCommand(new CommandHandler() {
+        controller.setCommand(new Command(new CommandHandler() {
             /**
              * @see CommandHandler#execute(ReadOnlyCommandMetadata, Object)
              */
@@ -94,8 +94,8 @@ public final class FileExplorerDemoScreen extends MainScreen {
                     final Object context) {
                 selectAction();
             }
+        }));
 
-        }, null, null);
         _view.setController(controller);
 
         // Set the highlight style for the view
@@ -203,15 +203,11 @@ public final class FileExplorerDemoScreen extends MainScreen {
      * 
      */
     public boolean keyChar(final char c, final int status, final int time) {
-        switch (c) {
-        case Characters.ESCAPE:
-            if (goBack()) {
-                return true;
-            }
-
-        default:
-            return super.keyChar(c, status, time);
+        if (c == Characters.ESCAPE && goBack()) {
+            return true;
         }
+
+        return super.keyChar(c, status, time);
     }
 
     /**

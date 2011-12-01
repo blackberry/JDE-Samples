@@ -26,20 +26,33 @@
 
 package com.rim.samples.device.ui.tableandlistdemo;
 
+import net.rim.device.api.command.Command;
+import net.rim.device.api.command.CommandHandler;
+import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Bitmap;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Manager;
+import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.component.table.RichList;
+import net.rim.device.api.ui.component.table.TableController;
+import net.rim.device.api.ui.component.table.TableModel;
 import net.rim.device.api.ui.container.MainScreen;
 
 /**
  * Screen demonstrating the use of the RichList object. Displays a list of
  * BlackBerry Smartphone devices with complex formatting and accompanying
- * images.
+ * images. Clicking or tapping on a row displays selected device in a pop up
+ * dialog.
  */
 public final class RichListScreen extends MainScreen {
+    private final static int BITMAP = 0;
+    private final static int DISPLAY_NAME = 1;
+    private final static int OS = 2;
+    private final static int YEAR = 3;
+    private final static int INTERFACES = 4;
+
     /**
      * Creates a new RichListScreen object
      * 
@@ -59,6 +72,9 @@ public final class RichListScreen extends MainScreen {
 
         // Create a RichList which will be added to the provided manager
         final RichList richList = new RichList(mainManager, true, 4, 0);
+
+        // Set the focus policy for the RichList
+        richList.setFocusPolicy(TableController.ROW_FOCUS);
 
         // Populate the RichList with data from text file
         while (deviceData.hasMoreTokens()) {
@@ -80,8 +96,32 @@ public final class RichListScreen extends MainScreen {
             final String interfaces = deviceData.nextToken().trim();
 
             // Add data to the RichList
-            richList.add(new Object[] { bitmap, displayName.toString(), os,
-                    year, interfaces });
+            final Object[] rowObjects = new Object[5];
+            rowObjects[BITMAP] = bitmap;
+            rowObjects[DISPLAY_NAME] = displayName.toString();
+            rowObjects[OS] = os;
+            rowObjects[YEAR] = year;
+            rowObjects[INTERFACES] = interfaces;
+            richList.add(rowObjects);
         }
+
+        richList.setCommand(new Command(new CommandHandler() {
+            /**
+             * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
+             *      Object)
+             */
+            public void execute(final ReadOnlyCommandMetadata metadata,
+                    final Object context) {
+                // Display selected device in a pop up dialog
+                final TableModel tableModel = richList.getModel();
+                final Object[] objArray =
+                        (Object[]) tableModel.getRow(richList.getFocusRow());
+                final Dialog dialog =
+                        new Dialog(Dialog.D_OK,
+                                (String) objArray[DISPLAY_NAME], 0,
+                                (Bitmap) objArray[BITMAP], 0);
+                dialog.doModal();
+            }
+        }));
     }
 }

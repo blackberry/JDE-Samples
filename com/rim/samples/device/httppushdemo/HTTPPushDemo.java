@@ -36,6 +36,7 @@ import javax.microedition.io.StreamConnectionNotifier;
 import net.rim.device.api.io.http.HttpServerConnection;
 import net.rim.device.api.io.http.MDSPushInputStream;
 import net.rim.device.api.system.Application;
+import net.rim.device.api.system.DeviceInfo;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
@@ -57,10 +58,10 @@ public class HTTPPushDemo extends UiApplication {
 
     // Members
     // ------------------------------------------------------------------
-    private final ListeningThread _listeningThread;
-    private final HTTPPushDemoScreen _mainScreen;
-    private final RichTextField _infoField;
-    private final RichTextField _imageField;
+    private ListeningThread _listeningThread;
+    private HTTPPushDemoScreen _mainScreen;
+    private RichTextField _infoField;
+    private RichTextField _imageField;
 
     /**
      * Entry point for application.
@@ -76,49 +77,62 @@ public class HTTPPushDemo extends UiApplication {
     }
 
     /**
-     * Default constructor.
+     * Creates a new HTTPPushDemo object
      */
     public HTTPPushDemo() {
-        _mainScreen = new HTTPPushDemoScreen();
-        _mainScreen.setTitle(new LabelField("HTTP Push Demo",
-                Field.USE_ALL_WIDTH));
+        // Make sure that the device is a simulator.
+        // If it isn't display a dialog and exit the application.
+        if (!DeviceInfo.isSimulator()) {
+            UiApplication.getUiApplication().invokeLater(new Runnable() {
+                public void run() {
+                    Dialog.alert("This application must be run on a simulator. Exiting application...");
+                    System.exit(0);
+                }
+            });
+        } else {
+            _mainScreen = new HTTPPushDemoScreen();
+            _mainScreen.setTitle(new LabelField("HTTP Push Demo",
+                    Field.USE_ALL_WIDTH));
 
-        _infoField = new RichTextField();
-        _mainScreen.add(_infoField);
+            _infoField = new RichTextField();
+            _mainScreen.add(_infoField);
 
-        _mainScreen.add(new SeparatorField());
+            _mainScreen.add(new SeparatorField());
 
-        _imageField = new RichTextField();
-        _mainScreen.add(_imageField);
+            _imageField = new RichTextField();
+            _mainScreen.add(_imageField);
 
-        // Start the listening thread.
-        _listeningThread = new ListeningThread();
-        _listeningThread.start();
+            // Start the listening thread
+            _listeningThread = new ListeningThread();
+            _listeningThread.start();
 
-        _infoField.setText("HTTP Listen object started");
+            _infoField.setText("HTTP Listen object started");
 
-        pushScreen(_mainScreen);
+            pushScreen(_mainScreen);
+        }
     }
 
     // Inner Classes
     // ------------------------------------------------------------
     /**
      * This class implements a Thread object which trys to connect to a HTTP url
-     * and retrieves the url's contents to render to the screen.
+     * and retrieve the url's contents to render to the screen.
      */
     private class ListeningThread extends Thread {
         private boolean _stop = false;
         private StreamConnectionNotifier _notify;
 
         /**
-         * Stops the thread from listening.
+         * Stops the thread from listening
          */
         private synchronized void stop() {
             _stop = true;
-            try {
-                // Close the connection so the thread will return.
-                _notify.close();
-            } catch (final Exception e) {
+
+            if (_notify != null) {
+                try {
+                    _notify.close();
+                } catch (final Exception e) {
+                }
             }
         }
 
@@ -129,94 +143,84 @@ public class HTTPPushDemo extends UiApplication {
          * @see java.lang.Runnable#run()
          */
         public void run() {
+            // Wait for the app's event thread to start
+            while (!HTTPPushDemo.this.hasEventThread()) {
+                Thread.yield();
+            }
 
             StreamConnection stream = null;
             InputStream input = null;
             MDSPushInputStream pushInputStream = null;
 
-            while (!_stop) {
-                try {
+            try {
+                _notify =
+                        (StreamConnectionNotifier) Connector.open(URL
+                                + ";deviceside=false");
 
-                    // Synchronize here so that we don't end up creating a
-                    // connection that is never closed.
-                    synchronized (this) {
-                        // Open the connection once (or re-open after an
-                        // IOException), so we don't end up
-                        // in a race condition, where a push is lost if it comes
-                        // in before the connection
-                        // is open again. We open the url with a parameter that
-                        // indicates that we should
-                        // always use MDS when attempting to connect.
-                        _notify =
-                                (StreamConnectionNotifier) Connector.open(URL
-                                        + ";deviceside=false");
-                    }
+                while (!_stop) {
+                    // NOTE: the following will block until data is received
+                    stream = _notify.acceptAndOpen();
 
-                    while (!_stop) {
+                    try {
+                        input = stream.openInputStream();
+                        pushInputStream =
+                                new MDSPushInputStream(
+                                        (HttpServerConnection) stream, input);
 
-                        // NOTE: the following will block until data is
-                        // received.
-                        stream = _notify.acceptAndOpen();
+                        // Extract the data from the input stream
+                        final DataBuffer db = new DataBuffer();
+                        byte[] data = new byte[CHUNK_SIZE];
+                        int chunk = 0;
 
-                        try {
-                            input = stream.openInputStream();
-                            pushInputStream =
-                                    new MDSPushInputStream(
-                                            (HttpServerConnection) stream,
-                                            input);
+                        while (-1 != (chunk = input.read(data))) {
+                            db.write(data, 0, chunk);
+                        }
 
-                            // Extract the data from the input stream.
+                        updateMessage(data);
 
-                            final DataBuffer db = new DataBuffer();
-                            byte[] data = new byte[CHUNK_SIZE];
-                            int chunk = 0;
+                        // If the push server has application level reliabilty
+                        // enabled, this method call will acknowledge receipt
+                        // of the push.
+                        pushInputStream.accept();
 
-                            while (-1 != (chunk = input.read(data))) {
-                                db.write(data, 0, chunk);
-                            }
-
-                            updateMessage(data);
-
-                            // This method is called to accept the push.
-                            pushInputStream.accept();
-
-                            data = db.getArray();
-                        } catch (final IOException e1) {
-                            // A problem occurred with the input stream ,
-                            // however, the original
-                            // StreamConnectionNotifier is still valid.
-                            errorDialog(e1.toString());
-                        } finally {
-                            if (input != null) {
-                                try {
-                                    input.close();
-                                } catch (final IOException e2) {
-                                }
-                            }
-
-                            if (stream != null) {
-                                try {
-                                    stream.close();
-                                } catch (final IOException e2) {
-                                }
+                        data = db.getArray();
+                    } catch (final IOException ioe) {
+                        // A problem occurred with the input stream , however,
+                        // the original
+                        // StreamConnectionNotifier is still valid.
+                        errorDialog(ioe.toString());
+                    } finally {
+                        if (input != null) {
+                            try {
+                                input.close();
+                            } catch (final IOException ioe) {
                             }
                         }
-                    }
-                } catch (final IOException ioe) {
-                    // Likely the stream was closed. Catches the exception
-                    // thrown by
-                    // _notify.acceptAndOpen() when this program exits.
-                    errorDialog(ioe.toString());
-                } finally {
-                    if (_notify != null) {
-                        try {
-                            _notify.close();
-                            _notify = null;
-                        } catch (final IOException e) {
+
+                        if (stream != null) {
+                            try {
+                                stream.close();
+                            } catch (final IOException ioe) {
+                            }
                         }
                     }
                 }
+            } catch (final IOException ioe) {
+                errorDialog(ioe.toString());
+            } finally {
+                if (_notify != null) {
+                    try {
+                        _notify.close();
+                        _notify = null;
+                    } catch (final IOException e) {
+                    }
+                }
             }
+            UiApplication.getUiApplication().invokeLater(new Runnable() {
+                public void run() {
+                    _mainScreen.close();
+                }
+            });
         }
     }
 
@@ -229,7 +233,7 @@ public class HTTPPushDemo extends UiApplication {
     private void updateMessage(final byte[] data) {
         Application.getApplication().invokeLater(new Runnable() {
             public void run() {
-                // Query the user to load the received message.
+                // Query the user to load the received message
                 final String[] choices = { "Ok", "Cancel" };
 
                 if (0 != Dialog.ask(
@@ -251,30 +255,13 @@ public class HTTPPushDemo extends UiApplication {
     }
 
     /**
-     * Clean up the connections when exiting.
-     * 
-     * @see UiApplication#onExit()
-     */
-    protected void onExit() {
-        // Stop the listening thread.
-        _listeningThread.stop();
-
-        try {
-            _listeningThread.join();
-        } catch (final InterruptedException e) {
-            errorDialog("ListeningThread#join() threw " + e.toString());
-        }
-
-    }
-
-    /**
      * Presents a dialog to the user with a given message
      * 
      * @param message
      *            The text to display
      */
     public static void errorDialog(final String message) {
-        UiApplication.getUiApplication().invokeLater(new Runnable() {
+        UiApplication.getUiApplication().invokeAndWait(new Runnable() {
             public void run() {
                 Dialog.alert(message);
             }
@@ -286,12 +273,11 @@ public class HTTPPushDemo extends UiApplication {
      * when closing.
      */
     private class HTTPPushDemoScreen extends MainScreen {
-
         /**
          * @see net.rim.device.api.ui.Screen#close()
          */
         public void close() {
-            onExit();
+            _listeningThread.stop();
 
             super.close();
         }

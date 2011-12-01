@@ -98,17 +98,15 @@ public final class HomeScreenDemoSecondaryScreen extends MainScreen {
             _picturesList.add((String) _pictureFileNames.elementAt(i));
         }
 
-        _picturesList.setCommand(new CommandHandler() {
+        _picturesList.setCommand(new Command(new CommandHandler() {
             /**
-             * @see import net.rim.device.api.command.CommandHandler#execute(
-             *      ReadOnlyCommandMetadata, Object)
+             * @see CommandHandler#execute(ReadOnlyCommandMetadata, Object)
              */
             public void execute(final ReadOnlyCommandMetadata metadata,
                     final Object context) {
                 setImage();
             }
-
-        }, null, null);
+        }));
 
         add(vfm);
 

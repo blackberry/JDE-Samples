@@ -30,7 +30,6 @@ import net.rim.device.api.io.messaging.Message;
 import net.rim.device.api.ui.UiApplication;
 
 public abstract class ResponseCallback {
-
     private final UiApplication _app;
 
     public ResponseCallback() {
@@ -45,8 +44,6 @@ public abstract class ResponseCallback {
      * Invokes onResponse() method for ResponseCallback object on application
      * thread to update UI component depending on results of response message
      * 
-     * @param ResponseCallback
-     *            Object to invoke the callback
      * @param message
      *            The text to display
      */
@@ -63,8 +60,6 @@ public abstract class ResponseCallback {
      * thread For example, displays a pop-up dialog to the user with a given
      * message
      * 
-     * @param ResponseCallback
-     *            Object to invoke the callback
      * @param timeout
      *            Timeout, in seconds
      */
@@ -75,5 +70,4 @@ public abstract class ResponseCallback {
             }
         });
     }
-
 }

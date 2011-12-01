@@ -120,7 +120,7 @@ public final class SendBlockScreen extends MainScreen implements
     }
 
     /**
-     * @see com.rim.samples.device.communicationapidemo.CommunicationControllerListener#onWaitTimerChanged(int)
+     * @see com.rim.samples.device.communicationapidemo.CommunicationControllerListener#onWaitTimerCounterChanged(int)
      */
     public void onWaitTimerCounterChanged(final int time) {
         UiApplication.getUiApplication().invokeLater(new Runnable() {

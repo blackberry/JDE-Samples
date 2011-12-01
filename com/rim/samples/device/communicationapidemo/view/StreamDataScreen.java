@@ -82,7 +82,6 @@ public final class StreamDataScreen extends MainScreen {
                     _pending = true;
                     controller.uploadStream(_uriSenderField.getText(),
                             _callback);
-
                 } else {
                     Dialog.alert("Previous request pending state...");
                 }
@@ -108,7 +107,6 @@ public final class StreamDataScreen extends MainScreen {
 
     private static final class StreamDataScreenCallback extends
             ResponseCallback {
-
         private final StreamDataScreen _screen;
 
         private StreamDataScreenCallback(final StreamDataScreen screen) {
@@ -138,7 +136,5 @@ public final class StreamDataScreen extends MainScreen {
                     "Wait for response: timed out after " + timeout + " sec";
             Dialog.alert(timeoutMessage);
         }
-
     }
-
 }

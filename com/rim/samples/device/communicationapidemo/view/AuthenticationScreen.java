@@ -42,9 +42,9 @@ import com.rim.samples.device.communicationapidemo.ResponseCallback;
 import com.rim.samples.device.communicationapidemo.ui.FullWidthButton;
 
 public final class AuthenticationScreen extends MainScreen {
-    EditField _uriField;
-    EditField _userIdField;
-    EditField _passwordField;
+    private final EditField _uriField;
+    private final EditField _userIdField;
+    private final EditField _passwordField;
     private final ResponseCallback _callback;
     private boolean _pending;
 
@@ -148,7 +148,5 @@ public final class AuthenticationScreen extends MainScreen {
                     "Wait for response: timed out after " + timeout + " sec";
             Dialog.alert(timeoutMessage);
         }
-
     }
-
 }
