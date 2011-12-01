@@ -34,7 +34,6 @@ import net.rim.device.api.lowmemory.LowMemoryManager;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.ContextMenu;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.MenuItem;
@@ -70,8 +69,7 @@ import net.rim.device.api.ui.container.PopupScreen;
      * and shows the list of order records.
      */
     MemoryDemoMainScreen() {
-        setTitle(new LabelField("Order Records", DrawStyle.ELLIPSIS
-                | Field.USE_ALL_WIDTH));
+        setTitle(new LabelField("Order Records"));
 
         _app = UiApplication.getUiApplication();
 
@@ -99,16 +97,49 @@ import net.rim.device.api.ui.container.PopupScreen;
     }
 
     /**
-     * Intercepts the ENTER key and displays this screen's menu.
+     * Handles a trackball click and provides identical behavior to an ENTER
+     * keypress event.
+     * 
+     * @see net.rim.device.api.ui.Screen#invokeAction(int)
+     */
+    protected boolean invokeAction(final int action) {
+        switch (action) {
+        case ACTION_INVOKE: // Trackball click.
+            viewRecord(_orderListField.getSelectedIndex());
+            return true; // We've consumed the event.
+        }
+        return super.invokeAction(action);
+    }
+
+    /**
+     * Intercepts the ENTER key.
      * 
      * @see net.rim.device.api.ui.Screen#keyChar(char,int,int)
      */
     protected boolean keyChar(final char key, final int status, final int time) {
         if (key == Characters.ENTER) {
-            return onMenu(0);
+            viewRecord(_orderListField.getSelectedIndex());
+            return true;
         }
 
         return super.keyChar(key, status, time);
+    }
+
+    /**
+     * Displays selected record in view mode.
+     */
+    private void viewRecord(final int index) {
+        OrderRecord orderRecord =
+                (OrderRecord) /* outer. */get(_orderListField, index);
+        final MemoryDemoOrderScreen screen =
+                new MemoryDemoOrderScreen(orderRecord, false);
+        /* outer. */_app.pushModalScreen(screen);
+        orderRecord = screen.getUpdatedOrderRecord();
+
+        if (orderRecord != null) {
+            /* outer. */_orderList.replaceOrderRecordAt(_orderListField
+                    .getSelectedIndex(), orderRecord);
+        }
     }
 
     // ListFieldCallback methods
@@ -280,17 +311,7 @@ import net.rim.device.api.ui.container.PopupScreen;
         }
 
         public void run() {
-            OrderRecord orderRecord =
-                    (OrderRecord) /* outer. */get(_orderListField, _index);
-            final MemoryDemoOrderScreen screen =
-                    new MemoryDemoOrderScreen(orderRecord, false);
-            /* outer. */_app.pushModalScreen(screen);
-            orderRecord = screen.getUpdatedOrderRecord();
-
-            if (orderRecord != null) {
-                /* outer. */_orderList
-                        .replaceOrderRecordAt(_index, orderRecord);
-            }
+            viewRecord(_index);
         }
     }
 

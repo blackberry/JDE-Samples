@@ -30,15 +30,12 @@ import javax.microedition.location.Coordinates;
 
 final class MapLocation extends Coordinates {
     private String _name;
-    private boolean _isVisible; // Display marker at this location ?
+    private boolean _isVisible;
 
     MapLocation(final double latitude, final double longitude, final String name) {
         super(latitude, longitude, 0);
 
         _name = name;
-
-        // _isVisible = false; (set by default) // Do not display marker at
-        // location until it has been selected by the user.
     }
 
     String getName() {

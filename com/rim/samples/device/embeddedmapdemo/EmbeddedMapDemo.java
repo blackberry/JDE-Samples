@@ -31,10 +31,13 @@ import java.util.Vector;
 import javax.microedition.location.Landmark;
 import javax.microedition.location.QualifiedCoordinates;
 
+import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
+import net.rim.device.api.ui.TouchEvent;
+import net.rim.device.api.ui.TouchGesture;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BasicEditField;
 import net.rim.device.api.ui.component.ButtonField;
@@ -45,9 +48,9 @@ import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
 
 /**
- * This sample shows how to create an embedded map. The LocatorScreen class in
- * this sample also shows how to use the Locator API to search for locations and
- * display them on the embedded map.
+ * This sample demonstrates the embedding of a MapField in a BlackBerry UI
+ * application. The LocatorScreen class shows how to use the Locator API to
+ * search for locations and display them on the map.
  */
 final class EmbeddedMapDemo extends UiApplication {
     static final String INITIAL_NAME = "RIM Mississauga";
@@ -70,9 +73,7 @@ final class EmbeddedMapDemo extends UiApplication {
         app.enterEventDispatcher();
     }
 
-    /**
-     * Constructor that sets up variables.
-     */
+    // Constructor
     EmbeddedMapDemo() {
         _mapLocations = new Vector();
         _initialLocation =
@@ -85,8 +86,8 @@ final class EmbeddedMapDemo extends UiApplication {
     }
 
     /**
-     * This class is the main screen of the application. It holds the embedded
-     * map as well as labels and buttons for other features and the menu.
+     * This class is the main screen for the application. It holds the embedded
+     * map as well as labels and buttons for other features.
      */
     final class EmbeddedMapDemoScreen extends MainScreen {
         private final VerticalFieldManager _vfm;
@@ -97,10 +98,9 @@ final class EmbeddedMapDemo extends UiApplication {
         private final BasicEditField _nameField;
         private final SaveButtonField _saveField;
 
-        /**
-         * Constructor that sets up the screen.
-         */
+        // Constructor
         private EmbeddedMapDemoScreen() {
+            // Initialize UI components
             setTitle("Embedded Map Demo");
 
             _vfm =
@@ -108,11 +108,9 @@ final class EmbeddedMapDemo extends UiApplication {
                             | Manager.VERTICAL_SCROLLBAR
                             | Manager.VERTICAL_SCROLL);
 
-            // The instructions, map, and saving fields
-            _instructionsField1 =
-                    new LabelField("Click on trackball to (de)activate map");
+            _instructionsField1 = new LabelField("Click map to (de)activate");
             _instructionsField2 =
-                    new LabelField("Press 'i'/'l' to zoom in, 'o' to zoom out");
+                    new LabelField("Press 'i' to zoom in, 'o' to zoom out");
             _mapField = new ExtendedMapField(_initialLocation, _mapLocations);
             _nameField =
                     new BasicEditField("Name: ", _initialLocation.getName(),
@@ -127,10 +125,8 @@ final class EmbeddedMapDemo extends UiApplication {
             _vfm.add(_nameField);
             _vfm.add(_saveField);
 
-            // Add the file manager to hold all of this
             add(_vfm);
 
-            // Finally, add the menu items
             addMenuItem(_favouriteLocationsItem);
             addMenuItem(_locatorItem);
             addMenuItem(_saveLocationItem);
@@ -219,7 +215,7 @@ final class EmbeddedMapDemo extends UiApplication {
         }
 
         /**
-         * Add to the favourite locations list and display on a map the location
+         * Add to the favourite locations list and display the location
          * described by the given landmark.
          * 
          * @param landmark
@@ -233,8 +229,8 @@ final class EmbeddedMapDemo extends UiApplication {
                     new MapLocation(cords.getLatitude(), cords.getLongitude(),
                             landmark.getName());
 
-            // Check if the location exists in the favourites, if not
-            // then create and add.
+            // Check if the location exists in the favourites, if not,
+            // create and add.
             final int index = _mapField.checkForLocation(location);
             if (index != -1) {
                 displayLocation(index);
@@ -246,7 +242,7 @@ final class EmbeddedMapDemo extends UiApplication {
 
         /**
          * Save the current location. If the location has already been saved,
-         * then updated the entry with the new name.
+         * update the entry with the new name.
          */
         void saveOrUpdateLocation() {
             final String name = _nameField.getText().trim();
@@ -272,6 +268,54 @@ final class EmbeddedMapDemo extends UiApplication {
 
                 displayLocation(index);
             }
+        }
+
+        /**
+         * @see Manager#sublayout(int, int)
+         */
+        protected void sublayout(final int width, final int height) {
+            _mapField.setPreferredSize(Display.getWidth() - 10, (int) (Display
+                    .getHeight() * 0.65));
+            super.sublayout(width, height);
+        }
+
+        /**
+         * @see Field#touchEvent(TouchEvent)
+         */
+        protected boolean touchEvent(final TouchEvent message) {
+            boolean isConsumed = false;
+
+            if (_mapField.isClicked()) {
+                final TouchGesture touchGesture = message.getGesture();
+                if (touchGesture != null) {
+                    // If the user has performed a swipe gesture we will move
+                    // the
+                    // map accordingly.
+                    if (touchGesture.getEvent() == TouchGesture.SWIPE) {
+                        // Retrieve the swipe magnitude so we know how
+                        // far to move the map.
+                        final int magnitude = touchGesture.getSwipeMagnitude();
+
+                        // Move the map in the direction of the swipe.
+                        switch (touchGesture.getSwipeDirection()) {
+                        case TouchGesture.SWIPE_NORTH:
+                            _mapField.move(0, -magnitude);
+                            break;
+                        case TouchGesture.SWIPE_SOUTH:
+                            _mapField.move(0, magnitude);
+                            break;
+                        case TouchGesture.SWIPE_EAST:
+                            _mapField.move(-magnitude, 0);
+                            break;
+                        case TouchGesture.SWIPE_WEST:
+                            _mapField.move(magnitude, 0);
+                            break;
+                        }
+                        isConsumed = true; // We've consumed the touch event.
+                    }
+                }
+            }
+            return isConsumed;
         }
 
         /**
@@ -303,9 +347,6 @@ final class EmbeddedMapDemo extends UiApplication {
             return true;
         }
 
-        /**
-         * This is an extension of ButtonField
-         */
         private class SaveButtonField extends ButtonField implements
                 FieldChangeListener {
             /**

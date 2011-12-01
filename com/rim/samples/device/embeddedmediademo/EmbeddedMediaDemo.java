@@ -76,7 +76,8 @@ final class EmbeddedMediaScreen extends MainScreen implements
     private final RichTextField _statusField;
     private ButtonField _controlButton;
     private Field _videoField;
-    private final EmbeddedMediaScreen _mainScreen;
+    private HorizontalFieldManager _hfm1;
+    private HorizontalFieldManager _hfm2;
 
     private LabelField _currentTime;
     private LabelField _duration;
@@ -86,9 +87,8 @@ final class EmbeddedMediaScreen extends MainScreen implements
 
     // Constructor
     public EmbeddedMediaScreen() {
-        _mainScreen = this;
-
         setTitle("Embedded Media Demo");
+
         _statusField = new RichTextField("Loading media, please wait...");
         add(_statusField);
 
@@ -98,86 +98,14 @@ final class EmbeddedMediaScreen extends MainScreen implements
 
                 // If initialization was successful...
                 if (_videoField != null) {
-                    addFields();
+                    initializeUiComponents();
+                    addComponentsToScreen();
+                    updateVideoSize();
                 } else {
                     _statusField.setText("Error: Could not load media");
                 }
             }
         });
-    }
-
-    /**
-     * Method to add UI fields to the main screen. Only called if media was
-     * sucessfully loaded.
-     */
-    private void addFields() {
-        delete(_statusField);
-        add(_videoField);
-
-        final HorizontalFieldManager hfm1 =
-                new HorizontalFieldManager(Field.FIELD_HCENTER);
-        _controlButton = new ButtonField("Start");
-        _controlButton.setChangeListener(this);
-        hfm1.add(_controlButton);
-        add(hfm1);
-
-        // Fields to display the duration and the elapsed time.
-        final HorizontalFieldManager hfm2 =
-                new HorizontalFieldManager(Field.FIELD_HCENTER);
-        _currentTime = new LabelField("-");
-        _duration = new LabelField("- s");
-        _volumeDisplay =
-                new LabelField("Volume : " + _volumeControl.getLevel());
-        hfm2.add(_currentTime);
-        hfm2.add(new LabelField(" / "));
-        hfm2.add(_duration);
-        hfm2.add(new LabelField("\t\t"));
-        hfm2.add(_volumeDisplay);
-        add(hfm2);
-    }
-
-    /**
-     * Creates a Player based on a specified URL and provides a VolumeControl
-     * object.
-     */
-    private void initializeMedia() {
-        try {
-            /*
-             * For the purpose of this sample we are supplying a URL to a media
-             * file that is included in the project itself. See the
-             * javax.microedition.media.Manager javadoc for more information on
-             * handling data residing on a server.
-             */
-            final InputStream is =
-                    getClass().getResourceAsStream("/media/BlackBerry.mp4");
-            _player =
-                    javax.microedition.media.Manager.createPlayer(is,
-                            "video/mp4");
-            _player.addPlayerListener(this);
-            _player.realize();
-
-            final VideoControl vc =
-                    (VideoControl) _player.getControl("VideoControl");
-            if (vc != null) {
-                _videoField =
-                        (Field) vc.initDisplayMode(
-                                GUIControl.USE_GUI_PRIMITIVE,
-                                "net.rim.device.api.ui.Field");
-                vc.setDisplaySize(_mainScreen.getWidth(),
-                        (int) (0.6875 * _mainScreen.getHeight())); // Leave room
-                                                                   // for the
-                                                                   // LabelFields.
-                vc.setVisible(true);
-            }
-
-            _volumeControl =
-                    (VolumeControl) _player.getControl("VolumeControl");
-
-        } catch (final MediaException pe) {
-            System.out.println(pe.toString());
-        } catch (final IOException ioe) {
-            System.out.println(ioe.toString());
-        }
     }
 
     /**
@@ -210,6 +138,115 @@ final class EmbeddedMediaScreen extends MainScreen implements
             } catch (final MediaException pe) {
                 System.out.println(pe.toString());
             }
+        }
+    }
+
+    /**
+     * @see net.rim.device.api.ui.Manager#sublayout(int,int)
+     * @param width
+     *            Width available for this screen.
+     * @param height
+     *            Width available for this screen.
+     */
+    protected void sublayout(final int width, final int height) {
+        super.sublayout(width, height);
+        updateVideoSize();
+    }
+
+    /**
+     * Initializes UI Components
+     */
+    private void initializeUiComponents() {
+        delete(_statusField);
+
+        _hfm1 = new HorizontalFieldManager(Field.FIELD_HCENTER);
+        _controlButton = new ButtonField("Start");
+        _controlButton.setChangeListener(this);
+        _hfm1.add(_controlButton);
+
+        _hfm2 = new HorizontalFieldManager(Field.FIELD_HCENTER);
+        _currentTime = new LabelField("-");
+        _duration = new LabelField("- s");
+        _volumeDisplay =
+                new LabelField("Volume : " + _volumeControl.getLevel());
+        _hfm2.add(_currentTime);
+        _hfm2.add(new LabelField(" / "));
+        _hfm2.add(_duration);
+        _hfm2.add(new LabelField("\t\t"));
+        _hfm2.add(_volumeDisplay);
+    }
+
+    /**
+     * Adds UI components to the main screen.
+     */
+    private void addComponentsToScreen() {
+        add(_videoField);
+        add(_hfm1);
+        add(_hfm2);
+    }
+
+    /**
+     * Creates a Player based on a specified URL and provides a VolumeControl
+     * object.
+     */
+    private void initializeMedia() {
+        try {
+            /*
+             * For the purpose of this sample we are supplying a URL to a media
+             * file that is included in the project itself. See the
+             * javax.microedition.media.Manager javadoc for more information on
+             * handling data residing on a server.
+             */
+            final InputStream is =
+                    getClass().getResourceAsStream("/media/BlackBerry.mp4");
+            _player =
+                    javax.microedition.media.Manager.createPlayer(is,
+                            "video/mp4");
+            _player.addPlayerListener(this);
+            _player.realize();
+
+            final VideoControl vc =
+                    (VideoControl) _player.getControl("VideoControl");
+            if (vc != null) {
+                _videoField =
+                        (Field) vc.initDisplayMode(
+                                GUIControl.USE_GUI_PRIMITIVE,
+                                "net.rim.device.api.ui.Field");
+                vc.setVisible(true);
+            }
+
+            _volumeControl =
+                    (VolumeControl) _player.getControl("VolumeControl");
+
+        } catch (final MediaException pe) {
+            System.out.println(pe.toString());
+        } catch (final IOException ioe) {
+            System.out.println(ioe.toString());
+        }
+    }
+
+    /**
+     * Updates the video size according to the current screen dimensions.
+     * 
+     * @param screenWidth
+     *            The screen's width.
+     * @param screenHeight
+     *            The screens's height.
+     */
+    private void updateVideoSize() {
+        try {
+            final VideoControl vc =
+                    (VideoControl) _player.getControl("VideoControl");
+            if (vc != null) {
+                final net.rim.device.api.ui.Manager manager = getMainManager();
+                final int videoHeight =
+                        manager.getHeight() - _hfm1.getHeight()
+                                - _hfm2.getHeight();
+                final int videoWidth = manager.getWidth();
+                vc.setDisplaySize(videoWidth, videoHeight);
+            }
+        } catch (final Exception e) {
+            System.out.println(e.toString());
         }
     }
 

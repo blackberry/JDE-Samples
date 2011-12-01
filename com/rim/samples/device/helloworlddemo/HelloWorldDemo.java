@@ -28,7 +28,6 @@
 
 package com.rim.samples.device.helloworlddemo;
 
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
@@ -80,9 +79,7 @@ class HelloWorldDemo extends UiApplication {
         // here. The ELLIPSIS option truncates the label text with "..." if the
         // text
         // is too long for the space available.
-        final LabelField title =
-                new LabelField("Hello World Demo", DrawStyle.ELLIPSIS
-                        | Field.USE_ALL_WIDTH);
+        final LabelField title = new LabelField("Hello World Demo");
         setTitle(title);
 
         // Add a read only text field (RichTextField) to the screen. The

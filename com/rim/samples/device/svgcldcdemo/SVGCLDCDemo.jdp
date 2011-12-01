@@ -25,6 +25,7 @@ img\blackberry.png
 img\svgcldcdemo_jde.png
 SVGCLDCDemo.java
 SVGScreen.java
+Util.java
 ]
 HaveAlxImports=0
 HaveDefs=0

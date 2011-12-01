@@ -31,8 +31,6 @@ import javax.microedition.pim.PIMException;
 
 import net.rim.blackberry.api.pdap.BlackBerryPIM;
 import net.rim.blackberry.api.pdap.BlackBerryPIMList;
-import net.rim.device.api.ui.DrawStyle;
-import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.container.MainScreen;
@@ -78,8 +76,7 @@ final class MemoApiDemo extends UiApplication {
     private MemoApiDemo() {
         final MainScreen mainScreen = new MemoMainScreen();
 
-        mainScreen.setTitle(new LabelField("Memo API Demo", Field.USE_ALL_WIDTH
-                | DrawStyle.ELLIPSIS));
+        mainScreen.setTitle(new LabelField("Memo API Demo"));
         pushScreen(mainScreen);
     }
 }

@@ -29,7 +29,6 @@ package com.rim.samples.device.memorydemo;
 import java.util.Vector;
 
 import net.rim.device.api.system.Characters;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
@@ -82,7 +81,7 @@ import net.rim.device.api.ui.container.MainScreen;
             title = "View Order Record";
         }
 
-        setTitle(new LabelField(title, DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH));
+        setTitle(new LabelField(title));
 
         _controller = new OrderRecordController(orderRecord, editable);
         final Vector fields = _controller.getFields();
@@ -147,8 +146,7 @@ import net.rim.device.api.ui.container.MainScreen;
      * Makes this screen editable.
      */
     private void makeEditScreen() {
-        setTitle(new LabelField("Edit Order Record", DrawStyle.ELLIPSIS
-                | Field.USE_ALL_WIDTH));
+        setTitle(new LabelField("Edit Order Record"));
         _editable = true;
         _controller.makeEditable();
     }

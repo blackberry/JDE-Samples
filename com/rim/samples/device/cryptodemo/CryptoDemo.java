@@ -40,11 +40,8 @@ import net.rim.device.api.crypto.PKCS5UnformatterEngine;
 import net.rim.device.api.crypto.TripleDESDecryptorEngine;
 import net.rim.device.api.crypto.TripleDESEncryptorEngine;
 import net.rim.device.api.crypto.TripleDESKey;
-import net.rim.device.api.ui.DrawStyle;
-import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
-import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.util.Arrays;
@@ -74,8 +71,7 @@ class CryptoDemo extends UiApplication {
      */
     private CryptoDemo() {
         final MainScreen screen = new MainScreen();
-        screen.setTitle(new LabelField("Crypto Demo", DrawStyle.ELLIPSIS
-                | Field.USE_ALL_WIDTH));
+        screen.setTitle("Crypto Demo");
 
         _status =
                 new RichTextField(

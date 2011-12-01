@@ -59,30 +59,38 @@ final class SVGMapScreen extends MainScreen implements FieldChangeListener,
     // Actual SVG map width and height
     private static final int SVG_WIDTH = 1024;
     private static final int SVG_HEIGHT = 768;
+
     // Display/Map width and height
     private static final int MAP_DISPLAY_WIDTH = 480;
     private static final int MAP_DISPLAY_HEIGHT = 240;
+
     // Desired scroll movement.
     private static final int SCROLL_CHANGE = 15;
 
     // SVGImage instance to store the parsed SVG data.
     private SVGImage _image;
+
     // SVGAnimator to obtain an SVGField.
     private SVGAnimator _animator;
+
     // Document to hold SVGImage contents.
     private Document _document;
 
     // Field to hold the animated svg context.
     private Field _svgField;
+
     // Manager to lay out the SVG Map item.
     private SVGMapManager _mapManager;
+
     // HashTable to store the checkboxes to their svg elements.
     private Hashtable _checkboxes;
+
     // Manager to lay out checkboxes.
     private FlowFieldManager _checkboxManager;
 
     // The svg root element.
-    SVGSVGElement _svg;
+    private SVGSVGElement _svg;
+
     // the svg viewbox.
     private SVGRect _svgViewBox;
     private SVGElement _viewportElement;
@@ -133,9 +141,8 @@ final class SVGMapScreen extends MainScreen implements FieldChangeListener,
         // custom
         // togglable field.
         _mapManager = new SVGMapManager();
-        this.add(_mapManager);
-        _svgField =
-                (net.rim.device.api.ui.Field) _animator.getTargetComponent();
+        add(_mapManager);
+        _svgField = (Field) _animator.getTargetComponent();
         _mapManager.add(_svgField);
 
         // Initialize a hashtable for our check boxes.
@@ -177,7 +184,7 @@ final class SVGMapScreen extends MainScreen implements FieldChangeListener,
         _checkboxManager.add(interestsCheckBox);
 
         // Adds the layout manager to the screen.
-        this.add(_checkboxManager);
+        add(_checkboxManager);
 
         // Obtain the root element and the view box settings.
         _svg = (SVGSVGElement) _document.getDocumentElement();

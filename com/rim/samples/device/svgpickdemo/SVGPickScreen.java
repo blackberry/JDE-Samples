@@ -37,6 +37,7 @@ import javax.microedition.m2g.ScalableImage;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.Manager;
+import net.rim.device.api.ui.TouchEvent;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.util.MathUtilities;
 
@@ -49,14 +50,16 @@ import org.w3c.dom.svg.SVGSVGElement;
 
 /**
  * SVG cursor program to select from a group of selectable shapes and display
- * stats
+ * stats.
+ * 
+ * The attribute values of the SVG elements in sample.svg were hard-coded in a
+ * way to display the image correctly on a 9500 device. However, one can
+ * programmatically adjust those values by calling setFloatTrait() on the
+ * SVGElement.
  */
 final class SVGPickScreen extends MainScreen {
-    private static final int DISPLAY_WIDTH = Display.getWidth();
-    private static final int DISPLAY_HEIGHT = Display.getHeight();
-
-    private static final int CURSOR_X_DEFAULT = 0;
-    private static final int CURSOR_Y_DEFAULT = 0;
+    private static final int CURSOR_X_DEFAULT = 30;
+    private static final int CURSOR_Y_DEFAULT = 60;
     private static final int CURSOR_MOVE_FACTOR = 10;
 
     private ScalableGraphics _scalableGraphics;
@@ -78,15 +81,14 @@ final class SVGPickScreen extends MainScreen {
     private SVGElement _displayName;
     private SVGElement _displayBounds;
 
+    private int _displayWidth;
+    private int _displayHeight;
+
     /**
      * Constructor.
      */
     SVGPickScreen() {
         setTitle("SVG Pick Demo");
-
-        // Initial position of cursor point
-        _cursorX = CURSOR_X_DEFAULT;
-        _cursorY = CURSOR_Y_DEFAULT;
 
         try {
             // Load SVG from svg
@@ -95,17 +97,24 @@ final class SVGPickScreen extends MainScreen {
 
             // Create SVGImage
             _image = (SVGImage) ScalableImage.createImage(inputStream, null);
+
             // Create Document
             _document = _image.getDocument();
+
             // Get SVG root element.
             _root = (SVGSVGElement) _document.getDocumentElement();
+
             // Create ScalableGraphics Instance
             _scalableGraphics = ScalableGraphics.createInstance();
+
+            _displayWidth = Display.getWidth();
+            _displayHeight = Display.getHeight();
 
             // Initialize our view bindings.
             intializeElements();
 
-            updateCursor(CURSOR_X_DEFAULT, CURSOR_Y_DEFAULT, 0);
+            // Initial position of cursor point.
+            updateCursor(CURSOR_X_DEFAULT, CURSOR_Y_DEFAULT);
         } catch (final IOException e) {
             System.exit(1);
         }
@@ -144,12 +153,50 @@ final class SVGPickScreen extends MainScreen {
     }
 
     /**
+     * @see net.rim.device.api.ui.Screen#touchEvent(TouchEvent)
+     */
+    protected boolean touchEvent(final TouchEvent message) {
+        final int touchEvent = message.getEvent();
+        if (touchEvent == TouchEvent.DOWN || touchEvent == TouchEvent.CLICK
+                || touchEvent == TouchEvent.MOVE) {
+            final int dx = message.getX(1) - _cursorX;
+            final int dy = message.getY(1) - _cursorY;
+            updateCursor(dx, dy);
+        }
+
+        return true;
+    }
+
+    /**
      * @see Manager#navigationMovement(int, int, int, int)
      */
     protected boolean navigationMovement(final int dx, final int dy,
             final int status, final int time) {
+        final int deltaX = CURSOR_MOVE_FACTOR * dx;
+        final int deltaY = CURSOR_MOVE_FACTOR * dy;
+
         // Update our new cursor position
-        updateCursor(dx, dy, CURSOR_MOVE_FACTOR);
+        updateCursor(deltaX, deltaY);
+
+        return true;
+    }
+
+    /**
+     * Updates our cursor position.
+     */
+    private void updateCursor(final int deltaX, final int deltaY) {
+        // Translate the cursor pointer.
+        final int translateX = clampDelta(0, _displayWidth, _cursorX, deltaX);
+        final int translateY = clampDelta(0, _displayHeight, _cursorY, deltaY);
+        final SVGMatrix transform = _cursor.getMatrixTrait("transform");
+        transform.mTranslate(translateX, translateY);
+        _cursor.setMatrixTrait("transform", transform);
+
+        // Update cursor position Text
+        _cursorX = MathUtilities.clamp(0, _cursorX + translateX, _displayWidth);
+        _cursorY =
+                MathUtilities.clamp(0, _cursorY + translateY, _displayHeight);
+        _cursorPosition.setTrait("#text", "" + _cursorX + ',' + _cursorY);
 
         // If a shape is selected then update the display.
         final SVGLocatableElement selected = findFirstSelectedShape();
@@ -169,34 +216,6 @@ final class SVGPickScreen extends MainScreen {
         }
 
         invalidate();
-
-        return true;
-    }
-
-    /**
-     * Updates our cursor position.
-     * 
-     * @param dx
-     *            Delta x for the cursor.
-     * @param dy
-     *            Delta y for the cursor.
-     */
-    private void updateCursor(final int dx, final int dy, final int factor) {
-        final int deltaX = factor * dx;
-        final int deltaY = factor * dy;
-
-        // Translate the cursor pointer.
-        final int translateX = clampDelta(0, DISPLAY_WIDTH, _cursorX, deltaX);
-        final int translateY = clampDelta(0, DISPLAY_HEIGHT, _cursorY, deltaY);
-        final SVGMatrix transform = _cursor.getMatrixTrait("transform");
-        transform.mTranslate(translateX, translateY);
-        _cursor.setMatrixTrait("transform", transform);
-
-        // Update cursor position Text
-        _cursorX = MathUtilities.clamp(0, _cursorX + translateX, DISPLAY_WIDTH);
-        _cursorY =
-                MathUtilities.clamp(0, _cursorY + translateY, DISPLAY_HEIGHT);
-        _cursorPosition.setTrait("#text", "" + _cursorX + ',' + _cursorY);
 
     }
 
@@ -317,8 +336,8 @@ final class SVGPickScreen extends MainScreen {
         _scalableGraphics.bindTarget(graphics);
 
         // Set the viewport dimensions
-        _image.setViewportWidth(DISPLAY_WIDTH);
-        _image.setViewportHeight(DISPLAY_HEIGHT);
+        _image.setViewportWidth(_displayWidth);
+        _image.setViewportHeight(_displayHeight);
 
         // Render the svg image/ model
         _scalableGraphics.render(0, 0, _image);
@@ -326,4 +345,17 @@ final class SVGPickScreen extends MainScreen {
         // Release bindings on Graphics
         _scalableGraphics.releaseTarget();
     }
+
+    /**
+     * @see net.rim.device.api.ui.container.FullScreen#sublayout(int, int)
+     */
+    protected void sublayout(final int width, final int height) {
+        if (_displayWidth != width || _displayHeight != height) {
+            _displayWidth = width;
+            _displayHeight = height;
+        }
+
+        super.sublayout(width, height);
+    }
+
 }

@@ -29,8 +29,6 @@ package com.rim.samples.device.otabackuprestoredemo;
 import net.rim.device.api.synchronization.SyncManager;
 import net.rim.device.api.synchronization.UIDGenerator;
 import net.rim.device.api.system.Display;
-import net.rim.device.api.ui.DrawStyle;
-import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
@@ -144,8 +142,7 @@ class OTABackupRestoreDemo extends UiApplication implements ListFieldCallback {
 
         _addContactAction = new AddContactAction();
 
-        screen.setTitle(new LabelField("OTA Backup/Restore Contacts",
-                DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH));
+        screen.setTitle(new LabelField("OTA Backup/Restore Contacts"));
 
         _listField = new ListField();
         _listField.setCallback(this);

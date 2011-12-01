@@ -26,10 +26,8 @@ AutoRestart=0
 ExcludeFromBuildAll=0
 [Files
 img\blanksquare.png
-img\horizontal_bar.gif
 img\o.png
 img\tictactoe_jde.png
-img\vertical_bar.gif
 img\x.png
 TicTacToeDemo.java
 TTTRequestListener.java

@@ -28,8 +28,6 @@ package com.rim.samples.device.xmldemo;
 
 import java.io.InputStream;
 
-import net.rim.device.api.ui.DrawStyle;
-import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.container.MainScreen;
@@ -63,8 +61,7 @@ import org.w3c.dom.NodeList;
      * @see DocumentBuilderFactory
      */
     XMLDemoScreen() {
-        setTitle(new LabelField("XML Demo", DrawStyle.ELLIPSIS
-                | Field.USE_ALL_WIDTH));
+        setTitle(new LabelField("XML Demo"));
 
         try {
             // Build a document based on the XML file.

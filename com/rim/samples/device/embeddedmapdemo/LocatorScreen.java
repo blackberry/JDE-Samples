@@ -45,10 +45,10 @@ import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
 
 /**
- * This class makes use of the Locator API. This screen allows users to look up
+ * This class makes use of the Locator API. The screen allows users to look up
  * locations using a number of different criteria. If a match or multiple
  * matches are found, the user can choose which one to display (see
- * LookupMatchesScreen) and the location will be displayed on the embedded map.
+ * LookupMatchesScreen) and the location will be displayed on the map.
  */
 final class LocatorScreen extends MainScreen {
     private final EmbeddedMapDemo.EmbeddedMapDemoScreen _mainScreen;
@@ -64,7 +64,7 @@ final class LocatorScreen extends MainScreen {
     private final LabelField _statusLabelField;
 
     /**
-     * Constructor.
+     * Constructor
      * 
      * @param screen
      *            - A pointer to the main screen.
@@ -198,7 +198,7 @@ final class LocatorScreen extends MainScreen {
     };
 
     /**
-     * Listener for _lookupButton. See lookup().
+     * Listener for _lookupButton
      */
     private final FieldChangeListener _lookupListener =
             new FieldChangeListener() {

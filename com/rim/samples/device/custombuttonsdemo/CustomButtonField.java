@@ -45,8 +45,6 @@ class CustomButtonField extends Field implements DrawStyle {
     static final int FULLSCREEN = 5;
     static final int COLOUR_BACKGROUND = 6;
 
-    static final int DEFAULT_FIXED_WIDTH = 225;
-
     private final String _label;
     private final int _shape;
     private Font _font;
@@ -116,7 +114,7 @@ class CustomButtonField extends Field implements DrawStyle {
             }
 
         case FIXED_WIDTH:
-            return DEFAULT_FIXED_WIDTH;
+            return _font.getAdvance(" ") * 35; // Always set to 35 spaces wide
 
         case FULLSCREEN:
             return Display.getWidth();

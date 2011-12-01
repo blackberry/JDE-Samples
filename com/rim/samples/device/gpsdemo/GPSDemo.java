@@ -137,7 +137,7 @@ class GPSDemo extends UiApplication {
         _messageString = new StringBuffer();
 
         final GPSDemoScreen screen = new GPSDemoScreen();
-        screen.setTitle(new LabelField("GPS Demo", Field.USE_ALL_WIDTH));
+        screen.setTitle("GPS Demo");
 
         _status = new EditField(Field.NON_FOCUSABLE);
         screen.add(_status);

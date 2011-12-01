@@ -33,14 +33,16 @@ import java.util.Vector;
 import javax.microedition.location.Coordinates;
 
 import net.rim.device.api.io.LineReader;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
-import net.rim.device.api.ui.Keypad;
+import net.rim.device.api.ui.Manager;
+import net.rim.device.api.ui.TouchEvent;
+import net.rim.device.api.ui.TouchGesture;
 import net.rim.device.api.ui.Trackball;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.container.VerticalFieldManager;
 
 /**
  * Handles the display of MapFieldDemo's UI elements.
@@ -64,28 +66,21 @@ class MapFieldDemoScreen extends MainScreen {
     private Vector _siteNames; // <String>
     private MapFieldDemoSite _currentSite;
 
-    // For keypad/trackball
-    private boolean _reducedKeypad = false;
-    private final boolean _checkedTrackballSupport = false;
+    private boolean _checkedTrackballSupport = false;
 
     /**
      * Sets up screen elements and initializes the map.
      */
     MapFieldDemoScreen() {
+        super(Manager.NO_VERTICAL_SCROLL);
         Coordinates defaultLocation;
 
         // Reads data from file.
         final LineReader lineReader =
                 new LineReader(getClass().getResourceAsStream("/MapsData.txt"));
 
-        // Determine keypad type.
-        if (Keypad.getHardwareLayout() == Keypad.HW_LAYOUT_REDUCED
-                || Keypad.getHardwareLayout() == Keypad.HW_LAYOUT_REDUCED_24) {
-            _reducedKeypad = true;
-        }
-
         // Maps instance for screen.
-        _map = new DemoMapField(_reducedKeypad);
+        _map = new DemoMapField();
 
         storeAllSites("/MapsData.txt");
         storeAllCampuses("/MapsData.txt");
@@ -125,17 +120,21 @@ class MapFieldDemoScreen extends MainScreen {
                 }
             }
 
-            // Add address labels.
-            _addressBar1 = new LabelField();
-            _addressBar2 = new LabelField();
-
-            // Display all UI.
-            add(_map);
-            add(_addressBar1);
-            add(_addressBar2);
-
             displayTitle(_currentCampus);
+            add(_map);
+
+            // Create label fields to display address of highlighted site.
+            _addressBar1 = new LabelField("");
+            _addressBar2 = new LabelField("");
+
+            // Add the address label fields to the screen's status section.
+            final VerticalFieldManager statusVFM = new VerticalFieldManager();
+            statusVFM.add(_addressBar1);
+            statusVFM.add(_addressBar2);
+            setStatus(statusVFM);
+
             createMenuItems();
+
         } catch (final IOException e) {
         }
     }
@@ -255,7 +254,6 @@ class MapFieldDemoScreen extends MainScreen {
                 }
 
                 public void run() {
-                    _map.turnOffText();
                     _currentCampus = this.getCampus();
 
                     // Moves the map to the current campus.
@@ -294,8 +292,7 @@ class MapFieldDemoScreen extends MainScreen {
      *            Name of the campus.
      */
     private void displayTitle(final String campus) {
-        setTitle(new LabelField("Welcome to " + campus, Field.USE_ALL_WIDTH
-                | DrawStyle.HCENTER));
+        setTitle(new LabelField("Welcome to " + campus));
     }
 
     /**
@@ -340,39 +337,55 @@ class MapFieldDemoScreen extends MainScreen {
      */
     protected boolean keyChar(final char character, final int status,
             final int time) {
-        // 'i' will zoom in.
-        if (character == 'i') {
-            if (!_reducedKeypad) {
-
-                if (_map.getZoom() != _map.getMinZoom()) {
-                    _map.setZoom(_map.getZoom() - 1);
-                }
-
-                return true;
-            }
-        }
-
-        // 'l' will zoom in on reduced layouts.
-        if (character == 'l') {
-            if (_reducedKeypad) {
-                if (_map.getZoom() != _map.getMinZoom()) {
-                    _map.setZoom(_map.getZoom() - 1);
-                }
-
-                return true;
-            }
-        }
-
-        // 'o' will zoom out
-        if (character == 'o') {
-            if (_map.getZoom() != _map.getMaxZoom()) {
-                _map.setZoom(_map.getZoom() + 1);
-            }
-
+        // 'i'(qwerty), 'g'(multitap) or 'u'(suretype) will zoom in.
+        if (character == 'i' || character == 'u' || character == 'g') {
+            _map.setZoom(Math.max(_map.getZoom() - 1, _map.getMinZoom()));
+            return true;
+        } else if (character == 'o' || character == 'm') { // 'o'(qwerty,
+                                                           // suretype) or
+                                                           // 'm'(multitap) will
+                                                           // zoom out
+            _map.setZoom(Math.min(_map.getZoom() + 1, _map.getMaxZoom()));
             return true;
         }
 
         return super.keyChar(character, status, time);
+    }
+
+    /**
+     * @see Field#touchEvent(TouchEvent)
+     */
+    protected boolean touchEvent(final TouchEvent message) {
+        boolean isConsumed = false;
+
+        final TouchGesture touchGesture = message.getGesture();
+        if (touchGesture != null) {
+            // If the user has performed a swipe gesture we will move the
+            // map accordingly.
+            if (touchGesture.getEvent() == TouchGesture.SWIPE) {
+                // Retrieve the swipe magnitude so we know how
+                // far to move the map.
+                final int magnitude = touchGesture.getSwipeMagnitude();
+
+                // Move the map in the direction of the swipe.
+                switch (touchGesture.getSwipeDirection()) {
+                case TouchGesture.SWIPE_NORTH:
+                    _map.move(0, -magnitude);
+                    break;
+                case TouchGesture.SWIPE_SOUTH:
+                    _map.move(0, magnitude);
+                    break;
+                case TouchGesture.SWIPE_EAST:
+                    _map.move(-magnitude, 0);
+                    break;
+                case TouchGesture.SWIPE_WEST:
+                    _map.move(magnitude, 0);
+                    break;
+                }
+                isConsumed = true; // We've consumed the touch event.
+            }
+        }
+        return isConsumed;
     }
 
     /**
@@ -381,6 +394,8 @@ class MapFieldDemoScreen extends MainScreen {
     protected boolean navigationMovement(final int dx, final int dy,
             final int status, final int time) {
         if (!_checkedTrackballSupport) {
+            _checkedTrackballSupport = true;
+
             // Allows smoother panning on the map.
             if (Trackball.isSupported()) {
                 // Adjust the filter.

@@ -28,10 +28,10 @@ package com.rim.samples.device.socketdemo;
 
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.RadioInfo;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.VirtualKeyboard;
 import net.rim.device.api.ui.component.CheckboxField;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.EditField;
@@ -53,8 +53,7 @@ class SocketDemoScreen extends MainScreen {
 
     // Constructor
     SocketDemoScreen() {
-        setTitle(new LabelField("Socket Demo", DrawStyle.ELLIPSIS
-                | Field.USE_ALL_WIDTH));
+        setTitle(new LabelField("Socket Demo"));
 
         add(new RichTextField(
                 "Enter local host name in the field below and select 'Go' from the menu.",
@@ -177,6 +176,14 @@ class SocketDemoScreen extends MainScreen {
             if (_hostField.getText().length() > 0) {
                 new ConnectThread().start();
                 _threadRunning = true;
+
+                // Hide the virtual keyboard so the user can see status updates.
+                if (VirtualKeyboard.isSupported()) {
+                    final VirtualKeyboard keyboard = getVirtualKeyboard();
+                    if (keyboard.getVisibility() != VirtualKeyboard.HIDE) {
+                        keyboard.setVisibility(VirtualKeyboard.HIDE);
+                    }
+                }
             } else {
                 Dialog.ask(Dialog.D_OK, "Please enter a valid host name");
             }

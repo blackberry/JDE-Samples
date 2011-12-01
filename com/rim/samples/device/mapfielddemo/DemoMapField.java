@@ -32,7 +32,6 @@ import javax.microedition.location.Coordinates;
 
 import net.rim.device.api.lbs.MapField;
 import net.rim.device.api.system.Bitmap;
-import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.XYPoint;
@@ -47,50 +46,26 @@ class DemoMapField extends MapField {
     private final Vector _allSites = new Vector();
     private MapFieldDemoSite _highlightedSite;
 
-    // For coordinates
-    private boolean coordinatesInitialized = false;
-    private int _latitude, _longitude;
-    private int _previousLatitude, _previousLongitude;
-
     // For cursor
     private final Bitmap _cursor = Bitmap.getBitmapResource("bullseye.png");
 
     // For preferred height
     private LabelField _sampleLabel;
-    private final int _preferredMapHeight;
+    private int _preferredMapHeight;
 
     // Instructive text
     private final int _textHeight;
     private boolean _turnOffText = false;
-    private int _textOption;
-
-    // Text options
-    private static final int NAVIGATE_INSTRUCTION = 1;
-    private static final int CHANGE_LOCATION_INSTRUCTION = 2;
-
-    // For keypad
-    private final boolean _reducedKeypad;
 
     /**
      * Initializes map.
      */
-    DemoMapField(final boolean reducedKeypad) {
-        // Sample label is used to determine the relative height of the map and
-        // therefore
-        // declared null right after use.
+    DemoMapField() {
+        // Sample label is only used to determine the instructive text height
+        // and is declared null right after use.
         _sampleLabel = new LabelField();
         _textHeight = _sampleLabel.getPreferredHeight();
-        _preferredMapHeight =
-                (int) (Display.getHeight() - _sampleLabel.getPreferredHeight() * 3.45);
         _sampleLabel = null;
-
-        // For keypad.
-        _reducedKeypad = reducedKeypad;
-
-        // Size the map.
-        setPreferredSize(getPreferredWidth(), getPreferredHeight());
-
-        _textOption = NAVIGATE_INSTRUCTION;
     }
 
     /**
@@ -188,15 +163,6 @@ class DemoMapField extends MapField {
             currentSite.drawSite(g);
         }
 
-        if (coordinatesInitialized) {
-            if (_latitude != _previousLatitude
-                    || _longitude != _previousLongitude) {
-                moveTo(_latitude, _longitude);
-                _previousLatitude = _latitude;
-                _previousLongitude = _longitude;
-            }
-        }
-
         // Places the cursor permanently at the center of the map.
         // Logical right shift ">> 1" is equivalent to division by 2.
         g.drawBitmap(getWidth() >> 1, getHeight() >> 1, getWidth(),
@@ -205,20 +171,8 @@ class DemoMapField extends MapField {
         // Displays instructive text until turned off.
         if (!_turnOffText) {
             g.setColor(Color.SLATEGRAY);
-
-            if (_textOption == NAVIGATE_INSTRUCTION) {
-                g.drawText("Navigate area with trackball", 1, 1);
-
-                if (_reducedKeypad) {
-                    g.drawText("Use 'L' to zoom in", 1, _textHeight + 2);
-                } else {
-                    g.drawText("Use 'I' to zoom in", 1, _textHeight + 2);
-                }
-
-                g.drawText("Use 'O' to zoom out", 1, _textHeight * 2 + 4);
-            } else if (_textOption == CHANGE_LOCATION_INSTRUCTION) {
-                g.drawText("Menu items change locations", 1, 1);
-            }
+            g.drawText("Use 'I' to zoom in", 1, _textHeight + 2);
+            g.drawText("Use 'O' to zoom out", 1, _textHeight * 2 + 4);
         }
     }
 
@@ -226,10 +180,7 @@ class DemoMapField extends MapField {
      * @see net.rim.device.api.lbs.MapField#setZoom(int)
      */
     public void setZoom(final int zoom) {
-        if (_textOption == NAVIGATE_INSTRUCTION) {
-            _textOption = CHANGE_LOCATION_INSTRUCTION;
-        }
-
+        _turnOffText = true;
         super.setZoom(zoom);
     }
 
@@ -246,13 +197,7 @@ class DemoMapField extends MapField {
                                                                 // by 8.
         final int longitude = getLongitude() + (dx << 3 << zoom);
 
-        _latitude = latitude;
-        _longitude = longitude;
-        coordinatesInitialized = true;
-
-        if (_textOption == NAVIGATE_INSTRUCTION) {
-            _textOption = CHANGE_LOCATION_INSTRUCTION;
-        }
+        moveTo(latitude, longitude);
 
         return true;
     }
@@ -265,20 +210,6 @@ class DemoMapField extends MapField {
      */
     void addSite(final MapFieldDemoSite site) {
         _allSites.addElement(site);
-    }
-
-    /**
-     * Turns off the instructive text.
-     */
-    void turnOffText() {
-        _turnOffText = true;
-    }
-
-    /**
-     * @see net.rim.device.api.ui.Field#getPreferredHeight()
-     */
-    public int getPreferredHeight() {
-        return _preferredMapHeight;
     }
 
     /**

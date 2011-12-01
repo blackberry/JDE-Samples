@@ -36,11 +36,11 @@ import net.rim.device.api.system.Application;
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.Bitmap;
 import net.rim.device.api.system.Characters;
-import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.Field;
-import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.Graphics;
+import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
+import net.rim.device.api.ui.TouchEvent;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BitmapField;
 import net.rim.device.api.ui.component.Dialog;
@@ -49,7 +49,6 @@ import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.ObjectChoiceField;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.component.SeparatorField;
-import net.rim.device.api.ui.container.FlowFieldManager;
 import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 
@@ -60,13 +59,9 @@ import net.rim.device.api.ui.container.MainScreen;
 class TicTacToeDemo extends UiApplication implements DialogClosedListener {
     // Members
     // ------------------------------------------------------------------
-    private int _difficulty;
+    private int _difficulty = _EASY;
     private final MainScreen _mainScreen;
-    private final DifficultyField _difficultyField = new DifficultyField(
-            "Difficulty Level", new String[] { "Easy", "Medium", "Hard" },
-            _MEDIUM);
-    private final HorizontalFieldManager _hfm;
-
+    private static final String[] _levels = { "Easy", "Medium", "Hard" };
     private boolean _firstTurnFlag;
     private boolean _middleStartFlag;
     private boolean _gameOverFlag;
@@ -86,10 +81,6 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
     // ------------------------------------------------------------------
     private static final Bitmap _xBitmap = Bitmap.getBitmapResource("x.png");
     private static final Bitmap _oBitmap = Bitmap.getBitmapResource("o.png");
-    private static final Bitmap _verticalBarBitmap = Bitmap
-            .getBitmapResource("vertical_bar.gif");
-    private static final Bitmap _horizontalBarBitmap = Bitmap
-            .getBitmapResource("horizontal_bar.gif");
     private static final Bitmap _blankBitmap;
 
     private static final int _NONE = 0;
@@ -115,6 +106,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
 
     private static final int _TIE = 8;
 
+    private static final int _EASY = 0;
     private static final int _MEDIUM = 1;
     private static final int _HARD = 2;
 
@@ -136,7 +128,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
     private static final Dialog _twoPlayerRequestDialog = new Dialog(
             "Requesting two player game...", new Object[] { "Cancel" },
             new int[] { Dialog.CANCEL }, 0, null);
-    private final TurnField _turnField = new TurnField();
+    private final StatusField _statusField;
     private static TicTacToeDemo _theGame;
     private int _yourMark;
     private int _theirMark;
@@ -184,61 +176,37 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
 
         _mainScreen.setTitle("Tic Tac Toe Demo");
 
-        // Initialization
-        newGame();
-
-        // Add the difficulty selector (easy, medium, hard)
-        _hfm = new HorizontalFieldManager(Field.FIELD_HCENTER);
-        _hfm.add(_difficultyField);
-        _mainScreen.add(_hfm);
-
-        // Add a horizontal line.
-        _mainScreen.add(new SeparatorField());
-
         // Add a blank line.
         _mainScreen.add(new RichTextField(Field.NON_FOCUSABLE));
 
-        final Bitmap spacerBitmap =
-                new Bitmap((Display.getWidth() - 92) / 2, 2);
-        final Graphics g = new Graphics(spacerBitmap);
-        g.clear();
+        // Create three horizontal field managers, one for each row of square
+        // fields
+        final HorizontalFieldManager hfmRow1 =
+                new HorizontalFieldManager(Field.FIELD_HCENTER);
+        final HorizontalFieldManager hfmRow2 =
+                new HorizontalFieldManager(Field.FIELD_HCENTER);
+        final HorizontalFieldManager hfmRow3 =
+                new HorizontalFieldManager(Field.FIELD_HCENTER);
 
-        // Layout the board using FlowFieldManager since there is no grid
-        // layout.
-        // The horizontal bar gif has a width equal to the full width of the
-        // screen
-        // so that the board will actually lay itself out properly.
-        final FlowFieldManager ffm = new FlowFieldManager(Field.FIELD_HCENTER);
+        // Add square fields to first row
+        hfmRow1.add(_squareFields[_TOP_LEFT]);
+        hfmRow1.add(_squareFields[_TOP_CENTER]);
+        hfmRow1.add(_squareFields[_TOP_RIGHT]);
 
-        ffm.add(new BitmapField(spacerBitmap));
-        ffm.add(_squareFields[_TOP_LEFT]);
-        ffm.add(new BitmapField(_verticalBarBitmap));
-        ffm.add(_squareFields[_TOP_CENTER]);
-        ffm.add(new BitmapField(_verticalBarBitmap));
-        ffm.add(_squareFields[_TOP_RIGHT]);
-        ffm.add(new BitmapField(spacerBitmap));
-        ffm.add(new BitmapField(spacerBitmap));
-        ffm.add(new BitmapField(_horizontalBarBitmap));
-        ffm.add(new BitmapField(spacerBitmap));
-        ffm.add(new BitmapField(spacerBitmap));
-        ffm.add(_squareFields[_LEFT]);
-        ffm.add(new BitmapField(_verticalBarBitmap));
-        ffm.add(_squareFields[_CENTER]);
-        ffm.add(new BitmapField(_verticalBarBitmap));
-        ffm.add(_squareFields[_RIGHT]);
-        ffm.add(new BitmapField(spacerBitmap));
-        ffm.add(new BitmapField(spacerBitmap));
-        ffm.add(new BitmapField(_horizontalBarBitmap));
-        ffm.add(new BitmapField(spacerBitmap));
-        ffm.add(new BitmapField(spacerBitmap));
-        ffm.add(_squareFields[_BOTTOM_LEFT]);
-        ffm.add(new BitmapField(_verticalBarBitmap));
-        ffm.add(_squareFields[_BOTTOM_CENTER]);
-        ffm.add(new BitmapField(_verticalBarBitmap));
-        ffm.add(_squareFields[_BOTTOM_RIGHT]);
-        ffm.add(new BitmapField(spacerBitmap));
+        // Add square fields to second row
+        hfmRow2.add(_squareFields[_LEFT]);
+        hfmRow2.add(_squareFields[_CENTER]);
+        hfmRow2.add(_squareFields[_RIGHT]);
 
-        _mainScreen.add(ffm);
+        // Add square fields to third row
+        hfmRow3.add(_squareFields[_BOTTOM_LEFT]);
+        hfmRow3.add(_squareFields[_BOTTOM_CENTER]);
+        hfmRow3.add(_squareFields[_BOTTOM_RIGHT]);
+
+        // Add the horizontal field managers to the screen
+        _mainScreen.add(hfmRow1);
+        _mainScreen.add(hfmRow2);
+        _mainScreen.add(hfmRow3);
 
         // Add a blank line
         _mainScreen.add(new RichTextField(Field.NON_FOCUSABLE));
@@ -246,15 +214,27 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
         // Add a horizontal line
         _mainScreen.add(new SeparatorField());
 
-        // Add a field that tells the player whose turn it is
-        _mainScreen.add(_turnField);
+        // Add a status field to indicate difficulty level, turn status or game
+        // status.
+        _statusField = new StatusField();
+        _mainScreen.add(_statusField);
 
-        // Set the focus to the top left square
-        _squareFields[_TOP_LEFT].setFocus();
+        // Set the status on the event thread
+        UiApplication.getUiApplication().invokeLater(new Runnable() {
+            public void run() {
+                if (!_twoPlayerFlag) {
+                    // Update the status field
+                    _statusField.setDifficulty(_levels[_difficulty]);
+                }
+            }
+        });
 
         // We've completed construction of the UI objects.
         // Push the MainScreen instance onto the UI stack for rendering.
         pushScreen(_mainScreen);
+
+        // Initialization
+        newGame();
     }
 
     /**
@@ -271,16 +251,6 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
      * the main screen).
      */
     private void newGame() {
-        _turnField.clear(10);
-
-        // If user clicked on "New Game" (against the computer), and the
-        // previous game
-        // played was against a BlackBerry Messenger contact, then add back the
-        // deleted difficulty selector field.
-        if (_twoPlayerFlag) {
-            _hfm.add(_difficultyField);
-        }
-
         for (int i = _TOP_LEFT; i <= _BOTTOM_RIGHT; ++i) {
             _squareFields[i].setSquare(_NONE);
         }
@@ -318,18 +288,15 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
     void newTwoPlayerGame(final boolean firstTurn, final Session session) {
         newGame();
 
-        // Difficulty selector not relevant in a two player game
-        _hfm.delete(_difficultyField);
-
         _yourTurnFlag = firstTurn;
         _twoPlayerFlag = true;
 
         if (firstTurn) {
-            _turnField.yourTurn();
+            _statusField.yourTurn();
             _yourMark = _X;
             _theirMark = _O;
         } else {
-            _turnField.theirTurn();
+            _statusField.theirTurn();
             _yourMark = _O;
             _theirMark = _X;
         }
@@ -347,10 +314,12 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
      */
     private class TicTacToeScreen extends MainScreen {
         private final MenuItem _newGameItem; // Menu item for starting a new
-                                             // game.
+                                             // game
         private final MenuItem _newTwoPlayerGame; // Menu item for starting a
                                                   // two player game via
-                                                  // BlackBerry Messenger.
+                                                  // BlackBerry Messenger
+        private final MenuItem _changeDifficultyLevel; // Menu item for changing
+                                                       // the difficulty level
 
         /**
          * Constructs a new main screen instance with provided style and creates
@@ -394,6 +363,75 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
                             }
                         }
                     };
+
+            _changeDifficultyLevel =
+                    new MenuItem("Change Difficulty Level", 100000, 0) {
+                        public void run() {
+                            final DifficultyLevelChangeDialog dialog =
+                                    new DifficultyLevelChangeDialog(_difficulty);
+
+                            if (dialog.doModal() == Dialog.OK) {
+                                final int newLevel = dialog.getLevelIndex();
+                                if (newLevel != _difficulty) {
+                                    _difficulty = newLevel;
+                                    _statusField
+                                            .setDifficulty(_levels[_difficulty]);
+                                    newGame();
+                                }
+                            }
+                        }
+                    };
+        }
+
+        /**
+         * @see Field#touchEvent(TouchEvent)
+         */
+        protected boolean touchEvent(final TouchEvent message) {
+            final int eventCode = message.getEvent();
+
+            if (eventCode == TouchEvent.DOWN) {
+                // Get the screen coordinates of the touch event
+                final int touchX = message.getX(1);
+                final int touchY = message.getY(1);
+
+                final Manager manager = getMainManager();
+
+                // Get the manager's top and left positions
+                final int managerTop = manager.getTop();
+                final int managerLeft = manager.getLeft();
+
+                // Loop through the fields contained in the manager
+                for (int i = 0; i < manager.getFieldCount(); i++) {
+                    final Field field = manager.getField(i);
+                    if (field instanceof SquareField) {
+                        // Calculate the screen position of the current field
+                        final int top = managerTop + field.getTop();
+                        final int left = managerLeft + field.getLeft();
+
+                        // If the touch coordinates fall within the current
+                        // field's position, set the field's focus and execute a
+                        // move
+                        if (touchX > left && touchX < left + field.getWidth()
+                                && touchY > top
+                                && touchY < top + field.getHeight()) {
+                            field.setFocus();
+
+                            if (_twoPlayerFlag) {
+                                if (_yourTurnFlag) {
+                                    youMove();
+                                }
+                            } else {
+                                youMove();
+                            }
+                        }
+                    }
+                }
+            }
+            if (message.isValid()) {
+                return super.touchEvent(message);
+            } else {
+                return true;
+            }
         }
 
         /**
@@ -444,10 +482,14 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
             menu.add(_newGameItem);
             menu.add(_newTwoPlayerGame);
 
-            // If _difficultyField is highlighted, make "Change Option" item
-            // default
-            if (_hfm.getFieldWithFocus() == _difficultyField) {
-                menu.setDefault(0);
+            // Menu item to change difficulty level is available when playing
+            // against the coumputer
+            if (!_twoPlayerFlag) {
+                menu.add(_changeDifficultyLevel);
+            }
+
+            if (_gameOverFlag) {
+                menu.setDefault(_newGameItem);
             }
         }
 
@@ -458,13 +500,6 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
          * @see net.rim.device.api.ui.Screen#navigationClick(int,int)
          */
         public boolean navigationClick(final int status, final int time) {
-
-            // Display _difficultyField choices when field receives focus
-            // and is clicked by the trackball or trackwheel.
-            if (_hfm.getFieldWithFocus() == _difficultyField) {
-                return false;
-            }
-
             if (_twoPlayerFlag) {
                 if (_yourTurnFlag) {
                     youMove();
@@ -500,11 +535,13 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
     }
 
     /**
-     * Displays the game status
+     * This class represents a field which displays the current difficulty
+     * level, the turn status in the case of a two player game, or the game
+     * status when the game is finished.
      */
-    private static final class TurnField extends RichTextField {
+    private static final class StatusField extends RichTextField {
         // Constructor
-        private TurnField() {
+        private StatusField() {
             super(Field.NON_FOCUSABLE | Field.FIELD_HCENTER
                     | Field.USE_ALL_WIDTH);
             yourTurn();
@@ -523,40 +560,40 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
         private void theirTurn() {
             setText("Their Turn...");
         }
+
+        /**
+         * Sets the field's text to indicate it is the opponent's turn
+         */
+        private void setDifficulty(final String difficulty) {
+            setText("Difficulty: " + difficulty);
+        }
     }
 
     /**
-     * DifficultyField - start a new game when the difficulty is changed
+     * A dialog window used to change difficulty level
      */
-    private class DifficultyField extends ObjectChoiceField implements
-            FieldChangeListener {
+    private static class DifficultyLevelChangeDialog extends Dialog {
+        private final ObjectChoiceField _levelChooser;
+
         /**
-         * Constructor for DifficultyField class
-         * 
-         * @param label
-         *            Label for this field
-         * @param choices
-         *            Choices for this field ("Easy" , "Medium" ,"Hard")
-         * @param initialIndex
-         *            Index of the initially selected value
+         * Constructor
          */
-        private DifficultyField(final String label, final Object[] choices,
-                final int initialIndex) {
-            super(label, choices, initialIndex);
-            setChangeListener(this);
+        public DifficultyLevelChangeDialog(final int index) {
+            super(Dialog.D_OK_CANCEL, "Choose Difficulty", Dialog.OK, null,
+                    Dialog.GLOBAL_STATUS);
+            _levelChooser =
+                    new ObjectChoiceField("Difficulty Level: ", _levels, 0);
+            _levelChooser.setSelectedIndex(index);
+            add(_levelChooser);
         }
 
         /**
+         * Retrieve the level selection
          * 
-         * @see net.rim.device.api.ui.FieldChangeListener#fieldChanged(Field,int)
+         * @return The selected level
          */
-        public void fieldChanged(final Field field, final int context) {
-
-            // Start a new game only when a choice is selected and then clicked
-            // by the trackball.
-            if (context == 2) {
-                newGame();
-            }
+        public int getLevelIndex() {
+            return _levelChooser.getSelectedIndex();
         }
     }
 
@@ -632,8 +669,6 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
                 }
 
                 _winLineOccurrences[_squareIndex] = new int[] {};
-
-                // setFocus();
                 invalidate();
                 _state = value;
 
@@ -708,8 +743,6 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
      * center.
      */
     private void computerMoves() {
-        _difficulty = _difficultyField.getSelectedIndex();
-
         if (_difficulty == _HARD) {
             // First turn
             if (_firstTurnFlag) {
@@ -865,7 +898,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
             _twoPlayerSession.close();
         }
 
-        _turnField.setText("Game Over!");
+        _statusField.setText("Game Over!");
     }
 
     /**
@@ -903,7 +936,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
                                                 .getSquareIndex(), null);
                         _twoPlayerSession.send(move);
                         _yourTurnFlag = false;
-                        _turnField.theirTurn();
+                        _statusField.theirTurn();
 
                         if (youWin) {
                             endGame(_yourMark);
@@ -1081,7 +1114,7 @@ class TicTacToeDemo extends UiApplication implements DialogClosedListener {
                 final SquareField marked = _squareFields[move];
                 marked.setSquare(_theirMark);
                 _yourTurnFlag = true;
-                _turnField.yourTurn();
+                _statusField.yourTurn();
                 int numMoves = 0;
 
                 for (int i = 0; i < 8; i++) {

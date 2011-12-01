@@ -59,7 +59,7 @@ final class DecorDemo extends UiApplication {
     /**
      * Constructor.
      */
-    private DecorDemo() {
+    public DecorDemo() {
         final DecorDemoScreen screen = new DecorDemoScreen();
         pushScreen(screen);
     }
@@ -75,7 +75,6 @@ final class DecorDemoScreen extends MainScreen {
      * Constructor.
      */
     DecorDemoScreen() {
-
         // XYEdge objects are used to represent different padding configurations
         // Each integer represents the amount of space between the box and
         // border
@@ -104,7 +103,7 @@ final class DecorDemoScreen extends MainScreen {
         // Setting the title of the application
         setTitle(new LabelField("Decor Demo", DrawStyle.ELLIPSIS
                 | Field.USE_ALL_WIDTH));
-        add(new RichTextField());
+        add(new RichTextField(Field.NON_FOCUSABLE));
 
         // Sample text field with a thick and solid rounded border
         // and single solid colour background.
@@ -124,7 +123,7 @@ final class DecorDemoScreen extends MainScreen {
 
         // Add the field to the screen
         add(simpleField);
-        add(new RichTextField());
+        add(new RichTextField(Field.NON_FOCUSABLE));
 
         // Sample text field with a thick and dotted rounded border
         // and single colour transparent background.
@@ -140,7 +139,7 @@ final class DecorDemoScreen extends MainScreen {
         transparentField.setBorder(dottedBorder);
         transparentField.setBackground(transparentBackground);
         add(transparentField);
-        add(new RichTextField());
+        add(new RichTextField(Field.NON_FOCUSABLE));
 
         // Sample text field with a thick and dashed border
         // and gradient background.
@@ -155,7 +154,7 @@ final class DecorDemoScreen extends MainScreen {
         gradientField.setBorder(dashedBorder);
         gradientField.setBackground(gradientBackground);
         add(gradientField);
-        add(new RichTextField());
+        add(new RichTextField(Field.NON_FOCUSABLE));
 
         // Sample text field with a no padding dotted border and no background.
         final RichTextField noPaddingField =
@@ -165,7 +164,7 @@ final class DecorDemoScreen extends MainScreen {
                         Border.STYLE_DOTTED);
         noPaddingField.setBorder(noPaddingBorder);
         add(noPaddingField);
-        add(new RichTextField());
+        add(new RichTextField(Field.NON_FOCUSABLE));
 
         // Sample text field with a thick bevel border and bitmap background.
         final RichTextField bevelAndBitmapField =

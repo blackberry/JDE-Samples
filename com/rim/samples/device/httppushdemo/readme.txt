@@ -10,7 +10,7 @@ Steps to demonstrate the HTTP Push Demo sample application:
     directory under the "BlackBerry JDE" installation directory).
  4) Press F5 to build the samples.jdw workspace and launch the BlackBerry Simulator.
  5) Launch the browser from the BlackBerry Simulator's home screen.
- 6) Retrieve a web page: Select "Go To..." and enter an address (such as www.rim.com).
+ 6) Enter an address (e.g. www.rim.com) and retrieve the web page.
  7) Exit the browser.
  8) Launch the HTTP Push Demo from the BlackBerry Simulator's home screen.
  9) Launch the HTTP Push Demo Server by executing the run.bat file, located in the

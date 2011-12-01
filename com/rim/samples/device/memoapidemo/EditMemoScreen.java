@@ -29,7 +29,6 @@ package com.rim.samples.device.memoapidemo;
 import java.io.IOException;
 
 import net.rim.blackberry.api.pdap.BlackBerryMemo;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
@@ -68,7 +67,7 @@ import net.rim.device.api.ui.container.MainScreen;
             title = "Edit Memo";
         }
 
-        setTitle(new LabelField(title, Field.USE_ALL_WIDTH | DrawStyle.ELLIPSIS));
+        setTitle(new LabelField(title));
 
         final Field[] fields =
                 (Field[]) _controller.render(newMemo ? MemoController.FOR_ADD

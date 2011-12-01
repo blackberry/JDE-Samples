@@ -40,7 +40,7 @@ import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.container.MainScreen;
 
 final class SavedLocationsScreen extends MainScreen {
-    private final Vector _mapLocations; // Vector from EmbeddedMapDemo class.
+    private final Vector _mapLocations;
     private final EmbeddedMapDemo.EmbeddedMapDemoScreen _mainScreen;
     private final LocationsListField _mapLocationsList;
 
@@ -155,7 +155,7 @@ final class SavedLocationsScreen extends MainScreen {
         }
 
         /**
-         * Override the Enter key to display the currently selected location.
+         * Capture Enter key press to display the currently selected location.
          * 
          * @see net.rim.device.api.ui.Screen#keyChar(char, int, int)
          */
@@ -170,12 +170,9 @@ final class SavedLocationsScreen extends MainScreen {
         }
 
         /**
-         * Override the trackwheel/ball click to display the currently selected
-         * location.
-         * 
-         * @see net.rim.device.api.ui.Screen#trackwheelClick(int, int)
+         * @see net.rim.device.api.ui.Screen#navigationClick(int, int)
          */
-        protected boolean trackwheelClick(final int status, final int time) {
+        protected boolean navigationClick(final int status, final int time) {
             return requestDisplay();
         }
 

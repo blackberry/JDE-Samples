@@ -36,13 +36,10 @@ import javax.microedition.pim.PIMException;
 import javax.microedition.pim.PIMItem;
 
 import net.rim.device.api.system.Display;
-import net.rim.device.api.ui.DrawStyle;
-import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.Screen;
 import net.rim.device.api.ui.UiApplication;
-import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.ListField;
 import net.rim.device.api.ui.component.ListFieldCallback;
 import net.rim.device.api.ui.container.MainScreen;
@@ -117,8 +114,7 @@ public final class ContactListScreen extends MainScreen implements
         _addContactAction = new AddContactAction();
         _addContactAction.setScreen(this);
         _selectContactAction = new SelectContactAction();
-        setTitle(new LabelField("Contact List", DrawStyle.ELLIPSIS
-                | Field.USE_ALL_WIDTH));
+        setTitle("Contact List");
 
         _listField = new ListField();
         _listField.setCallback(this);

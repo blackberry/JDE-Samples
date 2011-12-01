@@ -33,14 +33,11 @@ import javax.microedition.pim.PIMException;
 import javax.microedition.pim.PIMItem;
 
 import net.rim.blackberry.api.pdap.BlackBerryContact;
-import net.rim.device.api.ui.DrawStyle;
-import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BasicEditField;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.EditField;
-import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.MainScreen;
 
@@ -70,8 +67,7 @@ public final class ContactScreen extends MainScreen {
     public ContactScreen() {
         _saveMenuItem = new SaveMenuItem();
 
-        setTitle(new LabelField("Create Contact", DrawStyle.ELLIPSIS
-                | Field.USE_ALL_WIDTH));
+        setTitle("Create Contact");
 
         _first = new EditField("First: ", "");
         add(_first);

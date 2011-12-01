@@ -38,6 +38,7 @@ import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.ListField;
+import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.container.MainScreen;
 
 /**
@@ -66,9 +67,6 @@ final class PersistentStoreDemoScreen extends MainScreen {
         _meetingList.setCallback(_uiApp);
         updateList();
         addMenuItem(newMeetingItem);
-        addMenuItem(viewItem);
-        addMenuItem(editItem);
-        addMenuItem(deleteItem);
         addMenuItem(retrieveItem);
     }
 
@@ -89,6 +87,22 @@ final class PersistentStoreDemoScreen extends MainScreen {
             _uiApp.pushScreen(new MeetingScreen((Meeting) meetings
                     .elementAt(index), index, editable));
         }
+    }
+
+    /**
+     * Overrides method in super class. Adds items to act on selected meeting if
+     * list is not empty.
+     * 
+     * @see net.rim.device.api.ui.Screen#makeMenu(Menu,int)
+     */
+    protected void makeMenu(final Menu menu, final int instance) {
+        if (_meetingList.getSize() > 0) {
+            menu.add(viewItem);
+            menu.add(editItem);
+            menu.add(deleteItem);
+        }
+
+        super.makeMenu(menu, instance);
     }
 
     /**

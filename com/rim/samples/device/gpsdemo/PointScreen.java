@@ -31,7 +31,6 @@ import java.util.Vector;
 
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.Display;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.MenuItem;
@@ -55,9 +54,7 @@ class PointScreen extends MainScreen implements ListFieldCallback {
 
     PointScreen(final Vector points) {
 
-        final LabelField title =
-                new LabelField("Previous waypoints", DrawStyle.ELLIPSIS
-                        | Field.USE_ALL_WIDTH);
+        final LabelField title = new LabelField("Previous waypoints");
         setTitle(title);
 
         _points = points;
@@ -193,9 +190,7 @@ class PointScreen extends MainScreen implements ListFieldCallback {
      */
     private static class ViewScreen extends MainScreen {
         ViewScreen(final WayPoint point, final int count) {
-            final LabelField title =
-                    new LabelField("Waypoint" + count, DrawStyle.ELLIPSIS
-                            | Field.USE_ALL_WIDTH);
+            final LabelField title = new LabelField("Waypoint" + count);
             setTitle(title);
 
             Date date = new Date(point._startTime);

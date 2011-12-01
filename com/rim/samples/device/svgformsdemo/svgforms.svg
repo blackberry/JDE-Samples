@@ -1,0 +1,232 @@
+<?xml version="1.0" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%">
+
+    <!-- Tabs -->
+    <g id="tabs">
+        <g id="buttontab" fill-opacity="0.5">
+            <rect id="buttontabrect" y="10" rx="4" ry="4" width="70" height="42" fill="none" stroke="#FF6600"/>
+            <text id="buttontabnametext"  y="25" font-size="15" font-weight="bold" fill="red"> Buttons </text>
+            <set attributeName="fill-opacity" to="1.0" begin="focusin"/>
+            <set attributeName="fill-opacity" to="0.5" begin="focusout"/> 
+        </g> 
+        
+        <g id="slidertab" fill-opacity="0.5">
+            <rect id="slidertabrect" y="10" rx="4" ry="4" width="70" height="42" fill="none" stroke="#FF6600"/>
+            <text id="slidertabnametext" y="25" font-size="15" font-weight="bold" fill="red"> Sliders </text>
+            <set attributeName="fill-opacity" to="1.0" begin="focusin"/>
+            <set attributeName="fill-opacity" to="0.5" begin="focusout"/> 
+        </g>
+        
+        <g id="listtab" fill-opacity="0.5">
+            <rect  id="listtabrect" y="10" rx="4" ry="4" width="70" height="42" fill="none" stroke="#FF6600"/>
+            <text id="listtabnametext" y="25" font-size="15" font-weight="bold" fill="red"> Lists </text>
+            <set attributeName="fill-opacity" to="1.0" begin="focusin"/>
+            <set attributeName="fill-opacity" to="0.5" begin="focusout"/> 
+        </g>
+        
+        <g id="texttab" fill-opacity="0.5">
+            <rect id="texttabrect" y="10" rx="4" ry="4" width="70" height="42" fill="none" stroke="#FF6600"/>
+            <text id="texttabnametext" y="25" font-size="15" font-weight="bold" fill="red"> Text </text>
+            <set attributeName="fill-opacity" to="1.0" begin="focusin"/>
+            <set attributeName="fill-opacity" to="0.5" begin="focusout"/> 
+        </g>
+        <rect id = "border" y="32" rx="10" ry="10" width="450" height="270" fill="white" stroke= "#FF6600"/>
+        <rect id="buttontabenabled" visibility="visible" y="31" rx="4" ry="4" width="70" height="2" fill="white" stroke="none" stroke-width="0.5"/>
+        <rect id="slidertabenabled" visibility="hidden" y="31" rx="4" ry="4" width="70" height="2" fill="white" stroke="none" stroke-width="0.5"/>
+        <rect id="listtabenabled" visibility="hidden" y="31" rx="4" ry="4" width="70" height="2" fill="white" stroke="none" stroke-width="0.5"/>
+        <rect id="texttabenabled" visibility="hidden" y="31" rx="4" ry="4" width="70" height="2" fill="white" stroke="none" stroke-width="0.5"/>
+    </g>
+    
+    <!-- Button panel -->
+    <g id="buttonview" display="inline" stroke-opacity="0.25" fill="#FF6600">
+       
+        <g id="checkbox1">
+            <rect x="100" y="60" rx="4" ry="4" width="15" height="15" stroke-width="1.5"  fill-opacity="0.25" stroke="#FF6600"/>
+            <polyline id="check1" display="none" points="100 65 105 70 115 55" fill="none" stroke="red" stroke-width="2"/>
+            <text id="checkboxtext1" x="135" y="73" font-weight="bold" font-size="18"> apple </text>
+            <set attributeName="stroke-opacity" to="1.0" begin="focusin"/>
+            <set attributeName="stroke-opacity" to="0.25" begin="focusout"/>
+        </g>
+        <g id="checkbox2"> 
+            <rect x="100" y="90" rx="3" ry="3" width="15" height="15" stroke-width="1.5" fill-opacity="0.25" stroke="#FF6600"/>
+            <polyline id="check2" display="none" points="100 95 105 100 115 85" fill="none" stroke="red" stroke-width="2"/>
+            <text id="checkboxtext2" x="135" y="103" font-weight="bold" font-size="18"> orange </text>
+            <set attributeName="stroke-opacity" to="1.0" begin="focusin"/>
+            <set attributeName="stroke-opacity" to="0.25" begin="focusout"/> 
+        </g>
+        <g id="radiobutton1">
+            <circle cx="108" cy="150" r="8" stroke-width="1.5" fill-opacity="0.25" stroke="#FF6600"/>
+            <circle id="radiocheck1" display="none" cx="108" cy="150" r="4" fill="red"/>
+            <text id="radiobuttontext1" x="135" y="155" font-weight="bold" font-size="18"> 10 KG </text>
+            <set attributeName="stroke-opacity" to="1.0" begin="focusin"/>
+            <set attributeName="stroke-opacity" to="0.25" begin="focusout"/> 
+        </g>
+        <g id="radiobutton2"> 
+            <circle cx="108" cy="180" r="8" stroke-width="1.5" fill-opacity="0.25" stroke="#FF6600"/>
+            <circle id="radiocheck2" display="none" cx="108" cy="180" r="4" fill="red"/>
+            <text id="radiobuttontext2" x="135" y="185" font-weight="bold" font-size="18"> 15 KG </text>
+            <set attributeName="stroke-opacity" to="1.0" begin="focusin"/>
+                <set attributeName="stroke-opacity" to="0.25" begin="focusout"/> 
+        </g>
+        <g id="radiobutton3">
+            <circle cx="108" cy="210" r="8" stroke-width="1.5" fill-opacity="0.25" stroke= "#FF6600"/>
+            <circle id="radiocheck3" display="none" cx="108" cy="210" r="4" fill="red"/>
+            <text id="radiobuttontext3" x="135" y="215" font-weight="bold" font-size="18"> 20 KG </text>
+            <set attributeName="stroke-opacity" to="1.0" begin="focusin"/>
+            <set attributeName="stroke-opacity" to="0.25" begin="focusout"/> 
+        </g>
+        <g id="button1">
+            <rect id="button1rect" y="250" rx="5" ry="5" width="100" height="25" stroke= "#FF6600" stroke-width="2"  fill-opacity="0.25"/>
+            <text id="button1text" y="268" font-weight="bold" font-size="18"> buy now! </text>
+            <set attributeName="stroke-opacity" to="1.0" begin="focusin"/>
+            <set attributeName="stroke-opacity" to="0.25" begin="focusout"/> 
+        </g>
+    </g>    
+    
+    <!-- Sliders/Progressbar panel -->
+    <g id="sliderview" fill="#FF6600" display="none">
+        <text x="50" y="75" font-weight="bold" font-size="14"> Slider </text>
+        <g id="slider1" stroke-opacity="0.25">
+            <line id="slider1bar" y1="100" y2="100" stroke="#FF6600" />
+            <circle id="slider1control" cy="100" r="7" fill="#FEB32B" stroke="#FF6600"/>
+            <set attributeName="stroke-opacity" to="1.0" begin="focusin"/>
+            <set attributeName="stroke-opacity" to="0.25" begin="focusout"/> 
+        </g>
+        <text id="progressbartext" y="180" font-weight="bold" font-size="14"> Progress bar </text>
+        <g id="progressbar">
+            <rect id ="progressbarrect" y="200" width="100" height="17" fill-opacity="0.25" stroke="#FF6600" stroke-width="1"/>
+            <line id="progressbarline" y1="208" x2="50" y2="208" stroke="red" stroke-width="12" stroke-dasharray="3,2" />
+        </g> 
+        <g id="progressbarstatus">
+            <text id="progressbarstatusvalue" y="213" font-size="12"> 0 </text>
+            <text id="progressbarstatuspercent" y="213" font-size="12" > % </text>
+        </g>
+        <g id="slider2" stroke-opacity="0.25">
+            <line id="slider2bar" y1="100" y2="100" stroke="#FF6600"/>
+            <circle id="slider2control" cy="100" r="5" fill="#FEB32B" stroke="#FF6600"/>
+            <text id="slider2text" y="104" font-size="14" > Red </text>
+            <set attributeName="stroke-opacity" to="1.0" begin="focusin"/>
+            <set attributeName="stroke-opacity" to="0.25" begin="focusout"/> 
+        </g>
+        <g id="slider3" stroke-opacity="0.25">
+            <line id="slider3bar" y1="150" y2="150" stroke="#FF6600" stroke-width="1" />
+            <circle id="slider3control" cy="150" r="5" fill="#FEB32B" stroke="#FF6600"/>
+            <text id="slider3text" y="154" font-size="14" > Green </text>
+            <set attributeName="stroke-opacity" to="1.0" begin="focusin"/>
+            <set attributeName="stroke-opacity" to="0.25" begin="focusout"/>               
+        </g> 
+        <g id="slider4" stroke-opacity="0.25">
+            <line id="slider4bar" y1="200" y2="200" stroke="#FF6600" stroke-width="1" />
+            <circle id="slider4control" cy="200" r="5" fill="#FEB32B" stroke="#FF6600"/>
+            <text id="slider4text" y="204" font-size="14" > Blue </text>
+            <set attributeName="stroke-opacity" to="1.0" begin="focusin"/>
+            <set attributeName="stroke-opacity" to="0.25" begin="focusout"/> 
+        </g> 
+        <rect id="colorbox" x="300" y="250" width="64" height="20" fill="#000000" /> 
+    </g>
+    
+   <!-- Lists panel -->
+    
+    <g id="listview" fill="#FF6600" display="none">
+        <g id="list" fill="#FF6600"  stroke-opacity="0.1">
+            <rect id="listrect" y="70" width="150" height="100" fill-opacity="0.0" stroke= "#FF6600" stroke-width="1"/>
+            
+            <g id="listitem1" stroke-opacity="0.5">
+                <rect id="listitem1rect" y="70" width="150" height="20" fill-opacity="0.50" stroke= "#FF6600" stroke-width="0.5"/>
+                <text id="listitem1text" y="84" font-size="14" > apple </text>
+            </g>
+            
+            <g id="listitem2"  stroke-opacity="0.5">
+                <rect id="listitem2rect" y="90" width="150" height="20" fill-opacity="0.25" stroke= "#FF6600" stroke-width="0.5"/>
+                <text id="listitem2text" y="104" font-size="14" > orange </text>
+            </g>
+            
+            <g id="listitem3" stroke-opacity="0.5">
+                <rect id="listitem3rect" y="110" width="150" height="20" fill-opacity="0.25" stroke= "#FF6600" stroke-width="0.5"/>
+                <text id="listitem3text" y="124" font-size="14" > pineapple </text>
+            </g>
+            
+            <g id="listitem4" stroke-opacity="0.5">
+                <rect id="listitem4rect" y="130" width="150" height="20" fill-opacity="0.25" stroke= "#FF6600" stroke-width="0.5"/>
+                <text id="listitem4text" y="144" font-size="14" > kiwi </text>
+            </g>
+            
+            <g id="listitem5" stroke-opacity="0.5">
+                <rect id="listitem5rect" y="150" width="150" height="20" fill-opacity="0.25" stroke= "#FF6600" stroke-width="0.5"/>
+                <text id="listitem5text" y="164" font-size="14" > grapes </text>
+            </g>
+        </g>
+        
+        <g id="combobox"  stroke-opacity="0.1">
+            <rect id="comboboxrect" y="70" width="100" height="20" fill-opacity="0.0" stroke= "#FF6600" stroke-width="1"/>
+            
+            <g id="comboboxarrow">
+                <rect id= "comboboxarrowrect"  y="70" width="20" height="20" fill-opacity="0.25" stroke= "#FF6600" stroke-width="1"/>
+                <polyline id="comboboxarrowup" points="405,82, 410,77, 415, 82" display="none"  fill="none" stroke="#FF6600" stroke-width="3" />
+                <polyline id="comboboxarrowdown" points="405,77, 410,82, 415, 77" display="inline" fill="none" stroke="#FF6600" stroke-width="3" />
+            </g>
+            
+            <g id="comboboxgroup" display="none">
+                <g id="comboboxitem1" stroke-opacity="0.5">
+                    <rect id="comboboxrect1" y="70" width="100" height="20" fill-opacity="0.5" stroke= "#FF6600" stroke-width="0.5"/>
+                    <text id="comboboxitemtext1" y="84" font-size="14" > 25 KG </text>
+                </g>
+                
+                <g id="comboboxitem2" stroke-opacity="0.5">
+                    <rect id="comboboxrect2" y="90" width="100" height="20" fill-opacity="0.20" stroke= "#FF6600" stroke-width="0.5"/>
+                    <text id="comboboxitemtext2" y="104" font-size="14" > 35 KG </text>
+                </g>
+                
+                <g id="comboboxitem3" stroke-opacity="0.5">
+                    <rect id="comboboxrect3" y="110" width="100" height="20" fill-opacity="0.20" stroke= "#FF6600" stroke-width="0.5"/>
+                    <text id="comboboxitemtext3" y="124" font-size="14" > 50 KG </text>
+                </g>
+            </g>
+            
+            <g id="currentcomboboxitem" display="inline">
+                <rect id="currentcomboboxrect"  y="70" width="100" height="20" fill-opacity="0.25" stroke= "#FF6600" stroke-width="0.5"/>
+                <text id="currentcomboboxitemtext" y="84" font-size="14" > 25 KG </text>
+            </g>
+        </g>
+        
+        <g id="button2" fill="#FF6600" stroke-opacity="0.25">
+                <rect id="button2rect" y="250" rx="5" ry="5" width="100" height="25" stroke= "#FF6600" stroke-width="2"  fill-opacity="0.25"/>
+                <text id="button2text" y="268" font-weight="bold" font-size="18"> buy now! </text>
+        </g>
+    </g>
+    
+    <!-- Text box panel -->
+    <g id="textview" fill="#FF6600" display="none"> 
+        
+        <text id="textboxlabeltext" y="130" font-weight="bold" font-size="14"> Sample text box
+        </text>
+        
+        <g id="textbox" stroke-opacity="0.5">
+                <rect id="textboxrect" y="140" rx="2" ry="2" width="185" height="20" fill-opacity="0.25" stroke="#FF6600" stroke-width="1" />
+                <text id="textboxtext" y="155" font-size="15"> Enter text here </text>
+                <set attributeName="stroke-opacity" to="1.0" begin="focusin"/>
+                <set attributeName="stroke-opacity" to="0.5" begin="focusout"/> 
+        </g>
+        <rect id="textboxcursor" y="142" rx="2" ry="2" display="none" width="2" height="13" fill-opacity="0.25" stroke="#FF6600" stroke-width="1" />
+    </g>
+    
+    <!-- Dialog box -->
+    <g id="dialogbox" display="none">
+        <g>
+            <rect id ="dialogboxrect" y="80" rx="8" ry="8" width="300" height="150" fill="#ffffff" fill-opacity="1.0" stroke="#FE132B" stroke-width="3">                 
+            </rect>
+            <text id="dialogboxtext1" y="125" fill="red" font-weight="bold" font-size="20"> text 1 </text>
+            <text id="dialogboxtext2" y="155" fill="red" font-weight="bold" font-size="20"> text 2 </text>
+            <g fill="#FF6600">
+                <g id="dialogboxbutton">
+                    <rect id="dialogboxbuttonrect" y="180" rx="5" ry="5" width="120" height="30" fill-opacity="0.25" stroke="#FF6600" stroke-width="3">                 
+                    </rect>
+                    <text  id="dialogboxbuttontext" y="200" font-weight="bold" font-size="20"> proceed?
+                    </text>
+                </g>
+            </g>
+
+        </g>
+    </g>
+    
+</svg>

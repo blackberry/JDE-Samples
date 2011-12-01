@@ -30,7 +30,6 @@ import javax.microedition.pim.PIMException;
 import javax.microedition.pim.PIMList;
 
 import net.rim.blackberry.api.pdap.BlackBerryMemo;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.component.BasicEditField;
 import net.rim.device.api.ui.component.LabelField;
@@ -103,8 +102,7 @@ import net.rim.device.api.ui.component.LabelField;
     /* package */Object render(final int type) {
         switch (type) {
         case FOR_TITLE:
-            return new LabelField(_titleField.getText(), Field.USE_ALL_WIDTH
-                    | DrawStyle.ELLIPSIS);
+            return new LabelField(_titleField.getText());
 
         case FOR_ADD:
             setEditable(true);

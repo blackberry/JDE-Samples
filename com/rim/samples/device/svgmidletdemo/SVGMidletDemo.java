@@ -40,6 +40,13 @@ import javax.microedition.midlet.MIDlet;
 /**
  * Simple demo midlet which uses JSR226 to load a SVGImage and self render it
  * using ScalableGraphics.
+ * 
+ * Since this sample renders a static image on the screen (i.e. we are not
+ * updating any of the attribute values), the attribute values of some SVG
+ * elements in sample.svg were hard-coded in a way to display the image
+ * correctly on a 9500 device. However, one can programmatically adjust those
+ * values by calling setFloatTrait() on the SVGElement.
+ * 
  */
 public class SVGMidletDemo extends MIDlet {
 
@@ -97,8 +104,8 @@ public class SVGMidletDemo extends MIDlet {
  * Custom canvas used to render the svg image.
  */
 class MySVGCanvas extends Canvas {
-    private final int _canvasWidth = this.getWidth();
-    private final int _canvasHeight = this.getHeight();
+    private int _canvasWidth;
+    private int _canvasHeight;
 
     private final SVGImage _image;
     private final ScalableGraphics _sg;
@@ -110,6 +117,10 @@ class MySVGCanvas extends Canvas {
      *            The svg image we want to render in the canvas.
      */
     MySVGCanvas(final SVGImage image) throws IOException {
+
+        _canvasWidth = this.getWidth();
+        _canvasHeight = this.getHeight();
+
         _image = image;
         _sg = ScalableGraphics.createInstance();
     }
@@ -138,6 +149,20 @@ class MySVGCanvas extends Canvas {
 
         // Release bindings on Graphics
         _sg.releaseTarget();
+    }
+
+    /**
+     * Invoked when the sample runs and when the screen is tilted.
+     * 
+     * @see javax.microedition.lcdui.Canvas#sizeChanged(int, int)
+     */
+    protected void sizeChanged(final int w, final int h) {
+        if (_canvasWidth != w || _canvasHeight != h) {
+            _canvasWidth = w;
+            _canvasHeight = h;
+        }
+
+        super.sizeChanged(w, h);
     }
 
 }

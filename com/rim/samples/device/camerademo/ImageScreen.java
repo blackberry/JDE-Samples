@@ -32,14 +32,12 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 
 import net.rim.device.api.system.Bitmap;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BitmapField;
 import net.rim.device.api.ui.component.ButtonField;
 import net.rim.device.api.ui.component.Dialog;
-import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 
@@ -71,8 +69,7 @@ public final class ImageScreen extends MainScreen {
         // A reference to this object, to be used in listeners.
         _imageScreen = this;
 
-        setTitle(new LabelField("IMAGE " + _counter, DrawStyle.ELLIPSIS
-                | Field.USE_ALL_WIDTH));
+        setTitle("IMAGE");
 
         // Convert the byte array to a Bitmap image.
         final Bitmap image =

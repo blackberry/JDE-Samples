@@ -33,12 +33,10 @@ import javax.microedition.media.Player;
 import javax.microedition.media.control.GUIControl;
 import javax.microedition.media.control.VideoControl;
 
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.ButtonField;
-import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.ObjectChoiceField;
 import net.rim.device.api.ui.component.RichTextField;
 import net.rim.device.api.ui.container.HorizontalFieldManager;
@@ -88,8 +86,7 @@ final class CameraScreen extends MainScreen {
      */
     CameraScreen() {
         // Set the title of the screen.
-        setTitle(new LabelField("Camera Demo", DrawStyle.ELLIPSIS
-                | Field.USE_ALL_WIDTH));
+        setTitle("Camera Demo");
 
         // Initialize the camera object and video field.
         initializeCamera();

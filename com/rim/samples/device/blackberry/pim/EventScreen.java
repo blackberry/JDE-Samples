@@ -51,14 +51,12 @@ import net.rim.blackberry.api.mail.Session;
 import net.rim.blackberry.api.mail.SupportedAttachmentPart;
 import net.rim.blackberry.api.mail.TextBodyPart;
 import net.rim.blackberry.api.mail.Transport;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.DateField;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.EditField;
-import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.ObjectChoiceField;
 import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.component.TextField;
@@ -160,8 +158,7 @@ public final class EventScreen extends MainScreen {
         _invitees = new Vector();
         _inviteContactMenuItem = new InviteContactMenuItem();
 
-        setTitle(new LabelField("PIM Demo", DrawStyle.ELLIPSIS
-                | Field.USE_ALL_WIDTH));
+        setTitle("PIM Demo");
 
         _subject = new EditField("Subject: ", "");
         add(_subject);

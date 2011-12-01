@@ -27,7 +27,6 @@
 package com.rim.samples.device.localizationdemo;
 
 import net.rim.device.api.i18n.ResourceBundle;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.MenuItem;
@@ -73,8 +72,7 @@ final class LocalizationDemoScreen extends MainScreen implements
 
     LocalizationDemoScreen() {
         final LabelField title =
-                new LabelField(_resources.getString(APPLICATION_TITLE),
-                        DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH);
+                new LabelField(_resources.getString(APPLICATION_TITLE));
         setTitle(title);
 
         add(new RichTextField(_resources.getString(FIELD_TITLE),
@@ -109,9 +107,9 @@ final class LocalizationDemoScreen extends MainScreen implements
      * @see net.rim.device.api.ui.FieldChangeListener#fieldChanged(Field,int)
      */
     public void fieldChanged(final Field field, final int context) {
-        // Display _infoScreen only when a choice is selected and then clicked
-        // by the trackball.
-        if ((context & ChoiceField.CONTEXT_CHANGE_OPTION) != 0) {
+        // Display _infoScreen only when a choice is selected and then clicked.
+        if (field instanceof ObjectChoiceField
+                && (context & ChoiceField.CONTEXT_CHANGE_OPTION) != 0) {
             pushInfoScreen();
         }
     }

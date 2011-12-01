@@ -42,7 +42,6 @@ import net.rim.device.api.system.Display;
 import net.rim.device.api.system.KeyListener;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.MenuItem;
@@ -163,8 +162,7 @@ final class PhoneApiDemo extends UiApplication {
         private PhoneApiDemoMainScreen() {
             super();
 
-            /* parent. */setTitle(new LabelField("Phone API Demo",
-                    DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH));
+            /* parent. */setTitle(new LabelField("Phone API Demo"));
 
             _phoneNumberListField = new ListField(_phoneNumberList.size());
             _phoneNumberListField.setCallback(this);
@@ -274,8 +272,7 @@ final class PhoneApiDemo extends UiApplication {
             public void run() {
                 final MainScreen screen = new MainScreen();
 
-                screen.setTitle(new LabelField("View Phone Record",
-                        DrawStyle.ELLIPSIS | Field.USE_ALL_WIDTH));
+                screen.setTitle(new LabelField("View Phone Record"));
 
                 final PhoneNumberRecordDisplayer displayer =
                         new PhoneNumberRecordDisplayer(_record);

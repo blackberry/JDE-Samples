@@ -39,8 +39,8 @@ import net.rim.device.api.ui.container.MainScreen;
 
 /**
  * This screen is displayed when there are multiple matches for a user location
- * search. The user can cancel or choose one of the options to display on the
- * embedded map.
+ * search. The user can cancel or choose one of the options to display a
+ * location on the map.
  */
 class LookupMatchesScreen extends MainScreen {
 
@@ -49,7 +49,7 @@ class LookupMatchesScreen extends MainScreen {
     private final EmbeddedMapDemo.EmbeddedMapDemoScreen _mainScreen;
 
     /**
-     * Constructor.
+     * Constructor
      * 
      * @param landmarks
      *            - An array of landmarks representing all matches
@@ -72,8 +72,8 @@ class LookupMatchesScreen extends MainScreen {
     }
 
     /**
-     * Menu item to display on the map the currently selected location. Will
-     * close this screen.
+     * Menu item to display the currently selected location. Will close this
+     * screen.
      */
     private final MenuItem _displayItem = new MenuItem("Display", 110, 10) {
         public void run() {
@@ -151,7 +151,7 @@ class LookupMatchesScreen extends MainScreen {
         }
 
         /**
-         * Override the Enter key to display the currently selected location.
+         * Captures Enter key press to display the currently selected location.
          * 
          * @see net.rim.device.api.ui.Screen#keyChar(char, int, int)
          */
@@ -169,12 +169,9 @@ class LookupMatchesScreen extends MainScreen {
         }
 
         /**
-         * Override the trackwheel/ball click to display the currently selected
-         * location.
-         * 
-         * @see net.rim.device.api.ui.Screen#trackwheelClick(int, int)
+         * @see net.rim.device.api.ui.Screen#navigationClick(int, int)
          */
-        protected boolean trackwheelClick(final int status, final int time) {
+        protected boolean navigationClick(final int status, final int time) {
             _mainScreen.addAndDisplayLocation(_landmarks[_listField
                     .getSelectedIndex()]);
             close();

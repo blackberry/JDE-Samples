@@ -37,7 +37,7 @@ img\chapidemo_jde.png
 ]
 Listing=0
 Options=-quiet 
-OutputFileName=chapidemo
+OutputFileName=CHAPIDemo
 [PackageProtection
 ]
 RibbonPosition=0

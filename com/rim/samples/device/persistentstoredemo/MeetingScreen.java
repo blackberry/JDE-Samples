@@ -29,7 +29,6 @@ package com.rim.samples.device.persistentstoredemo;
 import java.util.Vector;
 
 import net.rim.device.api.system.Display;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.Graphics;
@@ -101,13 +100,11 @@ final class MeetingScreen extends MainScreen implements ListFieldCallback {
 
         // Customize screen based on our editable state.
         if (editable) {
-            setTitle(new LabelField("Edit Screen", DrawStyle.ELLIPSIS
-                    | Field.USE_ALL_WIDTH));
+            setTitle(new LabelField("Edit Screen"));
             addMenuItem(saveItem);
             addMenuItem(addAttendeeItem);
         } else {
-            setTitle(new LabelField("View Screen", DrawStyle.ELLIPSIS
-                    | Field.USE_ALL_WIDTH));
+            setTitle(new LabelField("View Screen"));
             _nameField.setEditable(false);
             _descField.setEditable(false);
             _dateField.setEditable(false);

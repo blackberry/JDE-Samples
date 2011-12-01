@@ -30,7 +30,6 @@ import java.io.IOException;
 
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.Display;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
@@ -78,9 +77,7 @@ final class MediaEngineDemo extends UiApplication {
          * Contructor
          */
         MediaSampleScreen() {
-            final LabelField title =
-                    new LabelField("Media Engine Demo", DrawStyle.ELLIPSIS
-                            | Field.USE_ALL_WIDTH);
+            final LabelField title = new LabelField("Media Engine Demo");
             setTitle(title);
 
             _statusField =
@@ -93,11 +90,11 @@ final class MediaEngineDemo extends UiApplication {
          */
         public void makeMenu(final Menu menu, final int instance) {
             // Invoke some content using the jar://url
-            menu.add(new MenuItem("PME 1", 5, 5) {
+            menu.add(new MenuItem("PME 1", 0, 0) {
                 public void run() {
                     // Check for optimal screen dimensions.
-                    if (Display.getHeight() != 320 || Display.getWidth() != 480) {
-                        Dialog.alert("Sample has been optimized for a 480 x 320 display. "
+                    if (Display.getHeight() != 480 || Display.getWidth() != 360) {
+                        Dialog.alert("Sample has been optimized for a 360 x 480 display. "
                                 + "This device has a "
                                 + Display.getWidth()
                                 + " x " + Display.getHeight() + " display.");
@@ -117,11 +114,11 @@ final class MediaEngineDemo extends UiApplication {
             });
 
             // Invoke some content using the jar:///url
-            menu.add(new MenuItem("PME 2", 6, 6) {
+            menu.add(new MenuItem("PME 2", 1, 0) {
                 public void run() {
                     // Check for optimal screen dimensions.
-                    if (Display.getHeight() != 320 || Display.getWidth() != 480) {
-                        Dialog.alert("Sample has been optimized for a 480 x 320 display. "
+                    if (Display.getHeight() != 480 || Display.getWidth() != 360) {
+                        Dialog.alert("Sample has been optimized for a 360 x 480 display. "
                                 + "This device has a "
                                 + Display.getWidth()
                                 + " x " + Display.getHeight() + " display.");

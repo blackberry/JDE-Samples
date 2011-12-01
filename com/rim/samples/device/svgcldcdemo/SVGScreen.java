@@ -50,8 +50,6 @@ import org.w3c.dom.svg.SVGSVGElement;
  * 480 pixels, and a height of at least 320 pixels (e.g. 9000).
  */
 final class SVGScreen extends MainScreen {
-    private static final int DISPLAY_WIDTH = Display.getWidth();
-    private static final int DISPLAY_HEIGHT = Display.getHeight();
 
     private static final String SVG_NAMESPACE_URI =
             "http://www.w3.org/2000/svg";
@@ -63,11 +61,23 @@ final class SVGScreen extends MainScreen {
     protected ScalableGraphics _scalablegraphics; // This is our scalable
                                                   // renderer.
 
+    private int _displayWidth;
+    private int _displayHeight;
+
+    private SVGElement _redElement;
+    private SVGElement _greenElement;
+    private SVGElement _spiralElement;
+    private SVGElement _textElement;
+    private SVGElement _imageElement;
+
     /**
      * Constructor.
      */
     SVGScreen() {
         setTitle("SVG CLDC Demo");
+
+        _displayWidth = Display.getWidth();
+        _displayHeight = Display.getHeight();
 
         _image = createSVGImage();
         _scalablegraphics = ScalableGraphics.createInstance();
@@ -89,99 +99,188 @@ final class SVGScreen extends MainScreen {
         // Get our root svg element.
         final SVGSVGElement svgElement =
                 (SVGSVGElement) document.getDocumentElement();
-        svgElement.setTrait("width", DISPLAY_WIDTH + "");
-        svgElement.setFloatTrait("height", DISPLAY_HEIGHT);
+        svgElement.setTrait("width", _displayWidth + "");
+        svgElement.setFloatTrait("height", _displayHeight);
 
         // Create a circle element.
-        final SVGElement redElement =
+        _redElement =
                 (SVGElement) document.createElementNS(SVG_NAMESPACE_URI,
                         "circle");
-        redElement.setId("redElement");
-        redElement.setFloatTrait("cx", 230);
-        redElement.setFloatTrait("cy", 140);
-        redElement.setFloatTrait("r", 50);
-        redElement.setTrait("fill", "#ff0000");
-        redElement.setTrait("stroke", "black");
-        redElement.setFloatTrait("stroke-width", 2);
-        redElement.setFloatTrait("fill-opacity", 0.75f);
+        _redElement.setId("_redElement");
+        _redElement.setFloatTrait("cx", Util.convertDefaultValue(230, true));
+        _redElement.setFloatTrait("cy", Util.convertDefaultValue(140, false));
+
+        final float r = Util.convertDefaultValue(50, true);
+        _redElement.setFloatTrait("r", r);
+
+        _redElement.setTrait("fill", "#ff0000");
+        _redElement.setTrait("stroke", "black");
+        _redElement.setFloatTrait("stroke-width", 2);
+        _redElement.setFloatTrait("fill-opacity", 0.75f);
 
         // Create a ellipse element.
-        final SVGElement greenElement =
+        _greenElement =
                 (SVGElement) document.createElementNS(SVG_NAMESPACE_URI,
                         "ellipse");
-        greenElement.setId("greenElement");
-        greenElement.setFloatTrait("cx", 200);
-        greenElement.setFloatTrait("cy", 180);
-        greenElement.setFloatTrait("rx", 50);
-        greenElement.setFloatTrait("ry", 50);
+        _greenElement.setId("_greenElement");
+        _greenElement.setFloatTrait("cx", Util.convertDefaultValue(200, true));
+        _greenElement.setFloatTrait("cy", Util.convertDefaultValue(180, false));
+        _greenElement.setFloatTrait("rx", r);
+        _greenElement.setFloatTrait("ry", r);
 
         final SVGRGBColor green = svgElement.createSVGRGBColor(0, 255, 0);
-        greenElement.setRGBColorTrait("fill", green);
+        _greenElement.setRGBColorTrait("fill", green);
 
-        greenElement.setTrait("stroke", "rgb(0,0,0)");
-        greenElement.setTrait("stroke-width", "2");
-        greenElement.setFloatTrait("fill-opacity", 0.5f);
+        _greenElement.setTrait("stroke", "rgb(0,0,0)");
+        _greenElement.setTrait("stroke-width", "2");
+        _greenElement.setFloatTrait("fill-opacity", 0.5f);
 
         // Create a path element.
-        final SVGElement spiralElement =
+        _spiralElement =
                 (SVGElement) document
                         .createElementNS(SVG_NAMESPACE_URI, "path");
-        spiralElement.setId("spiralElement");
+        _spiralElement.setId("_spiralElement");
         // Lets build a path.
         final SVGPath path = svgElement.createSVGPath();
-        path.moveTo(153.0f, 334.0f);
-        path.curveTo(153.0f, 334.0f, 151.0f, 334.0f, 151.0f, 334.0f);
-        path.curveTo(151.0f, 339.0f, 153.0f, 344.0f, 156.0f, 344.0f);
-        path.curveTo(164.0f, 344.0f, 171.0f, 339.0f, 171.0f, 334.0f);
-        path.curveTo(171.0f, 322.0f, 164.0f, 314.0f, 156.0f, 314.0f);
-        path.curveTo(142.0f, 314.0f, 131.0f, 322.0f, 131.0f, 334.0f);
-        path.curveTo(131.0f, 350.0f, 142.0f, 364.0f, 156.0f, 364.0f);
-        path.curveTo(175.0f, 364.0f, 191.0f, 350.0f, 191.0f, 334.0f);
-        path.curveTo(191.0f, 311.0f, 175.0f, 294.0f, 156.0f, 294.0f);
-        path.curveTo(131.0f, 294.0f, 111.0f, 311.0f, 111.0f, 334.0f);
-        path.curveTo(111.0f, 361.0f, 131.0f, 384.0f, 156.0f, 384.0f);
-        path.curveTo(186.0f, 384.0f, 211.0f, 361.0f, 211.0f, 334.0f);
-        path.curveTo(211.0f, 300.0f, 186.0f, 274.0f, 156.0f, 274.0f);
-        spiralElement.setPathTrait("d", path);
 
-        spiralElement.setTrait("stroke", "blue");
-        spiralElement.setTrait("fill", "none");
-        spiralElement.setFloatTrait("stroke-width", 3);
-        spiralElement.setFloatTrait("fill-opacity", 0.9f);
+        final float x = Util.convertDefaultValue(153.0f, true);
+        final float y = Util.convertDefaultValue(334.0f, true);
+        path.moveTo(x, y);
+
+        float[] defaultValues =
+                { 153.0f, 334.0f, 151.0f, 334.0f, 151.0f, 334.0f };
+        float[] convertedValues = Util.convertDefaultValue(defaultValues);
+        path.curveTo(convertedValues[0], convertedValues[1],
+                convertedValues[2], convertedValues[3], convertedValues[4],
+                convertedValues[5]);
+
+        defaultValues =
+                new float[] { 151.0f, 339.0f, 153.0f, 344.0f, 156.0f, 344.0f };
+        convertedValues = Util.convertDefaultValue(defaultValues);
+        path.curveTo(convertedValues[0], convertedValues[1],
+                convertedValues[2], convertedValues[3], convertedValues[4],
+                convertedValues[5]);
+
+        defaultValues =
+                new float[] { 164.0f, 344.0f, 171.0f, 339.0f, 171.0f, 334.0f };
+        convertedValues = Util.convertDefaultValue(defaultValues);
+        path.curveTo(convertedValues[0], convertedValues[1],
+                convertedValues[2], convertedValues[3], convertedValues[4],
+                convertedValues[5]);
+
+        defaultValues =
+                new float[] { 171.0f, 322.0f, 164.0f, 314.0f, 156.0f, 314.0f };
+        convertedValues = Util.convertDefaultValue(defaultValues);
+        path.curveTo(convertedValues[0], convertedValues[1],
+                convertedValues[2], convertedValues[3], convertedValues[4],
+                convertedValues[5]);
+
+        defaultValues =
+                new float[] { 142.0f, 314.0f, 131.0f, 322.0f, 131.0f, 334.0f };
+        convertedValues = Util.convertDefaultValue(defaultValues);
+        path.curveTo(convertedValues[0], convertedValues[1],
+                convertedValues[2], convertedValues[3], convertedValues[4],
+                convertedValues[5]);
+
+        defaultValues =
+                new float[] { 131.0f, 350.0f, 142.0f, 364.0f, 156.0f, 364.0f };
+        convertedValues = Util.convertDefaultValue(defaultValues);
+        path.curveTo(convertedValues[0], convertedValues[1],
+                convertedValues[2], convertedValues[3], convertedValues[4],
+                convertedValues[5]);
+
+        defaultValues =
+                new float[] { 175.0f, 364.0f, 191.0f, 350.0f, 191.0f, 334.0f };
+        convertedValues = Util.convertDefaultValue(defaultValues);
+        path.curveTo(convertedValues[0], convertedValues[1],
+                convertedValues[2], convertedValues[3], convertedValues[4],
+                convertedValues[5]);
+
+        defaultValues =
+                new float[] { 191.0f, 311.0f, 175.0f, 294.0f, 156.0f, 294.0f };
+        convertedValues = Util.convertDefaultValue(defaultValues);
+        path.curveTo(convertedValues[0], convertedValues[1],
+                convertedValues[2], convertedValues[3], convertedValues[4],
+                convertedValues[5]);
+
+        defaultValues =
+                new float[] { 131.0f, 294.0f, 111.0f, 311.0f, 111.0f, 334.0f };
+        convertedValues = Util.convertDefaultValue(defaultValues);
+        path.curveTo(convertedValues[0], convertedValues[1],
+                convertedValues[2], convertedValues[3], convertedValues[4],
+                convertedValues[5]);
+
+        defaultValues =
+                new float[] { 111.0f, 361.0f, 131.0f, 384.0f, 156.0f, 384.0f };
+        convertedValues = Util.convertDefaultValue(defaultValues);
+        path.curveTo(convertedValues[0], convertedValues[1],
+                convertedValues[2], convertedValues[3], convertedValues[4],
+                convertedValues[5]);
+
+        defaultValues =
+                new float[] { 186.0f, 384.0f, 211.0f, 361.0f, 211.0f, 334.0f };
+        convertedValues = Util.convertDefaultValue(defaultValues);
+        path.curveTo(convertedValues[0], convertedValues[1],
+                convertedValues[2], convertedValues[3], convertedValues[4],
+                convertedValues[5]);
+
+        defaultValues =
+                new float[] { 211.0f, 300.0f, 186.0f, 274.0f, 156.0f, 274.0f };
+        convertedValues = Util.convertDefaultValue(defaultValues);
+        path.curveTo(convertedValues[0], convertedValues[1],
+                convertedValues[2], convertedValues[3], convertedValues[4],
+                convertedValues[5]);
+
+        _spiralElement.setPathTrait("d", path);
+
+        _spiralElement.setTrait("stroke", "blue");
+        _spiralElement.setTrait("fill", "none");
+        _spiralElement.setFloatTrait("stroke-width", 3);
+        _spiralElement.setFloatTrait("fill-opacity", 0.9f);
+
         // Do some transformations on the path.
-        final SVGMatrix transform = spiralElement.getMatrixTrait("transform");
-        transform.mTranslate(110, -155);
-        spiralElement.setMatrixTrait("transform", transform);
+        final SVGMatrix transform = _spiralElement.getMatrixTrait("transform");
+        if (_displayHeight > _displayWidth) {
+            transform.mTranslate(Util.convertDefaultValue(110, true), 0);
+        } else {
+            transform.mTranslate(0, Util.convertDefaultValue(-110, true));
+        }
+
+        _spiralElement.setMatrixTrait("transform", transform);
 
         // Create an image element.
-        final SVGElement imageElement =
+        _imageElement =
                 (SVGElement) document.createElementNS(SVG_NAMESPACE_URI,
                         "image");
-        imageElement.setId("imageElement");
-        imageElement.setTraitNS(XLINK_NAMESPACE_URI, "href", IMAGE_URL);
-        imageElement.setFloatTrait("x", 10);
-        imageElement.setFloatTrait("y", 10);
-        imageElement.setFloatTrait("width", 180);
-        imageElement.setFloatTrait("height", 36);
+        _imageElement.setId("_imageElement");
+        _imageElement.setTraitNS(XLINK_NAMESPACE_URI, "href", IMAGE_URL);
+
+        final float f = Util.convertDefaultValue(10, true);
+        _imageElement.setFloatTrait("x", f);
+        _imageElement.setFloatTrait("y", f);
+        _imageElement.setFloatTrait("width", Util
+                .convertDefaultValue(180, true));
+        _imageElement.setFloatTrait("height", Util.convertDefaultValue(36,
+                false));
 
         // Create a text element.
-        final SVGElement textElement =
+        _textElement =
                 (SVGElement) document
                         .createElementNS(SVG_NAMESPACE_URI, "text");
-        textElement.setId("textElement");
-        textElement.setTrait("font-family", "BBAlpha Sans");
-        textElement.setTrait("font-size", "18");
-        textElement.setFloatTrait("x", 10);
-        textElement.setFloatTrait("y", 300);
-        textElement.setTrait("#text",
+        _textElement.setId("_textElement");
+        _textElement.setTrait("font-family", "BBAlpha Sans");
+        _textElement.setTrait("font-size", "18");
+        _textElement.setFloatTrait("x", f);
+        _textElement.setFloatTrait("y", Util.convertDefaultValue(300, false));
+        _textElement.setTrait("#text",
                 "JSR226 - Scalable 2D Vector Graphics API for J2ME");
 
         // Add all our elements in the order you want to render them.
-        svgElement.appendChild(imageElement);
-        svgElement.appendChild(spiralElement);
-        svgElement.appendChild(redElement);
-        svgElement.appendChild(greenElement);
-        svgElement.appendChild(textElement);
+        svgElement.appendChild(_imageElement);
+        svgElement.appendChild(_spiralElement);
+        svgElement.appendChild(_redElement);
+        svgElement.appendChild(_greenElement);
+        svgElement.appendChild(_textElement);
 
         return image;
     }
@@ -198,8 +297,8 @@ final class SVGScreen extends MainScreen {
         _scalablegraphics.bindTarget(graphics);
 
         // Set our viewport dimensions.
-        _image.setViewportWidth(DISPLAY_WIDTH);
-        _image.setViewportHeight(DISPLAY_HEIGHT);
+        _image.setViewportWidth(_displayWidth);
+        _image.setViewportHeight(_displayHeight);
 
         // Render the svg image (model) and x/y=0/0
         _scalablegraphics.render(0, 0, _image);
@@ -207,4 +306,43 @@ final class SVGScreen extends MainScreen {
         // Release bindings on Graphics
         _scalablegraphics.releaseTarget();
     }
+
+    /**
+     * @see net.rim.device.api.ui.container.FullScreen#sublayout(int, int)
+     */
+    protected void sublayout(final int width, final int height) {
+        if (_displayWidth != width || _displayHeight != height) {
+            _displayWidth = width;
+            _displayHeight = height;
+
+            _redElement
+                    .setFloatTrait("cx", Util.convertDefaultValue(230, true));
+            _redElement.setFloatTrait("cy", Util
+                    .convertDefaultValue(140, false));
+
+            _greenElement.setFloatTrait("cx", Util.convertDefaultValue(200,
+                    true));
+            _greenElement.setFloatTrait("cy", Util.convertDefaultValue(180,
+                    false));
+
+            final SVGMatrix transform =
+                    _spiralElement.getMatrixTrait("transform");
+            if (_displayHeight > _displayWidth) {
+                transform.mTranslate(Util.convertDefaultValue(-70, true), Util
+                        .convertDefaultValue(40, false));
+            } else {
+                transform.mTranslate(Util.convertDefaultValue(60, true), Util
+                        .convertDefaultValue(-50, false));
+            }
+
+            _spiralElement.setMatrixTrait("transform", transform);
+
+            _textElement.setFloatTrait("x", Util.convertDefaultValue(10, true));
+            _textElement.setFloatTrait("y", Util
+                    .convertDefaultValue(300, false));
+        }
+
+        super.sublayout(width, height);
+    }
+
 }

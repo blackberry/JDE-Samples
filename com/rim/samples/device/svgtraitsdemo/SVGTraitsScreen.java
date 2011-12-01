@@ -37,6 +37,7 @@ import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.Manager;
+import net.rim.device.api.ui.TouchEvent;
 import net.rim.device.api.ui.container.MainScreen;
 
 import org.w3c.dom.Document;
@@ -50,14 +51,15 @@ import org.w3c.dom.svg.SVGSVGElement;
 final class SVGTraitsScreen extends MainScreen {
     private static final String SVG_NAMESPACE_URI =
             "http://www.w3.org/2000/svg";
-    private static final int MAX_WIDTH = Display.getWidth();
-    private static final int MAX_HEIGHT = Display.getHeight();
     private static final int SCROLL_INCREMENT = 20;
 
     private SVGImage _image;
     private final ScalableGraphics _scalableGraphics;
     private SVGSVGElement _svgElement;
     private final SVGElement _rect1, _widthText, _heightText;
+
+    private int _displayWidth;
+    private int _displayHeight;
 
     /**
      * Constructor.
@@ -81,6 +83,9 @@ final class SVGTraitsScreen extends MainScreen {
         } catch (final IOException e) {
             System.exit(1);
         }
+
+        _displayWidth = Display.getWidth();
+        _displayHeight = Display.getHeight();
 
         // Extract id of rectangle from svg
         _rect1 = (SVGElement) document.getElementById("rect1");
@@ -134,6 +139,24 @@ final class SVGTraitsScreen extends MainScreen {
     }
 
     /**
+     * @see net.rim.device.api.ui.Screen#touchEvent(TouchEvent)
+     */
+    protected boolean touchEvent(final TouchEvent message) {
+        if (message.getEvent() == TouchEvent.MOVE) {
+            final int numOfCoordinates = message.getMovePointsSize();
+            if (numOfCoordinates > 1) {
+                final int[] x = new int[numOfCoordinates];
+                final int[] y = new int[numOfCoordinates];
+                message.getMovePoints(1, x, y, null);
+                update(x[numOfCoordinates - 1] - x[numOfCoordinates - 2],
+                        y[numOfCoordinates - 1] - y[numOfCoordinates - 2]);
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Updates current size of the Rectangle and position and value of text
      * fields.
      * 
@@ -144,33 +167,50 @@ final class SVGTraitsScreen extends MainScreen {
      *            height update for rectangle (negative = decrease, positive =
      *            increase)
      */
-    private void update(final int horizontal, final int vertical) {
-        if (_rect1.getFloatTrait("width") + horizontal >= SCROLL_INCREMENT
-                && _rect1.getFloatTrait("height") + vertical >= SCROLL_INCREMENT
-                && _rect1.getFloatTrait("width") + horizontal <= MAX_WIDTH
-                && _rect1.getFloatTrait("height") + vertical <= MAX_HEIGHT) {
-            // Update width and height of rectangle on trackball movement
-            _rect1.setFloatTrait("width", _rect1.getFloatTrait("width")
-                    + horizontal);
-            _rect1.setFloatTrait("height", _rect1.getFloatTrait("height")
-                    + vertical);
+    private void update(final int dx, final int dy) {
+        if (_rect1.getFloatTrait("width") + dx >= SCROLL_INCREMENT
+                && _rect1.getFloatTrait("height") + dy >= SCROLL_INCREMENT) {
+            final boolean validWidth =
+                    _rect1.getFloatTrait("width") + dx <= _displayWidth;
+            final boolean validHeight =
+                    _rect1.getFloatTrait("height") + dy <= _displayHeight;
 
-            // Update position and value of text fields
-            _widthText.setFloatTrait("x", _rect1.getFloatTrait("x")
-                    + _rect1.getFloatTrait("width") / 2);
-            _widthText.setFloatTrait("y", _rect1.getFloatTrait("y")
-                    + _rect1.getFloatTrait("height") + 20);
-            _widthText.setTrait("#text", "" + _rect1.getFloatTrait("width"));
+            final float newX = _rect1.getFloatTrait("width") + dx;
+            final float newY = _rect1.getFloatTrait("height") + dy;
 
-            _heightText.setFloatTrait("x", _rect1.getFloatTrait("x")
-                    + _rect1.getFloatTrait("width") + 10);
-            _heightText.setFloatTrait("y", _rect1.getFloatTrait("y")
-                    + _rect1.getFloatTrait("height") / 2);
-            _heightText.setTrait("#text", "" + _rect1.getFloatTrait("height"));
-
-            // Repaint screen
-            invalidate();
+            if (validWidth && validHeight) {
+                updateTraits(newX, newY);
+            } else if (validWidth && !validHeight) {
+                updateTraits(newX, _displayHeight);
+            } else if (!validWidth && validHeight) {
+                updateTraits(_displayWidth, newY);
+            } else {
+                // Never encountered.
+                updateTraits(_displayWidth, _displayHeight);
+            }
         }
+    }
+
+    private void updateTraits(final float x, final float y) {
+        // Update width and height of rectangle.
+        _rect1.setFloatTrait("width", x);
+        _rect1.setFloatTrait("height", y);
+
+        // Update position and value of text fields
+        _widthText.setFloatTrait("x", _rect1.getFloatTrait("x")
+                + _rect1.getFloatTrait("width") / 2);
+        _widthText.setFloatTrait("y", _rect1.getFloatTrait("y")
+                + _rect1.getFloatTrait("height") + 20);
+        _widthText.setTrait("#text", "" + _rect1.getFloatTrait("width"));
+
+        _heightText.setFloatTrait("x", _rect1.getFloatTrait("x")
+                + _rect1.getFloatTrait("width") + 10);
+        _heightText.setFloatTrait("y", _rect1.getFloatTrait("y")
+                + _rect1.getFloatTrait("height") / 2);
+        _heightText.setTrait("#text", "" + _rect1.getFloatTrait("height"));
+
+        // Repaint screen
+        invalidate();
     }
 
     /**
@@ -187,14 +227,29 @@ final class SVGTraitsScreen extends MainScreen {
         // Bind target Graphics
         _scalableGraphics.bindTarget(graphics);
 
-        // Set the viewport dimensions
-        _image.setViewportWidth(MAX_WIDTH);
-        _image.setViewportHeight(MAX_HEIGHT);
-
         // Render the svg image/ model
         _scalableGraphics.render(0, 0, _image);
 
         // Release bindings on Graphics
         _scalableGraphics.releaseTarget();
+    }
+
+    /**
+     * @see net.rim.device.api.ui.container.FullScreen#sublayout(int, int)
+     */
+    protected void sublayout(final int width, final int height) {
+        if (_displayWidth != width || _displayHeight != height) {
+            _displayWidth = width;
+            _displayHeight = height;
+
+            update(0, 0);
+        }
+
+        // Set the viewport dimensions
+        _image.setViewportWidth(_displayWidth);
+        _image.setViewportHeight(_displayHeight);
+
+        super.sublayout(width, height);
+
     }
 }

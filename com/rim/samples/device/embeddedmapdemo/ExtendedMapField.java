@@ -31,7 +31,6 @@ import java.util.Vector;
 import net.rim.device.api.lbs.MapField;
 import net.rim.device.api.system.Bitmap;
 import net.rim.device.api.system.Characters;
-import net.rim.device.api.system.Display;
 import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.Graphics;
@@ -45,22 +44,19 @@ final class ExtendedMapField extends MapField {
     private static final double MARGIN_OF_ERROR = 0.00001;
 
     private final MapLocation _initialLocation;
-    private final Bitmap _cursor; // Central pointer.
-    private final Bitmap _marker; // Marker at selected location.
-    private final Vector _mapLocations; // Vector from EmbeddedMapDemo class.
+    private final Bitmap _cursor; // Central pointer
+    private final Bitmap _marker; // Marker at selected location
+    private final Vector _mapLocations;
 
     private final Border _toggledBorder;
     private final Border _untoggledBorder;
 
-    private boolean _clicked; // Clicked by trackball.
+    private boolean _clicked;
 
+    // Constructor
     ExtendedMapField(final MapLocation initialLocation,
             final Vector mapLocations) {
         super(Field.FOCUSABLE | Field.FIELD_HCENTER);
-
-        // Leave space for other UI fields.
-        final int preferredHeight = (int) (Display.getHeight() * 0.65);
-        setPreferredSize(getPreferredWidth(), preferredHeight);
 
         _initialLocation = initialLocation;
         _mapLocations = mapLocations;
@@ -85,12 +81,18 @@ final class ExtendedMapField extends MapField {
         resetMap();
     }
 
+    /**
+     * Moves the map to the default location.
+     */
+
     void resetMap() {
         moveTo(_initialLocation);
         setZoom(INITIAL_ZOOM);
     }
 
-    /* Toggles the map on or off and changes the border to match. */
+    /**
+     * Toggles the map on or off and changes the border to match.
+     */
     private void toggleMap() {
         _clicked = !_clicked;
         if (_clicked) {
@@ -101,6 +103,18 @@ final class ExtendedMapField extends MapField {
         invalidate();
     }
 
+    /**
+     * Returns activated status of the map.
+     * 
+     * @return True if map is activated, otherwise flase.
+     */
+    boolean isClicked() {
+        return _clicked;
+    }
+
+    /**
+     * Sets the maps's status to activated and forces a re-paint.
+     */
     void activatePan() {
         _clicked = true;
         invalidate();
@@ -111,11 +125,14 @@ final class ExtendedMapField extends MapField {
      */
     protected boolean keyChar(final char character, final int status,
             final int time) {
-        // 'i' or 'l' will zoom in.
-        if (character == 'i' || character == 'l') {
+        // 'i'(qwerty), 'g'(multitap) or 'u'(suretype) will zoom in.
+        if (character == 'i' || character == 'u' || character == 'g') {
             setZoom(Math.max(getZoom() - 1, getMinZoom()));
             return true;
-        } else if (character == 'o') { // 'o' will zoom out
+        } else if (character == 'o' || character == 'm') { // 'o'(qwerty,
+                                                           // suretype) or
+                                                           // 'm'(multitap) will
+                                                           // zoom out
             setZoom(Math.min(getZoom() + 1, getMaxZoom()));
             return true;
         } else if (character == Characters.ENTER) {
@@ -132,7 +149,7 @@ final class ExtendedMapField extends MapField {
      */
     protected boolean navigationMovement(final int dx, final int dy,
             final int status, final int time) {
-        // Shift only if trackball was clicked (panning activated).
+        // Shift only if map was clicked (panning activated).
         if (_clicked) {
             move(dx << 3, dy << 3);
 
@@ -143,7 +160,8 @@ final class ExtendedMapField extends MapField {
     }
 
     /**
-     * Override the onUnfocus method to get rid of the border when losing focus.
+     * Override the onUnfocus() method to get rid of the border when losing
+     * focus.
      * 
      * @see net.rim.device.api.ui.Field#onUnfocus()
      */
@@ -154,7 +172,7 @@ final class ExtendedMapField extends MapField {
     }
 
     /**
-     * Override the onFocus method to add the border upon getting focus.
+     * Override the onFocus() method to add the border upon getting focus.
      * 
      * @see net.rim.device.api.ui.Field#onFocus(int)
      */
@@ -220,6 +238,13 @@ final class ExtendedMapField extends MapField {
         return super.invokeAction(action);
     }
 
+    /**
+     * Moves the map to a specified location.
+     * 
+     * @param index
+     *            The index in the map locations vector of the location to
+     *            display.
+     */
     void displayLocation(final int index) {
         MapLocation mapLocation;
         for (int i = _mapLocations.size() - 1; i >= 0; --i) {

@@ -51,7 +51,7 @@ import net.rim.device.api.util.SimpleSortingVector;
 
     // Constants
     // -----------------------------------------------------------------------------------
-    private static final long PERSIST = 0x9dbb6535e730ff7dL; // com.rim.samples.device.memorydemo.orders
+    private static final long PERSIST = 0x53fd5dae400aaccL; // com.rim.samples.device.memorydemo
     private static final int MAX_NUM_ORDERED = 100;
 
     /**

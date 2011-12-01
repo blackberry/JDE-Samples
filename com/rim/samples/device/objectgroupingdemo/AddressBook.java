@@ -39,7 +39,7 @@ import net.rim.device.api.system.RuntimeStore;
  * address book.
  */
 class AddressBook {
-    private static final long PERSIST = 0xcf76f65979a526eaL; // com.rim.samples.device.objectgroupingdemo.AddressBook.PERSIST
+    private static final long PERSIST = 0x72ea07b090aac4a0L; // com.rim.samples.device.objectgroupingdemo
     private static final long ADDRESS_BOOK = 0xdc33b15c18be898fL; // com.rim.samples.device.objectgroupingdemo.AddressBook.ADDRESS_BOOK
 
     private final PersistentObject _persist; // Refeence to the PersistentObject

@@ -26,8 +26,6 @@
 
 package com.rim.samples.device.otabackuprestoredemo;
 
-import net.rim.device.api.ui.DrawStyle;
-import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BasicEditField;
@@ -78,8 +76,7 @@ final class OTAContactScreen extends MainScreen {
     OTAContactScreen() {
         _saveMenuItem = new SaveMenuItem();
 
-        setTitle(new LabelField("Contact", DrawStyle.ELLIPSIS
-                | Field.USE_ALL_WIDTH));
+        setTitle(new LabelField("Contact"));
 
         _first = new EditField("First: ", "");
         add(_first);
