@@ -35,6 +35,7 @@ com\rim\samples\device\contactlinkingdemo\ContactLinkingDemo_autostartup.jdp
 com\rim\samples\device\cryptodemo\CryptoDemo.jdp
 com\rim\samples\device\embeddedmediademo\EmbeddedMediaDemo.jdp
 com\rim\samples\device\fileexplorerdemo\FileExplorerDemo.jdp
+com\rim\samples\device\fmradiodemo\FMRadioDemo.jdp
 com\rim\samples\device\helloworlddemo\HelloWorldDemo.jdp
 com\rim\samples\device\homescreendemo\HomeScreenAlternateEntryPoint.jdp
 com\rim\samples\device\homescreendemo\HomeScreenDemo.jdp
@@ -106,6 +107,7 @@ com\rim\samples\device\svg\svgformsdemo\SVGFormsDemo.jdp
 com\rim\samples\device\svg\svgmapdemo\SVGMapDemo.jdp
 com\rim\samples\device\svg\svgmidletdemo\SVGMidletDemo.jdp
 com\rim\samples\device\svg\svgpickdemo\SVGPickDemo.jdp
+com\rim\samples\device\svg\svgscriptingdemo\SVGScriptingDemo.jdp
 com\rim\samples\device\svg\svgtraitsdemo\SVGTraitsDemo.jdp
 com\rim\samples\device\syncdemo\SyncDemo.jdp
 com\rim\samples\device\syncdemo\SyncDemo_autostartup.jdp
@@ -165,6 +167,7 @@ com\rim\samples\device\contactlinkingdemo\ContactLinkingDemo.jdp
 com\rim\samples\device\cryptodemo\CryptoDemo.jdp
 com\rim\samples\device\embeddedmediademo\EmbeddedMediaDemo.jdp
 com\rim\samples\device\fileexplorerdemo\FileExplorerDemo.jdp
+com\rim\samples\device\fmradiodemo\FMRadioDemo.jdp
 com\rim\samples\device\helloworlddemo\HelloWorldDemo.jdp
 com\rim\samples\device\homescreendemo\HomeScreenDemo.jdp
 com\rim\samples\device\httpdemo\HTTPDemo.jdp
@@ -229,6 +232,7 @@ com\rim\samples\device\svg\svgformsdemo\SVGFormsDemo.jdp
 com\rim\samples\device\svg\svgmapdemo\SVGMapDemo.jdp
 com\rim\samples\device\svg\svgmidletdemo\SVGMidletDemo.jdp
 com\rim\samples\device\svg\svgpickdemo\SVGPickDemo.jdp
+com\rim\samples\device\svg\svgscriptingdemo\SVGScriptingDemo.jdp
 com\rim\samples\device\svg\svgtraitsdemo\SVGTraitsDemo.jdp
 com\rim\samples\device\syncdemo\SyncDemo.jdp
 com\rim\samples\device\tiltdemo\TiltDemo.jdp

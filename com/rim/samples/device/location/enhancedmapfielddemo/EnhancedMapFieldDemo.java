@@ -163,7 +163,7 @@ public final class EnhancedMapFieldDemo extends UiApplication {
 
             // Add a GsImage
             final GsImage img = new GsImage();
-            img.setIconUri("http://na.blackberry.com/eng/developers/logo_black.jpg");
+            img.setIconUri("http://us.blackberry.com/developers/logo_black.jpg");
             img.setLat(43.49000);
             img.setLon(-80.53919);
             img.setName("Logo");

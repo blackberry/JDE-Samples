@@ -39,19 +39,14 @@ import net.rim.device.api.ui.image.ImageFactory;
 
 /**
  * A sample application demonstrating the ability to link application specific
- * contacts with contacts in the BlackBerry address book.
+ * contacts with contacts in the BlackBerry address book. Note that an address
+ * book contact can be linked to by more than one application.
  */
 public final class ContactLinkingDemo extends UiApplication {
     /**
-     * The primary application id for this application
+     * The application id for this application
      */
     public static final long APPLICATION_ID = 0x819417e94b6ca3b7L; // com.rim.samples.device.contactlinkingdemo.APPLICATION_ID
-
-    /**
-     * A secondary application id used to demonstrate how a BlackBerryContact
-     * can be linked to by more than one application.
-     */
-    public static final long SECONDARY_APPLICATION_ID = 0x62501e608346866eL; // com.rim.samples.device.contactlinkingdemo.SECONDARY_APPLICATION_ID
 
     /**
      * Entry point for application
@@ -62,63 +57,34 @@ public final class ContactLinkingDemo extends UiApplication {
     public static void main(final String[] args) {
         if (args != null && args.length > 0) {
             if (args[0].equals("autostartup")) {
-                // Create images
-                final EncodedImage encodedImageBlue =
+                // Create image
+                final EncodedImage encodedImage =
                         EncodedImage
                                 .getEncodedImageResource("img/logo_blue.jpg");
-                final EncodedImage encodedImageBlack =
-                        EncodedImage
-                                .getEncodedImageResource("img/logo_black.jpg");
-                final Image imageBlue =
-                        ImageFactory.createImage(encodedImageBlue);
-                final Image imageBlack =
-                        ImageFactory.createImage(encodedImageBlack);
+                final Image image = ImageFactory.createImage(encodedImage);
 
                 // Create an application descriptor for this application
                 final ApplicationDescriptor applicationDescriptor =
                         new ApplicationDescriptor(ApplicationDescriptor
                                 .currentApplicationDescriptor(),
-                                "Contact Linking Demo 1",
+                                "Contact Linking Demo",
                                 new String[] { "menu-invoked" });
-                final ApplicationMenuItem[] items1 = new ApplicationMenuItem[2];
-                items1[0] = new SampleMenuItem(APPLICATION_ID, imageBlue);
-                items1[1] = new SampleMenuItem(APPLICATION_ID, imageBlue) {
+                final ApplicationMenuItem[] items = new ApplicationMenuItem[2];
+                items[0] = new SampleMenuItem(APPLICATION_ID, image);
+                items[1] = new SampleMenuItem(APPLICATION_ID, image) {
                     public String toString() {
                         return "Test item 2";
                     }
                 };
-                LinkedContactUtilities.registerMenuItems(items1,
-                        APPLICATION_ID,
+
+                LinkedContactUtilities.registerMenuItems(items, APPLICATION_ID,
                         LinkedContactConstants.COMPOSE_SN_MENU_GROUP,
                         applicationDescriptor);
 
-                // Creating a second descriptor to demonstrate how a given
-                // BlackBerryContact can be linked to more than one application.
-                final ApplicationDescriptor appDesc2 =
-                        new ApplicationDescriptor(applicationDescriptor,
-                                "Contact Linking Demo 2",
-                                new String[] { "menu-invoked" });
-
-                final ApplicationMenuItem[] items2 = new ApplicationMenuItem[1];
-                items2[0] =
-                        new SampleMenuItem(SECONDARY_APPLICATION_ID, imageBlack) {
-                            public String toString() {
-                                return "App 2 item";
-                            }
-                        };
-
-                LinkedContactUtilities.registerMenuItems(items2,
-                        SECONDARY_APPLICATION_ID,
-                        LinkedContactConstants.COMPOSE_SN_MENU_GROUP, appDesc2);
-
-                // Register info providers
+                // Register info provider
                 LinkedContactUtilities.registerLinkedContactInfoProvider(
-                        new SampleLinkedContactInfoProvider(imageBlue,
-                                "Demo App 1"), APPLICATION_ID,
-                        LinkedContactConstants.COMPOSE_SN_MENU_GROUP);
-                LinkedContactUtilities.registerLinkedContactInfoProvider(
-                        new SampleLinkedContactInfoProvider(imageBlack,
-                                "Demo App 2"), SECONDARY_APPLICATION_ID,
+                        new SampleLinkedContactInfoProvider(image, "Demo App"),
+                        APPLICATION_ID,
                         LinkedContactConstants.COMPOSE_SN_MENU_GROUP);
             } else if (args[0].equals("menu-invoked")) {
                 // Create a new instance of the application and make the

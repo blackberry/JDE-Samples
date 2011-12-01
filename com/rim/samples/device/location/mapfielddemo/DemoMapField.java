@@ -64,6 +64,9 @@ public class DemoMapField extends MapField {
         _sampleLabel = new LabelField();
         _textHeight = _sampleLabel.getPreferredHeight();
         _sampleLabel = null;
+
+        // Zoom in to the deepest level
+        setZoom(getMinZoom());
     }
 
     /**

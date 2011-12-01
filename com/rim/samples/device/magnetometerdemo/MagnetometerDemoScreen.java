@@ -58,6 +58,7 @@ public final class MagnetometerDemoScreen extends MainScreen implements
         FieldChangeListener, MagnetometerListener {
     private final TextField _headingField;
     private final TextField _angleField;
+    private final TextField _quaternionField;
     private final TextField _strengthField;
     private final TextField _calibrationQualityField;
     private TextField _declinationField;
@@ -71,6 +72,7 @@ public final class MagnetometerDemoScreen extends MainScreen implements
     private final TextField _snapshotQualityField;
     private final TextField _snapshotHeadingField;
     private TextField _snapshotDeclinationField;
+    private final TextField _snapshotQuaternionField;
 
     private final ButtonField _snapshotButton;
     private final ButtonField _calibrateButton;
@@ -84,6 +86,9 @@ public final class MagnetometerDemoScreen extends MainScreen implements
     private GeomagneticField _geoField;
     private final Application _app;
 
+    private final float[] _quaternion;
+    private final float[] _rotationMatrix;
+
     /**
      * Creates a new MagetometerDemoScreen object
      * 
@@ -95,6 +100,9 @@ public final class MagnetometerDemoScreen extends MainScreen implements
 
         setTitle("Magnetometer Demo");
 
+        _quaternion = new float[4];
+        _rotationMatrix = new float[9];
+
         // Cache if the device is a simulator or not
         final boolean isSim = DeviceInfo.isSimulator();
 
@@ -103,11 +111,14 @@ public final class MagnetometerDemoScreen extends MainScreen implements
         _headingField = new TextField("Heading: ", "");
         _strengthField = new TextField("Field strength: ", "");
         _angleField = new TextField("Angle: ", "");
+        _quaternionField = new TextField("Quaternion: ", "");
         _calibrationQualityField = new TextField("Calibration quality: ", "");
         _streamingManager.add(_headingField);
         _streamingManager.add(_angleField);
+        _streamingManager.add(_quaternionField);
         _streamingManager.add(_strengthField);
         _streamingManager.add(_calibrationQualityField);
+        _streamingManager.setPadding(4, 4, 4, 4);
         add(_streamingManager);
 
         // Add HorizontalFieldManager for buttons
@@ -130,10 +141,13 @@ public final class MagnetometerDemoScreen extends MainScreen implements
         _snapshotStrengthField = new TextField("Snapshot field strength: ", "");
         _snapshotQualityField =
                 new TextField("Snapshot calibration quality: ", "");
+        _snapshotQuaternionField = new TextField("Snapshot quaternion: ", "");
         _snapshotManager.add(_snapshotHeadingField);
         _snapshotManager.add(_snapshotAngleField);
+        _snapshotManager.add(_snapshotQuaternionField);
         _snapshotManager.add(_snapshotStrengthField);
         _snapshotManager.add(_snapshotQualityField);
+        _snapshotManager.setPadding(4, 4, 4, 4);
         add(_snapshotManager);
 
         add(new SeparatorField());
@@ -190,59 +204,63 @@ public final class MagnetometerDemoScreen extends MainScreen implements
     /**
      * Displays magnetometer data on the screen
      * 
-     * @param angle
-     *            Clockwise angle from magnetic north
+     * @param magData
+     *            magnetometerData
      * @param declination
      *            Difference between magnetic north and true north at the
      *            device's snapshot location
-     * @param strength
-     *            Strength of the magnetic field
-     * @param quality
-     *            Quality of the calibration
-     * @param heading
-     *            snapshot heading based on a 16 point compass rose
      */
-    public void printStreaming(final float angle, final float declination,
-            final float strength, final int quality, final String heading) {
-        _angleField.setText((int) angle + "°");
+    public void printStreaming(final MagnetometerData magData,
+            final float declination) {
+        _angleField.setText(magData.getDirectionTop() + "°");
+
+        magData.getRotationMatrix(_rotationMatrix);
+        getNormalizedQuaternion(_quaternion, _rotationMatrix);
+        _quaternionField.setText("(" + _quaternion[0] + "," + _quaternion[1]
+                + "," + _quaternion[2] + "," + _quaternion[3] + ")");
         if (!Float.isNaN(declination)) {
             // If the declination is valid, print it to the screen.
             // It will become valid once the GeomagneticField has been
             // initialized.
-            _declinationField.setText((int) declination + "°");
+            _declinationField.setText(declination + "°");
         }
-        _strengthField.setText(Float.toString(strength));
-        _calibrationQualityField.setText(Integer.toString(quality));
-        _headingField.setText(heading);
+        _strengthField.setText(Float.toString(magData.getFieldStrength()));
+        _calibrationQualityField.setText(Integer.toString(magData
+                .getCalibrationQuality()));
+        _headingField.setText(getHeadingName(MagnetometerData
+                .getHeading(magData.getDirectionTop())));
     }
 
     /**
      * Displays a snapshot of magnetometer data
      * 
-     * @param angle
-     *            Snapshot of the clockwise angle from magnetic north
+     * @param magData
+     *            magnetometerData
      * @param declination
      *            Snapshot of the difference between magnetic north and true
      *            north at teh device's snapshot location
-     * @param strength
-     *            Snapshot of the strength of the magnetic field
-     * @param quality
-     *            Snapshot of the quality of the calibration
-     * @param heading
-     *            Snapshot of the heading based on a 16 point compass rose
      */
-    public void printSnapshot(final float angle, final float declination,
-            final float strength, final int quality, final String heading) {
-        _snapshotAngleField.setText((int) angle + "°");
+    public void printSnapshot(final MagnetometerData magData,
+            final float declination) {
+        _snapshotAngleField.setText(magData.getDirectionTop() + "°");
+
+        magData.getRotationMatrix(_rotationMatrix);
+        getNormalizedQuaternion(_quaternion, _rotationMatrix);
+        _snapshotQuaternionField.setText("(" + _quaternion[0] + ","
+                + _quaternion[1] + "," + _quaternion[2] + "," + _quaternion[3]
+                + ")");
         if (!Float.isNaN(declination)) {
             // If the declination is valid, print it to the screen.
             // It will become valid once the GeomagneticField has been
             // initialized.
-            _snapshotDeclinationField.setText((int) declination + "°");
+            _declinationField.setText(declination + "°");
         }
-        _snapshotStrengthField.setText(Float.toString(strength));
-        _snapshotQualityField.setText(Integer.toString(quality));
-        _snapshotHeadingField.setText(heading);
+        _snapshotStrengthField.setText(Float.toString(magData
+                .getFieldStrength()));
+        _snapshotQualityField.setText(Integer.toString(magData
+                .getCalibrationQuality()));
+        _snapshotHeadingField.setText(getHeadingName(MagnetometerData
+                .getHeading(magData.getDirectionTop())));
     }
 
     /**
@@ -426,15 +444,8 @@ public final class MagnetometerDemoScreen extends MainScreen implements
             declination = Float.NaN;
         }
 
-        // Capture the new data
-        final float direction = magData.getDirectionTop();
-        final float strength = magData.getFieldStrength();
-        final int quality = magData.getCalibrationQuality();
-        final String heading =
-                getHeadingName(MagnetometerData.getHeading(direction));
-
         // Print the data on the display
-        printStreaming(direction, declination, strength, quality, heading);
+        printStreaming(magData, declination);
     }
 
     /**
@@ -442,21 +453,6 @@ public final class MagnetometerDemoScreen extends MainScreen implements
      * display.
      */
     public void doSnapshot() {
-        float direction;
-        float strength;
-        int quality;
-
-        // Get data from the magnetometer channel
-        final MagnetometerData data = _magnetometerChannel.getData();
-
-        // Synchronize on the data so that it doesn't change while we are
-        // retrieving it
-        synchronized (data) {
-            direction = data.getDirectionTop();
-            strength = data.getFieldStrength();
-            quality = data.getCalibrationQuality();
-        }
-
         float declination;
 
         try {
@@ -467,10 +463,7 @@ public final class MagnetometerDemoScreen extends MainScreen implements
             declination = Float.NaN;
         }
 
-        // Convert the heading from an int value into a String heading
-        final String heading =
-                getHeadingName(MagnetometerData.getHeading(direction));
-        printSnapshot(direction, declination, strength, quality, heading);
+        printSnapshot(_magnetometerChannel.getData(), declination);
     }
 
     /**
@@ -482,5 +475,83 @@ public final class MagnetometerDemoScreen extends MainScreen implements
         } catch (final Exception e) {
             MagnetometerDemo.errorDialog("Error calibrating: " + e.toString());
         }
+    }
+
+    /**
+     * Calculates a normalized quaternion from a rotation matrix
+     * 
+     * @param q
+     *            Stores the normalized quaternion
+     * @param rm
+     *            Rotation matrix
+     */
+    public static boolean getNormalizedQuaternion(final float[] q,
+            final float[] rm) {
+        float Rx, Ry, Rz, Ux, Uy, Uz, Bx, By, Bz;
+
+        if (rm.length == 9) {
+            Rx = rm[0];
+            Ry = rm[1];
+            Rz = rm[2];
+            Ux = rm[3];
+            Uy = rm[4];
+            Uz = rm[5];
+            Bx = rm[6];
+            By = rm[7];
+            Bz = rm[8];
+        } else if (rm.length == 16) {
+            Rx = rm[0];
+            Ry = rm[1];
+            Rz = rm[2];
+            Ux = rm[4];
+            Uy = rm[5];
+            Uz = rm[6];
+            Bx = rm[8];
+            By = rm[9];
+            Bz = rm[10];
+        } else {
+            return false;
+        }
+
+        final float qw = (float) Math.sqrt(clamp(Rx + Uy + Bz + 1) * 0.25f);
+        float qx = (float) Math.sqrt(clamp(Rx - Uy - Bz + 1) * 0.25f);
+        float qy = (float) Math.sqrt(clamp(-Rx + Uy - Bz + 1) * 0.25f);
+        float qz = (float) Math.sqrt(clamp(-Rx - Uy + Bz + 1) * 0.25f);
+
+        qx = copySign(qx, By - Uz);
+        qy = copySign(qy, Rz - Bx);
+        qz = copySign(qz, Ux - Ry);
+
+        // [w, x, y, z]
+        q[0] = qw;
+        q[1] = qx;
+        q[2] = qy;
+        q[3] = qz;
+
+        return true;
+    }
+
+    /**
+     * Clamp a float value so that it's never negative
+     */
+    private static float clamp(final float f) {
+        return f < 0 ? 0 : f;
+    }
+
+    /**
+     * Assigns the sign (positive/negative) to magitude
+     * 
+     * @param magnitude
+     *            Magnitude to assume the provided sign
+     * @param sign
+     *            The sign to be applied
+     * @return Magnitude with sign provided
+     */
+    private static float copySign(final float magnitude, final float sign) {
+        int magnitudeBits = Float.floatToIntBits(magnitude);
+        final int signBits = Float.floatToIntBits(sign);
+        magnitudeBits = magnitudeBits & ~0x80000000 | signBits & 0x80000000;
+
+        return Float.intBitsToFloat(magnitudeBits);
     }
 }

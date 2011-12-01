@@ -40,7 +40,6 @@ import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.DeviceInfo;
 import net.rim.device.api.system.Display;
-import net.rim.device.api.system.KeypadListener;
 import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
@@ -302,20 +301,6 @@ public final class FileExplorerDemoScreen extends MainScreen {
         }
 
         super.makeMenu(menu, instance);
-    }
-
-    /**
-     * Overrides default implementation. Performs the select action if the
-     * trackwheel was clicked; otherwise, the default action occurs.
-     * 
-     * @see net.rim.device.api.ui.Screen#navigationClick(int,int)
-     */
-    public boolean navigationClick(final int status, final int time) {
-        if ((status & KeypadListener.STATUS_TRACKWHEEL) != KeypadListener.STATUS_TRACKWHEEL) {
-            return selectAction();
-        }
-
-        return super.navigationClick(status, time);
     }
 
     /**

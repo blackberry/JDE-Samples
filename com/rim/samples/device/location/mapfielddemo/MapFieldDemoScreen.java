@@ -379,8 +379,6 @@ public class MapFieldDemoScreen extends MainScreen {
      * @see net.rim.device.api.ui.Screen#touchEvent(TouchEvent)
      */
     protected boolean touchEvent(final TouchEvent message) {
-        boolean isConsumed = false;
-
         final TouchGesture touchGesture = message.getGesture();
         if (touchGesture != null) {
             // If the user has performed a swipe gesture we will move the
@@ -405,10 +403,12 @@ public class MapFieldDemoScreen extends MainScreen {
                     _map.move(magnitude, 0);
                     break;
                 }
-                isConsumed = true; // We've consumed the touch event.
+                return true; // We've consumed the touch event.
             }
         }
-        return isConsumed;
+        // Allow the parent implementation of touchEvent() to handle this event
+        // since we are not.
+        return super.touchEvent(message);
     }
 
     /**

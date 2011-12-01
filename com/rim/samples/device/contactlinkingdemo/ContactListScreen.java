@@ -35,7 +35,6 @@ import net.rim.blackberry.api.invoke.AddressBookArguments;
 import net.rim.blackberry.api.invoke.Invoke;
 import net.rim.blackberry.api.pdap.BlackBerryContact;
 import net.rim.blackberry.api.pdap.BlackBerryContactList;
-import net.rim.blackberry.api.pdap.contactlinking.DefaultLinkableContact;
 import net.rim.blackberry.api.pdap.contactlinking.LinkableContact;
 import net.rim.blackberry.api.pdap.contactlinking.LinkedContactUtilities;
 import net.rim.device.api.command.Command;
@@ -92,7 +91,6 @@ public final class ContactListScreen extends MainScreen {
         _viewEmailMenuItem = new ViewEmailMenuItem();
         _viewPhoneMenuItem = new ViewPhoneMenuItem();
         _linkToBbContact = new LinkToContactMenuItem();
-        _altLinkToBbContact = new AltLinkToContactMenuItem();
 
         // Initialize the contact list with all contact information
         initializeContacts();
@@ -427,14 +425,6 @@ public final class ContactListScreen extends MainScreen {
             menu.add(_linkToBbContact);
         }
 
-        final DefaultLinkableContact copy =
-                new DefaultLinkableContact(selected.getContactID(),
-                        ContactLinkingDemo.SECONDARY_APPLICATION_ID);
-        if (LinkedContactUtilities.getLinkedContact(copy) != null) {
-            menu.add(new AltUnlinkContactMenuItem());
-        } else {
-            menu.add(_altLinkToBbContact);
-        }
         super.makeMenu(menu, instance);
     }
 
@@ -518,67 +508,6 @@ public final class ContactListScreen extends MainScreen {
                 public void execute(final ReadOnlyCommandMetadata metadata,
                         final Object context) {
                     linkContact(getSelectedContact());
-                }
-            }));
-        }
-    }
-
-    /**
-     * MenuItem to link a LinkableContact to a BlackBerryContact using
-     * ContactLinkingDemo.SECONDARY_APPLICATION_ID (to demonstrate how a
-     * BlackBerryContact can be linked to by multiple applications).
-     */
-    private class AltLinkToContactMenuItem extends MenuItem {
-        public AltLinkToContactMenuItem() {
-            super(new StringProvider("Secondary Link To BlackBerry Contact"),
-                    0x230040, 0);
-            this.setCommand(new Command(new CommandHandler() {
-                /**
-                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
-                 *      Object)
-                 */
-                public void execute(final ReadOnlyCommandMetadata metadata,
-                        final Object context) {
-                    final LinkableContact linkableContact =
-                            getSelectedContact();
-                    final DefaultLinkableContact copy =
-                            new DefaultLinkableContact(linkableContact
-                                    .getContactID(),
-                                    ContactLinkingDemo.SECONDARY_APPLICATION_ID);
-                    copy.setString(Contact.NAME, linkableContact
-                            .getString(Contact.NAME));
-                    copy.setString(Contact.EMAIL, linkableContact
-                            .getString(Contact.EMAIL));
-                    copy.setString(Contact.ATTR_MOBILE, linkableContact
-                            .getString(Contact.ATTR_MOBILE));
-                    linkContact(copy);
-                }
-            }));
-        }
-    }
-
-    /**
-     * MenuItem to unlink a LinkableContact using
-     * ContactLinkingDemo.SECONDARY_APPLICATION_ID (to demonstrate how a
-     * BlackBerryContact can be linked to by multiple applications).
-     */
-    private class AltUnlinkContactMenuItem extends MenuItem {
-        public AltUnlinkContactMenuItem() {
-            super(new StringProvider("Secondary Unlink Contact"), 0x230050, 0);
-            this.setCommand(new Command(new CommandHandler() {
-                /**
-                 * @see net.rim.device.api.command.CommandHandler#execute(ReadOnlyCommandMetadata,
-                 *      Object)
-                 */
-                public void execute(final ReadOnlyCommandMetadata metadata,
-                        final Object context) {
-                    final LinkableContact linkableContact =
-                            getSelectedContact();
-                    final DefaultLinkableContact copy =
-                            new DefaultLinkableContact(linkableContact
-                                    .getContactID(),
-                                    ContactLinkingDemo.SECONDARY_APPLICATION_ID);
-                    unlinkContact(copy);
                 }
             }));
         }
