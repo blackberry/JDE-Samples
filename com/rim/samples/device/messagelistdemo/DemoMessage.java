@@ -50,7 +50,7 @@ public final class DemoMessage implements ApplicationMessage {
     private EncodedImage _previewPicture;
 
     /**
-     * Creates a new DemoMesage object
+     * Creates a new DemoMessage object
      */
     public DemoMessage() {
         _isNew = true;
