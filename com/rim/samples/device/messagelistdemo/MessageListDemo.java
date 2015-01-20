@@ -150,7 +150,7 @@ public final class MessageListDemo extends UiApplication {
     }
 
     /**
-     * Creates a new MesageListDemo object
+     * Creates a new MessageListDemo object
      * 
      * @param isMainGui
      *            True if constructor should create GUI, false otherwise
