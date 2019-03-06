@@ -47,7 +47,7 @@ To build the BlackBerry&reg; Samples:
 
 With the BlackBerry&reg; JDE installed, load the BlackBerry&reg; JDE Samples for Java&reg; workspace and select **Build** from the **Build** menu or press the **F7** key.  All active projcets will compile.  You are notified of any compilation or syntax errors during compilation.  If any errors occur, the process stops.
 
-**To activate or deavtivate a project**
+**To activate or deactivate a project**
 
 Right-click on the project and select **Activate Project** or **Deactivate Project** or on the **Project** menu, click **Set Active Projects.**  Select the projects you want to activate.
 
